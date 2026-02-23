@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ClientContextProvider } from "@/contexts/ClientContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PermissionGuard } from "@/components/PermissionGuard";
+import { usePermissions } from "@/hooks/usePermissions";
 
 // ── Pages ───────────────────────────────────────────────────
 import Dashboard from "@/pages/Dashboard";
@@ -88,11 +89,30 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   if (loading) return null;
-  // Don't auto-redirect on public routes — let the login page handle redirect after auth
-  if (session) {
-    // Simple redirect; the login page does the smart redirect via get_user_type RPC
-    return <Navigate to="/" replace />;
+  if (session) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+/** Wraps portal routes — redirects staff users to the practice dashboard */
+function PortalRoute({ children }: { children: React.ReactNode }) {
+  return (
+    <ProtectedRoute>
+      <PortalRouteGuard>{children}</PortalRouteGuard>
+    </ProtectedRoute>
+  );
+}
+
+function PortalRouteGuard({ children }: { children: React.ReactNode }) {
+  const { userKind, loading } = usePermissions();
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
   }
+  // Staff users should not access portal routes
+  if (userKind === "staff") return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
@@ -231,13 +251,13 @@ const AppRoutes = () => (
 
     {/* ── Client Portal (aud=client) ───────────────────── */}
     <Route path="/portal" element={
-      <ProtectedRoute>
+      <PortalRoute>
         <BrandingProvider>
           <FeaturesProvider>
             <PortalShell />
           </FeaturesProvider>
         </BrandingProvider>
-      </ProtectedRoute>
+      </PortalRoute>
     }>
       <Route index element={<Navigate to="/portal/home" replace />} />
       <Route path="home" element={<PortalHomePage />} />

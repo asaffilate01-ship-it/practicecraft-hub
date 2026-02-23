@@ -1,4 +1,5 @@
 import { usePermissions } from "@/hooks/usePermissions";
+import { Navigate } from "react-router-dom";
 import { ShieldX } from "lucide-react";
 
 interface PermissionGuardProps {
@@ -8,7 +9,7 @@ interface PermissionGuardProps {
 }
 
 export function PermissionGuard({ module, action, children }: PermissionGuardProps) {
-  const { can, loading } = usePermissions();
+  const { can, loading, userKind } = usePermissions();
 
   if (loading) {
     return (
@@ -16,6 +17,11 @@ export function PermissionGuard({ module, action, children }: PermissionGuardPro
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
+  }
+
+  // Portal users trying to access staff routes → redirect to portal
+  if (userKind === "portal") {
+    return <Navigate to="/portal" replace />;
   }
 
   if (!can(module, action)) {
