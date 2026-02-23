@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { PermissionGuard } from "@/components/PermissionGuard";
 import Dashboard from "@/pages/Dashboard";
 import Clients from "@/pages/Clients";
 import ClientDetail from "@/pages/ClientDetail";
@@ -52,19 +53,19 @@ const AppRoutes = () => (
 
     {/* Protected app routes */}
     <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
-    <Route path="/clients" element={<ProtectedRoute><AppLayout><Clients /></AppLayout></ProtectedRoute>} />
-    <Route path="/clients/:id" element={<ProtectedRoute><AppLayout><ClientDetail /></AppLayout></ProtectedRoute>} />
-    <Route path="/tasks" element={<ProtectedRoute><AppLayout><Tasks /></AppLayout></ProtectedRoute>} />
-    <Route path="/bookkeeping" element={<ProtectedRoute><AppLayout><Bookkeeping /></AppLayout></ProtectedRoute>} />
-    <Route path="/vat" element={<ProtectedRoute><AppLayout><VatReturns /></AppLayout></ProtectedRoute>} />
-    <Route path="/payroll" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Payroll (RTI)" description="Full HMRC Real Time Information payroll engine" /></AppLayout></ProtectedRoute>} />
-    <Route path="/accounts" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Accounts Production" description="FRS 102/105, CT600, SA100, iXBRL tagging" /></AppLayout></ProtectedRoute>} />
-    <Route path="/secretarial" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Company Secretarial" description="Companies House filings, confirmation statements, PSC" /></AppLayout></ProtectedRoute>} />
-    <Route path="/kyc" element={<ProtectedRoute><AppLayout><PlaceholderPage title="AML / KYC" description="Client identity verification, PEP screening, risk scoring" /></AppLayout></ProtectedRoute>} />
-    <Route path="/billing" element={<ProtectedRoute><AppLayout><Billing /></AppLayout></ProtectedRoute>} />
-    <Route path="/documents" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Documents" description="Secure document storage, versioning, OCR & e-signatures" /></AppLayout></ProtectedRoute>} />
-    <Route path="/reports" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Reports" description="Practice KPIs, revenue analysis, compliance reports" /></AppLayout></ProtectedRoute>} />
-    <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+    <Route path="/clients" element={<ProtectedRoute><AppLayout><PermissionGuard module="clients" action="view"><Clients /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/clients/:id" element={<ProtectedRoute><AppLayout><PermissionGuard module="clients" action="view"><ClientDetail /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/tasks" element={<ProtectedRoute><AppLayout><PermissionGuard module="tasks" action="view"><Tasks /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/bookkeeping" element={<ProtectedRoute><AppLayout><PermissionGuard module="ledger" action="view"><Bookkeeping /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/vat" element={<ProtectedRoute><AppLayout><PermissionGuard module="vat" action="view"><VatReturns /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/payroll" element={<ProtectedRoute><AppLayout><PermissionGuard module="payroll" action="view"><PlaceholderPage title="Payroll (RTI)" description="Full HMRC Real Time Information payroll engine" /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/accounts" element={<ProtectedRoute><AppLayout><PermissionGuard module="accounts" action="view"><PlaceholderPage title="Accounts Production" description="FRS 102/105, CT600, SA100, iXBRL tagging" /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/secretarial" element={<ProtectedRoute><AppLayout><PermissionGuard module="secretarial" action="view"><PlaceholderPage title="Company Secretarial" description="Companies House filings, confirmation statements, PSC" /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/kyc" element={<ProtectedRoute><AppLayout><PermissionGuard module="aml" action="view"><PlaceholderPage title="AML / KYC" description="Client identity verification, PEP screening, risk scoring" /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/billing" element={<ProtectedRoute><AppLayout><PermissionGuard module="billing" action="view"><Billing /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/documents" element={<ProtectedRoute><AppLayout><PermissionGuard module="documents" action="view"><PlaceholderPage title="Documents" description="Secure document storage, versioning, OCR & e-signatures" /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/reports" element={<ProtectedRoute><AppLayout><PermissionGuard module="reports" action="view"><PlaceholderPage title="Reports" description="Practice KPIs, revenue analysis, compliance reports" /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/settings" element={<ProtectedRoute><AppLayout><PermissionGuard module="settings" action="view"><Settings /></PermissionGuard></AppLayout></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
