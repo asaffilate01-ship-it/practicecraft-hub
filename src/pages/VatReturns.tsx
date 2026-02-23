@@ -11,8 +11,66 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, FileText, Send, Eye } from "lucide-react";
+import { Plus, FileText, Send, Eye, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
+import { useRef, useCallback } from "react";
+
+function parseCsvToBoxes(csvText: string): Partial<Record<string, string>> | null {
+  const lines = csvText.trim().split(/\r?\n/).filter(l => l.trim());
+  const result: Partial<Record<string, string>> = {};
+
+  // Strategy 1: Look for rows with box labels/numbers and values
+  for (const line of lines) {
+    const cells = line.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+    
+    // Try to find box number in cells
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i].toLowerCase();
+      const boxMatch = cell.match(/box\s*(\d)/);
+      if (boxMatch) {
+        const boxNum = parseInt(boxMatch[1]);
+        if (boxNum >= 1 && boxNum <= 9) {
+          // Look for a numeric value in subsequent cells
+          for (let j = i + 1; j < cells.length; j++) {
+            const val = cells[j].replace(/[£,\s]/g, "");
+            if (val && !isNaN(parseFloat(val))) {
+              result[`box${boxNum}`] = parseFloat(val).toString();
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (Object.keys(result).length > 0) return result;
+
+  // Strategy 2: If CSV is just 9 values (one per line or comma-separated)
+  const allValues: string[] = [];
+  for (const line of lines) {
+    const cells = line.split(",").map(c => c.trim().replace(/^"|"$/g, "").replace(/[£,\s]/g, ""));
+    for (const c of cells) {
+      if (c && !isNaN(parseFloat(c))) allValues.push(parseFloat(c).toString());
+    }
+  }
+
+  if (allValues.length >= 7) {
+    // Map first 9 values to boxes
+    const editableBoxes = [1, 2, 4, 6, 7, 8, 9];
+    const mapping = allValues.length >= 9
+      ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      : editableBoxes;
+    
+    mapping.forEach((boxNum, i) => {
+      if (allValues[i] !== undefined) {
+        result[`box${boxNum}`] = allValues[i];
+      }
+    });
+    return Object.keys(result).length > 0 ? result : null;
+  }
+
+  return null;
+}
 
 const boxLabels = [
   "Box 1 – VAT due on sales",
@@ -106,6 +164,62 @@ export default function VatReturns() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const csvInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCsvUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.endsWith(".csv") && file.type !== "text/csv") {
+      toast.error("Please upload a CSV file");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const boxes = parseCsvToBoxes(text);
+      if (!boxes) {
+        toast.error("Could not parse box values from CSV. Ensure it contains Box 1–9 labels or 9 numeric values.");
+        return;
+      }
+      setForm(prev => ({
+        ...prev,
+        box1: boxes.box1 ?? prev.box1,
+        box2: boxes.box2 ?? prev.box2,
+        box4: boxes.box4 ?? prev.box4,
+        box6: boxes.box6 ?? prev.box6,
+        box7: boxes.box7 ?? prev.box7,
+        box8: boxes.box8 ?? prev.box8,
+        box9: boxes.box9 ?? prev.box9,
+      }));
+      toast.success("CSV imported — box values populated");
+    };
+    reader.readAsText(file);
+    // Reset so same file can be re-uploaded
+    if (csvInputRef.current) csvInputRef.current.value = "";
+  }, []);
+
+  const downloadCsvTemplate = useCallback(() => {
+    const csv = [
+      "Box,Label,Value",
+      "Box 1,VAT due on sales,0",
+      "Box 2,VAT due on acquisitions (EC),0",
+      "Box 3,Total VAT due (1 + 2),0",
+      "Box 4,VAT reclaimed on purchases,0",
+      "Box 5,Net VAT (3 − 4),0",
+      "Box 6,Total sales (excl. VAT),0",
+      "Box 7,Total purchases (excl. VAT),0",
+      "Box 8,Total EC supplies,0",
+      "Box 9,Total EC acquisitions,0",
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "vat_return_template.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const updates: any = { status };
@@ -186,6 +300,15 @@ export default function VatReturns() {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>New VAT Return</DialogTitle></DialogHeader>
+          <div className="flex gap-2 mb-1">
+            <input ref={csvInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={handleCsvUpload} />
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => csvInputRef.current?.click()}>
+              <Upload className="w-3.5 h-3.5" /> Import CSV
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="gap-1.5" onClick={downloadCsvTemplate}>
+              <Download className="w-3.5 h-3.5" /> Template
+            </Button>
+          </div>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 col-span-2">
