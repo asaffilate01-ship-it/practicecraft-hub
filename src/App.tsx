@@ -9,6 +9,9 @@ import Dashboard from "@/pages/Dashboard";
 import Clients from "@/pages/Clients";
 import ClientDetail from "@/pages/ClientDetail";
 import Tasks from "@/pages/Tasks";
+import Bookkeeping from "@/pages/Bookkeeping";
+import VatReturns from "@/pages/VatReturns";
+import Billing from "@/pages/Billing";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/auth/Login";
@@ -52,13 +55,13 @@ const AppRoutes = () => (
     <Route path="/clients" element={<ProtectedRoute><AppLayout><Clients /></AppLayout></ProtectedRoute>} />
     <Route path="/clients/:id" element={<ProtectedRoute><AppLayout><ClientDetail /></AppLayout></ProtectedRoute>} />
     <Route path="/tasks" element={<ProtectedRoute><AppLayout><Tasks /></AppLayout></ProtectedRoute>} />
-    <Route path="/bookkeeping" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Bookkeeping" description="Double-entry ledger, chart of accounts, bank reconciliation" /></AppLayout></ProtectedRoute>} />
-    <Route path="/vat" element={<ProtectedRoute><AppLayout><PlaceholderPage title="VAT (MTD)" description="Making Tax Digital VAT returns & HMRC submissions" /></AppLayout></ProtectedRoute>} />
+    <Route path="/bookkeeping" element={<ProtectedRoute><AppLayout><Bookkeeping /></AppLayout></ProtectedRoute>} />
+    <Route path="/vat" element={<ProtectedRoute><AppLayout><VatReturns /></AppLayout></ProtectedRoute>} />
     <Route path="/payroll" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Payroll (RTI)" description="Full HMRC Real Time Information payroll engine" /></AppLayout></ProtectedRoute>} />
     <Route path="/accounts" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Accounts Production" description="FRS 102/105, CT600, SA100, iXBRL tagging" /></AppLayout></ProtectedRoute>} />
     <Route path="/secretarial" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Company Secretarial" description="Companies House filings, confirmation statements, PSC" /></AppLayout></ProtectedRoute>} />
     <Route path="/kyc" element={<ProtectedRoute><AppLayout><PlaceholderPage title="AML / KYC" description="Client identity verification, PEP screening, risk scoring" /></AppLayout></ProtectedRoute>} />
-    <Route path="/billing" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Billing" description="Invoicing, direct debit, Stripe & GoCardless integration" /></AppLayout></ProtectedRoute>} />
+    <Route path="/billing" element={<ProtectedRoute><AppLayout><Billing /></AppLayout></ProtectedRoute>} />
     <Route path="/documents" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Documents" description="Secure document storage, versioning, OCR & e-signatures" /></AppLayout></ProtectedRoute>} />
     <Route path="/reports" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Reports" description="Practice KPIs, revenue analysis, compliance reports" /></AppLayout></ProtectedRoute>} />
     <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
