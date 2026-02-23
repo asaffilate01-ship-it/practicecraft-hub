@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, FileText, Send, Eye, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useRef, useCallback } from "react";
+import { HmrcConnectButton } from "@/components/HmrcConnectButton";
 
 function parseCsvToBoxes(csvText: string): Partial<Record<string, string>> | null {
   const lines = csvText.trim().split(/\r?\n/).filter(l => l.trim());
@@ -242,9 +243,19 @@ export default function VatReturns() {
           <h1 className="text-2xl font-bold tracking-tight">VAT (MTD)</h1>
           <p className="text-sm text-muted-foreground">Making Tax Digital VAT returns & HMRC submission tracking</p>
         </div>
-        <Button className="gap-2" onClick={() => setShowCreate(true)}>
-          <Plus className="w-4 h-4" /> New VAT Return
-        </Button>
+        <div className="flex gap-2">
+          {profile?.tenant_id && (
+            <HmrcConnectButton
+              clientId=""
+              tenantId={profile.tenant_id}
+              scopes="read:vat write:vat"
+              label="Connect HMRC (VAT)"
+            />
+          )}
+          <Button className="gap-2" onClick={() => setShowCreate(true)}>
+            <Plus className="w-4 h-4" /> New VAT Return
+          </Button>
+        </div>
       </div>
 
       <Card>

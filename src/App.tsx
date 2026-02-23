@@ -32,6 +32,7 @@ import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
+import HmrcCallback from "@/pages/auth/HmrcCallback";
 import NotFound from "./pages/NotFound";
 
 // ── Portal / Employee pages ─────────────────────────────────
@@ -97,6 +98,7 @@ const AppRoutes = () => (
     <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
     <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
     <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/auth-redirect" element={<HmrcCallback />} />
 
     {/* ── Dashboard ────────────────────────────────────── */}
     <Route path="/" element={<Protected><Dashboard /></Protected>} />
