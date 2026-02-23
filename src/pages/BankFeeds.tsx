@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClientContext } from "@/contexts/ClientContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ const catStatusColors: Record<string, string> = {
 export default function BankFeeds() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { selectedClientId, selectedClientName } = useClientContext();
   const [showAddConnection, setShowAddConnection] = useState(false);
   const [showAddTxn, setShowAddTxn] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState<string>("all");
@@ -59,12 +61,14 @@ export default function BankFeeds() {
   });
 
   const { data: connections = [], isLoading: loadingConns } = useQuery({
-    queryKey: ["bank_connections", profile?.tenant_id],
+    queryKey: ["bank_connections", profile?.tenant_id, selectedClientId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("bank_connections")
         .select("*, client:clients(legal_name)")
         .order("created_at", { ascending: false });
+      if (selectedClientId) q = q.eq("client_id", selectedClientId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },

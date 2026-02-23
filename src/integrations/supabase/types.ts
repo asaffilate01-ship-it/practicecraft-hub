@@ -5526,6 +5526,54 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          allowed_modules: string[]
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          max_clients: number
+          max_users: number
+          name: string
+          price_annual_pence: number
+          price_monthly_pence: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_modules?: string[]
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_clients?: number
+          max_users?: number
+          name: string
+          price_annual_pence?: number
+          price_monthly_pence?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_modules?: string[]
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_clients?: number
+          max_users?: number
+          name?: string
+          price_annual_pence?: number
+          price_monthly_pence?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       task_templates: {
         Row: {
           checklist_json: Json | null
@@ -5839,6 +5887,76 @@ export type Database = {
             foreignKeyName: "template_versions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      tenant_subscriptions: {
+        Row: {
+          billing_cycle: string
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          plan_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tenant_id: string
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle?: string
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          plan_id: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tenant_id: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: string
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          plan_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tenant_id?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "v_practice_dashboard_kpis"
             referencedColumns: ["tenant_id"]
           },
@@ -6744,6 +6862,19 @@ export type Database = {
       }
     }
     Functions: {
+      get_tenant_allowed_modules: {
+        Args: { p_tenant_id: string }
+        Returns: string[]
+      }
+      get_tenant_plan_limits: {
+        Args: { p_tenant_id: string }
+        Returns: {
+          max_clients: number
+          max_users: number
+          plan_code: string
+          plan_name: string
+        }[]
+      }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
