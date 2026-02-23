@@ -22,6 +22,10 @@ import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/usePermissions";
+import { usePracticeBranding } from "@/practice/branding/PracticeBrandingProvider";
+import { usePracticeFeatures } from "@/practice/features/PracticeFeaturesProvider";
+import { TenantSwitcher } from "@/practice/components/TenantSwitcher";
+import { getStaffSession, canUseModule } from "@/practice/auth/staffSession";
 
 type NavItem = {
   title: string;
@@ -29,24 +33,28 @@ type NavItem = {
   icon: typeof LayoutDashboard;
   /** Permission required: [module, action]. Omit for always-visible items. */
   permission?: [string, string];
+  /** Feature flag key for tenant-level gating */
+  featureKey?: string;
+  /** Module key for staff-role gating */
+  moduleKey?: string;
 };
 
 const mainNav: NavItem[] = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Clients", url: "/clients", icon: Users, permission: ["clients", "view"] },
-  { title: "Tasks", url: "/tasks", icon: CheckSquare, permission: ["tasks", "view"] },
-  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, permission: ["ledger", "view"] },
-  { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"] },
-  { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"] },
-  { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"] },
-  { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"] },
-  { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"] },
-  { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"] },
-  { title: "Submissions", url: "/submissions", icon: Send, permission: ["submissions", "view"] },
-  { title: "Billing", url: "/billing", icon: CreditCard, permission: ["billing", "view"] },
-  { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"] },
-  { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"] },
-  { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"] },
+  { title: "Clients", url: "/clients", icon: Users, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
+  { title: "Tasks", url: "/tasks", icon: CheckSquare, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
+  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+  { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
+  { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
+  { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+  { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
+  { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"], featureKey: "incorporations", moduleKey: "incorporations" },
+  { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
+  { title: "Submissions", url: "/submissions", icon: Send, permission: ["submissions", "view"], featureKey: "submissions", moduleKey: "submissions" },
+  { title: "Billing", url: "/billing", icon: CreditCard, permission: ["billing", "view"], featureKey: "billing", moduleKey: "billing" },
+  { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
+  { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
+  { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
 ];
 
 const bottomNav: NavItem[] = [
@@ -56,14 +64,22 @@ const bottomNav: NavItem[] = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { can, loading } = usePermissions();
+  const branding = usePracticeBranding();
+  const features = usePracticeFeatures();
+  const session = getStaffSession();
 
-  const visibleMainNav = mainNav.filter(
-    (item) => !item.permission || can(item.permission[0], item.permission[1])
-  );
+  const isVisible = (item: NavItem) => {
+    // RBAC permission check
+    if (item.permission && !can(item.permission[0], item.permission[1])) return false;
+    // Tenant feature flag check
+    if (item.featureKey && features[item.featureKey] === false) return false;
+    // Staff role module check
+    if (item.moduleKey && !canUseModule(session.role, item.moduleKey)) return false;
+    return true;
+  };
 
-  const visibleBottomNav = bottomNav.filter(
-    (item) => !item.permission || can(item.permission[0], item.permission[1])
-  );
+  const visibleMainNav = mainNav.filter(isVisible);
+  const visibleBottomNav = bottomNav.filter(isVisible);
 
   return (
     <aside
@@ -72,15 +88,19 @@ export function AppSidebar() {
         collapsed ? "w-16" : "w-60"
       )}
     >
-      {/* Logo */}
+      {/* Logo / Branding */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
-          <CloudCog className="w-4 h-4 text-sidebar-primary-foreground" />
-        </div>
-        {!collapsed && (
+        {branding?.logoUrl ? (
+          <img src={branding.logoUrl} alt={branding.practiceName} className="h-8 object-contain shrink-0" />
+        ) : (
+          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
+            <CloudCog className="w-4 h-4 text-sidebar-primary-foreground" />
+          </div>
+        )}
+        {!collapsed && !branding?.logoUrl && (
           <div className="overflow-hidden">
             <h1 className="text-sm font-bold text-sidebar-accent-foreground tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-              IQ Practice Cloud
+              {branding?.practiceName ?? "IQ Practice Cloud"}
             </h1>
           </div>
         )}
@@ -99,6 +119,13 @@ export function AppSidebar() {
           />
         </button>
       </div>
+
+      {/* Tenant Switcher */}
+      {!collapsed && (
+        <div className="py-3 border-b border-sidebar-border">
+          <TenantSwitcher />
+        </div>
+      )}
 
       {/* Main nav */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
@@ -123,6 +150,14 @@ export function AppSidebar() {
           ))
         )}
       </nav>
+
+      {/* Support footer */}
+      {!collapsed && branding?.supportEmail && (
+        <div className="border-t border-sidebar-border p-3 space-y-1">
+          <div className="text-[10px] uppercase tracking-wider text-sidebar-foreground/60 font-medium">Support</div>
+          <div className="text-xs text-sidebar-foreground">{branding.supportEmail}</div>
+        </div>
+      )}
 
       {/* Bottom nav */}
       <div className="border-t border-sidebar-border p-2 space-y-0.5">

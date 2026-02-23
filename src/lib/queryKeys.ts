@@ -80,6 +80,9 @@ export const qk = {
     roles: ["practice", "roles"] as const,
     workflows: (filters?: any) => ["practice", "workflows", filters] as const,
     integrations: ["practice", "integrations"] as const,
+    branding: ["practice", "branding"] as const,
+    features: ["practice", "features"] as const,
+    tenants: ["practice", "tenants"] as const,
   },
 
   // ── Settings ────────────────────────────────────────

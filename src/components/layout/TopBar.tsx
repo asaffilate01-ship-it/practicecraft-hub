@@ -11,17 +11,19 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { usePracticeBranding } from "@/practice/branding/PracticeBrandingProvider";
 
 export function TopBar() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const branding = usePracticeBranding();
 
   const initials = user?.user_metadata?.full_name
     ? user.user_metadata.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : user?.email?.slice(0, 2).toUpperCase() || "U";
 
   const displayName = user?.user_metadata?.full_name || user?.email || "User";
-  const firmName = user?.user_metadata?.firm_name || "My Practice";
+  const firmName = branding?.practiceName || user?.user_metadata?.firm_name || "My Practice";
 
   const handleSignOut = async () => {
     await signOut();
