@@ -14,6 +14,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts_periods: {
+        Row: {
+          accounts_standard: string
+          client_id: string
+          created_at: string
+          ct600_status: string
+          filing_deadline: string | null
+          id: string
+          notes: string | null
+          period_end: string
+          period_start: string
+          period_type: string
+          sa_status: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accounts_standard?: string
+          client_id: string
+          created_at?: string
+          ct600_status?: string
+          filing_deadline?: string | null
+          id?: string
+          notes?: string | null
+          period_end: string
+          period_start: string
+          period_type?: string
+          sa_status?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accounts_standard?: string
+          client_id?: string
+          created_at?: string
+          ct600_status?: string
+          filing_deadline?: string | null
+          id?: string
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          sa_status?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_periods_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_periods_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "accounts_periods_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "accounts_periods_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "accounts_periods_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_periods_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -3229,6 +3323,279 @@ export type Database = {
           },
           {
             foreignKeyName: "onboarding_steps_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      pay_runs: {
+        Row: {
+          created_at: string
+          employer_id: string
+          eps_submission_job_id: string | null
+          fps_submission_job_id: string | null
+          id: string
+          notes: string | null
+          pay_date: string
+          period_end: string
+          period_start: string
+          status: string
+          tax_period: number
+          tax_year: string
+          tenant_id: string
+          total_gross_pence: number
+          total_net_pence: number
+          total_ni_employee_pence: number
+          total_ni_employer_pence: number
+          total_tax_pence: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employer_id: string
+          eps_submission_job_id?: string | null
+          fps_submission_job_id?: string | null
+          id?: string
+          notes?: string | null
+          pay_date: string
+          period_end: string
+          period_start: string
+          status?: string
+          tax_period: number
+          tax_year?: string
+          tenant_id: string
+          total_gross_pence?: number
+          total_net_pence?: number
+          total_ni_employee_pence?: number
+          total_ni_employer_pence?: number
+          total_tax_pence?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employer_id?: string
+          eps_submission_job_id?: string | null
+          fps_submission_job_id?: string | null
+          id?: string
+          notes?: string | null
+          pay_date?: string
+          period_end?: string
+          period_start?: string
+          status?: string
+          tax_period?: number
+          tax_year?: string
+          tenant_id?: string
+          total_gross_pence?: number
+          total_net_pence?: number
+          total_ni_employee_pence?: number
+          total_ni_employer_pence?: number
+          total_tax_pence?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_runs_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      payroll_employers: {
+        Row: {
+          accounts_office_ref: string | null
+          client_id: string
+          created_at: string
+          employer_name: string
+          hmrc_gateway_id: string | null
+          id: string
+          is_active: boolean
+          pay_frequency: string
+          paye_reference: string | null
+          tax_year: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accounts_office_ref?: string | null
+          client_id: string
+          created_at?: string
+          employer_name: string
+          hmrc_gateway_id?: string | null
+          id?: string
+          is_active?: boolean
+          pay_frequency?: string
+          paye_reference?: string | null
+          tax_year?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accounts_office_ref?: string | null
+          client_id?: string
+          created_at?: string
+          employer_name?: string
+          hmrc_gateway_id?: string | null
+          id?: string
+          is_active?: boolean
+          pay_frequency?: string
+          paye_reference?: string | null
+          tax_year?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_employers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_employers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "payroll_employers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "payroll_employers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "payroll_employers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_employers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      payslips: {
+        Row: {
+          additions_json: Json
+          created_at: string
+          deductions_json: Json
+          document_id: string | null
+          employee_name: string
+          gross_pence: number
+          id: string
+          net_pence: number
+          ni_employee_pence: number
+          ni_employer_pence: number
+          ni_number: string | null
+          pay_run_id: string
+          pension_employee_pence: number
+          pension_employer_pence: number
+          student_loan_pence: number
+          tax_code: string | null
+          tax_pence: number
+          tenant_id: string
+          updated_at: string
+          ytd_gross_pence: number
+          ytd_ni_pence: number
+          ytd_tax_pence: number
+        }
+        Insert: {
+          additions_json?: Json
+          created_at?: string
+          deductions_json?: Json
+          document_id?: string | null
+          employee_name: string
+          gross_pence?: number
+          id?: string
+          net_pence?: number
+          ni_employee_pence?: number
+          ni_employer_pence?: number
+          ni_number?: string | null
+          pay_run_id: string
+          pension_employee_pence?: number
+          pension_employer_pence?: number
+          student_loan_pence?: number
+          tax_code?: string | null
+          tax_pence?: number
+          tenant_id: string
+          updated_at?: string
+          ytd_gross_pence?: number
+          ytd_ni_pence?: number
+          ytd_tax_pence?: number
+        }
+        Update: {
+          additions_json?: Json
+          created_at?: string
+          deductions_json?: Json
+          document_id?: string | null
+          employee_name?: string
+          gross_pence?: number
+          id?: string
+          net_pence?: number
+          ni_employee_pence?: number
+          ni_employer_pence?: number
+          ni_number?: string | null
+          pay_run_id?: string
+          pension_employee_pence?: number
+          pension_employer_pence?: number
+          student_loan_pence?: number
+          tax_code?: string | null
+          tax_pence?: number
+          tenant_id?: string
+          updated_at?: string
+          ytd_gross_pence?: number
+          ytd_ni_pence?: number
+          ytd_tax_pence?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payslips_pay_run_id_fkey"
+            columns: ["pay_run_id"]
+            isOneToOne: false
+            referencedRelation: "pay_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payslips_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payslips_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"

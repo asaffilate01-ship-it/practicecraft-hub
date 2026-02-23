@@ -134,7 +134,7 @@ export default function ClientDetail() {
         </TabsContent>
 
         <TabsContent value="payroll" className="mt-4">
-          <PayrollTab />
+          <PayrollTab clientId={id!} />
         </TabsContent>
 
         <TabsContent value="documents" className="mt-4">
