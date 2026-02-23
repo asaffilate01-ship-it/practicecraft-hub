@@ -4244,6 +4244,7 @@ export type Database = {
           id: string
           notes: string | null
           pay_date: string
+          pay_frequency: string
           period_end: string
           period_start: string
           status: string
@@ -4254,6 +4255,9 @@ export type Database = {
           total_net_pence: number
           total_ni_employee_pence: number
           total_ni_employer_pence: number
+          total_pension_employee_pence: number | null
+          total_pension_employer_pence: number | null
+          total_student_loan_pence: number | null
           total_tax_pence: number
           updated_at: string
         }
@@ -4265,6 +4269,7 @@ export type Database = {
           id?: string
           notes?: string | null
           pay_date: string
+          pay_frequency?: string
           period_end: string
           period_start: string
           status?: string
@@ -4275,6 +4280,9 @@ export type Database = {
           total_net_pence?: number
           total_ni_employee_pence?: number
           total_ni_employer_pence?: number
+          total_pension_employee_pence?: number | null
+          total_pension_employer_pence?: number | null
+          total_student_loan_pence?: number | null
           total_tax_pence?: number
           updated_at?: string
         }
@@ -4286,6 +4294,7 @@ export type Database = {
           id?: string
           notes?: string | null
           pay_date?: string
+          pay_frequency?: string
           period_end?: string
           period_start?: string
           status?: string
@@ -4296,6 +4305,9 @@ export type Database = {
           total_net_pence?: number
           total_ni_employee_pence?: number
           total_ni_employer_pence?: number
+          total_pension_employee_pence?: number | null
+          total_pension_employer_pence?: number | null
+          total_student_loan_pence?: number | null
           total_tax_pence?: number
           updated_at?: string
         }
@@ -4323,102 +4335,334 @@ export type Database = {
           },
         ]
       }
+      payroll_absences: {
+        Row: {
+          absence_type: string
+          created_at: string
+          days: number
+          employee_id: string
+          employer_id: string
+          end_date: string | null
+          hours: number | null
+          id: string
+          is_paid: boolean
+          notes: string | null
+          start_date: string
+          status: string
+          statutory_pay_type: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          absence_type: string
+          created_at?: string
+          days?: number
+          employee_id: string
+          employer_id: string
+          end_date?: string | null
+          hours?: number | null
+          id?: string
+          is_paid?: boolean
+          notes?: string | null
+          start_date: string
+          status?: string
+          statutory_pay_type?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          absence_type?: string
+          created_at?: string
+          days?: number
+          employee_id?: string
+          employer_id?: string
+          end_date?: string | null
+          hours?: number | null
+          id?: string
+          is_paid?: boolean
+          notes?: string | null
+          start_date?: string
+          status?: string
+          statutory_pay_type?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_absences_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_absences_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_absences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_absences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      payroll_benefits: {
+        Row: {
+          amount_made_good_pence: number | null
+          benefit_type: string
+          cash_equivalent_pence: number
+          created_at: string
+          description: string
+          employee_id: string
+          employer_id: string
+          end_date: string | null
+          id: string
+          metadata_json: Json
+          payrolled: boolean
+          section: string | null
+          start_date: string | null
+          tax_year: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_made_good_pence?: number | null
+          benefit_type: string
+          cash_equivalent_pence?: number
+          created_at?: string
+          description: string
+          employee_id: string
+          employer_id: string
+          end_date?: string | null
+          id?: string
+          metadata_json?: Json
+          payrolled?: boolean
+          section?: string | null
+          start_date?: string | null
+          tax_year?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_made_good_pence?: number | null
+          benefit_type?: string
+          cash_equivalent_pence?: number
+          created_at?: string
+          description?: string
+          employee_id?: string
+          employer_id?: string
+          end_date?: string | null
+          id?: string
+          metadata_json?: Json
+          payrolled?: boolean
+          section?: string | null
+          start_date?: string | null
+          tax_year?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_benefits_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_benefits_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_benefits_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_benefits_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       payroll_employees: {
         Row: {
+          account_name: string | null
+          account_number: string | null
           address_json: Json
+          address_line1: string | null
+          address_line2: string | null
           annual_salary_pence: number | null
           bank_account_json: Json
+          city: string | null
+          country: string | null
+          county: string | null
           created_at: string
           date_of_birth: string | null
+          directors_nic_method: string | null
           email: string | null
           employer_id: string
           first_name: string
           gender: string | null
+          holiday_carried_forward: number | null
+          holiday_entitlement_days: number | null
+          holiday_taken_days: number | null
           hourly_rate_pence: number | null
           id: string
           is_active: boolean
           is_director: boolean
+          is_irregular_employment: boolean | null
           last_name: string
           leave_date: string | null
           ni_category: string | null
           ni_number: string | null
           notes: string | null
+          p45_issue_date: string | null
+          p45_previous_pay_pence: number | null
+          p45_previous_tax_pence: number | null
           pay_method: string
+          payment_method: string | null
+          payroll_id: string | null
           pension_employee_pct: number | null
           pension_employer_pct: number | null
           pension_opt_out: boolean
           phone: string | null
+          postcode: string | null
           postgrad_loan: boolean
+          sort_code: string | null
           start_date: string | null
+          starter_declaration: string | null
           student_loan_plan: string | null
           tax_code: string | null
           tenant_id: string
           title: string | null
           updated_at: string
+          week1_month1: boolean | null
         }
         Insert: {
+          account_name?: string | null
+          account_number?: string | null
           address_json?: Json
+          address_line1?: string | null
+          address_line2?: string | null
           annual_salary_pence?: number | null
           bank_account_json?: Json
+          city?: string | null
+          country?: string | null
+          county?: string | null
           created_at?: string
           date_of_birth?: string | null
+          directors_nic_method?: string | null
           email?: string | null
           employer_id: string
           first_name: string
           gender?: string | null
+          holiday_carried_forward?: number | null
+          holiday_entitlement_days?: number | null
+          holiday_taken_days?: number | null
           hourly_rate_pence?: number | null
           id?: string
           is_active?: boolean
           is_director?: boolean
+          is_irregular_employment?: boolean | null
           last_name: string
           leave_date?: string | null
           ni_category?: string | null
           ni_number?: string | null
           notes?: string | null
+          p45_issue_date?: string | null
+          p45_previous_pay_pence?: number | null
+          p45_previous_tax_pence?: number | null
           pay_method?: string
+          payment_method?: string | null
+          payroll_id?: string | null
           pension_employee_pct?: number | null
           pension_employer_pct?: number | null
           pension_opt_out?: boolean
           phone?: string | null
+          postcode?: string | null
           postgrad_loan?: boolean
+          sort_code?: string | null
           start_date?: string | null
+          starter_declaration?: string | null
           student_loan_plan?: string | null
           tax_code?: string | null
           tenant_id: string
           title?: string | null
           updated_at?: string
+          week1_month1?: boolean | null
         }
         Update: {
+          account_name?: string | null
+          account_number?: string | null
           address_json?: Json
+          address_line1?: string | null
+          address_line2?: string | null
           annual_salary_pence?: number | null
           bank_account_json?: Json
+          city?: string | null
+          country?: string | null
+          county?: string | null
           created_at?: string
           date_of_birth?: string | null
+          directors_nic_method?: string | null
           email?: string | null
           employer_id?: string
           first_name?: string
           gender?: string | null
+          holiday_carried_forward?: number | null
+          holiday_entitlement_days?: number | null
+          holiday_taken_days?: number | null
           hourly_rate_pence?: number | null
           id?: string
           is_active?: boolean
           is_director?: boolean
+          is_irregular_employment?: boolean | null
           last_name?: string
           leave_date?: string | null
           ni_category?: string | null
           ni_number?: string | null
           notes?: string | null
+          p45_issue_date?: string | null
+          p45_previous_pay_pence?: number | null
+          p45_previous_tax_pence?: number | null
           pay_method?: string
+          payment_method?: string | null
+          payroll_id?: string | null
           pension_employee_pct?: number | null
           pension_employer_pct?: number | null
           pension_opt_out?: boolean
           phone?: string | null
+          postcode?: string | null
           postgrad_loan?: boolean
+          sort_code?: string | null
           start_date?: string | null
+          starter_declaration?: string | null
           student_loan_plan?: string | null
           tax_code?: string | null
           tenant_id?: string
           title?: string | null
           updated_at?: string
+          week1_month1?: boolean | null
         }
         Relationships: [
           {
@@ -4447,42 +4691,66 @@ export type Database = {
       payroll_employers: {
         Row: {
           accounts_office_ref: string | null
+          apprenticeship_levy: boolean | null
+          apprenticeship_levy_allowance_pence: number | null
+          cis_registered: boolean | null
           client_id: string
           created_at: string
           employer_name: string
+          employment_allowance: boolean | null
           hmrc_gateway_id: string | null
           id: string
           is_active: boolean
           pay_frequency: string
           paye_reference: string | null
+          pension_provider: string | null
+          pension_scheme_ref: string | null
+          small_employer: boolean | null
+          staging_date: string | null
           tax_year: string
           tenant_id: string
           updated_at: string
         }
         Insert: {
           accounts_office_ref?: string | null
+          apprenticeship_levy?: boolean | null
+          apprenticeship_levy_allowance_pence?: number | null
+          cis_registered?: boolean | null
           client_id: string
           created_at?: string
           employer_name: string
+          employment_allowance?: boolean | null
           hmrc_gateway_id?: string | null
           id?: string
           is_active?: boolean
           pay_frequency?: string
           paye_reference?: string | null
+          pension_provider?: string | null
+          pension_scheme_ref?: string | null
+          small_employer?: boolean | null
+          staging_date?: string | null
           tax_year?: string
           tenant_id: string
           updated_at?: string
         }
         Update: {
           accounts_office_ref?: string | null
+          apprenticeship_levy?: boolean | null
+          apprenticeship_levy_allowance_pence?: number | null
+          cis_registered?: boolean | null
           client_id?: string
           created_at?: string
           employer_name?: string
+          employment_allowance?: boolean | null
           hmrc_gateway_id?: string | null
           id?: string
           is_active?: boolean
           pay_frequency?: string
           paye_reference?: string | null
+          pension_provider?: string | null
+          pension_scheme_ref?: string | null
+          small_employer?: boolean | null
+          staging_date?: string | null
           tax_year?: string
           tenant_id?: string
           updated_at?: string
@@ -4532,22 +4800,126 @@ export type Database = {
           },
         ]
       }
+      payroll_forms: {
+        Row: {
+          created_at: string
+          document_id: string | null
+          employee_id: string | null
+          employer_id: string
+          form_data_json: Json
+          form_type: string
+          generated_at: string | null
+          hmrc_response_json: Json | null
+          id: string
+          notes: string | null
+          sent_at: string | null
+          status: string
+          submitted_at: string | null
+          tax_year: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_id?: string | null
+          employee_id?: string | null
+          employer_id: string
+          form_data_json?: Json
+          form_type: string
+          generated_at?: string | null
+          hmrc_response_json?: Json | null
+          id?: string
+          notes?: string | null
+          sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          tax_year?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string | null
+          employee_id?: string | null
+          employer_id?: string
+          form_data_json?: Json
+          form_type?: string
+          generated_at?: string | null
+          hmrc_response_json?: Json | null
+          id?: string
+          notes?: string | null
+          sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          tax_year?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_forms_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_forms_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_forms_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_forms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_forms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       payslips: {
         Row: {
           additions_json: Json
+          attachment_of_earnings_pence: number | null
           created_at: string
           deductions_json: Json
           document_id: string | null
+          employee_id: string | null
           employee_name: string
           gross_pence: number
+          holiday_pay_pence: number | null
+          hours_worked: number | null
           id: string
           net_pence: number
           ni_employee_pence: number
           ni_employer_pence: number
           ni_number: string | null
+          overtime_hours: number | null
+          overtime_pence: number | null
           pay_run_id: string
           pension_employee_pence: number
           pension_employer_pence: number
+          sap_pence: number | null
+          shpp_pence: number | null
+          sick_pay_pence: number | null
+          smp_pence: number | null
+          spp_pence: number | null
           student_loan_pence: number
           tax_code: string | null
           tax_pence: number
@@ -4559,19 +4931,30 @@ export type Database = {
         }
         Insert: {
           additions_json?: Json
+          attachment_of_earnings_pence?: number | null
           created_at?: string
           deductions_json?: Json
           document_id?: string | null
+          employee_id?: string | null
           employee_name: string
           gross_pence?: number
+          holiday_pay_pence?: number | null
+          hours_worked?: number | null
           id?: string
           net_pence?: number
           ni_employee_pence?: number
           ni_employer_pence?: number
           ni_number?: string | null
+          overtime_hours?: number | null
+          overtime_pence?: number | null
           pay_run_id: string
           pension_employee_pence?: number
           pension_employer_pence?: number
+          sap_pence?: number | null
+          shpp_pence?: number | null
+          sick_pay_pence?: number | null
+          smp_pence?: number | null
+          spp_pence?: number | null
           student_loan_pence?: number
           tax_code?: string | null
           tax_pence?: number
@@ -4583,19 +4966,30 @@ export type Database = {
         }
         Update: {
           additions_json?: Json
+          attachment_of_earnings_pence?: number | null
           created_at?: string
           deductions_json?: Json
           document_id?: string | null
+          employee_id?: string | null
           employee_name?: string
           gross_pence?: number
+          holiday_pay_pence?: number | null
+          hours_worked?: number | null
           id?: string
           net_pence?: number
           ni_employee_pence?: number
           ni_employer_pence?: number
           ni_number?: string | null
+          overtime_hours?: number | null
+          overtime_pence?: number | null
           pay_run_id?: string
           pension_employee_pence?: number
           pension_employer_pence?: number
+          sap_pence?: number | null
+          shpp_pence?: number | null
+          sick_pay_pence?: number | null
+          smp_pence?: number | null
+          spp_pence?: number | null
           student_loan_pence?: number
           tax_code?: string | null
           tax_pence?: number
@@ -4606,6 +5000,13 @@ export type Database = {
           ytd_tax_pence?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "payslips_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payslips_pay_run_id_fkey"
             columns: ["pay_run_id"]
