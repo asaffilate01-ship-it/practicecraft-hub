@@ -3418,6 +3418,127 @@ export type Database = {
           },
         ]
       }
+      payroll_employees: {
+        Row: {
+          address_json: Json
+          annual_salary_pence: number | null
+          bank_account_json: Json
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          employer_id: string
+          first_name: string
+          gender: string | null
+          hourly_rate_pence: number | null
+          id: string
+          is_active: boolean
+          is_director: boolean
+          last_name: string
+          leave_date: string | null
+          ni_category: string | null
+          ni_number: string | null
+          notes: string | null
+          pay_method: string
+          pension_employee_pct: number | null
+          pension_employer_pct: number | null
+          pension_opt_out: boolean
+          phone: string | null
+          postgrad_loan: boolean
+          start_date: string | null
+          student_loan_plan: string | null
+          tax_code: string | null
+          tenant_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_json?: Json
+          annual_salary_pence?: number | null
+          bank_account_json?: Json
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          employer_id: string
+          first_name: string
+          gender?: string | null
+          hourly_rate_pence?: number | null
+          id?: string
+          is_active?: boolean
+          is_director?: boolean
+          last_name: string
+          leave_date?: string | null
+          ni_category?: string | null
+          ni_number?: string | null
+          notes?: string | null
+          pay_method?: string
+          pension_employee_pct?: number | null
+          pension_employer_pct?: number | null
+          pension_opt_out?: boolean
+          phone?: string | null
+          postgrad_loan?: boolean
+          start_date?: string | null
+          student_loan_plan?: string | null
+          tax_code?: string | null
+          tenant_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_json?: Json
+          annual_salary_pence?: number | null
+          bank_account_json?: Json
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          employer_id?: string
+          first_name?: string
+          gender?: string | null
+          hourly_rate_pence?: number | null
+          id?: string
+          is_active?: boolean
+          is_director?: boolean
+          last_name?: string
+          leave_date?: string | null
+          ni_category?: string | null
+          ni_number?: string | null
+          notes?: string | null
+          pay_method?: string
+          pension_employee_pct?: number | null
+          pension_employer_pct?: number | null
+          pension_opt_out?: boolean
+          phone?: string | null
+          postgrad_loan?: boolean
+          start_date?: string | null
+          student_loan_plan?: string | null
+          tax_code?: string | null
+          tenant_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_employees_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_employees_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_employees_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       payroll_employers: {
         Row: {
           accounts_office_ref: string | null
