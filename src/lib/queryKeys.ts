@@ -85,6 +85,7 @@ export const qk = {
     tenants: ["practice", "tenants"] as const,
     onboarding: (tenantId: string) => ["practice", "onboarding", tenantId] as const,
     templatesCatalog: ["practice", "templates", "catalog"] as const,
+    auditLog: ["practice", "auditLog"] as const,
   },
 
   // ── Settings ────────────────────────────────────────
