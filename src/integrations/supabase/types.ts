@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      chart_of_accounts: {
+        Row: {
+          account_type: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          parent_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_type?: string
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_type?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_of_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address_json: Json | null
@@ -84,6 +135,218 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_lines: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          line_total: number
+          quantity: number
+          unit_price: number
+          vat_rate: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          line_total?: number
+          quantity?: number
+          unit_price?: number
+          vat_rate?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          line_total?: number
+          quantity?: number
+          unit_price?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount_paid: number
+          client_id: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          invoice_number: string
+          issue_date: string
+          notes: string | null
+          status: string
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          subtotal: number
+          tenant_id: string
+          total: number
+          updated_at: string
+          vat_amount: number
+        }
+        Insert: {
+          amount_paid?: number
+          client_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          issue_date?: string
+          notes?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tenant_id: string
+          total?: number
+          updated_at?: string
+          vat_amount?: number
+        }
+        Update: {
+          amount_paid?: number
+          client_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          notes?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tenant_id?: string
+          total?: number
+          updated_at?: string
+          vat_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entries: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          entry_date: string
+          id: string
+          is_posted: boolean
+          narration: string | null
+          reference: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          id?: string
+          is_posted?: boolean
+          narration?: string | null
+          reference?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          id?: string
+          is_posted?: boolean
+          narration?: string | null
+          reference?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_lines: {
+        Row: {
+          account_id: string
+          created_at: string
+          credit: number
+          debit: number
+          description: string | null
+          id: string
+          journal_entry_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_entry_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_lines_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
@@ -271,6 +534,90 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vat_returns: {
+        Row: {
+          box1: number
+          box2: number
+          box3: number
+          box4: number
+          box5: number
+          box6: number
+          box7: number
+          box8: number
+          box9: number
+          client_id: string | null
+          created_at: string
+          hmrc_receipt: string | null
+          id: string
+          notes: string | null
+          period_end: string
+          period_start: string
+          status: string
+          submitted_at: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          box1?: number
+          box2?: number
+          box3?: number
+          box4?: number
+          box5?: number
+          box6?: number
+          box7?: number
+          box8?: number
+          box9?: number
+          client_id?: string | null
+          created_at?: string
+          hmrc_receipt?: string | null
+          id?: string
+          notes?: string | null
+          period_end: string
+          period_start: string
+          status?: string
+          submitted_at?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          box1?: number
+          box2?: number
+          box3?: number
+          box4?: number
+          box5?: number
+          box6?: number
+          box7?: number
+          box8?: number
+          box9?: number
+          client_id?: string | null
+          created_at?: string
+          hmrc_receipt?: string | null
+          id?: string
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          status?: string
+          submitted_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vat_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vat_returns_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
