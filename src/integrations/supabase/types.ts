@@ -193,6 +193,13 @@ export type Database = {
             foreignKeyName: "ch_filings_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ch_filings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -320,6 +327,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "client_credentials_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -618,6 +632,13 @@ export type Database = {
             foreignKeyName: "company_profiles_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -708,6 +729,13 @@ export type Database = {
             foreignKeyName: "company_register_directors_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_directors_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -783,6 +811,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_members_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -886,6 +921,13 @@ export type Database = {
             foreignKeyName: "company_register_psc_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_psc_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -965,6 +1007,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "confirmation_statement_cycles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -1094,6 +1143,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -1343,6 +1399,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "event_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -1740,6 +1803,13 @@ export type Database = {
             foreignKeyName: "incorporation_applications_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "incorporation_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -1803,6 +1873,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "integration_health_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -1997,6 +2074,13 @@ export type Database = {
             foreignKeyName: "invoices_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -2066,6 +2150,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "journal_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -2198,6 +2289,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ledger_suggestions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -2468,6 +2566,13 @@ export type Database = {
             foreignKeyName: "message_threads_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "message_threads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -2617,6 +2722,13 @@ export type Database = {
             foreignKeyName: "minutes_documents_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "minutes_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -2633,13 +2745,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "secretarial_events"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "minutes_documents_secretarial_event_id_fkey"
-            columns: ["secretarial_event_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_changes_pending"
-            referencedColumns: ["event_id"]
           },
           {
             foreignKeyName: "minutes_documents_tenant_id_fkey"
@@ -2731,6 +2836,13 @@ export type Database = {
             foreignKeyName: "notification_logs_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "notification_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -2806,6 +2918,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "notification_queue_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -2944,6 +3063,13 @@ export type Database = {
             foreignKeyName: "ocr_jobs_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ocr_jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -3020,6 +3146,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "onboarding_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -3291,6 +3424,13 @@ export type Database = {
             foreignKeyName: "receipt_extractions_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "receipt_extractions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -3365,6 +3505,120 @@ export type Database = {
           },
         ]
       }
+      secretarial_changes: {
+        Row: {
+          approved_at: string | null
+          approved_by_user_id: string | null
+          change_type: string
+          client_id: string
+          created_at: string
+          created_by_user_id: string | null
+          description: string | null
+          id: string
+          payload_json: Json
+          requires_auth_code: boolean
+          status: string
+          submission_job_id: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+          validation_json: Json
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          change_type: string
+          client_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          id?: string
+          payload_json?: Json
+          requires_auth_code?: boolean
+          status?: string
+          submission_job_id?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+          validation_json?: Json
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          change_type?: string
+          client_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          id?: string
+          payload_json?: Json
+          requires_auth_code?: boolean
+          status?: string
+          submission_job_id?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          validation_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secretarial_changes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretarial_changes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_changes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_changes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_changes_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "submission_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretarial_changes_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_jobs_recent"
+            referencedColumns: ["submission_job_id"]
+          },
+          {
+            foreignKeyName: "secretarial_changes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretarial_changes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       secretarial_events: {
         Row: {
           client_id: string
@@ -3424,6 +3678,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -3508,6 +3769,13 @@ export type Database = {
             foreignKeyName: "share_classes_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "share_classes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -3586,6 +3854,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "share_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -3704,6 +3979,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "submission_jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -3855,6 +4137,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -4158,6 +4447,13 @@ export type Database = {
             foreignKeyName: "vat_returns_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "vat_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -4284,6 +4580,13 @@ export type Database = {
             foreignKeyName: "company_profiles_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -4364,47 +4667,54 @@ export type Database = {
       }
       v_secretarial_changes_pending: {
         Row: {
+          change_id: string | null
+          change_type: string | null
           client_id: string | null
           client_legal_name: string | null
-          created_at: string | null
-          description: string | null
-          effective_date: string | null
-          event_id: string | null
-          event_type: string | null
+          requires_auth_code: boolean | null
           status: string | null
           tenant_id: string | null
+          title: string | null
+          updated_at: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "secretarial_events_client_id_fkey"
+            foreignKeyName: "secretarial_changes_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "secretarial_events_client_id_fkey"
+            foreignKeyName: "secretarial_changes_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
             referencedColumns: ["client_id"]
           },
           {
-            foreignKeyName: "secretarial_events_client_id_fkey"
+            foreignKeyName: "secretarial_changes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_changes_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
           {
-            foreignKeyName: "secretarial_events_tenant_id_fkey"
+            foreignKeyName: "secretarial_changes_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "secretarial_events_tenant_id_fkey"
+            foreignKeyName: "secretarial_changes_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"
@@ -4414,46 +4724,25 @@ export type Database = {
       }
       v_secretarial_due: {
         Row: {
-          accounts_urgency: string | null
+          ch_last_synced_at: string | null
           client_id: string | null
           client_legal_name: string | null
           company_number: string | null
-          cs_urgency: string | null
-          next_accounts_due: string | null
+          company_status: string | null
           next_confirmation_statement_due: string | null
+          open_secretarial_changes: number | null
           tenant_id: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_profiles_tenant_id_fkey"
+            foreignKeyName: "clients_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "company_profiles_tenant_id_fkey"
+            foreignKeyName: "clients_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"
@@ -4489,6 +4778,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "submission_jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
@@ -4602,6 +4898,13 @@ export type Database = {
             foreignKeyName: "message_threads_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "message_threads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
           },
@@ -4646,6 +4949,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "vat_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
             referencedColumns: ["client_id"]
           },
           {
