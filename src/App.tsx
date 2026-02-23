@@ -10,6 +10,7 @@ import Clients from "@/pages/Clients";
 import ClientDetail from "@/pages/ClientDetail";
 import Tasks from "@/pages/Tasks";
 import PlaceholderPage from "@/pages/PlaceholderPage";
+import Settings from "@/pages/Settings";
 import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
@@ -60,7 +61,7 @@ const AppRoutes = () => (
     <Route path="/billing" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Billing" description="Invoicing, direct debit, Stripe & GoCardless integration" /></AppLayout></ProtectedRoute>} />
     <Route path="/documents" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Documents" description="Secure document storage, versioning, OCR & e-signatures" /></AppLayout></ProtectedRoute>} />
     <Route path="/reports" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Reports" description="Practice KPIs, revenue analysis, compliance reports" /></AppLayout></ProtectedRoute>} />
-    <Route path="/settings" element={<ProtectedRoute><AppLayout><PlaceholderPage title="Settings" description="Firm settings, white-label config, roles & permissions, integrations" /></AppLayout></ProtectedRoute>} />
+    <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
