@@ -33,6 +33,9 @@ import PlaceholderPage from "@/pages/PlaceholderPage";
 import CompaniesHouseWizard from "@/pages/CompaniesHouseWizard";
 import HmrcWizard from "@/pages/HmrcWizard";
 import AuditLog from "@/pages/AuditLog";
+import DocumentRequests from "@/pages/DocumentRequests";
+import ESignatures from "@/pages/ESignatures";
+import AmlMonitoring from "@/pages/AmlMonitoring";
 
 // ── Auth pages ──────────────────────────────────────────────
 import Login from "@/pages/auth/Login";
@@ -171,6 +174,7 @@ const AppRoutes = () => (
     <Route path="/aml" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
     <Route path="/aml/workbench" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
     <Route path="/aml/cases/:caseId" element={<Guarded module="aml" action="view"><PlaceholderPage title="AML Case" description="Client risk assessment and verification case detail" /></Guarded>} />
+    <Route path="/aml/monitoring" element={<Guarded module="aml" action="view"><AmlMonitoring /></Guarded>} />
 
     {/* ── Billing ──────────────────────────────────────── */}
     <Route path="/billing" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
@@ -182,6 +186,8 @@ const AppRoutes = () => (
     <Route path="/documents" element={<Guarded module="documents" action="view"><DocumentsLibrary /></Guarded>} />
     <Route path="/documents/library" element={<Guarded module="documents" action="view"><DocumentsLibrary /></Guarded>} />
     <Route path="/documents/templates" element={<Guarded module="templates" action="view"><PlaceholderPage title="Document Templates" description="Email and document template management" /></Guarded>} />
+    <Route path="/documents/requests" element={<Guarded module="documents" action="view"><DocumentRequests /></Guarded>} />
+    <Route path="/documents/signatures" element={<Guarded module="documents" action="view"><ESignatures /></Guarded>} />
 
     {/* ── Submissions ──────────────────────────────────── */}
     <Route path="/submissions" element={<Guarded module="submissions" action="view"><Submissions /></Guarded>} />
