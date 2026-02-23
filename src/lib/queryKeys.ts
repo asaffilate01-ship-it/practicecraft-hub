@@ -94,7 +94,11 @@ export const qk = {
     onboarding: (tenantId: string) => ["practice", "onboarding", tenantId] as const,
     templatesCatalog: ["practice", "templates", "catalog"] as const,
     auditLog: ["practice", "auditLog"] as const,
+    emailTemplates: (filters?: any) => ["practice", "emailTemplates", filters] as const,
   },
+
+  // ── Time Recording ─────────────────────────────────
+  timeEntries: (filters?: any) => ["time-entries", filters] as const,
 
   // ── Settings ────────────────────────────────────────
   settings: {
