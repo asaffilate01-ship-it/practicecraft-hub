@@ -1172,12 +1172,54 @@ export type Database = {
           },
         ]
       }
+      document_versions: {
+        Row: {
+          created_at: string
+          document_id: string
+          id: string
+          notes: string | null
+          size_bytes: number
+          storage_path: string
+          uploaded_by_user_id: string | null
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          id?: string
+          notes?: string | null
+          size_bytes?: number
+          storage_path: string
+          uploaded_by_user_id?: string | null
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          id?: string
+          notes?: string | null
+          size_bytes?: number
+          storage_path?: string
+          uploaded_by_user_id?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           client_id: string | null
           created_at: string
           document_type: string
           filename: string
+          folder_path: string
           id: string
           metadata_json: Json
           mime_type: string
@@ -1195,6 +1237,7 @@ export type Database = {
           created_at?: string
           document_type?: string
           filename: string
+          folder_path?: string
           id?: string
           metadata_json?: Json
           mime_type: string
@@ -1212,6 +1255,7 @@ export type Database = {
           created_at?: string
           document_type?: string
           filename?: string
+          folder_path?: string
           id?: string
           metadata_json?: Json
           mime_type?: string
@@ -2318,6 +2362,180 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "journal_entries"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      kyc_cases: {
+        Row: {
+          adverse_media_check: boolean | null
+          approved_at: string | null
+          approved_by_user_id: string | null
+          assigned_to_user_id: string | null
+          client_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          pep_check: boolean | null
+          risk_level: string
+          risk_notes: string | null
+          risk_score: number | null
+          sanctions_check: boolean | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          adverse_media_check?: boolean | null
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          assigned_to_user_id?: string | null
+          client_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          pep_check?: boolean | null
+          risk_level?: string
+          risk_notes?: string | null
+          risk_score?: number | null
+          sanctions_check?: boolean | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          adverse_media_check?: boolean | null
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          assigned_to_user_id?: string | null
+          client_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          pep_check?: boolean | null
+          risk_level?: string
+          risk_notes?: string | null
+          risk_score?: number | null
+          sanctions_check?: boolean | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kyc_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "kyc_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "kyc_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "kyc_cases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kyc_cases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      kyc_checks: {
+        Row: {
+          case_id: string
+          check_type: string
+          checked_at: string | null
+          checked_by_user_id: string | null
+          created_at: string
+          document_id: string | null
+          id: string
+          notes: string | null
+          result_json: Json
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          case_id: string
+          check_type: string
+          checked_at?: string | null
+          checked_by_user_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          result_json?: Json
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string
+          check_type?: string
+          checked_at?: string | null
+          checked_by_user_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          notes?: string | null
+          result_json?: Json
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_checks_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "kyc_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kyc_checks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kyc_checks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kyc_checks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
           },
         ]
       }
