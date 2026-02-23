@@ -1200,33 +1200,318 @@ export type Database = {
           },
         ]
       }
+      ledger_suggestions: {
+        Row: {
+          approved_at: string | null
+          approved_by_user_id: string | null
+          client_id: string
+          created_at: string
+          document_id: string
+          extraction_id: string | null
+          id: string
+          lines_json: Json
+          posted_journal_id: string | null
+          reason: string | null
+          status: string
+          suggested_by: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          client_id: string
+          created_at?: string
+          document_id: string
+          extraction_id?: string | null
+          id?: string
+          lines_json?: Json
+          posted_journal_id?: string | null
+          reason?: string | null
+          status?: string
+          suggested_by?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          client_id?: string
+          created_at?: string
+          document_id?: string
+          extraction_id?: string | null
+          id?: string
+          lines_json?: Json
+          posted_journal_id?: string | null
+          reason?: string | null
+          status?: string
+          suggested_by?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_suggestions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_suggestions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ledger_suggestions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ledger_suggestions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_suggestions_extraction_id_fkey"
+            columns: ["extraction_id"]
+            isOneToOne: false
+            referencedRelation: "receipt_extractions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_suggestions_posted_journal_id_fkey"
+            columns: ["posted_journal_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_suggestions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_suggestions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      message_attachments: {
+        Row: {
+          created_at: string
+          document_id: string
+          id: string
+          message_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          id?: string
+          message_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          id?: string
+          message_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_attachments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_attachments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_attachments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      message_thread_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by_user_id: string | null
+          assigned_to_user_id: string | null
+          id: string
+          tenant_id: string
+          thread_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by_user_id?: string | null
+          assigned_to_user_id?: string | null
+          id?: string
+          tenant_id: string
+          thread_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by_user_id?: string | null
+          assigned_to_user_id?: string | null
+          id?: string
+          tenant_id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_thread_assignments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_thread_assignments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "message_thread_assignments_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: true
+            referencedRelation: "message_threads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_thread_assignments_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: true
+            referencedRelation: "v_threads_needing_attention"
+            referencedColumns: ["thread_id"]
+          },
+        ]
+      }
+      message_thread_participants: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          tenant_id: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          tenant_id: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          tenant_id?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_thread_participants_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_thread_participants_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "message_thread_participants_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "message_threads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_thread_participants_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "v_threads_needing_attention"
+            referencedColumns: ["thread_id"]
+          },
+        ]
+      }
       message_threads: {
         Row: {
           client_id: string
           created_at: string
+          created_by_user_id: string | null
           id: string
           last_message_at: string
+          last_message_id: string | null
+          priority: string
           status: string
           subject: string
           tenant_id: string
+          updated_at: string
         }
         Insert: {
           client_id: string
           created_at?: string
+          created_by_user_id?: string | null
           id?: string
           last_message_at?: string
+          last_message_id?: string | null
+          priority?: string
           status?: string
           subject: string
           tenant_id: string
+          updated_at?: string
         }
         Update: {
           client_id?: string
           created_at?: string
+          created_by_user_id?: string | null
           id?: string
           last_message_at?: string
+          last_message_id?: string | null
+          priority?: string
           status?: string
           subject?: string
           tenant_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1269,8 +1554,10 @@ export type Database = {
       messages: {
         Row: {
           body: string
+          body_html: string | null
           created_at: string
           id: string
+          is_internal: boolean
           sender_type: string
           sender_user_id: string | null
           tenant_id: string
@@ -1278,8 +1565,10 @@ export type Database = {
         }
         Insert: {
           body: string
+          body_html?: string | null
           created_at?: string
           id?: string
+          is_internal?: boolean
           sender_type?: string
           sender_user_id?: string | null
           tenant_id: string
@@ -1287,8 +1576,10 @@ export type Database = {
         }
         Update: {
           body?: string
+          body_html?: string | null
           created_at?: string
           id?: string
+          is_internal?: boolean
           sender_type?: string
           sender_user_id?: string | null
           tenant_id?: string
@@ -1315,6 +1606,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "message_threads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "v_threads_needing_attention"
+            referencedColumns: ["thread_id"]
           },
         ]
       }
@@ -1543,6 +1841,227 @@ export type Database = {
           },
         ]
       }
+      ocr_jobs: {
+        Row: {
+          attempt_count: number
+          client_id: string | null
+          created_at: string
+          document_id: string
+          id: string
+          last_error: string | null
+          provider: string
+          request_json: Json
+          result_json: Json | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          client_id?: string | null
+          created_at?: string
+          document_id: string
+          id?: string
+          last_error?: string | null
+          provider?: string
+          request_json?: Json
+          result_json?: Json | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          client_id?: string | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          last_error?: string | null
+          provider?: string
+          request_json?: Json
+          result_json?: Json | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocr_jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ocr_jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ocr_jobs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      onboarding_cases: {
+        Row: {
+          checklist_json: Json
+          client_id: string | null
+          created_at: string
+          created_by_user_id: string | null
+          data_json: Json
+          entity_type: string
+          id: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          checklist_json?: Json
+          client_id?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          data_json?: Json
+          entity_type: string
+          id?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          checklist_json?: Json
+          client_id?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          data_json?: Json
+          entity_type?: string
+          id?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "onboarding_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "onboarding_cases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_cases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      onboarding_steps: {
+        Row: {
+          created_at: string
+          data_json: Json
+          id: string
+          onboarding_case_id: string
+          required: boolean
+          step_key: string
+          step_status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_json?: Json
+          id?: string
+          onboarding_case_id: string
+          required?: boolean
+          step_key: string
+          step_status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_json?: Json
+          id?: string
+          onboarding_case_id?: string
+          required?: boolean
+          step_key?: string
+          step_status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_steps_onboarding_case_id_fkey"
+            columns: ["onboarding_case_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_steps_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_steps_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       permission_presets: {
         Row: {
           created_at: string
@@ -1650,6 +2169,106 @@ export type Database = {
           },
           {
             foreignKeyName: "push_tokens_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      receipt_extractions: {
+        Row: {
+          client_id: string | null
+          confidence: number | null
+          created_at: string
+          currency: string | null
+          document_id: string
+          id: string
+          invoice_number: string | null
+          raw_json: Json
+          receipt_date: string | null
+          supplier_name: string | null
+          supplier_vat_number: string | null
+          tenant_id: string
+          total_gross_pence: number | null
+          total_net_pence: number | null
+          total_vat_pence: number | null
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          currency?: string | null
+          document_id: string
+          id?: string
+          invoice_number?: string | null
+          raw_json?: Json
+          receipt_date?: string | null
+          supplier_name?: string | null
+          supplier_vat_number?: string | null
+          tenant_id: string
+          total_gross_pence?: number | null
+          total_net_pence?: number | null
+          total_vat_pence?: number | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          currency?: string | null
+          document_id?: string
+          id?: string
+          invoice_number?: string | null
+          raw_json?: Json
+          receipt_date?: string | null
+          supplier_name?: string | null
+          supplier_vat_number?: string | null
+          tenant_id?: string
+          total_gross_pence?: number | null
+          total_net_pence?: number | null
+          total_vat_pence?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_extractions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_extractions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "receipt_extractions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "receipt_extractions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_extractions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_extractions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"
@@ -2482,6 +3101,56 @@ export type Database = {
           },
           {
             foreignKeyName: "tasks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      v_threads_needing_attention: {
+        Row: {
+          client_id: string | null
+          client_legal_name: string | null
+          last_message_at: string | null
+          last_sender_type: string | null
+          priority: string | null
+          status: string | null
+          subject: string | null
+          tenant_id: string | null
+          thread_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_threads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_threads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "message_threads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "message_threads_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_threads_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"
