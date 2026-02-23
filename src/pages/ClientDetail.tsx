@@ -1,20 +1,49 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Building2, Mail, Phone, Hash, FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Mail, Phone, Hash, FileText, Pencil, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const entityLabels: Record<string, string> = {
   ltd: "Ltd Company", sole_trader: "Sole Trader", partnership: "Partnership",
   llp: "LLP", charity: "Charity", trust: "Trust",
 };
 
+const priorityColors: Record<string, string> = {
+  urgent: "bg-destructive text-destructive-foreground",
+  high: "bg-[hsl(38,92%,50%)] text-white",
+  medium: "bg-secondary text-secondary-foreground",
+  low: "bg-muted text-muted-foreground",
+};
+
 export default function ClientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [taskForm, setTaskForm] = useState({ title: "", description: "", priority: "medium", due_date: "" });
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("tenant_id").eq("id", user!.id).single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
 
   const { data: client, isLoading } = useQuery({
     queryKey: ["client", id],
@@ -36,6 +65,29 @@ export default function ClientDetail() {
     enabled: !!id,
   });
 
+  const addTask = useMutation({
+    mutationFn: async () => {
+      if (!profile?.tenant_id) throw new Error("No tenant");
+      const { error } = await supabase.from("tasks").insert({
+        tenant_id: profile.tenant_id,
+        client_id: id,
+        title: taskForm.title.trim(),
+        description: taskForm.description.trim() || null,
+        priority: taskForm.priority as any,
+        due_date: taskForm.due_date || null,
+        assigned_to_user_id: user?.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-tasks", id] });
+      setShowAddTask(false);
+      setTaskForm({ title: "", description: "", priority: "medium", due_date: "" });
+      toast.success("Task created");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   if (isLoading) {
     return <div className="flex items-center justify-center py-20"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>;
   }
@@ -44,9 +96,15 @@ export default function ClientDetail() {
     return <div className="py-20 text-center text-muted-foreground">Client not found</div>;
   }
 
+  const infoItems = [
+    { label: "Company No.", value: client.company_number, icon: Hash },
+    { label: "VAT No.", value: client.vat_number, icon: FileText },
+    { label: "Email", value: client.email, icon: Mail },
+    { label: "Phone", value: client.phone, icon: Phone },
+  ].filter(item => item.value);
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate("/clients")}>
           <ArrowLeft className="w-4 h-4" />
@@ -59,37 +117,22 @@ export default function ClientDetail() {
           </div>
           {client.trading_name && <p className="text-sm text-muted-foreground mt-0.5">t/a {client.trading_name}</p>}
         </div>
+        <Button variant="outline" size="sm" onClick={() => navigate(`/clients`)}>
+          <Pencil className="w-3.5 h-3.5 mr-1.5" /> Edit
+        </Button>
       </div>
 
-      {/* Key Info Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {client.company_number && (
-          <Card className="p-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Hash className="w-3.5 h-3.5" /> Company No.</div>
-            <p className="font-semibold">{client.company_number}</p>
-          </Card>
-        )}
-        {client.vat_number && (
-          <Card className="p-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><FileText className="w-3.5 h-3.5" /> VAT No.</div>
-            <p className="font-semibold">{client.vat_number}</p>
-          </Card>
-        )}
-        {client.email && (
-          <Card className="p-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Mail className="w-3.5 h-3.5" /> Email</div>
-            <p className="font-semibold text-sm">{client.email}</p>
-          </Card>
-        )}
-        {client.phone && (
-          <Card className="p-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Phone className="w-3.5 h-3.5" /> Phone</div>
-            <p className="font-semibold">{client.phone}</p>
-          </Card>
-        )}
-      </div>
+      {infoItems.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {infoItems.map(({ label, value, icon: Icon }) => (
+            <Card key={label} className="p-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Icon className="w-3.5 h-3.5" /> {label}</div>
+              <p className="font-semibold text-sm">{value}</p>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {/* Tabs */}
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -113,13 +156,18 @@ export default function ClientDetail() {
                 {client.charity_number && <div><span className="text-muted-foreground">Charity No:</span> <span className="font-medium ml-2">{client.charity_number}</span></div>}
               </div>
               <div className="text-xs text-muted-foreground pt-2 border-t">
-                Created: {new Date(client.created_at).toLocaleDateString("en-GB")}
+                Created: {new Date(client.created_at).toLocaleDateString("en-GB")} · Updated: {new Date(client.updated_at).toLocaleDateString("en-GB")}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="tasks" className="mt-4">
+        <TabsContent value="tasks" className="mt-4 space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" className="gap-1.5" onClick={() => setShowAddTask(true)}>
+              <Plus className="w-3.5 h-3.5" /> Add Task
+            </Button>
+          </div>
           <Card>
             <CardContent className="pt-6">
               {tasks.length === 0 ? (
@@ -132,7 +180,10 @@ export default function ClientDetail() {
                         <p className="text-sm font-medium">{t.title}</p>
                         <p className="text-xs text-muted-foreground">{t.due_date ? `Due: ${new Date(t.due_date).toLocaleDateString("en-GB")}` : "No due date"}</p>
                       </div>
-                      <Badge variant="secondary" className="text-xs capitalize">{t.status.replace("_", " ")}</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={cn("text-[10px] px-1.5 py-0", priorityColors[t.priority])}>{t.priority}</Badge>
+                        <Badge variant="secondary" className="text-xs capitalize">{t.status.replace("_", " ")}</Badge>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -149,6 +200,47 @@ export default function ClientDetail() {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Add Task Dialog */}
+      <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Add Task for {client.legal_name}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Title *</Label>
+              <Input value={taskForm.title} onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })} placeholder="Prepare VAT return" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input value={taskForm.description} onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })} placeholder="Details..." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select value={taskForm.priority} onValueChange={(v) => setTaskForm({ ...taskForm, priority: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Due Date</Label>
+                <Input type="date" value={taskForm.due_date} onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddTask(false)}>Cancel</Button>
+            <Button onClick={() => addTask.mutate()} disabled={!taskForm.title.trim() || addTask.isPending}>
+              {addTask.isPending ? "Creating..." : "Create Task"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
