@@ -437,6 +437,94 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // ── OAuth2: Exchange code AND store in client_credentials ──
+    if (path === "oauth/exchange-and-store" && req.method === "POST") {
+      const { code, redirectUri, clientId, tenantId, scopes } = body;
+      if (!code || !clientId || !tenantId) {
+        return new Response(JSON.stringify({ error: "code, clientId, and tenantId required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const tokens = await exchangeCode(code, redirectUri || "https://www.iqadvisory.co.uk/auth-redirect");
+
+      // Store tokens in client_credentials (encrypted at rest by Supabase)
+      const now = new Date().toISOString();
+      const expiresAt = tokens.expires_in
+        ? new Date(Date.now() + tokens.expires_in * 1000).toISOString()
+        : null;
+
+      // Determine provider based on scopes
+      const scopeStr = scopes || tokens.scope || "";
+      const providers: string[] = [];
+      if (scopeStr.includes("vat")) providers.push("hmrc_vat");
+      if (scopeStr.includes("self-assessment")) providers.push("hmrc_sa");
+      if (scopeStr.includes("paye")) providers.push("hmrc_paye");
+      if (providers.length === 0) providers.push("hmrc");
+
+      // Upsert credentials for each provider scope
+      for (const provider of providers) {
+        const { error: upsertErr } = await supabase
+          .from("client_credentials")
+          .upsert(
+            {
+              tenant_id: tenantId,
+              client_id: clientId,
+              provider,
+              credential_type: "oauth2",
+              ciphertext: JSON.stringify({
+                access_token: tokens.access_token,
+                refresh_token: tokens.refresh_token,
+                token_type: tokens.token_type,
+              }),
+              expires_at: expiresAt,
+              metadata_json: {
+                scope: tokens.scope || scopeStr,
+                connected_at: now,
+              },
+            },
+            { onConflict: "tenant_id,client_id,provider" }
+          );
+
+        if (upsertErr) {
+          console.error("Error storing HMRC credentials:", upsertErr);
+          // Try insert if upsert fails (no unique constraint yet)
+          await supabase.from("client_credentials").insert({
+            tenant_id: tenantId,
+            client_id: clientId,
+            provider,
+            credential_type: "oauth2",
+            ciphertext: JSON.stringify({
+              access_token: tokens.access_token,
+              refresh_token: tokens.refresh_token,
+              token_type: tokens.token_type,
+            }),
+            expires_at: expiresAt,
+            metadata_json: {
+              scope: tokens.scope || scopeStr,
+              connected_at: now,
+            },
+          });
+        }
+      }
+
+      // Log the event
+      await supabase.from("event_logs").insert({
+        tenant_id: tenantId,
+        event_type: "hmrc_oauth_connected",
+        source: "system",
+        client_id: clientId,
+        payload_json: { providers, scope: tokens.scope || scopeStr },
+      });
+
+      return new Response(JSON.stringify({
+        success: true,
+        providers,
+        scope: tokens.scope || scopeStr,
+        expiresAt,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // ── OAuth2: Refresh ──────────────────────────────
     if (path === "oauth/refresh" && req.method === "POST") {
       const tokens = await refreshToken(body.refresh_token);

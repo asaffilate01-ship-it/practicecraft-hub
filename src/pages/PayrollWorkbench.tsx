@@ -19,6 +19,7 @@ import {
   Banknote, Send, Eye, Pencil, Trash2, UserPlus, UserMinus,
 } from "lucide-react";
 import { toast } from "sonner";
+import { HmrcConnectButton } from "@/components/HmrcConnectButton";
 
 const fmt = (pence: number) => `£${(pence / 100).toFixed(2)}`;
 
@@ -328,6 +329,14 @@ export default function PayrollWorkbench() {
           <p className="text-sm text-muted-foreground">HMRC Real Time Information — employers, pay runs, FPS/EPS submissions</p>
         </div>
         <div className="flex gap-2">
+          {profile?.tenant_id && (
+            <HmrcConnectButton
+              clientId=""
+              tenantId={profile.tenant_id}
+              scopes="read:employment-paye write:employment-paye"
+              label="Connect HMRC (PAYE)"
+            />
+          )}
           <Button variant="outline" className="gap-1.5" onClick={() => setShowNewEmployer(true)}>
             <Users className="w-3.5 h-3.5" /> Add Employer
           </Button>
