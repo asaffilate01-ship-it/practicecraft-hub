@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,9 @@ import { FinancialStatementsStep } from "./FinancialStatementsStep";
 import { TaxComputationStep, defaultTaxCompData, type TaxCompData } from "./TaxComputationStep";
 import { TaxFormStep } from "./TaxFormStep";
 import { DisclosureChecklistStep } from "./DisclosureChecklistStep";
-
-const STEPS = [
-  { key: "tb", label: "Trial Balance" },
-  { key: "adj", label: "Adjustments" },
-  { key: "fs", label: "Financial Statements" },
-  { key: "tax_comp", label: "Tax Computation" },
-  { key: "tax_form", label: "Tax Return Form" },
-  { key: "checklist", label: "Review Checklist" },
-];
+import { FixedAssetScheduleStep, defaultFixedAssetScheduleData, type FixedAssetScheduleData } from "./FixedAssetScheduleStep";
+import { NotesToAccountsStep, defaultNotesData, type NotesData } from "./NotesToAccountsStep";
+import { DirectorsReportStep, defaultDirectorsReportData, type DirectorsReportData } from "./DirectorsReportStep";
 
 type Props = {
   period: any;
@@ -36,12 +30,35 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [checks, setChecks] = useState<Record<string, boolean>>({});
   const [checkNotes, setCheckNotes] = useState<Record<string, string>>({});
+  const [assetData, setAssetData] = useState<FixedAssetScheduleData>(defaultFixedAssetScheduleData);
+  const [notesData, setNotesData] = useState<NotesData>(defaultNotesData);
+  const [directorsData, setDirectorsData] = useState<DirectorsReportData>(defaultDirectorsReportData);
   const [saving, setSaving] = useState(false);
 
   const entityType = period?.clients?.entity_type || "ltd";
   const clientName = period?.clients?.legal_name || "Client";
   const companyNumber = period?.clients?.company_number;
   const utr = period?.clients?.utr;
+  const isLtd = entityType === "ltd" || entityType === "llp";
+
+  // Build steps dynamically based on entity type
+  const STEPS = [
+    { key: "tb", label: "Trial Balance" },
+    { key: "adj", label: "Adjustments" },
+    { key: "fixed_assets", label: "Fixed Assets" },
+    { key: "fs", label: "Financial Statements" },
+    { key: "notes", label: "Notes" },
+    ...(isLtd ? [{ key: "directors_report", label: "Directors' Report" }] : []),
+    { key: "tax_comp", label: "Tax Computation" },
+    { key: "tax_form", label: "Tax Return Form" },
+    { key: "checklist", label: "Review Checklist" },
+  ];
+
+  const monthsInPeriod = (() => {
+    const start = new Date(period.period_start);
+    const end = new Date(period.period_end);
+    return (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+  })();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -103,6 +120,9 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
       const fd = existingComp.form_data as any;
       const cv = existingComp.computed_values as any;
       if (cv?.compData) setCompData({ ...defaultTaxCompData, ...cv.compData });
+      if (cv?.assetData) setAssetData({ ...defaultFixedAssetScheduleData, ...cv.assetData });
+      if (cv?.notesData) setNotesData({ ...defaultNotesData, ...cv.notesData });
+      if (cv?.directorsData) setDirectorsData({ ...defaultDirectorsReportData, ...cv.directorsData });
       if (fd?.formData) setFormData(fd.formData);
       if (fd?.checks) setChecks(fd.checks);
       if (fd?.checkNotes) setCheckNotes(fd.checkNotes);
@@ -113,7 +133,6 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
     if (!profile?.tenant_id || !period?.id) return;
     setSaving(true);
     try {
-      // Delete existing entries and re-insert
       await supabase.from("trial_balance_entries").delete().eq("period_id", period.id);
       if (tbEntries.length > 0) {
         const rows = tbEntries.map((e, i) => ({
@@ -150,7 +169,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         period_id: period.id,
         computation_type: compType,
         form_data: { formData, checks, checkNotes } as any,
-        computed_values: { compData } as any,
+        computed_values: { compData, assetData, notesData, directorsData } as any,
         status: "draft",
       };
 
@@ -165,7 +184,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         if (error) throw error;
       }
       queryClient.invalidateQueries({ queryKey: ["tax-comp", period.id] });
-      toast.success("Tax computation saved");
+      toast.success("All data saved");
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -218,12 +237,12 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
       {/* Step indicator */}
       <Card>
         <CardContent className="py-3">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto">
             {STEPS.map((s, i) => (
-              <div key={s.key} className="flex items-center">
+              <div key={s.key} className="flex items-center flex-shrink-0">
                 <button
                   onClick={() => setStep(i)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[11px] font-medium transition-colors whitespace-nowrap ${
                     i === step
                       ? "bg-primary text-primary-foreground"
                       : i < step
@@ -234,7 +253,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
                   {i < step && <CheckCircle2 className="w-3 h-3" />}
                   <span>{i + 1}. {s.label}</span>
                 </button>
-                {i < STEPS.length - 1 && <div className="w-4 h-px bg-border mx-1" />}
+                {i < STEPS.length - 1 && <div className="w-3 h-px bg-border mx-0.5" />}
               </div>
             ))}
           </div>
@@ -243,16 +262,39 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
 
       {/* Step content */}
       {currentStep.key === "tb" && (
-        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} />
+        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} />
       )}
       {currentStep.key === "adj" && (
-        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} showAdjustments />
+        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} showAdjustments />
+      )}
+      {currentStep.key === "fixed_assets" && (
+        <FixedAssetScheduleStep
+          data={assetData} onChange={setAssetData}
+          periodStart={period.period_start} periodEnd={period.period_end}
+          entityType={entityType}
+        />
       )}
       {currentStep.key === "fs" && (
         <FinancialStatementsStep
           entries={tbEntries} entityType={entityType}
           standard={period.accounts_standard} periodStart={period.period_start}
           periodEnd={period.period_end} clientName={clientName}
+        />
+      )}
+      {currentStep.key === "notes" && (
+        <NotesToAccountsStep
+          notes={notesData} onChange={setNotesData}
+          entries={tbEntries} assets={assetData.assets}
+          entityType={entityType} periodEnd={period.period_end}
+          clientName={clientName} standard={period.accounts_standard}
+          monthsInPeriod={monthsInPeriod}
+        />
+      )}
+      {currentStep.key === "directors_report" && (
+        <DirectorsReportStep
+          data={directorsData} onChange={setDirectorsData}
+          clientName={clientName} periodStart={period.period_start}
+          periodEnd={period.period_end} companyNumber={companyNumber}
         />
       )}
       {currentStep.key === "tax_comp" && (
@@ -279,7 +321,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         </Button>
         <span className="text-xs text-muted-foreground">Step {step + 1} of {STEPS.length}</span>
         {step < STEPS.length - 1 ? (
-          <Button onClick={() => { if (step <= 1) saveTB(); if (step >= 3) saveTaxComp(); setStep(step + 1); }}>
+          <Button onClick={() => { if (step <= 1) saveTB(); if (step >= 5) saveTaxComp(); setStep(step + 1); }}>
             Next <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         ) : (

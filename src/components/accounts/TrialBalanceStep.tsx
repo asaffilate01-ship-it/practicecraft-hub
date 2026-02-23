@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Upload, Download, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, Upload, Download, AlertTriangle, CheckCircle2, Database } from "lucide-react";
 import { toast } from "sonner";
 
 export type TBEntry = {
@@ -72,10 +75,71 @@ type Props = {
   onChange: (entries: TBEntry[]) => void;
   entityType: string;
   showAdjustments?: boolean;
+  clientId?: string;
 };
 
-export function TrialBalanceStep({ entries, onChange, entityType, showAdjustments = false }: Props) {
+export function TrialBalanceStep({ entries, onChange, entityType, showAdjustments = false, clientId }: Props) {
   const [showAdj, setShowAdj] = useState(showAdjustments);
+  const { user } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("tenant_id").eq("id", user!.id).single();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const pullFromLedger = async () => {
+    if (!profile?.tenant_id) { toast.error("No tenant"); return; }
+    try {
+      // Get chart of accounts
+      const { data: accounts, error: accErr } = await supabase
+        .from("chart_of_accounts").select("id, code, name, account_type").eq("tenant_id", profile.tenant_id).order("code");
+      if (accErr) throw accErr;
+
+      // Get posted journal lines (optionally filtered by client)
+      let journalQuery = supabase.from("journal_entries").select("id, journal_lines(account_id, debit, credit)").eq("is_posted", true);
+      if (clientId) journalQuery = journalQuery.eq("client_id", clientId);
+      const { data: journals, error: jErr } = await journalQuery;
+      if (jErr) throw jErr;
+
+      // Aggregate by account
+      const balances: Record<string, { debit: number; credit: number }> = {};
+      (journals || []).forEach((j: any) => {
+        (j.journal_lines || []).forEach((line: any) => {
+          if (!balances[line.account_id]) balances[line.account_id] = { debit: 0, credit: 0 };
+          balances[line.account_id].debit += parseFloat(line.debit) || 0;
+          balances[line.account_id].credit += parseFloat(line.credit) || 0;
+        });
+      });
+
+      // Build TB entries from accounts with balances
+      const tbEntries: TBEntry[] = (accounts || [])
+        .filter(a => balances[a.id])
+        .map((a, i) => ({
+          account_code: a.code,
+          account_name: a.name,
+          account_type: a.account_type,
+          debit_pence: Math.round((balances[a.id]?.debit || 0) * 100),
+          credit_pence: Math.round((balances[a.id]?.credit || 0) * 100),
+          adjustment_debit_pence: 0,
+          adjustment_credit_pence: 0,
+          adjustment_notes: "",
+          sort_order: (i + 1) * 10,
+        }));
+
+      if (tbEntries.length === 0) {
+        toast.info("No posted journal entries found — trial balance is empty");
+      } else {
+        onChange(tbEntries);
+        toast.success(`Pulled ${tbEntries.length} accounts from the ledger`);
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
 
   const loadTemplate = () => {
     const template = entityType === "sole_trader" ? DEFAULT_SOLE_TRADER_TB : DEFAULT_LTD_TB;
@@ -159,6 +223,9 @@ export function TrialBalanceStep({ entries, onChange, entityType, showAdjustment
               <CardDescription>Import from bookkeeping, CSV, or enter manually. All values in £.</CardDescription>
             </div>
             <div className="flex gap-2">
+              <Button variant="default" size="sm" onClick={pullFromLedger} className="gap-1">
+                <Database className="w-3.5 h-3.5" /> Pull from Ledger
+              </Button>
               <Button variant="outline" size="sm" onClick={loadTemplate}>
                 <Download className="w-3.5 h-3.5 mr-1" /> Load Template
               </Button>
