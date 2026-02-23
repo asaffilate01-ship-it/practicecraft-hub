@@ -139,6 +139,136 @@ export type Database = {
           },
         ]
       }
+      coa_template_accounts: {
+        Row: {
+          coa_template_id: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_control: boolean | null
+          name: string
+          sort_order: number | null
+          subtype: string | null
+          tenant_id: string
+          type: string
+        }
+        Insert: {
+          coa_template_id: string
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_control?: boolean | null
+          name: string
+          sort_order?: number | null
+          subtype?: string | null
+          tenant_id: string
+          type: string
+        }
+        Update: {
+          coa_template_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_control?: boolean | null
+          name?: string
+          sort_order?: number | null
+          subtype?: string | null
+          tenant_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coa_template_accounts_coa_template_id_fkey"
+            columns: ["coa_template_id"]
+            isOneToOne: false
+            referencedRelation: "coa_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coa_template_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coa_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          entity_type: Database["public"]["Enums"]["entity_type"]
+          id: string
+          is_default: boolean | null
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          entity_type: Database["public"]["Enums"]["entity_type"]
+          id?: string
+          is_default?: boolean | null
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          entity_type?: Database["public"]["Enums"]["entity_type"]
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coa_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      engagement_services: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_services_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_lines: {
         Row: {
           created_at: string
@@ -351,6 +481,30 @@ export type Database = {
           },
         ]
       }
+      permission_presets: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          permissions_json: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          permissions_json?: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          permissions_json?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -382,6 +536,104 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_system_role: boolean | null
+          name: string
+          permissions_json: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system_role?: boolean | null
+          name: string
+          permissions_json?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_system_role?: boolean | null
+          name?: string
+          permissions_json?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_templates: {
+        Row: {
+          checklist_json: Json | null
+          created_at: string
+          default_days_before_due: number | null
+          default_priority: Database["public"]["Enums"]["priority"]
+          description: string | null
+          entity_types: Database["public"]["Enums"]["entity_type"][] | null
+          id: string
+          name: string
+          service_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          checklist_json?: Json | null
+          created_at?: string
+          default_days_before_due?: number | null
+          default_priority?: Database["public"]["Enums"]["priority"]
+          description?: string | null
+          entity_types?: Database["public"]["Enums"]["entity_type"][] | null
+          id?: string
+          name: string
+          service_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          checklist_json?: Json | null
+          created_at?: string
+          default_days_before_due?: number | null
+          default_priority?: Database["public"]["Enums"]["priority"]
+          description?: string | null
+          entity_types?: Database["public"]["Enums"]["entity_type"][] | null
+          id?: string
+          name?: string
+          service_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_templates_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "engagement_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_templates_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -638,6 +890,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      seed_tenant: { Args: { p_tenant_id: string }; Returns: undefined }
     }
     Enums: {
       app_role:
