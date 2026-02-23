@@ -30,6 +30,9 @@ import ReportsPage from "@/pages/Reports";
 import PracticePage from "@/pages/Practice";
 import TenantOnboarding from "@/pages/TenantOnboarding";
 import PlaceholderPage from "@/pages/PlaceholderPage";
+import CompaniesHouseWizard from "@/pages/CompaniesHouseWizard";
+import HmrcWizard from "@/pages/HmrcWizard";
+import AuditLog from "@/pages/AuditLog";
 
 // ── Auth pages ──────────────────────────────────────────────
 import Login from "@/pages/auth/Login";
@@ -194,6 +197,9 @@ const AppRoutes = () => (
     <Route path="/practice/roles" element={<Guarded module="settings" action="view"><PlaceholderPage title="Roles" description="Role and permission management" /></Guarded>} />
     <Route path="/practice/workflows" element={<Guarded module="automations" action="view"><PlaceholderPage title="Workflows" description="Automation rules and workflow configuration" /></Guarded>} />
     <Route path="/practice/integrations" element={<Guarded module="integrations" action="view"><PlaceholderPage title="Integrations" description="Third-party integrations and API connections" /></Guarded>} />
+    <Route path="/practice/integrations/companies-house" element={<Guarded module="secretarial" action="view"><CompaniesHouseWizard /></Guarded>} />
+    <Route path="/practice/integrations/hmrc" element={<Guarded module="vat" action="view"><HmrcWizard /></Guarded>} />
+    <Route path="/practice/audit-log" element={<Guarded module="settings" action="view"><AuditLog /></Guarded>} />
     <Route path="/practice/onboarding" element={<Guarded module="settings" action="view"><TenantOnboarding /></Guarded>} />
 
     {/* ── Settings ─────────────────────────────────────── */}

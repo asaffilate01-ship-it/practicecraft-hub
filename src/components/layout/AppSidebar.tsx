@@ -20,6 +20,7 @@ import {
   Landmark,
   Zap,
   UserPlus,
+  ClipboardList,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -60,6 +61,9 @@ const mainNav: NavItem[] = [
   { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
   { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
   { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
+  { title: "CH Wizard", url: "/practice/integrations/companies-house", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
+  { title: "HMRC Wizard", url: "/practice/integrations/hmrc", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
+  { title: "Audit Log", url: "/practice/audit-log", icon: ClipboardList, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
   { title: "Tenant Onboarding", url: "/practice/onboarding", icon: FilePlus2, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
   { title: "Client Onboarding", url: "/client-onboarding", icon: UserPlus, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
 ];
