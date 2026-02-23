@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Plus, Search, Pencil, Trash2, Archive, ArchiveRestore } from "lucide-react";
 import { toast } from "sonner";
 
 const entityLabels: Record<string, string> = {
@@ -37,6 +38,7 @@ export default function Clients() {
   const [editClient, setEditClient] = useState<any>(null);
   const [form, setForm] = useState(emptyForm);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [deleteConfirm, setDeleteConfirm] = useState<any>(null);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -123,7 +125,23 @@ export default function Clients() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       setEditClient(null);
+      setDeleteConfirm(null);
       toast.success("Client deleted");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const archiveClient = useMutation({
+    mutationFn: async ({ id, archive }: { id: string; archive: boolean }) => {
+      const updates: any = { status: archive ? "ceased" : "active" };
+      if (archive) updates.archived_at = new Date().toISOString();
+      else updates.archived_at = null;
+      const { error } = await supabase.from("clients").update(updates).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { archive }) => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      toast.success(archive ? "Client archived" : "Client restored");
     },
     onError: (e) => toast.error(e.message),
   });
@@ -297,9 +315,17 @@ export default function Clients() {
                     <TableCell className="text-sm text-muted-foreground">{c.vat_number || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{c.email || "—"}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => openEdit(c, e)}>
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
+                      <div className="flex gap-0.5">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => openEdit(c, e)} title="Edit">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); archiveClient.mutate({ id: c.id, archive: c.status !== "ceased" }); }} title={c.status === "ceased" ? "Restore" : "Archive"}>
+                          {c.status === "ceased" ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(c); }} title="Delete">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -327,12 +353,7 @@ export default function Clients() {
       <Dialog open={!!editClient} onOpenChange={(open) => { if (!open) { setEditClient(null); setForm(emptyForm); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle>Edit Client</DialogTitle>
-              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteClient.mutate(editClient?.id)}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
+            <DialogTitle>Edit Client</DialogTitle>
           </DialogHeader>
           <ClientFormFields />
           <DialogFooter>
@@ -343,6 +364,24 @@ export default function Clients() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {deleteConfirm?.legal_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this client and all associated data. This action cannot be undone. Consider archiving instead.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteClient.mutate(deleteConfirm?.id)}>
+              Delete permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

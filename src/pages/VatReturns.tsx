@@ -11,10 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, FileText, Send, Eye, Upload, Download } from "lucide-react";
+import { Plus, FileText, Send, Eye, Upload, Download, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRef, useCallback } from "react";
 import { HmrcConnectButton } from "@/components/HmrcConnectButton";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 function parseCsvToBoxes(csvText: string): Partial<Record<string, string>> | null {
   const lines = csvText.trim().split(/\r?\n/).filter(l => l.trim());
@@ -97,6 +98,8 @@ export default function VatReturns() {
   const { user } = useAuth();
   const [showCreate, setShowCreate] = useState(false);
   const [viewReturn, setViewReturn] = useState<any>(null);
+  const [editReturn, setEditReturn] = useState<any>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<any>(null);
   const [form, setForm] = useState({
     client_id: "", period_start: "", period_end: "", notes: "",
     box1: "0", box2: "0", box4: "0", box6: "0", box7: "0", box8: "0", box9: "0",
@@ -164,6 +167,69 @@ export default function VatReturns() {
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  const updateReturn = useMutation({
+    mutationFn: async () => {
+      if (!editReturn) return;
+      const box3val = (parseFloat(form.box1) || 0) + (parseFloat(form.box2) || 0);
+      const box5val = box3val - (parseFloat(form.box4) || 0);
+      const { error } = await supabase.from("vat_returns").update({
+        client_id: form.client_id || null,
+        period_start: form.period_start,
+        period_end: form.period_end,
+        box1: parseFloat(form.box1) || 0,
+        box2: parseFloat(form.box2) || 0,
+        box3: box3val,
+        box4: parseFloat(form.box4) || 0,
+        box5: box5val,
+        box6: parseFloat(form.box6) || 0,
+        box7: parseFloat(form.box7) || 0,
+        box8: parseFloat(form.box8) || 0,
+        box9: parseFloat(form.box9) || 0,
+        notes: form.notes.trim() || null,
+      }).eq("id", editReturn.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vat_returns"] });
+      setEditReturn(null);
+      setForm({ client_id: "", period_start: "", period_end: "", notes: "", box1: "0", box2: "0", box4: "0", box6: "0", box7: "0", box8: "0", box9: "0" });
+      toast.success("VAT return updated");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteReturn = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("vat_returns").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vat_returns"] });
+      setDeleteConfirm(null);
+      setViewReturn(null);
+      toast.success("VAT return deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const openEditReturn = (v: any) => {
+    setForm({
+      client_id: v.client_id || "",
+      period_start: v.period_start,
+      period_end: v.period_end,
+      notes: v.notes || "",
+      box1: String(v.box1 || 0),
+      box2: String(v.box2 || 0),
+      box4: String(v.box4 || 0),
+      box6: String(v.box6 || 0),
+      box7: String(v.box7 || 0),
+      box8: String(v.box8 || 0),
+      box9: String(v.box9 || 0),
+    });
+    setEditReturn(v);
+    setViewReturn(null);
+  };
 
   const csvInputRef = useRef<HTMLInputElement>(null);
 
@@ -295,9 +361,21 @@ export default function VatReturns() {
                       {v.submitted_at ? new Date(v.submitted_at).toLocaleDateString("en-GB") : "—"}
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewReturn(v)}>
-                        <Eye className="w-3.5 h-3.5" />
-                      </Button>
+                      <div className="flex gap-0.5">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewReturn(v)} title="View">
+                          <Eye className="w-3.5 h-3.5" />
+                        </Button>
+                        {v.status === "draft" && (
+                          <>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditReturn(v)} title="Edit">
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteConfirm(v)} title="Delete">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -407,9 +485,14 @@ export default function VatReturns() {
 
               <div className="flex gap-2 justify-end">
                 {viewReturn.status === "draft" && (
-                  <Button variant="outline" onClick={() => updateStatus.mutate({ id: viewReturn.id, status: "ready" })}>
-                    Mark Ready
-                  </Button>
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => openEditReturn(viewReturn)}>
+                      <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+                    </Button>
+                    <Button variant="outline" onClick={() => updateStatus.mutate({ id: viewReturn.id, status: "ready" })}>
+                      Mark Ready
+                    </Button>
+                  </>
                 )}
                 {viewReturn.status === "ready" && (
                   <Button className="gap-1.5" onClick={() => updateStatus.mutate({ id: viewReturn.id, status: "submitted" })}>
@@ -421,6 +504,93 @@ export default function VatReturns() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit VAT Return Dialog */}
+      <Dialog open={!!editReturn} onOpenChange={(open) => { if (!open) { setEditReturn(null); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Edit VAT Return</DialogTitle></DialogHeader>
+          <div className="flex gap-2 mb-1">
+            <input ref={csvInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={handleCsvUpload} />
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => csvInputRef.current?.click()}>
+              <Upload className="w-3.5 h-3.5" /> Re-import CSV
+            </Button>
+          </div>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2">
+                <Label>Client</Label>
+                <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
+                  <SelectContent>
+                    {clients.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.legal_name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Period Start</Label>
+                <Input type="date" value={form.period_start} onChange={(e) => setForm({ ...form, period_start: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Period End</Label>
+                <Input type="date" value={form.period_end} onChange={(e) => setForm({ ...form, period_end: e.target.value })} />
+              </div>
+            </div>
+            <div className="border rounded-lg p-4 space-y-3">
+              <p className="text-sm font-semibold">9-Box VAT Calculation</p>
+              {[
+                { key: "box1", editable: true },
+                { key: "box2", editable: true },
+                { key: "box3", editable: false, value: box3.toFixed(2) },
+                { key: "box4", editable: true },
+                { key: "box5", editable: false, value: box5.toFixed(2) },
+                { key: "box6", editable: true },
+                { key: "box7", editable: true },
+                { key: "box8", editable: true },
+                { key: "box9", editable: true },
+              ].map((box, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground flex-1">{boxLabels[i]}</span>
+                  <Input
+                    className="w-32 h-8 font-mono text-right"
+                    value={box.editable ? (form as any)[box.key] : box.value}
+                    onChange={box.editable ? (e) => setForm({ ...form, [box.key]: e.target.value }) : undefined}
+                    readOnly={!box.editable}
+                    disabled={!box.editable}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Internal notes..." rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditReturn(null)}>Cancel</Button>
+            <Button onClick={() => updateReturn.mutate()} disabled={!form.period_start || !form.period_end || updateReturn.isPending}>
+              {updateReturn.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete VAT Return Confirmation */}
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete VAT Return?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this VAT return. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteReturn.mutate(deleteConfirm?.id)}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
