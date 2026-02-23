@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CloudCog, Eye, EyeOff } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CloudCog, Eye, EyeOff, Building2, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Login() {
@@ -14,6 +15,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loginType, setLoginType] = useState<"staff" | "client">("staff");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +24,47 @@ export default function Login() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setLoading(false);
+
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    
     if (error) {
+      setLoading(false);
       toast.error(error.message);
-    } else {
+      return;
+    }
+
+    // Detect user type and redirect
+    try {
+      const { data: userType, error: rpcError } = await supabase.rpc("get_user_type", {
+        _user_id: authData.user.id,
+      });
+
+      setLoading(false);
+
+      if (rpcError) {
+        console.warn("Could not detect user type, using default redirect", rpcError);
+        navigate("/");
+        return;
+      }
+
+      const info = userType as any;
+
+      if (info.is_staff && info.is_portal) {
+        // User has both — respect the login tab they chose
+        navigate(loginType === "staff" ? "/" : "/portal");
+      } else if (info.is_staff) {
+        navigate("/");
+      } else if (info.is_portal) {
+        navigate("/portal");
+      } else {
+        // No profile found — could be new signup still being processed
+        navigate("/");
+      }
+    } catch {
+      setLoading(false);
       navigate("/");
     }
   };
@@ -41,16 +79,28 @@ export default function Login() {
           <CardTitle className="text-2xl" style={{ fontFamily: 'var(--font-heading)' }}>
             IQ Practice Cloud
           </CardTitle>
-          <CardDescription>Sign in to your practice account</CardDescription>
+          <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
+
+        <Tabs value={loginType} onValueChange={(v) => setLoginType(v as any)} className="px-6">
+          <TabsList className="w-full">
+            <TabsTrigger value="staff" className="flex-1 gap-1.5">
+              <Building2 className="w-3.5 h-3.5" /> Practice Staff
+            </TabsTrigger>
+            <TabsTrigger value="client" className="flex-1 gap-1.5">
+              <Users className="w-3.5 h-3.5" /> Client Portal
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@yourfirm.co.uk"
+                placeholder={loginType === "staff" ? "you@yourfirm.co.uk" : "you@company.co.uk"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
@@ -87,10 +137,21 @@ export default function Login() {
               {loading ? "Signing in..." : "Sign in"}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
-              Don't have an account?{" "}
-              <Link to="/signup" className="text-primary hover:underline font-medium">
-                Sign up
-              </Link>
+              {loginType === "staff" ? (
+                <>
+                  Don't have an account?{" "}
+                  <Link to="/signup" className="text-primary hover:underline font-medium">
+                    Sign up
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Have an invitation?{" "}
+                  <Link to="/portal/signup" className="text-primary hover:underline font-medium">
+                    Accept invite
+                  </Link>
+                </>
+              )}
             </p>
           </CardFooter>
         </form>
