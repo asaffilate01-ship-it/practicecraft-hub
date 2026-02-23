@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Mail, Phone, Hash, FileText, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { SecretarialTab } from "@/components/client/SecretarialTab";
 
 const entityLabels: Record<string, string> = {
   ltd: "Ltd Company", sole_trader: "Sole Trader", partnership: "Partnership",
@@ -137,6 +138,7 @@ export default function ClientDetail() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tasks">Tasks ({tasks.length})</TabsTrigger>
+          <TabsTrigger value="secretarial">Secretarial</TabsTrigger>
           <TabsTrigger value="bookkeeping">Bookkeeping</TabsTrigger>
           <TabsTrigger value="vat">VAT</TabsTrigger>
           <TabsTrigger value="payroll">Payroll</TabsTrigger>
@@ -190,6 +192,10 @@ export default function ClientDetail() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="secretarial" className="mt-4">
+          <SecretarialTab clientId={id!} companyNumber={client.company_number} />
         </TabsContent>
 
         {["bookkeeping", "vat", "payroll", "documents"].map((tab) => (

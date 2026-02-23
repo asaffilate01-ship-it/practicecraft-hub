@@ -15,6 +15,8 @@ import VatReturns from "@/pages/VatReturns";
 import Billing from "@/pages/Billing";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 import Settings from "@/pages/Settings";
+import Secretarial from "@/pages/Secretarial";
+import Incorporations from "@/pages/Incorporations";
 import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
@@ -60,7 +62,8 @@ const AppRoutes = () => (
     <Route path="/vat" element={<ProtectedRoute><AppLayout><PermissionGuard module="vat" action="view"><VatReturns /></PermissionGuard></AppLayout></ProtectedRoute>} />
     <Route path="/payroll" element={<ProtectedRoute><AppLayout><PermissionGuard module="payroll" action="view"><PlaceholderPage title="Payroll (RTI)" description="Full HMRC Real Time Information payroll engine" /></PermissionGuard></AppLayout></ProtectedRoute>} />
     <Route path="/accounts" element={<ProtectedRoute><AppLayout><PermissionGuard module="accounts" action="view"><PlaceholderPage title="Accounts Production" description="FRS 102/105, CT600, SA100, iXBRL tagging" /></PermissionGuard></AppLayout></ProtectedRoute>} />
-    <Route path="/secretarial" element={<ProtectedRoute><AppLayout><PermissionGuard module="secretarial" action="view"><PlaceholderPage title="Company Secretarial" description="Companies House filings, confirmation statements, PSC" /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/secretarial" element={<ProtectedRoute><AppLayout><PermissionGuard module="secretarial" action="view"><Secretarial /></PermissionGuard></AppLayout></ProtectedRoute>} />
+    <Route path="/incorporations" element={<ProtectedRoute><AppLayout><PermissionGuard module="incorporations" action="view"><Incorporations /></PermissionGuard></AppLayout></ProtectedRoute>} />
     <Route path="/kyc" element={<ProtectedRoute><AppLayout><PermissionGuard module="aml" action="view"><PlaceholderPage title="AML / KYC" description="Client identity verification, PEP screening, risk scoring" /></PermissionGuard></AppLayout></ProtectedRoute>} />
     <Route path="/billing" element={<ProtectedRoute><AppLayout><PermissionGuard module="billing" action="view"><Billing /></PermissionGuard></AppLayout></ProtectedRoute>} />
     <Route path="/documents" element={<ProtectedRoute><AppLayout><PermissionGuard module="documents" action="view"><PlaceholderPage title="Documents" description="Secure document storage, versioning, OCR & e-signatures" /></PermissionGuard></AppLayout></ProtectedRoute>} />
