@@ -13,6 +13,9 @@ import Clients from "@/pages/Clients";
 import ClientDetail from "@/pages/ClientDetail";
 import Tasks from "@/pages/Tasks";
 import Bookkeeping from "@/pages/Bookkeeping";
+import BankFeeds from "@/pages/BankFeeds";
+import CategorisationRules from "@/pages/CategorisationRules";
+import ClientOnboarding from "@/pages/ClientOnboarding";
 import VatReturns from "@/pages/VatReturns";
 import Billing from "@/pages/Billing";
 import Settings from "@/pages/Settings";
@@ -130,6 +133,9 @@ const AppRoutes = () => (
 
     {/* ── Bookkeeping / Ledger ─────────────────────────── */}
     <Route path="/bookkeeping" element={<Guarded module="ledger" action="view"><Bookkeeping /></Guarded>} />
+    <Route path="/bank-feeds" element={<Guarded module="ledger" action="view"><BankFeeds /></Guarded>} />
+    <Route path="/categorisation-rules" element={<Guarded module="ledger" action="view"><CategorisationRules /></Guarded>} />
+    <Route path="/client-onboarding" element={<Guarded module="clients" action="view"><ClientOnboarding /></Guarded>} />
 
     {/* ── VAT (MTD) ────────────────────────────────────── */}
     <Route path="/vat" element={<Guarded module="vat" action="view"><VatReturns /></Guarded>} />

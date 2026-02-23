@@ -216,6 +216,353 @@ export type Database = {
           },
         ]
       }
+      bank_connections: {
+        Row: {
+          account_name: string
+          account_number_masked: string | null
+          balance_pence: number | null
+          balance_updated_at: string | null
+          client_id: string
+          consent_expires_at: string | null
+          created_at: string
+          currency: string
+          id: string
+          metadata_json: Json
+          provider: string
+          provider_connection_id: string | null
+          sort_code: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number_masked?: string | null
+          balance_pence?: number | null
+          balance_updated_at?: string | null
+          client_id: string
+          consent_expires_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata_json?: Json
+          provider?: string
+          provider_connection_id?: string | null
+          sort_code?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number_masked?: string | null
+          balance_pence?: number | null
+          balance_updated_at?: string | null
+          client_id?: string
+          consent_expires_at?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata_json?: Json
+          provider?: string
+          provider_connection_id?: string | null
+          sort_code?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_connections_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_connections_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "bank_connections_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "bank_connections_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "bank_connections_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_connections_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      bank_transactions: {
+        Row: {
+          amount_pence: number
+          bank_connection_id: string
+          categorisation_status: string
+          client_id: string
+          confirmed_account_id: string | null
+          created_at: string
+          description: string
+          id: string
+          journal_entry_id: string | null
+          matched_rule_id: string | null
+          metadata_json: Json
+          provider_transaction_id: string | null
+          reference: string | null
+          running_balance_pence: number | null
+          suggested_account_id: string | null
+          tenant_id: string
+          transaction_date: string
+          transaction_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_pence: number
+          bank_connection_id: string
+          categorisation_status?: string
+          client_id: string
+          confirmed_account_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          journal_entry_id?: string | null
+          matched_rule_id?: string | null
+          metadata_json?: Json
+          provider_transaction_id?: string | null
+          reference?: string | null
+          running_balance_pence?: number | null
+          suggested_account_id?: string | null
+          tenant_id: string
+          transaction_date: string
+          transaction_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_pence?: number
+          bank_connection_id?: string
+          categorisation_status?: string
+          client_id?: string
+          confirmed_account_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          journal_entry_id?: string | null
+          matched_rule_id?: string | null
+          metadata_json?: Json
+          provider_transaction_id?: string | null
+          reference?: string | null
+          running_balance_pence?: number | null
+          suggested_account_id?: string | null
+          tenant_id?: string
+          transaction_date?: string
+          transaction_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_transactions_bank_connection_id_fkey"
+            columns: ["bank_connection_id"]
+            isOneToOne: false
+            referencedRelation: "bank_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_confirmed_account_id_fkey"
+            columns: ["confirmed_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_suggested_account_id_fkey"
+            columns: ["suggested_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      categorisation_rules: {
+        Row: {
+          auto_post: boolean
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          hit_count: number
+          id: string
+          is_active: boolean
+          last_matched_at: string | null
+          match_field: string
+          match_type: string
+          match_value: string
+          name: string
+          priority: number
+          target_account_id: string
+          tenant_id: string
+          updated_at: string
+          vat_code: string | null
+        }
+        Insert: {
+          auto_post?: boolean
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          hit_count?: number
+          id?: string
+          is_active?: boolean
+          last_matched_at?: string | null
+          match_field?: string
+          match_type?: string
+          match_value: string
+          name: string
+          priority?: number
+          target_account_id: string
+          tenant_id: string
+          updated_at?: string
+          vat_code?: string | null
+        }
+        Update: {
+          auto_post?: boolean
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          hit_count?: number
+          id?: string
+          is_active?: boolean
+          last_matched_at?: string | null
+          match_field?: string
+          match_type?: string
+          match_value?: string
+          name?: string
+          priority?: number
+          target_account_id?: string
+          tenant_id?: string
+          updated_at?: string
+          vat_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categorisation_rules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorisation_rules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "categorisation_rules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "categorisation_rules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "categorisation_rules_target_account_id_fkey"
+            columns: ["target_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorisation_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorisation_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       ch_filings: {
         Row: {
           accepted_at: string | null
@@ -446,6 +793,120 @@ export type Database = {
           },
           {
             foreignKeyName: "client_credentials_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      client_onboarding: {
+        Row: {
+          aml_case_id: string | null
+          client_id: string
+          coa_template_id: string | null
+          completed_at: string | null
+          created_at: string
+          current_step: string
+          engagement_document_id: string | null
+          engagement_signed: boolean
+          id: string
+          notes: string | null
+          selected_services: string[]
+          started_by: string | null
+          status: string
+          steps_json: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          aml_case_id?: string | null
+          client_id: string
+          coa_template_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step?: string
+          engagement_document_id?: string | null
+          engagement_signed?: boolean
+          id?: string
+          notes?: string | null
+          selected_services?: string[]
+          started_by?: string | null
+          status?: string
+          steps_json?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          aml_case_id?: string | null
+          client_id?: string
+          coa_template_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step?: string
+          engagement_document_id?: string | null
+          engagement_signed?: boolean
+          id?: string
+          notes?: string | null
+          selected_services?: string[]
+          started_by?: string | null
+          status?: string
+          steps_json?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_onboarding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_onboarding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "client_onboarding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "client_onboarding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "client_onboarding_coa_template_id_fkey"
+            columns: ["coa_template_id"]
+            isOneToOne: false
+            referencedRelation: "coa_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_onboarding_engagement_document_id_fkey"
+            columns: ["engagement_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_onboarding_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_onboarding_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"
