@@ -24,6 +24,7 @@ import {
   FileQuestion,
   PenTool,
   Eye,
+  Crown,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -76,6 +77,7 @@ const mainNav: NavItem[] = [
 ];
 
 const bottomNav: NavItem[] = [
+  { title: "Admin", url: "/admin", icon: Crown, permission: ["settings", "view"] },
   { title: "Settings", url: "/settings", icon: Settings, permission: ["settings", "view"] },
 ];
 

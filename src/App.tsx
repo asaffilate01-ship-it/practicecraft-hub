@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ClientContextProvider } from "@/contexts/ClientContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PermissionGuard } from "@/components/PermissionGuard";
 
@@ -38,6 +39,7 @@ import ESignatures from "@/pages/ESignatures";
 import AmlMonitoring from "@/pages/AmlMonitoring";
 import TimeRecording from "@/pages/TimeRecording";
 import EmailTemplates from "@/pages/EmailTemplates";
+import TenantAdmin from "@/pages/TenantAdmin";
 
 // ── Auth pages ──────────────────────────────────────────────
 import Login from "@/pages/auth/Login";
@@ -212,6 +214,7 @@ const AppRoutes = () => (
     <Route path="/practice/integrations/hmrc" element={<Guarded module="vat" action="view"><HmrcWizard /></Guarded>} />
     <Route path="/practice/audit-log" element={<Guarded module="settings" action="view"><AuditLog /></Guarded>} />
     <Route path="/practice/onboarding" element={<Guarded module="settings" action="view"><TenantOnboarding /></Guarded>} />
+    <Route path="/admin" element={<Guarded module="settings" action="view"><TenantAdmin /></Guarded>} />
 
     {/* ── Settings ─────────────────────────────────────── */}
     <Route path="/settings" element={<Guarded module="settings" action="view"><Settings /></Guarded>} />
@@ -259,9 +262,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <ClientContextProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </ClientContextProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

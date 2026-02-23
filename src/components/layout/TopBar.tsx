@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { usePracticeBranding } from "@/practice/branding/PracticeBrandingProvider";
+import { ClientSelector } from "@/components/layout/ClientSelector";
 
 export function TopBar() {
   const { user, signOut } = useAuth();
@@ -37,7 +38,8 @@ export function TopBar() {
         <Input placeholder="Search clients, tasks..." className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1" />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        <ClientSelector />
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
