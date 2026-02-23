@@ -14,6 +14,7 @@ import {
   Settings,
   ChevronLeft,
   CloudCog,
+  FilePlus2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -37,6 +38,7 @@ const mainNav: NavItem[] = [
   { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"] },
   { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"] },
   { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"] },
+  { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"] },
   { title: "AML / KYC", url: "/kyc", icon: ShieldCheck, permission: ["aml", "view"] },
   { title: "Billing", url: "/billing", icon: CreditCard, permission: ["billing", "view"] },
   { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"] },
