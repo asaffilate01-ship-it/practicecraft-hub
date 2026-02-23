@@ -123,4 +123,11 @@ export const qk = {
   // ── Tasks ───────────────────────────────────────────
   tasks: (filters?: any) => ["tasks", filters] as const,
   task: (taskId: string) => ["task", taskId] as const,
+
+  // ── RTI (FPS / EPS) ────────────────────────────────
+  rti: {
+    fpsDraft: (payrunId: string) => ["rti", "fps", "draft", payrunId] as const,
+    epsDraft: (employerId: string, period: string) => ["rti", "eps", "draft", employerId, period] as const,
+    jobs: (filters?: any) => ["rti", "jobs", filters] as const,
+  },
 } as const;
