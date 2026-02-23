@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Upload, Palette, Building2, User, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { RoleEditor } from "@/components/settings/RoleEditor";
 
 export default function Settings() {
   const queryClient = useQueryClient();
@@ -97,6 +98,7 @@ export default function Settings() {
           <TabsTrigger value="branding" className="gap-1.5"><Palette className="w-3.5 h-3.5" /> Branding</TabsTrigger>
           <TabsTrigger value="firm" className="gap-1.5"><Building2 className="w-3.5 h-3.5" /> Firm Details</TabsTrigger>
           <TabsTrigger value="profile" className="gap-1.5"><User className="w-3.5 h-3.5" /> My Profile</TabsTrigger>
+          <TabsTrigger value="roles" className="gap-1.5"><Shield className="w-3.5 h-3.5" /> Roles & Permissions</TabsTrigger>
         </TabsList>
 
         {/* Branding Tab */}
@@ -311,6 +313,11 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Roles & Permissions Tab */}
+        <TabsContent value="roles" className="mt-4">
+          <RoleEditor />
         </TabsContent>
       </Tabs>
     </div>
