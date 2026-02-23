@@ -39,6 +39,22 @@ import NotFound from "./pages/NotFound";
 import PortalHome from "@/pages/portal/PortalHome";
 import EmployeePayslips from "@/pages/employee/EmployeePayslips";
 
+// ── Portal shell + pages ────────────────────────────────────
+import { PortalShell } from "@/portal/layout/PortalShell";
+import { BrandingProvider } from "@/portal/branding/BrandingProvider";
+import { FeaturesProvider } from "@/portal/features/FeaturesProvider";
+import PortalHomePage from "@/pages/portal/PortalHomePage";
+import PortalDeadlinesPage from "@/pages/portal/PortalDeadlinesPage";
+import PortalDocumentsPage from "@/pages/portal/PortalDocumentsPage";
+import PortalMessagesPage from "@/pages/portal/PortalMessagesPage";
+import PortalMessageThreadPage from "@/pages/portal/PortalMessageThreadPage";
+import PortalInvoicesPage from "@/pages/portal/PortalInvoicesPage";
+import PortalInvoiceDetailPage from "@/pages/portal/PortalInvoiceDetailPage";
+import PortalVatPage from "@/pages/portal/PortalVatPage";
+import PortalPayslipsPage from "@/pages/portal/PortalPayslipsPage";
+import PortalSubmissionsPage from "@/pages/portal/PortalSubmissionsPage";
+import PortalSettingsPage from "@/pages/portal/PortalSettingsPage";
+
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -180,8 +196,28 @@ const AppRoutes = () => (
     <Route path="/settings/security" element={<Guarded module="settings" action="view"><PlaceholderPage title="Security" description="Authentication, MFA, and session settings" /></Guarded>} />
 
     {/* ── Client Portal (aud=client) ───────────────────── */}
-    <Route path="/portal" element={<ProtectedRoute><PortalHome /></ProtectedRoute>} />
-    <Route path="/portal/*" element={<ProtectedRoute><PortalHome /></ProtectedRoute>} />
+    <Route path="/portal" element={
+      <ProtectedRoute>
+        <BrandingProvider>
+          <FeaturesProvider>
+            <PortalShell />
+          </FeaturesProvider>
+        </BrandingProvider>
+      </ProtectedRoute>
+    }>
+      <Route index element={<Navigate to="/portal/home" replace />} />
+      <Route path="home" element={<PortalHomePage />} />
+      <Route path="deadlines" element={<PortalDeadlinesPage />} />
+      <Route path="documents" element={<PortalDocumentsPage />} />
+      <Route path="messages" element={<PortalMessagesPage />} />
+      <Route path="messages/:threadId" element={<PortalMessageThreadPage />} />
+      <Route path="invoices" element={<PortalInvoicesPage />} />
+      <Route path="invoices/:invoiceId" element={<PortalInvoiceDetailPage />} />
+      <Route path="vat" element={<PortalVatPage />} />
+      <Route path="payslips" element={<PortalPayslipsPage />} />
+      <Route path="submissions" element={<PortalSubmissionsPage />} />
+      <Route path="settings" element={<PortalSettingsPage />} />
+    </Route>
 
     {/* ── Employee Portal (aud=employee) ───────────────── */}
     <Route path="/employee" element={<ProtectedRoute><EmployeePayslips /></ProtectedRoute>} />
