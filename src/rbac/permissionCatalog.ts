@@ -19,9 +19,11 @@ export const PERMISSION_CATALOG: Record<string, string[]> = {
   automations: ["view", "edit"],
   notifications: ["view", "edit", "send"],
   submissions: ["view", "retry", "cancel"],
+  templates: ["view", "edit", "preview"],
   client_portal: ["view"],
   employee_portal: ["view"],
   payslips: ["view", "download"],
+  mobile: ["sync", "upload"],
 };
 
 /** Human-readable module labels for the UI grid */
@@ -42,9 +44,11 @@ export const MODULE_LABELS: Record<string, string> = {
   automations: "Automations",
   notifications: "Notifications",
   submissions: "Submissions",
+  templates: "Email Templates",
   client_portal: "Client Portal",
   employee_portal: "Employee Portal",
   payslips: "Payslips",
+  mobile: "Mobile App",
 };
 
 /** Human-readable action labels */
@@ -66,4 +70,6 @@ export const ACTION_LABELS: Record<string, string> = {
   send: "Send",
   retry: "Retry",
   cancel: "Cancel",
+  preview: "Preview",
+  sync: "Sync",
 };
