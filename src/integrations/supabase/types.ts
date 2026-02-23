@@ -122,6 +122,96 @@ export type Database = {
           },
         ]
       }
+      ch_filings: {
+        Row: {
+          accepted_at: string | null
+          ch_barcode: string | null
+          ch_transaction_id: string | null
+          client_id: string
+          created_at: string
+          filing_description: string | null
+          filing_type: string
+          id: string
+          rejected_reason: string | null
+          request_json: Json
+          response_json: Json
+          status: string
+          submitted_at: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          ch_barcode?: string | null
+          ch_transaction_id?: string | null
+          client_id: string
+          created_at?: string
+          filing_description?: string | null
+          filing_type: string
+          id?: string
+          rejected_reason?: string | null
+          request_json?: Json
+          response_json?: Json
+          status?: string
+          submitted_at?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          ch_barcode?: string | null
+          ch_transaction_id?: string | null
+          client_id?: string
+          created_at?: string
+          filing_description?: string | null
+          filing_type?: string
+          id?: string
+          rejected_reason?: string | null
+          request_json?: Json
+          response_json?: Json
+          status?: string
+          submitted_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ch_filings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ch_filings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ch_filings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ch_filings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ch_filings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       chart_of_accounts: {
         Row: {
           account_type: string
@@ -438,6 +528,461 @@ export type Database = {
           },
           {
             foreignKeyName: "coa_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      company_profiles: {
+        Row: {
+          client_id: string
+          company_name: string
+          company_number: string
+          company_status: string
+          created_at: string
+          id: string
+          incorporation_date: string | null
+          last_accounts_due: string | null
+          last_confirmation_statement_date: string | null
+          last_synced_at: string | null
+          next_accounts_due: string | null
+          next_confirmation_statement_due: string | null
+          officers_snapshot_json: Json
+          psc_snapshot_json: Json
+          registered_office_json: Json
+          sic_codes: string[]
+          sync_error: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          company_name: string
+          company_number: string
+          company_status?: string
+          created_at?: string
+          id?: string
+          incorporation_date?: string | null
+          last_accounts_due?: string | null
+          last_confirmation_statement_date?: string | null
+          last_synced_at?: string | null
+          next_accounts_due?: string | null
+          next_confirmation_statement_due?: string | null
+          officers_snapshot_json?: Json
+          psc_snapshot_json?: Json
+          registered_office_json?: Json
+          sic_codes?: string[]
+          sync_error?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          company_name?: string
+          company_number?: string
+          company_status?: string
+          created_at?: string
+          id?: string
+          incorporation_date?: string | null
+          last_accounts_due?: string | null
+          last_confirmation_statement_date?: string | null
+          last_synced_at?: string | null
+          next_accounts_due?: string | null
+          next_confirmation_statement_due?: string | null
+          officers_snapshot_json?: Json
+          psc_snapshot_json?: Json
+          registered_office_json?: Json
+          sic_codes?: string[]
+          sync_error?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      company_register_directors: {
+        Row: {
+          appointed_on: string | null
+          ch_officer_id: string | null
+          client_id: string
+          created_at: string
+          date_of_birth: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          nationality: string | null
+          occupation: string | null
+          residential_address_json: Json
+          resigned_on: string | null
+          service_address_json: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          appointed_on?: string | null
+          ch_officer_id?: string | null
+          client_id: string
+          created_at?: string
+          date_of_birth?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          nationality?: string | null
+          occupation?: string | null
+          residential_address_json?: Json
+          resigned_on?: string | null
+          service_address_json?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          appointed_on?: string | null
+          ch_officer_id?: string | null
+          client_id?: string
+          created_at?: string
+          date_of_birth?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          nationality?: string | null
+          occupation?: string | null
+          residential_address_json?: Json
+          resigned_on?: string | null
+          service_address_json?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_register_directors_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_register_directors_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_directors_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_directors_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_register_directors_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      company_register_members: {
+        Row: {
+          address_json: Json
+          client_id: string
+          created_at: string
+          date_became_member: string | null
+          date_ceased_member: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          share_class_id: string | null
+          shares_held: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          address_json?: Json
+          client_id: string
+          created_at?: string
+          date_became_member?: string | null
+          date_ceased_member?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          share_class_id?: string | null
+          shares_held?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          address_json?: Json
+          client_id?: string
+          created_at?: string
+          date_became_member?: string | null
+          date_ceased_member?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          share_class_id?: string | null
+          shares_held?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_register_members_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_register_members_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_members_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_members_share_class_id_fkey"
+            columns: ["share_class_id"]
+            isOneToOne: false
+            referencedRelation: "share_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_register_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_register_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      company_register_psc: {
+        Row: {
+          ceased_on: string | null
+          ch_psc_id: string | null
+          client_id: string
+          country_of_residence: string | null
+          created_at: string
+          date_of_birth: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          nationality: string | null
+          natures_of_control: string[]
+          notified_on: string | null
+          service_address_json: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          ceased_on?: string | null
+          ch_psc_id?: string | null
+          client_id: string
+          country_of_residence?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          nationality?: string | null
+          natures_of_control?: string[]
+          notified_on?: string | null
+          service_address_json?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          ceased_on?: string | null
+          ch_psc_id?: string | null
+          client_id?: string
+          country_of_residence?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          nationality?: string | null
+          natures_of_control?: string[]
+          notified_on?: string | null
+          service_address_json?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_register_psc_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_register_psc_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_psc_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_register_psc_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_register_psc_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      confirmation_statement_cycles: {
+        Row: {
+          ch_filing_id: string | null
+          client_id: string
+          created_at: string
+          due_date: string
+          filed_at: string | null
+          id: string
+          review_period_end: string
+          review_period_start: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          ch_filing_id?: string | null
+          client_id: string
+          created_at?: string
+          due_date: string
+          filed_at?: string | null
+          id?: string
+          review_period_end: string
+          review_period_start: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          ch_filing_id?: string | null
+          client_id?: string
+          created_at?: string
+          due_date?: string
+          filed_at?: string | null
+          id?: string
+          review_period_end?: string
+          review_period_start?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "confirmation_statement_cycles_ch_filing_id_fkey"
+            columns: ["ch_filing_id"]
+            isOneToOne: false
+            referencedRelation: "ch_filings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "confirmation_statement_cycles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "confirmation_statement_cycles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "confirmation_statement_cycles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "confirmation_statement_cycles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "confirmation_statement_cycles_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"
@@ -816,6 +1361,397 @@ export type Database = {
           },
           {
             foreignKeyName: "event_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      incorp_documents: {
+        Row: {
+          application_id: string
+          created_at: string
+          document_id: string | null
+          document_type: string
+          id: string
+          person_id: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          document_id?: string | null
+          document_type: string
+          id?: string
+          person_id?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          document_id?: string | null
+          document_type?: string
+          id?: string
+          person_id?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incorp_documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "incorporation_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_documents_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "incorp_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_documents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_documents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      incorp_people: {
+        Row: {
+          application_id: string
+          consent_to_act: boolean
+          country_of_residence: string | null
+          created_at: string
+          date_of_birth: string | null
+          first_name: string
+          id: string
+          kyc_status: string
+          last_name: string
+          middle_names: string | null
+          nationality: string | null
+          natures_of_control: string[] | null
+          occupation: string | null
+          residential_address_json: Json
+          role: string
+          service_address_json: Json
+          tenant_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          consent_to_act?: boolean
+          country_of_residence?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          first_name: string
+          id?: string
+          kyc_status?: string
+          last_name: string
+          middle_names?: string | null
+          nationality?: string | null
+          natures_of_control?: string[] | null
+          occupation?: string | null
+          residential_address_json?: Json
+          role: string
+          service_address_json?: Json
+          tenant_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          consent_to_act?: boolean
+          country_of_residence?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          first_name?: string
+          id?: string
+          kyc_status?: string
+          last_name?: string
+          middle_names?: string | null
+          nationality?: string | null
+          natures_of_control?: string[] | null
+          occupation?: string | null
+          residential_address_json?: Json
+          role?: string
+          service_address_json?: Json
+          tenant_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incorp_people_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "incorporation_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_people_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_people_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      incorp_share_structure: {
+        Row: {
+          amount_paid_pence: number
+          amount_unpaid_pence: number
+          application_id: string
+          class_name: string
+          created_at: string
+          currency: string
+          id: string
+          nominal_value_pence: number
+          shares_subscribed: number
+          subscriber_person_id: string | null
+          tenant_id: string
+          total_shares: number
+        }
+        Insert: {
+          amount_paid_pence?: number
+          amount_unpaid_pence?: number
+          application_id: string
+          class_name?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          nominal_value_pence?: number
+          shares_subscribed?: number
+          subscriber_person_id?: string | null
+          tenant_id: string
+          total_shares?: number
+        }
+        Update: {
+          amount_paid_pence?: number
+          amount_unpaid_pence?: number
+          application_id?: string
+          class_name?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          nominal_value_pence?: number
+          shares_subscribed?: number
+          subscriber_person_id?: string | null
+          tenant_id?: string
+          total_shares?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incorp_share_structure_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "incorporation_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_share_structure_subscriber_person_id_fkey"
+            columns: ["subscriber_person_id"]
+            isOneToOne: false
+            referencedRelation: "incorp_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_share_structure_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_share_structure_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      incorp_status_history: {
+        Row: {
+          application_id: string
+          changed_by_user_id: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          notes: string | null
+          tenant_id: string
+          to_status: string
+        }
+        Insert: {
+          application_id: string
+          changed_by_user_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          notes?: string | null
+          tenant_id: string
+          to_status: string
+        }
+        Update: {
+          application_id?: string
+          changed_by_user_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          notes?: string | null
+          tenant_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incorp_status_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "incorporation_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_status_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorp_status_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      incorporation_applications: {
+        Row: {
+          articles_type: string
+          ch_company_number: string | null
+          ch_incorporation_date: string | null
+          ch_submission_id: string | null
+          client_id: string | null
+          created_at: string
+          created_by_user_id: string | null
+          data_json: Json
+          entity_type: string
+          id: string
+          payment_amount_pence: number | null
+          payment_reference: string | null
+          payment_status: string
+          proposed_name: string | null
+          registered_office_json: Json
+          sail_address_json: Json | null
+          sic_codes: string[]
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          articles_type?: string
+          ch_company_number?: string | null
+          ch_incorporation_date?: string | null
+          ch_submission_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          data_json?: Json
+          entity_type?: string
+          id?: string
+          payment_amount_pence?: number | null
+          payment_reference?: string | null
+          payment_status?: string
+          proposed_name?: string | null
+          registered_office_json?: Json
+          sail_address_json?: Json | null
+          sic_codes?: string[]
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          articles_type?: string
+          ch_company_number?: string | null
+          ch_incorporation_date?: string | null
+          ch_submission_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          data_json?: Json
+          entity_type?: string
+          id?: string
+          payment_amount_pence?: number | null
+          payment_reference?: string | null
+          payment_status?: string
+          proposed_name?: string | null
+          registered_office_json?: Json
+          sail_address_json?: Json | null
+          sic_codes?: string[]
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incorporation_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorporation_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "incorporation_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "incorporation_applications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incorporation_applications_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"
@@ -1616,6 +2552,111 @@ export type Database = {
           },
         ]
       }
+      minutes_documents: {
+        Row: {
+          client_id: string
+          content_html: string | null
+          created_at: string
+          created_by_user_id: string | null
+          document_id: string | null
+          document_type: string
+          id: string
+          secretarial_event_id: string | null
+          signed_at: string | null
+          template_key: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          content_html?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          document_id?: string | null
+          document_type?: string
+          id?: string
+          secretarial_event_id?: string | null
+          signed_at?: string | null
+          template_key?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          content_html?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          document_id?: string | null
+          document_type?: string
+          id?: string
+          secretarial_event_id?: string | null
+          signed_at?: string | null
+          template_key?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "minutes_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "minutes_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "minutes_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "minutes_documents_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "minutes_documents_secretarial_event_id_fkey"
+            columns: ["secretarial_event_id"]
+            isOneToOne: false
+            referencedRelation: "secretarial_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "minutes_documents_secretarial_event_id_fkey"
+            columns: ["secretarial_event_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_changes_pending"
+            referencedColumns: ["event_id"]
+          },
+          {
+            foreignKeyName: "minutes_documents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "minutes_documents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       notification_logs: {
         Row: {
           body_preview: string | null
@@ -2324,6 +3365,280 @@ export type Database = {
           },
         ]
       }
+      secretarial_events: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by_user_id: string | null
+          description: string | null
+          effective_date: string | null
+          event_type: string
+          filed_at: string | null
+          filing_id: string | null
+          id: string
+          payload_json: Json
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          effective_date?: string | null
+          event_type: string
+          filed_at?: string | null
+          filing_id?: string | null
+          id?: string
+          payload_json?: Json
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          effective_date?: string | null
+          event_type?: string
+          filed_at?: string | null
+          filing_id?: string | null
+          id?: string
+          payload_json?: Json
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secretarial_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      share_classes: {
+        Row: {
+          class_name: string
+          client_id: string
+          created_at: string
+          currency: string
+          dividend_rights: boolean
+          id: string
+          nominal_value_pence: number
+          tenant_id: string
+          total_issued: number
+          updated_at: string
+          voting_rights: boolean
+        }
+        Insert: {
+          class_name?: string
+          client_id: string
+          created_at?: string
+          currency?: string
+          dividend_rights?: boolean
+          id?: string
+          nominal_value_pence?: number
+          tenant_id: string
+          total_issued?: number
+          updated_at?: string
+          voting_rights?: boolean
+        }
+        Update: {
+          class_name?: string
+          client_id?: string
+          created_at?: string
+          currency?: string
+          dividend_rights?: boolean
+          id?: string
+          nominal_value_pence?: number
+          tenant_id?: string
+          total_issued?: number
+          updated_at?: string
+          voting_rights?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_classes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_classes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "share_classes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "share_classes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_classes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      share_transactions: {
+        Row: {
+          client_id: string
+          consideration_text: string | null
+          created_at: string
+          effective_date: string
+          from_member_id: string | null
+          id: string
+          num_shares: number
+          price_per_share_pence: number | null
+          resolution_document_id: string | null
+          share_class_id: string | null
+          tenant_id: string
+          to_member_id: string | null
+          transaction_type: string
+        }
+        Insert: {
+          client_id: string
+          consideration_text?: string | null
+          created_at?: string
+          effective_date?: string
+          from_member_id?: string | null
+          id?: string
+          num_shares: number
+          price_per_share_pence?: number | null
+          resolution_document_id?: string | null
+          share_class_id?: string | null
+          tenant_id: string
+          to_member_id?: string | null
+          transaction_type?: string
+        }
+        Update: {
+          client_id?: string
+          consideration_text?: string | null
+          created_at?: string
+          effective_date?: string
+          from_member_id?: string | null
+          id?: string
+          num_shares?: number
+          price_per_share_pence?: number | null
+          resolution_document_id?: string | null
+          share_class_id?: string | null
+          tenant_id?: string
+          to_member_id?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "share_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "share_transactions_from_member_id_fkey"
+            columns: ["from_member_id"]
+            isOneToOne: false
+            referencedRelation: "company_register_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_resolution_document_id_fkey"
+            columns: ["resolution_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_share_class_id_fkey"
+            columns: ["share_class_id"]
+            isOneToOne: false
+            referencedRelation: "share_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_transactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "share_transactions_to_member_id_fkey"
+            columns: ["to_member_id"]
+            isOneToOne: false
+            referencedRelation: "company_register_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submission_jobs: {
         Row: {
           attempt_count: number
@@ -2939,6 +4254,55 @@ export type Database = {
           },
         ]
       }
+      v_company_register_health: {
+        Row: {
+          active_directors: number | null
+          active_members: number | null
+          active_pscs: number | null
+          client_id: string | null
+          client_legal_name: string | null
+          company_number: string | null
+          has_auth_code: boolean | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       v_overdue_tasks: {
         Row: {
           assigned_to_user_id: string | null
@@ -2997,6 +4361,105 @@ export type Database = {
           vat_due_14d?: never
         }
         Relationships: []
+      }
+      v_secretarial_changes_pending: {
+        Row: {
+          client_id: string | null
+          client_legal_name: string | null
+          created_at: string | null
+          description: string | null
+          effective_date: string | null
+          event_id: string | null
+          event_type: string | null
+          status: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secretarial_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretarial_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      v_secretarial_due: {
+        Row: {
+          accounts_urgency: string | null
+          client_id: string | null
+          client_legal_name: string | null
+          company_number: string | null
+          cs_urgency: string | null
+          next_accounts_due: string | null
+          next_confirmation_statement_due: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "company_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
       }
       v_submission_jobs_recent: {
         Row: {
