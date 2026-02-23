@@ -36,6 +36,8 @@ import AuditLog from "@/pages/AuditLog";
 import DocumentRequests from "@/pages/DocumentRequests";
 import ESignatures from "@/pages/ESignatures";
 import AmlMonitoring from "@/pages/AmlMonitoring";
+import TimeRecording from "@/pages/TimeRecording";
+import EmailTemplates from "@/pages/EmailTemplates";
 
 // ── Auth pages ──────────────────────────────────────────────
 import Login from "@/pages/auth/Login";
@@ -185,7 +187,7 @@ const AppRoutes = () => (
     {/* ── Documents ────────────────────────────────────── */}
     <Route path="/documents" element={<Guarded module="documents" action="view"><DocumentsLibrary /></Guarded>} />
     <Route path="/documents/library" element={<Guarded module="documents" action="view"><DocumentsLibrary /></Guarded>} />
-    <Route path="/documents/templates" element={<Guarded module="templates" action="view"><PlaceholderPage title="Document Templates" description="Email and document template management" /></Guarded>} />
+    <Route path="/documents/templates" element={<Guarded module="templates" action="view"><EmailTemplates /></Guarded>} />
     <Route path="/documents/requests" element={<Guarded module="documents" action="view"><DocumentRequests /></Guarded>} />
     <Route path="/documents/signatures" element={<Guarded module="documents" action="view"><ESignatures /></Guarded>} />
 
@@ -193,6 +195,9 @@ const AppRoutes = () => (
     <Route path="/submissions" element={<Guarded module="submissions" action="view"><Submissions /></Guarded>} />
     <Route path="/submissions/jobs" element={<Guarded module="submissions" action="view"><Submissions /></Guarded>} />
     <Route path="/submissions/jobs/:jobId" element={<Guarded module="submissions" action="view"><PlaceholderPage title="Submission Job" description="Submission job detail, timeline, and retry controls" /></Guarded>} />
+
+    {/* ── Time Recording ─────────────────────────────── */}
+    <Route path="/time" element={<Guarded module="tasks" action="view"><TimeRecording /></Guarded>} />
 
     {/* ── Reports ──────────────────────────────────────── */}
     <Route path="/reports" element={<Guarded module="reports" action="view"><ReportsPage /></Guarded>} />

@@ -5898,6 +5898,118 @@ export type Database = {
         }
         Relationships: []
       }
+      time_entries: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          date: string
+          description: string
+          duration_minutes: number
+          id: string
+          is_billable: boolean
+          rate_pence: number | null
+          status: string
+          task_id: string | null
+          tenant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          date?: string
+          description?: string
+          duration_minutes?: number
+          id?: string
+          is_billable?: boolean
+          rate_pence?: number | null
+          status?: string
+          task_id?: string | null
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          date?: string
+          description?: string
+          duration_minutes?: number
+          id?: string
+          is_billable?: boolean
+          rate_pence?: number | null
+          status?: string
+          task_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "time_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "time_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "time_entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["task_id"]
+          },
+          {
+            foreignKeyName: "time_entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["task_id"]
+          },
+          {
+            foreignKeyName: "time_entries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       trial_balance_entries: {
         Row: {
           account_code: string

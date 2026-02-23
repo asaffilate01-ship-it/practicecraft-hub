@@ -65,6 +65,7 @@ const mainNav: NavItem[] = [
   { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
   { title: "Doc Requests", url: "/documents/requests", icon: FileQuestion, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
   { title: "e-Signatures", url: "/documents/signatures", icon: PenTool, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
+  { title: "Time Recording", url: "/time", icon: ClipboardList, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
   { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
   { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
   { title: "CH Wizard", url: "/practice/integrations/companies-house", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
