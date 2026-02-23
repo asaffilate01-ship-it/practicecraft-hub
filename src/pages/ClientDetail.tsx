@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Mail, Phone, Hash, FileText, Pencil } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Hash, FileText, Pencil, KeyRound } from "lucide-react";
 import { SecretarialTab } from "@/components/client/SecretarialTab";
 import { TasksTab } from "@/components/client/TasksTab";
 import { DocumentsTab } from "@/components/client/DocumentsTab";
 import { BookkeepingTab } from "@/components/client/BookkeepingTab";
 import { VatTab } from "@/components/client/VatTab";
 import { PayrollTab } from "@/components/client/PayrollTab";
+import { CredentialsTab } from "@/components/client/CredentialsTab";
 
 const entityLabels: Record<string, string> = {
   ltd: "Ltd Company", sole_trader: "Sole Trader", partnership: "Partnership",
@@ -96,6 +97,7 @@ export default function ClientDetail() {
           <TabsTrigger value="vat">VAT</TabsTrigger>
           <TabsTrigger value="payroll">Payroll</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="credentials" className="gap-1"><KeyRound className="w-3 h-3" /> Credentials</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
@@ -139,6 +141,10 @@ export default function ClientDetail() {
 
         <TabsContent value="documents" className="mt-4">
           <DocumentsTab clientId={id!} />
+        </TabsContent>
+
+        <TabsContent value="credentials" className="mt-4">
+          <CredentialsTab clientId={id!} />
         </TabsContent>
       </Tabs>
     </div>
