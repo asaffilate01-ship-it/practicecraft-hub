@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { FilingDrawer } from "@/components/secretarial/FilingDrawer";
 
 const changeTypeLabels: Record<string, string> = {
   CONFIRMATION_STATEMENT: "Confirmation Statement",
@@ -60,6 +61,8 @@ export default function Secretarial() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dueDateFilter, setDueDateFilter] = useState("all");
+  const [drawerChangeId, setDrawerChangeId] = useState<string | null>(null);
+  const [drawerClientId, setDrawerClientId] = useState<string>("");
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -238,7 +241,7 @@ export default function Secretarial() {
                     {filteredChanges.map((c: any) => {
                       const sb = statusBadge[c.status] || statusBadge.draft;
                       return (
-                        <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/clients/${c.client_id}`)}>
+                        <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => { setDrawerChangeId(c.id); setDrawerClientId(c.client_id); }}>
                           <TableCell className="font-medium">{c.clients?.legal_name || "—"}</TableCell>
                           <TableCell className="text-sm">{changeTypeLabels[c.change_type] || c.change_type}</TableCell>
                           <TableCell className="text-sm">{c.title}</TableCell>
@@ -359,6 +362,13 @@ export default function Secretarial() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <FilingDrawer
+        open={!!drawerChangeId}
+        onOpenChange={(open) => { if (!open) setDrawerChangeId(null); }}
+        changeId={drawerChangeId}
+        clientId={drawerClientId}
+      />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,9 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KPICard } from "@/components/dashboard/KPICard";
 import {
   Building2, Clock, FileText, AlertTriangle, RefreshCw,
-  ShieldCheck, CheckCircle2, Lock, Users, Share2,
+  ShieldCheck, CheckCircle2, Lock, Users, Share2, ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FilingDrawer } from "@/components/secretarial/FilingDrawer";
 
 interface SecretarialTabProps {
   clientId: string;
@@ -27,6 +29,7 @@ const dueBadge = (dueDate: string | null) => {
 };
 
 export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps) {
+  const [drawerChangeId, setDrawerChangeId] = useState<string | null>(null);
   // Company profile
   const { data: companyProfile } = useQuery({
     queryKey: ["company-profile", clientId],
@@ -146,6 +149,26 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
 
   return (
     <div className="space-y-6">
+      {/* Compliance banners */}
+      {!authCode && (
+        <div className="flex items-center gap-2 rounded-lg border border-[hsl(var(--warning))]/30 bg-[hsl(var(--warning))]/5 p-3 text-sm">
+          <AlertTriangle className="w-4 h-4 text-[hsl(var(--warning))] shrink-0" />
+          <span className="text-[hsl(var(--warning))]"><strong>Auth code missing</strong> — Companies House filings cannot be submitted without a valid auth code.</span>
+          <Button variant="outline" size="sm" className="ml-auto shrink-0 gap-1"><Lock className="w-3 h-3" /> Store Auth Code</Button>
+        </div>
+      )}
+      {activeDirectors === 0 && directors.length >= 0 && companyProfile && (
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
+          <ShieldAlert className="w-4 h-4 text-destructive shrink-0" />
+          <span className="text-destructive"><strong>No active directors</strong> — At least one active director is required for compliance.</span>
+        </div>
+      )}
+      {pscs.length === 0 && companyProfile && (
+        <div className="flex items-center gap-2 rounded-lg border border-[hsl(var(--warning))]/30 bg-[hsl(var(--warning))]/5 p-3 text-sm">
+          <ShieldAlert className="w-4 h-4 text-[hsl(var(--warning))] shrink-0" />
+          <span className="text-[hsl(var(--warning))]"><strong>PSC register empty</strong> — Identity verification may be required for PSCs under 2026 rules.</span>
+        </div>
+      )}
       {/* Company Header */}
       <Card className="p-4">
         <div className="flex items-center justify-between flex-wrap gap-3">
@@ -333,7 +356,7 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
                   </TableHeader>
                   <TableBody>
                     {changes.map((c: any) => (
-                      <TableRow key={c.id}>
+                      <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setDrawerChangeId(c.id)}>
                         <TableCell className="text-sm">{c.change_type}</TableCell>
                         <TableCell className="font-medium">{c.title}</TableCell>
                         <TableCell>
@@ -384,6 +407,13 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
           </Card>
         </TabsContent>
       </Tabs>
+
+      <FilingDrawer
+        open={!!drawerChangeId}
+        onOpenChange={(open) => { if (!open) setDrawerChangeId(null); }}
+        changeId={drawerChangeId}
+        clientId={clientId}
+      />
     </div>
   );
 }
