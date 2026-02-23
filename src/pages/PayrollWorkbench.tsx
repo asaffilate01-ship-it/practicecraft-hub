@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClientContext } from "@/contexts/ClientContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ const statusVariant = (s: string) => {
 
 export default function PayrollWorkbench() {
   const { user } = useAuth();
+  const { selectedClientId, selectedClientName } = useClientContext();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -70,14 +72,16 @@ export default function PayrollWorkbench() {
     enabled: !!user,
   });
 
-  // Employers
+  // Employers — scoped to selected client
   const { data: employers = [] } = useQuery({
-    queryKey: ["payroll-employers", profile?.tenant_id],
+    queryKey: ["payroll-employers", profile?.tenant_id, selectedClientId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("payroll_employers")
         .select("*, clients(legal_name)")
         .order("created_at", { ascending: false });
+      if (selectedClientId) q = q.eq("client_id", selectedClientId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
@@ -99,15 +103,17 @@ export default function PayrollWorkbench() {
     enabled: !!profile?.tenant_id,
   });
 
-  // Pay runs
+  // Pay runs — scoped to selected client's employers
   const { data: payRuns = [], isLoading: runsLoading } = useQuery({
-    queryKey: ["pay-runs", profile?.tenant_id],
+    queryKey: ["pay-runs", profile?.tenant_id, selectedClientId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("pay_runs")
-        .select("*, payroll_employers(employer_name, paye_reference, clients(legal_name))")
+        .select("*, payroll_employers!inner(employer_name, paye_reference, client_id, clients(legal_name))")
         .order("pay_date", { ascending: false })
         .limit(100);
+      if (selectedClientId) q = q.eq("payroll_employers.client_id", selectedClientId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
@@ -134,13 +140,16 @@ export default function PayrollWorkbench() {
   const [empStatusFilter, setEmpStatusFilter] = useState("active");
   const [empEmployerFilter, setEmpEmployerFilter] = useState("all");
 
+  // Employees — scoped to selected client's employers
   const { data: employees = [] } = useQuery({
-    queryKey: ["payroll-employees", profile?.tenant_id],
+    queryKey: ["payroll-employees", profile?.tenant_id, selectedClientId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("payroll_employees")
-        .select("*, payroll_employers(employer_name)")
+        .select("*, payroll_employers!inner(employer_name, client_id)")
         .order("last_name");
+      if (selectedClientId) q = q.eq("payroll_employers.client_id", selectedClientId);
+      const { data, error } = await q;
       if (error) throw error;
       return data;
     },
@@ -461,13 +470,17 @@ export default function PayrollWorkbench() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Payroll (RTI)</h1>
-          <p className="text-sm text-muted-foreground">Complete payroll management — employees, pay runs, absences, benefits, RTI submissions</p>
+          <p className="text-sm text-muted-foreground">
+            {selectedClientName
+              ? `Payroll for ${selectedClientName}`
+              : "Select a client from the top bar to view payroll"}
+          </p>
         </div>
         <div className="flex gap-2">
           {profile?.tenant_id && (
             <HmrcConnectButton clientId="" tenantId={profile.tenant_id} scopes="read:employment-paye write:employment-paye" label="Connect HMRC (PAYE)" />
           )}
-          <Button variant="outline" className="gap-1.5" onClick={() => setShowNewEmployer(true)}>
+          <Button variant="outline" className="gap-1.5" disabled={!selectedClientId} onClick={() => { setNewEmployerClientId(selectedClientId || ""); setShowNewEmployer(true); }}>
             <Users className="w-3.5 h-3.5" /> Add Employer
           </Button>
           <Button className="gap-1.5" onClick={() => {
