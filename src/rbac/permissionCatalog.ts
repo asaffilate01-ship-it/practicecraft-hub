@@ -1,0 +1,60 @@
+/**
+ * Single source of truth for all permission modules and actions.
+ * Drives: UI permission grid, backend enforcement, seed presets, audit checks.
+ */
+export const PERMISSION_CATALOG: Record<string, string[]> = {
+  clients: ["view", "edit", "delete", "bypassAssignment", "all"],
+  tasks: ["view", "edit", "approve", "delete"],
+  documents: ["view", "upload", "delete", "export"],
+  ledger: ["view", "edit", "lock_period", "export"],
+  vat: ["view", "prepare", "submit", "export"],
+  payroll: ["view", "prepare", "submit", "export"],
+  accounts: ["view", "prepare", "submit", "export"],
+  secretarial: ["view", "prepare", "submit", "export"],
+  aml: ["view", "edit", "approve", "export"],
+  billing: ["view", "edit", "collect", "pay", "export"],
+  integrations: ["view", "edit"],
+  reports: ["view", "export"],
+  settings: ["view", "edit"],
+  client_portal: ["view"],
+  employee_portal: ["view"],
+  payslips: ["view", "download"],
+};
+
+/** Human-readable module labels for the UI grid */
+export const MODULE_LABELS: Record<string, string> = {
+  clients: "Clients",
+  tasks: "Tasks",
+  documents: "Documents",
+  ledger: "Ledger / Bookkeeping",
+  vat: "VAT (MTD)",
+  payroll: "Payroll (RTI)",
+  accounts: "Accounts Production",
+  secretarial: "Company Secretarial",
+  aml: "AML / KYC",
+  billing: "Billing & Collections",
+  integrations: "Integrations",
+  reports: "Reports",
+  settings: "Settings",
+  client_portal: "Client Portal",
+  employee_portal: "Employee Portal",
+  payslips: "Payslips",
+};
+
+/** Human-readable action labels */
+export const ACTION_LABELS: Record<string, string> = {
+  view: "View",
+  edit: "Edit",
+  delete: "Delete",
+  bypassAssignment: "Bypass Assignment",
+  all: "All Clients",
+  approve: "Approve",
+  upload: "Upload",
+  export: "Export",
+  lock_period: "Lock Period",
+  prepare: "Prepare",
+  submit: "Submit",
+  collect: "Collect",
+  pay: "Pay",
+  download: "Download",
+};
