@@ -25,6 +25,7 @@ import AccountsPage from "@/pages/Accounts";
 import DocumentsLibrary from "@/pages/DocumentsLibrary";
 import ReportsPage from "@/pages/Reports";
 import PracticePage from "@/pages/Practice";
+import TenantOnboarding from "@/pages/TenantOnboarding";
 import PlaceholderPage from "@/pages/PlaceholderPage";
 
 // ── Auth pages ──────────────────────────────────────────────
@@ -187,6 +188,7 @@ const AppRoutes = () => (
     <Route path="/practice/roles" element={<Guarded module="settings" action="view"><PlaceholderPage title="Roles" description="Role and permission management" /></Guarded>} />
     <Route path="/practice/workflows" element={<Guarded module="automations" action="view"><PlaceholderPage title="Workflows" description="Automation rules and workflow configuration" /></Guarded>} />
     <Route path="/practice/integrations" element={<Guarded module="integrations" action="view"><PlaceholderPage title="Integrations" description="Third-party integrations and API connections" /></Guarded>} />
+    <Route path="/practice/onboarding" element={<Guarded module="settings" action="view"><TenantOnboarding /></Guarded>} />
 
     {/* ── Settings ─────────────────────────────────────── */}
     <Route path="/settings" element={<Guarded module="settings" action="view"><Settings /></Guarded>} />
