@@ -1,0 +1,278 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Trash2, Upload, Download, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+
+export type TBEntry = {
+  id?: string;
+  account_code: string;
+  account_name: string;
+  account_type: string;
+  debit_pence: number;
+  credit_pence: number;
+  adjustment_debit_pence: number;
+  adjustment_credit_pence: number;
+  adjustment_notes: string;
+  sort_order: number;
+};
+
+const ACCOUNT_TYPES = [
+  "asset", "liability", "equity", "income", "expense",
+] as const;
+
+const DEFAULT_LTD_TB: TBEntry[] = [
+  { account_code: "1000", account_name: "Bank - Current Account", account_type: "asset", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 10 },
+  { account_code: "1100", account_name: "Accounts Receivable (Debtors)", account_type: "asset", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 20 },
+  { account_code: "1200", account_name: "Prepayments", account_type: "asset", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 30 },
+  { account_code: "1400", account_name: "Fixed Assets - Cost", account_type: "asset", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 40 },
+  { account_code: "1401", account_name: "Fixed Assets - Accum Depreciation", account_type: "asset", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 41 },
+  { account_code: "2000", account_name: "Accounts Payable (Creditors)", account_type: "liability", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 100 },
+  { account_code: "2100", account_name: "Accruals", account_type: "liability", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 110 },
+  { account_code: "2200", account_name: "PAYE/NIC Control", account_type: "liability", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 120 },
+  { account_code: "2300", account_name: "Corporation Tax Provision", account_type: "liability", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 130 },
+  { account_code: "2400", account_name: "Director Loan Account", account_type: "liability", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 140 },
+  { account_code: "3000", account_name: "Share Capital", account_type: "equity", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 200 },
+  { account_code: "3100", account_name: "Retained Earnings", account_type: "equity", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 210 },
+  { account_code: "4000", account_name: "Sales / Turnover", account_type: "income", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 300 },
+  { account_code: "4100", account_name: "Other Income", account_type: "income", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 310 },
+  { account_code: "5000", account_name: "Cost of Sales", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 400 },
+  { account_code: "6000", account_name: "Staff Wages", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 500 },
+  { account_code: "6001", account_name: "Employer NIC", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 501 },
+  { account_code: "6100", account_name: "Rent", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 510 },
+  { account_code: "6200", account_name: "Utilities", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 520 },
+  { account_code: "6500", account_name: "Professional Fees", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 550 },
+  { account_code: "6600", account_name: "Travel & Subsistence", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 560 },
+  { account_code: "6900", account_name: "Depreciation", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 590 },
+];
+
+const DEFAULT_SOLE_TRADER_TB: TBEntry[] = [
+  { account_code: "1000", account_name: "Bank", account_type: "asset", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 10 },
+  { account_code: "1100", account_name: "Debtors", account_type: "asset", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 20 },
+  { account_code: "2000", account_name: "Creditors", account_type: "liability", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 100 },
+  { account_code: "3000", account_name: "Owner Capital / Drawings", account_type: "equity", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 200 },
+  { account_code: "4000", account_name: "Sales / Turnover", account_type: "income", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 300 },
+  { account_code: "5000", account_name: "Cost of Sales", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 400 },
+  { account_code: "6000", account_name: "Motor / Travel", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 500 },
+  { account_code: "6100", account_name: "Phone / Internet", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 510 },
+  { account_code: "6200", account_name: "Rent / Use of Home", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 520 },
+  { account_code: "6300", account_name: "Professional Fees", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 530 },
+  { account_code: "6400", account_name: "Advertising", account_type: "expense", debit_pence: 0, credit_pence: 0, adjustment_debit_pence: 0, adjustment_credit_pence: 0, adjustment_notes: "", sort_order: 540 },
+];
+
+const penceToStr = (v: number) => (v / 100).toFixed(2);
+const strToPence = (s: string) => Math.round(parseFloat(s || "0") * 100);
+
+type Props = {
+  entries: TBEntry[];
+  onChange: (entries: TBEntry[]) => void;
+  entityType: string;
+  showAdjustments?: boolean;
+};
+
+export function TrialBalanceStep({ entries, onChange, entityType, showAdjustments = false }: Props) {
+  const [showAdj, setShowAdj] = useState(showAdjustments);
+
+  const loadTemplate = () => {
+    const template = entityType === "sole_trader" ? DEFAULT_SOLE_TRADER_TB : DEFAULT_LTD_TB;
+    onChange(template);
+    toast.success("Template loaded — enter your balances");
+  };
+
+  const handleCSVImport = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".csv";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const text = ev.target?.result as string;
+        const lines = text.split("\n").filter(Boolean);
+        const parsed: TBEntry[] = [];
+        lines.slice(1).forEach((line, i) => {
+          const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+          if (cols.length >= 4) {
+            parsed.push({
+              account_code: cols[0],
+              account_name: cols[1],
+              account_type: cols[2] || "expense",
+              debit_pence: strToPence(cols[3]),
+              credit_pence: strToPence(cols[4] || "0"),
+              adjustment_debit_pence: 0,
+              adjustment_credit_pence: 0,
+              adjustment_notes: "",
+              sort_order: (i + 1) * 10,
+            });
+          }
+        });
+        if (parsed.length > 0) {
+          onChange(parsed);
+          toast.success(`Imported ${parsed.length} lines from CSV`);
+        } else {
+          toast.error("No valid rows found. Expected: Code, Name, Type, Debit, Credit");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
+  const addRow = () => {
+    onChange([...entries, {
+      account_code: "", account_name: "", account_type: "expense",
+      debit_pence: 0, credit_pence: 0,
+      adjustment_debit_pence: 0, adjustment_credit_pence: 0,
+      adjustment_notes: "", sort_order: (entries.length + 1) * 10,
+    }]);
+  };
+
+  const removeRow = (idx: number) => onChange(entries.filter((_, i) => i !== idx));
+
+  const updateEntry = (idx: number, field: keyof TBEntry, value: any) => {
+    const next = [...entries];
+    (next[idx] as any)[field] = value;
+    onChange(next);
+  };
+
+  const totalDebit = entries.reduce((a, e) => a + e.debit_pence, 0);
+  const totalCredit = entries.reduce((a, e) => a + e.credit_pence, 0);
+  const adjTotalDebit = entries.reduce((a, e) => a + e.adjustment_debit_pence, 0);
+  const adjTotalCredit = entries.reduce((a, e) => a + e.adjustment_credit_pence, 0);
+  const balanced = totalDebit === totalCredit;
+  const adjBalanced = adjTotalDebit === adjTotalCredit;
+  const finalDebit = totalDebit + adjTotalDebit;
+  const finalCredit = totalCredit + adjTotalCredit;
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Trial Balance</CardTitle>
+              <CardDescription>Import from bookkeeping, CSV, or enter manually. All values in £.</CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={loadTemplate}>
+                <Download className="w-3.5 h-3.5 mr-1" /> Load Template
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleCSVImport}>
+                <Upload className="w-3.5 h-3.5 mr-1" /> Import CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowAdj(!showAdj)}>
+                {showAdj ? "Hide Adjustments" : "Show Adjustments"}
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-lg overflow-auto max-h-[600px]">
+            <Table>
+              <TableHeader className="sticky top-0 bg-muted z-10">
+                <TableRow>
+                  <TableHead className="w-20">Code</TableHead>
+                  <TableHead className="min-w-[180px]">Account Name</TableHead>
+                  <TableHead className="w-24">Type</TableHead>
+                  <TableHead className="w-28 text-right">Debit £</TableHead>
+                  <TableHead className="w-28 text-right">Credit £</TableHead>
+                  {showAdj && <>
+                    <TableHead className="w-28 text-right bg-accent/30">Adj Dr £</TableHead>
+                    <TableHead className="w-28 text-right bg-accent/30">Adj Cr £</TableHead>
+                    <TableHead className="w-28 text-right">Final Dr £</TableHead>
+                    <TableHead className="w-28 text-right">Final Cr £</TableHead>
+                  </>}
+                  <TableHead className="w-10" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {entries.map((entry, idx) => (
+                  <TableRow key={idx} className="text-sm">
+                    <TableCell className="p-1">
+                      <Input className="h-8 text-xs" value={entry.account_code}
+                        onChange={(e) => updateEntry(idx, "account_code", e.target.value)} />
+                    </TableCell>
+                    <TableCell className="p-1">
+                      <Input className="h-8 text-xs" value={entry.account_name}
+                        onChange={(e) => updateEntry(idx, "account_name", e.target.value)} />
+                    </TableCell>
+                    <TableCell className="p-1">
+                      <Select value={entry.account_type} onValueChange={(v) => updateEntry(idx, "account_type", v)}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {ACCOUNT_TYPES.map(t => <SelectItem key={t} value={t} className="capitalize text-xs">{t}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="p-1">
+                      <Input className="h-8 text-xs text-right" type="number" step="0.01"
+                        value={penceToStr(entry.debit_pence)}
+                        onChange={(e) => updateEntry(idx, "debit_pence", strToPence(e.target.value))} />
+                    </TableCell>
+                    <TableCell className="p-1">
+                      <Input className="h-8 text-xs text-right" type="number" step="0.01"
+                        value={penceToStr(entry.credit_pence)}
+                        onChange={(e) => updateEntry(idx, "credit_pence", strToPence(e.target.value))} />
+                    </TableCell>
+                    {showAdj && <>
+                      <TableCell className="p-1 bg-accent/10">
+                        <Input className="h-8 text-xs text-right" type="number" step="0.01"
+                          value={penceToStr(entry.adjustment_debit_pence)}
+                          onChange={(e) => updateEntry(idx, "adjustment_debit_pence", strToPence(e.target.value))} />
+                      </TableCell>
+                      <TableCell className="p-1 bg-accent/10">
+                        <Input className="h-8 text-xs text-right" type="number" step="0.01"
+                          value={penceToStr(entry.adjustment_credit_pence)}
+                          onChange={(e) => updateEntry(idx, "adjustment_credit_pence", strToPence(e.target.value))} />
+                      </TableCell>
+                      <TableCell className="p-1 text-right text-xs font-medium">
+                        {penceToStr(entry.debit_pence + entry.adjustment_debit_pence)}
+                      </TableCell>
+                      <TableCell className="p-1 text-right text-xs font-medium">
+                        {penceToStr(entry.credit_pence + entry.adjustment_credit_pence)}
+                      </TableCell>
+                    </>}
+                    <TableCell className="p-1">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => removeRow(idx)}>
+                        <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex items-center justify-between mt-3">
+            <Button variant="outline" size="sm" onClick={addRow}>
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add Row
+            </Button>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                {balanced ? <CheckCircle2 className="w-4 h-4 text-[hsl(var(--success))]" /> : <AlertTriangle className="w-4 h-4 text-[hsl(var(--warning))]" />}
+                <span className="font-medium">TB: Dr £{penceToStr(totalDebit)} / Cr £{penceToStr(totalCredit)}</span>
+                <Badge variant={balanced ? "default" : "destructive"} className="text-xs">
+                  {balanced ? "Balanced" : `Difference £${penceToStr(Math.abs(totalDebit - totalCredit))}`}
+                </Badge>
+              </div>
+              {showAdj && (
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">|</span>
+                  <span className="font-medium">Adjusted: Dr £{penceToStr(finalDebit)} / Cr £{penceToStr(finalCredit)}</span>
+                  <Badge variant={finalDebit === finalCredit ? "default" : "destructive"} className="text-xs">
+                    {finalDebit === finalCredit ? "Balanced" : "Unbalanced"}
+                  </Badge>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

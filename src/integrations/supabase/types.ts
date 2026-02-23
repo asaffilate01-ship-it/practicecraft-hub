@@ -4660,6 +4660,67 @@ export type Database = {
           },
         ]
       }
+      tax_computations: {
+        Row: {
+          computation_type: string
+          computed_values: Json
+          created_at: string
+          form_data: Json
+          id: string
+          notes: string | null
+          period_id: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          computation_type?: string
+          computed_values?: Json
+          created_at?: string
+          form_data?: Json
+          id?: string
+          notes?: string | null
+          period_id: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          computation_type?: string
+          computed_values?: Json
+          created_at?: string
+          form_data?: Json
+          id?: string
+          notes?: string | null
+          period_id?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_computations_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_computations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_computations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       template_variable_whitelist: {
         Row: {
           created_at: string
@@ -4812,6 +4873,79 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      trial_balance_entries: {
+        Row: {
+          account_code: string
+          account_name: string
+          account_type: string
+          adjustment_credit_pence: number
+          adjustment_debit_pence: number
+          adjustment_notes: string | null
+          created_at: string
+          credit_pence: number
+          debit_pence: number
+          id: string
+          period_id: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_code: string
+          account_name: string
+          account_type?: string
+          adjustment_credit_pence?: number
+          adjustment_debit_pence?: number
+          adjustment_notes?: string | null
+          created_at?: string
+          credit_pence?: number
+          debit_pence?: number
+          id?: string
+          period_id: string
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_code?: string
+          account_name?: string
+          account_type?: string
+          adjustment_credit_pence?: number
+          adjustment_debit_pence?: number
+          adjustment_notes?: string | null
+          created_at?: string
+          credit_pence?: number
+          debit_pence?: number
+          id?: string
+          period_id?: string
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_balance_entries_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trial_balance_entries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trial_balance_entries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
