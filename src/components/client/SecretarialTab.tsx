@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilingDrawer } from "@/components/secretarial/FilingDrawer";
+import { ChangeWizard } from "@/components/secretarial/ChangeWizard";
+import { AuthCodeModal } from "@/components/secretarial/AuthCodeModal";
 
 interface SecretarialTabProps {
   clientId: string;
@@ -30,6 +32,8 @@ const dueBadge = (dueDate: string | null) => {
 
 export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps) {
   const [drawerChangeId, setDrawerChangeId] = useState<string | null>(null);
+  const [showWizard, setShowWizard] = useState(false);
+  const [showAuthCode, setShowAuthCode] = useState(false);
   // Company profile
   const { data: companyProfile } = useQuery({
     queryKey: ["company-profile", clientId],
@@ -154,7 +158,7 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
         <div className="flex items-center gap-2 rounded-lg border border-[hsl(var(--warning))]/30 bg-[hsl(var(--warning))]/5 p-3 text-sm">
           <AlertTriangle className="w-4 h-4 text-[hsl(var(--warning))] shrink-0" />
           <span className="text-[hsl(var(--warning))]"><strong>Auth code missing</strong> — Companies House filings cannot be submitted without a valid auth code.</span>
-          <Button variant="outline" size="sm" className="ml-auto shrink-0 gap-1"><Lock className="w-3 h-3" /> Store Auth Code</Button>
+          <Button variant="outline" size="sm" className="ml-auto shrink-0 gap-1" onClick={() => setShowAuthCode(true)}><Lock className="w-3 h-3" /> Store Auth Code</Button>
         </div>
       )}
       {activeDirectors === 0 && directors.length >= 0 && companyProfile && (
@@ -202,7 +206,7 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
             <Button variant="outline" size="sm" className="gap-1.5">
               <RefreshCw className="w-3 h-3" /> Sync
             </Button>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAuthCode(true)}>
               <Lock className="w-3 h-3" /> {authCode ? "Update Auth Code" : "Store Auth Code"}
             </Button>
           </div>
@@ -413,6 +417,19 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
         onOpenChange={(open) => { if (!open) setDrawerChangeId(null); }}
         changeId={drawerChangeId}
         clientId={clientId}
+      />
+
+      <ChangeWizard
+        open={showWizard}
+        onOpenChange={setShowWizard}
+        clientId={clientId}
+      />
+
+      <AuthCodeModal
+        open={showAuthCode}
+        onOpenChange={setShowAuthCode}
+        clientId={clientId}
+        existingCredentialId={authCode?.id}
       />
     </div>
   );

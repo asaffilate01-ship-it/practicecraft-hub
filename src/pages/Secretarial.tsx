@@ -18,6 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { FilingDrawer } from "@/components/secretarial/FilingDrawer";
+import { ChangeWizard } from "@/components/secretarial/ChangeWizard";
 
 const changeTypeLabels: Record<string, string> = {
   CONFIRMATION_STATEMENT: "Confirmation Statement",
@@ -63,6 +64,8 @@ export default function Secretarial() {
   const [dueDateFilter, setDueDateFilter] = useState("all");
   const [drawerChangeId, setDrawerChangeId] = useState<string | null>(null);
   const [drawerClientId, setDrawerClientId] = useState<string>("");
+  const [showWizard, setShowWizard] = useState(false);
+  const [wizardClientId, setWizardClientId] = useState("");
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -175,7 +178,7 @@ export default function Secretarial() {
           <Button variant="outline" className="gap-1.5">
             <RefreshCw className="w-3.5 h-3.5" /> Sync All
           </Button>
-          <Button className="gap-1.5">
+          <Button className="gap-1.5" onClick={() => setShowWizard(true)}>
             <Plus className="w-3.5 h-3.5" /> Create Change
           </Button>
         </div>
@@ -368,6 +371,12 @@ export default function Secretarial() {
         onOpenChange={(open) => { if (!open) setDrawerChangeId(null); }}
         changeId={drawerChangeId}
         clientId={drawerClientId}
+      />
+
+      <ChangeWizard
+        open={showWizard}
+        onOpenChange={setShowWizard}
+        clientId={wizardClientId}
       />
     </div>
   );
