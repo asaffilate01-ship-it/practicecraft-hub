@@ -556,6 +556,52 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // ═══════════════════════════════════════════════════════════
+    // Reset Credentials — clears stored CH secrets for a tenant
+    // ═══════════════════════════════════════════════════════════
+
+    if ((path === "reset-credentials" || body?.action === "reset-credentials") && req.method === "POST") {
+      const { tenantId, clientId } = body;
+
+      // Clear client_credentials entries for CH
+      if (tenantId) {
+        const q = supabase
+          .from("client_credentials")
+          .delete()
+          .eq("tenant_id", tenantId)
+          .eq("provider", "companies_house");
+        if (clientId) q.eq("client_id", clientId);
+        await q;
+      }
+
+      // Log the reset
+      if (tenantId) {
+        await supabase.from("audit_log").insert({
+          tenant_id: tenantId,
+          action: "integration.reset",
+          entity_name: "companies_house",
+          entity_id: tenantId,
+        });
+      }
+
+      return json({ ok: true });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Integration Status — returns masked view of CH config
+    // ═══════════════════════════════════════════════════════════
+
+    if ((path === "integration-status" || body?.action === "integration-status") && req.method === "POST") {
+      return json({
+        companiesHouse: {
+          enabled: !!chApiKey,
+          presenterId: presenterId || null,
+          email: null,
+          apiKey: chApiKey ? "***" : "",
+        },
+      });
+    }
+
     return json({ error: "Unknown Companies House endpoint", path }, 404);
   } catch (error) {
     console.error("Companies House function error:", error);

@@ -724,6 +724,37 @@ Deno.serve(async (req: Request) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // ═══════════════════════════════════════════════════════════
+    // Reset Credentials — clears HMRC secrets and tokens
+    // ═══════════════════════════════════════════════════════════
+
+    if ((path === "reset-credentials" || body?.action === "reset-credentials") && req.method === "POST") {
+      const { tenantId, clientId } = body;
+
+      if (tenantId) {
+        const q = supabase
+          .from("client_credentials")
+          .delete()
+          .eq("tenant_id", tenantId)
+          .eq("provider", "hmrc");
+        if (clientId) q.eq("client_id", clientId);
+        await q;
+      }
+
+      if (tenantId) {
+        await supabase.from("audit_log").insert({
+          tenant_id: tenantId,
+          action: "integration.reset",
+          entity_name: "hmrc",
+          entity_id: tenantId,
+        });
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown HMRC endpoint", path }), {
       status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
