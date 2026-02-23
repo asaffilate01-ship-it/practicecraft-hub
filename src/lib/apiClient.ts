@@ -71,3 +71,22 @@ export const submissionsApi = {
   cancel: (jobId: string) =>
     invoke<SubmissionJob>("submissions", { action: "cancel", jobId }),
 };
+
+// ── Integrations API ────────────────────────────────────────
+
+export const integrationsApi = {
+  /** Reset Companies House credentials — clears stored secrets */
+  chReset: () =>
+    invoke<{ ok: true }>("companies-house", { action: "reset-credentials" }),
+
+  /** Reset HMRC credentials and tokens */
+  hmrcReset: () =>
+    invoke<{ ok: true }>("hmrc", { action: "reset-credentials" }),
+
+  /** Get masked integration status for a tenant */
+  status: () =>
+    invoke<{
+      companiesHouse: { enabled: boolean; presenterId?: string; email?: string; apiKey: string };
+      hmrc: { enabled: boolean; environment: string; clientId?: string; clientSecret: string; hasTokens: boolean };
+    }>("companies-house", { action: "integration-status" }),
+};

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { integrationsApi } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { MaskedSecretInput } from "@/components/MaskedSecretInput";
 import { Receipt, CheckCircle2, ArrowRight, ArrowLeft, ExternalLink, Shield, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,6 +17,7 @@ type Step = "intro" | "app" | "validate" | "oauth" | "vat-test" | "done";
 const STEPS: Step[] = ["intro", "app", "validate", "oauth", "vat-test", "done"];
 
 export default function HmrcWizard() {
+  const qc = useQueryClient();
   const [step, setStep] = useState<Step>("intro");
   const [clientId, setClientId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
@@ -24,11 +27,12 @@ export default function HmrcWizard() {
   const [tokens, setTokens] = useState<any>(null);
   const [vrn, setVrn] = useState("");
   const [obligations, setObligations] = useState<any[]>([]);
+  /** After first save, secrets are masked */
+  const [secretsSaved, setSecretsSaved] = useState(false);
 
   const validateMut = useMutation({
     mutationFn: async () => {
       if (!clientId.trim() || !clientSecret.trim()) throw new Error("Client ID and Secret are required");
-      // Basic validation - in production this would hit HMRC's test endpoint
       return { ok: true };
     },
     onSuccess: () => {
@@ -94,7 +98,28 @@ export default function HmrcWizard() {
     onSuccess: (data) => {
       setObligations(data.obligations || []);
       toast.success("VAT obligations fetched");
+      // Wipe secrets from memory after successful integration
+      setClientSecret("");
+      setCode("");
+      setTokens(null);
+      setSecretsSaved(true);
+      qc.invalidateQueries({ queryKey: ["integration-status"] });
       setStep("done");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const resetMut = useMutation({
+    mutationFn: () => integrationsApi.hmrcReset(),
+    onSuccess: () => {
+      setClientId("");
+      setClientSecret("");
+      setCode("");
+      setTokens(null);
+      setSecretsSaved(false);
+      qc.invalidateQueries({ queryKey: ["integration-status"] });
+      toast.success("HMRC credentials and tokens reset");
+      setStep("app");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -153,15 +178,25 @@ export default function HmrcWizard() {
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <Label>Client ID</Label>
-                  <Input value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="HMRC Client ID" />
+                  <Input
+                    value={clientId}
+                    onChange={(e) => setClientId(e.target.value)}
+                    placeholder="HMRC Client ID"
+                    disabled={secretsSaved}
+                  />
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Client Secret</Label>
-                  <Input type="password" value={clientSecret} onChange={(e) => setClientSecret(e.target.value)} placeholder="HMRC Client Secret" />
-                </div>
+                <MaskedSecretInput
+                  label="Client Secret"
+                  value={clientSecret}
+                  placeholder="HMRC Client Secret"
+                  isMasked={secretsSaved}
+                  onChange={setClientSecret}
+                  onReset={() => resetMut.mutate()}
+                  help="Reset clears tokens too."
+                />
                 <div className="space-y-1.5">
                   <Label>Environment</Label>
-                  <Select value={environment} onValueChange={(v) => setEnvironment(v as any)}>
+                  <Select value={environment} onValueChange={(v) => setEnvironment(v as any)} disabled={secretsSaved}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="sandbox">Sandbox</SelectItem>
@@ -172,7 +207,9 @@ export default function HmrcWizard() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setStep("intro")} className="gap-1.5"><ArrowLeft className="w-4 h-4" /> Back</Button>
-                <Button onClick={() => setStep("validate")} className="gap-1.5">Continue <ArrowRight className="w-4 h-4" /></Button>
+                {!secretsSaved && (
+                  <Button onClick={() => setStep("validate")} className="gap-1.5">Continue <ArrowRight className="w-4 h-4" /></Button>
+                )}
               </div>
             </div>
           )}
@@ -224,10 +261,12 @@ export default function HmrcWizard() {
                 </Button>
               </div>
 
+              {/* Never show raw tokens — just confirm presence */}
               {tokens && (
                 <Card className="bg-muted/50">
-                  <CardContent className="pt-4">
-                    <pre className="text-xs overflow-auto">{JSON.stringify(tokens, null, 2)}</pre>
+                  <CardContent className="pt-4 text-sm flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[hsl(var(--success))]" />
+                    OAuth tokens obtained successfully. Tokens are stored securely.
                   </CardContent>
                 </Card>
               )}
@@ -293,6 +332,16 @@ export default function HmrcWizard() {
               </CardHeader>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setStep("vat-test")}>Re-test VAT</Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => resetMut.mutate()}
+                  disabled={resetMut.isPending}
+                  className="gap-1.5"
+                >
+                  {resetMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Reset Credentials
+                </Button>
               </div>
             </div>
           )}

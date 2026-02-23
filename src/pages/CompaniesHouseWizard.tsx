@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { integrationsApi } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { MaskedSecretInput } from "@/components/MaskedSecretInput";
 import { Building2, CheckCircle2, ArrowRight, ArrowLeft, Search, Shield, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Step = "intro" | "credentials" | "validate" | "test" | "done";
-
 const STEPS: Step[] = ["intro", "credentials", "validate", "test", "done"];
 
 export default function CompaniesHouseWizard() {
+  const qc = useQueryClient();
   const [step, setStep] = useState<Step>("intro");
   const [apiKey, setApiKey] = useState("");
   const [presenterId, setPresenterId] = useState("");
@@ -21,21 +23,26 @@ export default function CompaniesHouseWizard() {
   const [email, setEmail] = useState("");
   const [companyNumber, setCompanyNumber] = useState("");
   const [testResult, setTestResult] = useState<any>(null);
+  /** After first successful save, secrets are masked */
+  const [secretsSaved, setSecretsSaved] = useState(false);
 
   const validateMut = useMutation({
     mutationFn: async () => {
       if (!apiKey.trim() || !presenterId.trim() || !email.trim()) {
         throw new Error("All fields are required");
       }
-      // Test the API key by fetching a known company
       const { data, error } = await supabase.functions.invoke("companies-house", {
-        body: { companyNumber: "00000006" }, // Test with a known company
+        body: { companyNumber: "00000006" },
       });
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
       toast.success("Credentials validated successfully");
+      // Wipe secrets from client state after successful save
+      setApiKey("");
+      setPresenterAuth("");
+      setSecretsSaved(true);
       setStep("test");
     },
     onError: (e: any) => toast.error(e.message || "Validation failed"),
@@ -56,6 +63,21 @@ export default function CompaniesHouseWizard() {
       setStep("done");
     },
     onError: (e: any) => toast.error(e.message || "Test call failed"),
+  });
+
+  const resetMut = useMutation({
+    mutationFn: () => integrationsApi.chReset(),
+    onSuccess: () => {
+      setApiKey("");
+      setPresenterId("");
+      setPresenterAuth("");
+      setEmail("");
+      setSecretsSaved(false);
+      qc.invalidateQueries({ queryKey: ["integration-status"] });
+      toast.success("Companies House credentials reset");
+      setStep("credentials");
+    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   const currentIdx = STEPS.indexOf(step);
@@ -86,7 +108,6 @@ export default function CompaniesHouseWizard() {
         ))}
       </div>
 
-      {/* Step content */}
       <Card>
         <CardContent className="pt-6">
           {step === "intro" && (
@@ -114,30 +135,53 @@ export default function CompaniesHouseWizard() {
                 <CardDescription>Your Companies House REST API key and XML Gateway presenter details</CardDescription>
               </CardHeader>
               <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label>REST API Key</Label>
-                  <Input value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="Your CH API key" />
-                </div>
+                <MaskedSecretInput
+                  label="REST API Key"
+                  value={apiKey}
+                  placeholder="Your CH API key"
+                  isMasked={secretsSaved}
+                  onChange={setApiKey}
+                  onReset={() => resetMut.mutate()}
+                  help="Will be stored encrypted and never shown again."
+                />
                 <div className="space-y-1.5">
                   <Label>Presenter ID (XML Gateway)</Label>
-                  <Input value={presenterId} onChange={(e) => setPresenterId(e.target.value)} placeholder="e.g. PRESENTER123" />
+                  <Input
+                    value={presenterId}
+                    onChange={(e) => setPresenterId(e.target.value)}
+                    placeholder="e.g. PRESENTER123"
+                    disabled={secretsSaved}
+                  />
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Presenter Auth (XML Gateway)</Label>
-                  <Input type="password" value={presenterAuth} onChange={(e) => setPresenterAuth(e.target.value)} placeholder="Presenter authentication value" />
-                </div>
+                <MaskedSecretInput
+                  label="Presenter Auth (XML Gateway)"
+                  value={presenterAuth}
+                  placeholder="Presenter authentication value"
+                  isMasked={secretsSaved}
+                  onChange={setPresenterAuth}
+                  onReset={() => resetMut.mutate()}
+                  help="Stored encrypted; cannot be revealed."
+                />
                 <div className="space-y-1.5">
                   <Label>Contact Email</Label>
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="api@yourpractice.co.uk" />
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="api@yourpractice.co.uk"
+                    disabled={secretsSaved}
+                  />
                 </div>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setStep("intro")} className="gap-1.5">
                   <ArrowLeft className="w-4 h-4" /> Back
                 </Button>
-                <Button onClick={() => setStep("validate")} className="gap-1.5">
-                  Continue <ArrowRight className="w-4 h-4" />
-                </Button>
+                {!secretsSaved && (
+                  <Button onClick={() => setStep("validate")} className="gap-1.5">
+                    Continue <ArrowRight className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -154,7 +198,7 @@ export default function CompaniesHouseWizard() {
                 </Button>
                 <Button onClick={() => validateMut.mutate()} disabled={validateMut.isPending} className="gap-1.5">
                   {validateMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
-                  Validate Now
+                  Validate & Save
                 </Button>
               </div>
             </div>
@@ -202,6 +246,16 @@ export default function CompaniesHouseWizard() {
               )}
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setStep("test")}>Re-test</Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => resetMut.mutate()}
+                  disabled={resetMut.isPending}
+                  className="gap-1.5"
+                >
+                  {resetMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Reset Credentials
+                </Button>
                 <Button onClick={() => toast.info("Next: Link secretarial workbench to live submissions")}>
                   Next Steps
                 </Button>

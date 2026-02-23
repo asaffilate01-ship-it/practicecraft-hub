@@ -2,13 +2,16 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { integrationsApi } from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Upload, Palette, Building2, User, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MaskedSecretInput } from "@/components/MaskedSecretInput";
+import { Upload, Palette, Building2, User, Shield, Plug, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { RoleEditor } from "@/components/settings/RoleEditor";
 
@@ -98,6 +101,7 @@ export default function Settings() {
           <TabsTrigger value="branding" className="gap-1.5"><Palette className="w-3.5 h-3.5" /> Branding</TabsTrigger>
           <TabsTrigger value="firm" className="gap-1.5"><Building2 className="w-3.5 h-3.5" /> Firm Details</TabsTrigger>
           <TabsTrigger value="profile" className="gap-1.5"><User className="w-3.5 h-3.5" /> My Profile</TabsTrigger>
+          <TabsTrigger value="integrations" className="gap-1.5"><Plug className="w-3.5 h-3.5" /> Integrations</TabsTrigger>
           <TabsTrigger value="roles" className="gap-1.5"><Shield className="w-3.5 h-3.5" /> Roles & Permissions</TabsTrigger>
         </TabsList>
 
@@ -315,11 +319,139 @@ export default function Settings() {
           </Card>
         </TabsContent>
 
+        {/* Integrations Tab */}
+        <TabsContent value="integrations" className="mt-4 space-y-4">
+          <IntegrationsSettings />
+        </TabsContent>
+
         {/* Roles & Permissions Tab */}
         <TabsContent value="roles" className="mt-4">
           <RoleEditor />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+/** Integrations settings — shows masked secrets with reset buttons */
+function IntegrationsSettings() {
+  const qc = useQueryClient();
+
+  const statusQ = useQuery({
+    queryKey: ["integration-status"],
+    queryFn: () => integrationsApi.status(),
+    staleTime: 60_000,
+  });
+
+  const chResetMut = useMutation({
+    mutationFn: () => integrationsApi.chReset(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["integration-status"] });
+      toast.success("Companies House credentials reset");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const hmrcResetMut = useMutation({
+    mutationFn: () => integrationsApi.hmrcReset(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["integration-status"] });
+      toast.success("HMRC credentials reset");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const status = statusQ.data;
+
+  return (
+    <div className="space-y-4">
+      {/* Companies House */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Building2 className="w-4 h-4" /> Companies House
+            </CardTitle>
+            <CardDescription>REST API + XML Gateway for secretarial filings</CardDescription>
+          </div>
+          <Badge variant={status?.companiesHouse?.enabled ? "default" : "outline"} className="gap-1">
+            {status?.companiesHouse?.enabled
+              ? <><CheckCircle2 className="w-3 h-3" /> Connected</>
+              : <><XCircle className="w-3 h-3" /> Not configured</>}
+          </Badge>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <MaskedSecretInput
+            label="REST API Key"
+            value={status?.companiesHouse?.apiKey || ""}
+            isMasked={status?.companiesHouse?.enabled || false}
+            onChange={() => {}}
+            onReset={() => chResetMut.mutate()}
+            help="Stored encrypted. Reset to re-enter."
+          />
+          <div className="space-y-1.5">
+            <Label>Presenter ID</Label>
+            <Input value={status?.companiesHouse?.presenterId || "—"} disabled className="bg-muted" />
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href="/practice/integrations/companies-house">Open Wizard</a>
+            </Button>
+            {status?.companiesHouse?.enabled && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => chResetMut.mutate()}
+                disabled={chResetMut.isPending}
+                className="gap-1"
+              >
+                {chResetMut.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                Reset All
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* HMRC */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Shield className="w-4 h-4" /> HMRC
+            </CardTitle>
+            <CardDescription>MTD VAT, Self Assessment, RTI Payroll via OAuth2</CardDescription>
+          </div>
+          <Badge variant="outline" className="gap-1">
+            <XCircle className="w-3 h-3" /> Check wizard
+          </Badge>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <MaskedSecretInput
+            label="Client Secret"
+            value="***"
+            isMasked={true}
+            onChange={() => {}}
+            onReset={() => hmrcResetMut.mutate()}
+            help="Reset clears OAuth tokens too."
+          />
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href="/practice/integrations/hmrc">Open Wizard</a>
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => hmrcResetMut.mutate()}
+              disabled={hmrcResetMut.isPending}
+              className="gap-1"
+            >
+              {hmrcResetMut.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+              Reset All
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
