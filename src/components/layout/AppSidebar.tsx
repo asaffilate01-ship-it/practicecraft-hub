@@ -17,6 +17,9 @@ import {
   FilePlus2,
   Send,
   Briefcase,
+  Landmark,
+  Zap,
+  UserPlus,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -44,6 +47,8 @@ const mainNav: NavItem[] = [
   { title: "Clients", url: "/clients", icon: Users, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
   { title: "Tasks", url: "/tasks", icon: CheckSquare, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
   { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+  { title: "Bank Feeds", url: "/bank-feeds", icon: Landmark, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+  { title: "Auto-Categorise", url: "/categorisation-rules", icon: Zap, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
   { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
   { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
   { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
@@ -56,6 +61,7 @@ const mainNav: NavItem[] = [
   { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
   { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
   { title: "Tenant Onboarding", url: "/practice/onboarding", icon: FilePlus2, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
+  { title: "Client Onboarding", url: "/client-onboarding", icon: UserPlus, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
 ];
 
 const bottomNav: NavItem[] = [
