@@ -9,14 +9,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { DueDatePill } from "@/components/ui/due-date-pill";
+import { AccountsProductionWizard } from "@/components/accounts/AccountsProductionWizard";
 import {
   Search, Plus, BookOpen, Calculator, CheckCircle2,
-  AlertTriangle, Eye, Pencil,
+  AlertTriangle, PlayCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,16 +26,13 @@ const statusVariant = (s: string) => {
   return "secondary" as const;
 };
 
-const ctSaStatuses = ["not_applicable", "not_started", "in_progress", "review", "filed"];
-
 export default function AccountsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showNewPeriod, setShowNewPeriod] = useState(false);
-  const [detailPeriod, setDetailPeriod] = useState<any>(null);
-  const [editMode, setEditMode] = useState(false);
+  const [wizardPeriod, setWizardPeriod] = useState<any>(null);
 
   const [newClientId, setNewClientId] = useState("");
   const [newPeriodStart, setNewPeriodStart] = useState("");
@@ -43,11 +40,6 @@ export default function AccountsPage() {
   const [newDeadline, setNewDeadline] = useState("");
   const [newStandard, setNewStandard] = useState("FRS 102 Section 1A");
   const [newPeriodType, setNewPeriodType] = useState("annual");
-
-  const [editForm, setEditForm] = useState({
-    status: "", ct600_status: "", sa_status: "", accounts_standard: "",
-    filing_deadline: "", notes: "", period_type: "",
-  });
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -106,28 +98,6 @@ export default function AccountsPage() {
     },
   });
 
-  const updatePeriod = useMutation({
-    mutationFn: async () => {
-      if (!detailPeriod) return;
-      const { error } = await supabase.from("accounts_periods").update({
-        status: editForm.status,
-        ct600_status: editForm.ct600_status,
-        sa_status: editForm.sa_status,
-        accounts_standard: editForm.accounts_standard,
-        filing_deadline: editForm.filing_deadline || null,
-        notes: editForm.notes || null,
-        period_type: editForm.period_type,
-      }).eq("id", detailPeriod.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["accounts-periods"] });
-      setEditMode(false);
-      setDetailPeriod(null);
-      toast.success("Period updated");
-    },
-  });
-
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase.from("accounts_periods").update({ status }).eq("id", id);
@@ -138,20 +108,6 @@ export default function AccountsPage() {
       toast.success("Status updated");
     },
   });
-
-  const openDetail = (p: any) => {
-    setDetailPeriod(p);
-    setEditForm({
-      status: p.status,
-      ct600_status: p.ct600_status,
-      sa_status: p.sa_status,
-      accounts_standard: p.accounts_standard,
-      filing_deadline: p.filing_deadline || "",
-      notes: p.notes || "",
-      period_type: p.period_type || "annual",
-    });
-    setEditMode(false);
-  };
 
   const now = new Date();
   const openPeriods = periods.filter((p: any) => ["open", "in_progress", "review"].includes(p.status)).length;
@@ -171,6 +127,19 @@ export default function AccountsPage() {
     });
   }, [periods, search, statusFilter]);
 
+  // If wizard is open, show it full-page
+  if (wizardPeriod) {
+    return (
+      <AccountsProductionWizard
+        period={wizardPeriod}
+        onClose={() => {
+          setWizardPeriod(null);
+          queryClient.invalidateQueries({ queryKey: ["accounts-periods"] });
+        }}
+      />
+    );
+  }
+
   const PeriodTable = ({ data, showCt = true, showSa = true }: { data: any[]; showCt?: boolean; showSa?: boolean }) => (
     <Table>
       <TableHeader>
@@ -187,7 +156,7 @@ export default function AccountsPage() {
       </TableHeader>
       <TableBody>
         {data.map((p: any) => (
-          <TableRow key={p.id} className="cursor-pointer hover:bg-muted/50" onClick={() => openDetail(p)}>
+          <TableRow key={p.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setWizardPeriod(p)}>
             <TableCell>
               <div>
                 <p className="text-sm font-medium">{p.clients?.legal_name || "—"}</p>
@@ -206,17 +175,11 @@ export default function AccountsPage() {
             <TableCell><Badge variant={statusVariant(p.status)} className="text-xs capitalize">{p.status.replace("_", " ")}</Badge></TableCell>
             <TableCell>
               <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" onClick={() => openDetail(p)}>
-                  <Eye className="w-3.5 h-3.5" />
+                <Button variant="default" size="sm" className="gap-1 text-xs" onClick={() => setWizardPeriod(p)}>
+                  <PlayCircle className="w-3.5 h-3.5" /> Open Wizard
                 </Button>
                 {p.status === "open" && (
-                  <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: p.id, status: "in_progress" })}>Start</Button>
-                )}
-                {p.status === "in_progress" && (
-                  <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: p.id, status: "review" })}>To Review</Button>
-                )}
-                {p.status === "review" && (
-                  <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: p.id, status: "filed" })}>Mark Filed</Button>
+                  <Button variant="outline" size="sm" className="text-xs" onClick={() => updateStatus.mutate({ id: p.id, status: "in_progress" })}>Start</Button>
                 )}
               </div>
             </TableCell>
@@ -230,8 +193,8 @@ export default function AccountsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Accounts, CT600 & Self Assessment</h1>
-          <p className="text-sm text-muted-foreground">Year-end accounts, Corporation Tax returns, and Self Assessment filings</p>
+          <h1 className="text-2xl font-bold tracking-tight">Accounts Production</h1>
+          <p className="text-sm text-muted-foreground">IRIS/Taxfiler-style accounts prep, CT600, SA100 & SA800 — full wizard workflow</p>
         </div>
         <Button className="gap-1.5" onClick={() => setShowNewPeriod(true)}>
           <Plus className="w-3.5 h-3.5" /> New Period
@@ -241,7 +204,7 @@ export default function AccountsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <KPICard title="Open Periods" value={openPeriods} change="In progress" changeType={openPeriods ? "negative" : "positive"} icon={BookOpen} iconColor="bg-primary/10" />
         <KPICard title="Overdue" value={overduePeriods} change="Past filing deadline" changeType={overduePeriods ? "negative" : "positive"} icon={AlertTriangle} iconColor="bg-destructive/10" />
-        <KPICard title="CT600 In Progress" value={ct600Pending} change="Corporation tax" changeType="neutral" icon={Calculator} iconColor="bg-warning/10" />
+        <KPICard title="CT600 In Progress" value={ct600Pending} change="Corporation tax" changeType="neutral" icon={Calculator} iconColor="bg-[hsl(var(--warning))]/10" />
         <KPICard title="SA In Progress" value={saPending} change="Self Assessment" changeType="neutral" icon={Calculator} iconColor="bg-[hsl(var(--info))]/10" />
         <KPICard title="Filed" value={filedPeriods} change="Completed" changeType="positive" icon={CheckCircle2} iconColor="bg-[hsl(var(--success))]/10" />
       </div>
@@ -292,8 +255,7 @@ export default function AccountsPage() {
               {ctPeriods.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
                   <Calculator className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">No Corporation Tax periods. CT600 applies to limited companies.</p>
-                  <p className="text-xs mt-1">Create a period for an Ltd/LLP client and set CT600 status.</p>
+                  <p className="text-sm">No Corporation Tax periods.</p>
                 </div>
               ) : (
                 <PeriodTable data={ctPeriods} showSa={false} />
@@ -308,8 +270,7 @@ export default function AccountsPage() {
               {saPeriods.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
                   <Calculator className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">No Self Assessment periods. SA100 applies to sole traders, partners, and trust returns.</p>
-                  <p className="text-xs mt-1">Create a period for a sole trader/partnership client and set SA status.</p>
+                  <p className="text-sm">No Self Assessment periods.</p>
                 </div>
               ) : (
                 <PeriodTable data={saPeriods} showCt={false} />
@@ -318,144 +279,6 @@ export default function AccountsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Period Detail / Edit Dialog */}
-      <Dialog open={!!detailPeriod} onOpenChange={(open) => { if (!open) { setDetailPeriod(null); setEditMode(false); } }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle>
-                {detailPeriod?.clients?.legal_name || "Period"} — {detailPeriod?.period_start && new Date(detailPeriod.period_start).toLocaleDateString("en-GB", { month: "short", year: "numeric" })} to {detailPeriod?.period_end && new Date(detailPeriod.period_end).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
-              </DialogTitle>
-              {!editMode && (
-                <Button variant="ghost" size="sm" onClick={() => setEditMode(true)}>
-                  <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-                </Button>
-              )}
-            </div>
-          </DialogHeader>
-
-          {detailPeriod && !editMode && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-muted-foreground">Entity Type:</span> <span className="font-medium ml-1 capitalize">{detailPeriod.clients?.entity_type}</span></div>
-                <div><span className="text-muted-foreground">Company No:</span> <span className="font-medium ml-1">{detailPeriod.clients?.company_number || "—"}</span></div>
-                <div><span className="text-muted-foreground">UTR:</span> <span className="font-medium ml-1">{detailPeriod.clients?.utr || "—"}</span></div>
-                <div><span className="text-muted-foreground">Standard:</span> <span className="font-medium ml-1">{detailPeriod.accounts_standard}</span></div>
-                <div><span className="text-muted-foreground">Type:</span> <span className="font-medium ml-1 capitalize">{detailPeriod.period_type}</span></div>
-                <div><span className="text-muted-foreground">Filing Deadline:</span> <span className="ml-1">{detailPeriod.filing_deadline ? <DueDatePill dueDate={detailPeriod.filing_deadline} /> : "—"}</span></div>
-              </div>
-
-              <div className="border rounded-lg p-4 space-y-3">
-                <h3 className="text-sm font-semibold">Filing Status</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="border rounded p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Accounts</p>
-                    <Badge variant={statusVariant(detailPeriod.status)} className="capitalize">{detailPeriod.status.replace("_", " ")}</Badge>
-                  </div>
-                  <div className="border rounded p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">CT600</p>
-                    <Badge variant={statusVariant(detailPeriod.ct600_status)} className="capitalize">{detailPeriod.ct600_status.replace("_", " ")}</Badge>
-                  </div>
-                  <div className="border rounded p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">SA100</p>
-                    <Badge variant={statusVariant(detailPeriod.sa_status)} className="capitalize">{detailPeriod.sa_status.replace("_", " ")}</Badge>
-                  </div>
-                </div>
-              </div>
-
-              {detailPeriod.notes && (
-                <div className="border rounded-lg p-4">
-                  <h3 className="text-sm font-semibold mb-1">Notes</h3>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{detailPeriod.notes}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {detailPeriod && editMode && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Accounts Status</Label>
-                  <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="open">Open</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="review">Under Review</SelectItem>
-                      <SelectItem value="filed">Filed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Period Type</Label>
-                  <Select value={editForm.period_type} onValueChange={(v) => setEditForm({ ...editForm, period_type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="annual">Annual</SelectItem>
-                      <SelectItem value="transition">Transition</SelectItem>
-                      <SelectItem value="short">Short Period</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>CT600 Status</Label>
-                  <Select value={editForm.ct600_status} onValueChange={(v) => setEditForm({ ...editForm, ct600_status: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {ctSaStatuses.map(s => <SelectItem key={s} value={s} className="capitalize">{s.replace("_", " ")}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>SA100 Status</Label>
-                  <Select value={editForm.sa_status} onValueChange={(v) => setEditForm({ ...editForm, sa_status: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {ctSaStatuses.map(s => <SelectItem key={s} value={s} className="capitalize">{s.replace("_", " ")}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Accounts Standard</Label>
-                  <Select value={editForm.accounts_standard} onValueChange={(v) => setEditForm({ ...editForm, accounts_standard: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="FRS 102 Section 1A">FRS 102 Section 1A</SelectItem>
-                      <SelectItem value="FRS 102">FRS 102 (Full)</SelectItem>
-                      <SelectItem value="FRS 105">FRS 105 (Micro)</SelectItem>
-                      <SelectItem value="Charity SORP">Charity SORP</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Filing Deadline</Label>
-                  <Input type="date" value={editForm.filing_deadline} onChange={(e) => setEditForm({ ...editForm, filing_deadline: e.target.value })} />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Notes</Label>
-                <Textarea value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} rows={3} placeholder="Internal notes, tax computation details..." />
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setEditMode(false)}>Cancel</Button>
-                <Button onClick={() => updatePeriod.mutate()} disabled={updatePeriod.isPending}>
-                  {updatePeriod.isPending ? "Saving..." : "Save Changes"}
-                </Button>
-              </DialogFooter>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* New period dialog */}
       <Dialog open={showNewPeriod} onOpenChange={setShowNewPeriod}>
