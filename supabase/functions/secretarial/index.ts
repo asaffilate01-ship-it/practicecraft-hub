@@ -832,34 +832,119 @@ Deno.serve(async (req) => {
       }).select().single();
       if (jobErr) throw jobErr;
 
-      // Update change + create CH filing record
-      await Promise.all([
-        supabase.from("secretarial_changes")
-          .update({
-            status: "queued",
-            submission_job_id: job.id,
-            validation_json: { ...result, validatedAt: new Date().toISOString(), schema: SCHEMA_REGISTRY[change.change_type] || null },
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", changeId),
-        supabase.from("ch_filings").insert({
-          tenant_id: tenantId,
-          client_id: change.client_id,
-          filing_type: change.change_type,
-          filing_description: change.title,
-          request_json: change.payload_json,
-          status: "pending",
+      // Update change status to queued
+      await supabase.from("secretarial_changes")
+        .update({
+          status: "queued",
           submission_job_id: job.id,
-        }),
-        supabase.from("event_logs").insert({
-          tenant_id: tenantId, event_type: "ch_filing_submitted",
-          source: "user", actor_user_id: user.id, client_id: change.client_id,
-          payload_json: { changeId, submissionJobId: job.id, filingRoute, idempotencyKey, schema: SCHEMA_REGISTRY[change.change_type] || null },
-          correlation_id: job.correlation_id || null,
-        }),
-      ]);
+          validation_json: { ...result, validatedAt: new Date().toISOString(), schema: SCHEMA_REGISTRY[change.change_type] || null },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", changeId);
 
-      return json({ submissionJobId: job.id, filingRoute, idempotencyKey }, 202);
+      await supabase.from("event_logs").insert({
+        tenant_id: tenantId, event_type: "ch_filing_queued",
+        source: "user", actor_user_id: user.id, client_id: change.client_id,
+        payload_json: { changeId, submissionJobId: job.id, filingRoute, idempotencyKey },
+      });
+
+      // ── Actually submit to Companies House via the companies-house edge function ──
+      if (filingRoute === "xml_gateway") {
+        try {
+          // Map change_type to filing type expected by companies-house/file
+          const filingTypeMap: Record<string, string> = {
+            CONFIRMATION_STATEMENT: "CS01",
+            CHANGE_REGISTERED_OFFICE: "AD01",
+            APPOINT_DIRECTOR: "AP01",
+            RESIGN_DIRECTOR: "TM01",
+          };
+          const filingType = filingTypeMap[change.change_type];
+
+          if (filingType) {
+            const chUrl = `${supabaseUrl}/functions/v1/companies-house/file`;
+            const chPayload = change.payload_json as Record<string, unknown>;
+
+            const chRes = await fetch(chUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${supabaseKey}`,
+                apikey: supabaseKey,
+              },
+              body: JSON.stringify({
+                filingType,
+                companyNumber: company?.company_number,
+                companyName: chPayload.companyName || company?.company_number,
+                companyAuthCode: authCred?.ciphertext,
+                payload: chPayload,
+                clientId: change.client_id,
+                tenantId,
+                test: false,
+              }),
+            });
+
+            const chResult = await chRes.json();
+
+            // Update submission job with result
+            const jobStatus = chResult.status === "rejected" ? "rejected" : chResult.status === "submitted" ? "sent" : "sent";
+            await supabase.from("submission_jobs")
+              .update({
+                status: jobStatus,
+                correlation_id: chResult.transactionId || null,
+                last_error: chResult.errors?.length ? chResult.errors.join("; ") : null,
+                attempt_count: 1,
+                last_attempt_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", job.id);
+
+            // Update the change status
+            const changeStatus = jobStatus === "rejected" ? "rejected" : "sent";
+            await supabase.from("secretarial_changes")
+              .update({ status: changeStatus, updated_at: new Date().toISOString() })
+              .eq("id", changeId);
+
+            // Log the filing result
+            await supabase.from("event_logs").insert({
+              tenant_id: tenantId, event_type: "ch_filing_submitted",
+              source: "system", actor_user_id: user.id, client_id: change.client_id,
+              payload_json: {
+                changeId, submissionJobId: job.id, filingRoute,
+                transactionId: chResult.transactionId,
+                qualifier: chResult.qualifier,
+                errors: chResult.errors || [],
+                filingId: chResult.filingId,
+              },
+              correlation_id: chResult.transactionId || null,
+            });
+
+            return json({
+              submissionJobId: job.id,
+              filingRoute,
+              idempotencyKey,
+              chResult: {
+                status: chResult.status,
+                transactionId: chResult.transactionId,
+                errors: chResult.errors || [],
+              },
+            }, 202);
+          }
+        } catch (chErr) {
+          // Filing call failed — mark job as failed but don't block
+          const errMsg = chErr instanceof Error ? chErr.message : "CH filing call failed";
+          await supabase.from("submission_jobs")
+            .update({ status: "failed", last_error: errMsg, updated_at: new Date().toISOString() })
+            .eq("id", job.id);
+          await supabase.from("secretarial_changes")
+            .update({ status: "rejected", updated_at: new Date().toISOString() })
+            .eq("id", changeId);
+
+          return json({ submissionJobId: job.id, filingRoute, error: errMsg }, 500);
+        }
+      }
+
+      // For API filing route or unsupported XML types, just return queued
+      return json({ submissionJobId: job.id, filingRoute, idempotencyKey, status: "queued" }, 202);
     }
 
     // ─── CHANGES: GET DETAILS ───
