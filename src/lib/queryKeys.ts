@@ -65,6 +65,14 @@ export const qk = {
   documents: {
     library: (filters?: any) => ["documents", "library", filters] as const,
     templates: (filters?: any) => ["documents", "templates", filters] as const,
+    requests: (filters?: any) => ["documents", "requests", filters] as const,
+    signatures: (filters?: any) => ["documents", "signatures", filters] as const,
+  },
+
+  // ── AML Monitoring ─────────────────────────────────────
+  amlMonitoring: {
+    alerts: (filters?: any) => ["aml", "monitoring", "alerts", filters] as const,
+    monitoredCases: ["aml", "monitoring", "cases"] as const,
   },
 
   // ── Billing ─────────────────────────────────────────

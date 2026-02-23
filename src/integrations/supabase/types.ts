@@ -108,6 +108,113 @@ export type Database = {
           },
         ]
       }
+      aml_monitoring_alerts: {
+        Row: {
+          alert_type: string
+          case_id: string
+          client_id: string
+          created_at: string
+          description: string | null
+          id: string
+          metadata_json: Json
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by_user_id: string | null
+          severity: string
+          source: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alert_type: string
+          case_id: string
+          client_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata_json?: Json
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alert_type?: string
+          case_id?: string
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata_json?: Json
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by_user_id?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aml_monitoring_alerts_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "kyc_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aml_monitoring_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aml_monitoring_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "aml_monitoring_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "aml_monitoring_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "aml_monitoring_alerts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aml_monitoring_alerts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -1594,6 +1701,94 @@ export type Database = {
           },
         ]
       }
+      document_requests: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          document_types: string[]
+          due_date: string | null
+          id: string
+          requested_by_user_id: string | null
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          document_types?: string[]
+          due_date?: string | null
+          id?: string
+          requested_by_user_id?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          document_types?: string[]
+          due_date?: string | null
+          id?: string
+          requested_by_user_id?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "document_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "document_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "document_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       document_tags: {
         Row: {
           color: string | null
@@ -1685,6 +1880,7 @@ export type Database = {
           metadata_json: Json
           mime_type: string
           ocr_text: string | null
+          request_id: string | null
           size_bytes: number
           status: string
           storage_path: string
@@ -1703,6 +1899,7 @@ export type Database = {
           metadata_json?: Json
           mime_type: string
           ocr_text?: string | null
+          request_id?: string | null
           size_bytes?: number
           status?: string
           storage_path: string
@@ -1721,6 +1918,7 @@ export type Database = {
           metadata_json?: Json
           mime_type?: string
           ocr_text?: string | null
+          request_id?: string | null
           size_bytes?: number
           status?: string
           storage_path?: string
@@ -1757,6 +1955,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "documents_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "document_requests"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "documents_tenant_id_fkey"
@@ -2836,6 +3041,13 @@ export type Database = {
           created_at: string
           expires_at: string | null
           id: string
+          id_verification_provider: string | null
+          id_verification_reference: string | null
+          id_verification_result_json: Json
+          id_verification_status: string | null
+          last_monitored_at: string | null
+          monitoring_enabled: boolean
+          next_review_date: string | null
           pep_check: boolean | null
           risk_level: string
           risk_notes: string | null
@@ -2854,6 +3066,13 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          id_verification_provider?: string | null
+          id_verification_reference?: string | null
+          id_verification_result_json?: Json
+          id_verification_status?: string | null
+          last_monitored_at?: string | null
+          monitoring_enabled?: boolean
+          next_review_date?: string | null
           pep_check?: boolean | null
           risk_level?: string
           risk_notes?: string | null
@@ -2872,6 +3091,13 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           id?: string
+          id_verification_provider?: string | null
+          id_verification_reference?: string | null
+          id_verification_result_json?: Json
+          id_verification_status?: string | null
+          last_monitored_at?: string | null
+          monitoring_enabled?: boolean
+          next_review_date?: string | null
           pep_check?: boolean | null
           risk_level?: string
           risk_notes?: string | null
@@ -5081,6 +5307,125 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "company_register_members"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_requests: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by_user_id: string | null
+          decline_reason: string | null
+          declined_at: string | null
+          document_id: string | null
+          expires_at: string | null
+          id: string
+          last_reminder_at: string | null
+          reminder_count: number
+          sent_at: string | null
+          signed_at: string | null
+          signed_document_path: string | null
+          signer_email: string
+          signer_name: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          decline_reason?: string | null
+          declined_at?: string | null
+          document_id?: string | null
+          expires_at?: string | null
+          id?: string
+          last_reminder_at?: string | null
+          reminder_count?: number
+          sent_at?: string | null
+          signed_at?: string | null
+          signed_document_path?: string | null
+          signer_email: string
+          signer_name: string
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          decline_reason?: string | null
+          declined_at?: string | null
+          document_id?: string | null
+          expires_at?: string | null
+          id?: string
+          last_reminder_at?: string | null
+          reminder_count?: number
+          sent_at?: string | null
+          signed_at?: string | null
+          signed_document_path?: string | null
+          signer_email?: string
+          signer_name?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "signature_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "signature_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "signature_requests_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
           },
         ]
       }

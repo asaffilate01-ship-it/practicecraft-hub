@@ -21,6 +21,9 @@ import {
   Zap,
   UserPlus,
   ClipboardList,
+  FileQuestion,
+  PenTool,
+  Eye,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -56,9 +59,12 @@ const mainNav: NavItem[] = [
   { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
   { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"], featureKey: "incorporations", moduleKey: "incorporations" },
   { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
+  { title: "AML Monitoring", url: "/aml/monitoring", icon: Eye, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
   { title: "Submissions", url: "/submissions", icon: Send, permission: ["submissions", "view"], featureKey: "submissions", moduleKey: "submissions" },
   { title: "Billing", url: "/billing", icon: CreditCard, permission: ["billing", "view"], featureKey: "billing", moduleKey: "billing" },
   { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
+  { title: "Doc Requests", url: "/documents/requests", icon: FileQuestion, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
+  { title: "e-Signatures", url: "/documents/signatures", icon: PenTool, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
   { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
   { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
   { title: "CH Wizard", url: "/practice/integrations/companies-house", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
