@@ -41,6 +41,8 @@ import AmlMonitoring from "@/pages/AmlMonitoring";
 import TimeRecording from "@/pages/TimeRecording";
 import EmailTemplates from "@/pages/EmailTemplates";
 import TenantAdmin from "@/pages/TenantAdmin";
+import FpsBuilderPage from "@/pages/rti/FpsBuilderPage";
+import EpsBuilderPage from "@/pages/rti/EpsBuilderPage";
 
 // ── Auth pages ──────────────────────────────────────────────
 import Login from "@/pages/auth/Login";
@@ -184,6 +186,8 @@ const AppRoutes = () => (
     <Route path="/payroll/workbench" element={<Guarded module="payroll" action="view"><PayrollWorkbench /></Guarded>} />
     <Route path="/payroll/employers/:employerId" element={<Guarded module="payroll" action="view"><PlaceholderPage title="Employer" description="Employer payroll setup and runs" /></Guarded>} />
     <Route path="/payroll/runs/:runId" element={<Guarded module="payroll" action="view"><PlaceholderPage title="Payroll Run" description="Payroll run detail, payslips, and RTI submission" /></Guarded>} />
+    <Route path="/payroll/rti/fps/:payrunId" element={<Guarded module="payroll" action="view"><FpsBuilderPage /></Guarded>} />
+    <Route path="/payroll/rti/eps/:employerId/:period" element={<Guarded module="payroll" action="view"><EpsBuilderPage /></Guarded>} />
 
     {/* ── Accounts Production ──────────────────────────── */}
     <Route path="/accounts" element={<Guarded module="accounts" action="view"><AccountsPage /></Guarded>} />

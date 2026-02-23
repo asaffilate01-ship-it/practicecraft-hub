@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -742,6 +743,11 @@ export default function PayrollWorkbench() {
             <div><span className="text-muted-foreground">Gross:</span> {fmt(selectedRun?.total_gross_pence || 0)}</div>
             <div><span className="text-muted-foreground">Tax:</span> {fmt(selectedRun?.total_tax_pence || 0)}</div>
             <div><span className="text-muted-foreground">Net:</span> {fmt(selectedRun?.total_net_pence || 0)}</div>
+          </div>
+          <div className="flex gap-2 mb-4">
+            <Link to={`/payroll/rti/fps/${selectedRun?.id}`}>
+              <Button size="sm" variant="outline"><Send className="h-4 w-4 mr-1" /> Build FPS</Button>
+            </Link>
           </div>
           {payslips.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">No payslips in this run.</p>
