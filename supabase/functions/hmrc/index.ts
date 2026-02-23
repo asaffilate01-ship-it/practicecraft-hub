@@ -9,19 +9,101 @@ const corsHeaders = {
 /**
  * HMRC Integration Edge Function
  *
- * Provides stubs for:
- * 1. MTD VAT — pull obligations, submit returns
- * 2. RTI Payroll — submit FPS/EPS
- *
- * To connect to the real HMRC APIs you need:
- * - HMRC_CLIENT_ID / HMRC_CLIENT_SECRET (OAuth2 credentials from HMRC Developer Hub)
- * - Per-client OAuth tokens stored in client_credentials table
- * - HMRC sandbox or production base URL
- *
- * HMRC Developer Hub: https://developer.service.hmrc.gov.uk
+ * Sandbox OAuth2 + MTD VAT + RTI stubs
+ * Uses HMRC_CLIENT_ID and HMRC_CLIENT_SECRET secrets
  */
 
 const HMRC_BASE_URL = Deno.env.get("HMRC_BASE_URL") || "https://test-api.service.hmrc.gov.uk";
+const HMRC_AUTH_URL = Deno.env.get("HMRC_AUTH_URL") || "https://test-api.service.hmrc.gov.uk";
+
+async function getClientCredentialsToken(): Promise<string> {
+  const clientId = Deno.env.get("HMRC_CLIENT_ID");
+  const clientSecret = Deno.env.get("HMRC_CLIENT_SECRET");
+
+  if (!clientId || !clientSecret) {
+    throw new Error("HMRC_CLIENT_ID or HMRC_CLIENT_SECRET not configured");
+  }
+
+  const res = await fetch(`${HMRC_AUTH_URL}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`HMRC OAuth error ${res.status}: ${text}`);
+  }
+
+  const data = await res.json();
+  return data.access_token;
+}
+
+// Build the OAuth2 authorization URL for user-delegated access (MTD VAT per-client)
+function buildAuthorizeUrl(redirectUri: string, state: string, scopes: string[]): string {
+  const clientId = Deno.env.get("HMRC_CLIENT_ID")!;
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: clientId,
+    scope: scopes.join(" "),
+    redirect_uri: redirectUri,
+    state,
+  });
+  return `${HMRC_AUTH_URL}/oauth/authorize?${params.toString()}`;
+}
+
+// Exchange authorization code for access + refresh tokens
+async function exchangeCode(code: string, redirectUri: string) {
+  const clientId = Deno.env.get("HMRC_CLIENT_ID")!;
+  const clientSecret = Deno.env.get("HMRC_CLIENT_SECRET")!;
+
+  const res = await fetch(`${HMRC_AUTH_URL}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "authorization_code",
+      client_id: clientId,
+      client_secret: clientSecret,
+      code,
+      redirect_uri: redirectUri,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`HMRC token exchange error ${res.status}: ${text}`);
+  }
+
+  return await res.json();
+}
+
+// Refresh an existing token
+async function refreshToken(refresh_token: string) {
+  const clientId = Deno.env.get("HMRC_CLIENT_ID")!;
+  const clientSecret = Deno.env.get("HMRC_CLIENT_SECRET")!;
+
+  const res = await fetch(`${HMRC_AUTH_URL}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`HMRC token refresh error ${res.status}: ${text}`);
+  }
+
+  return await res.json();
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -37,108 +119,141 @@ Deno.serve(async (req: Request) => {
     const path = url.pathname.replace(/^\/hmrc\/?/, "");
     const body = req.method !== "GET" ? await req.json() : {};
 
+    // ── OAuth2: Get authorize URL ────────────────────
+    if (path === "oauth/authorize-url" && req.method === "POST") {
+      const { redirectUri, state, scopes } = body;
+      const authorizeUrl = buildAuthorizeUrl(
+        redirectUri || `${supabaseUrl}/functions/v1/hmrc/oauth/callback`,
+        state || crypto.randomUUID(),
+        scopes || ["read:vat", "write:vat"]
+      );
+      return new Response(
+        JSON.stringify({ authorizeUrl }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ── OAuth2: Exchange code for tokens ─────────────
+    if (path === "oauth/token" && req.method === "POST") {
+      const { code, redirectUri } = body;
+      const tokens = await exchangeCode(code, redirectUri);
+      return new Response(
+        JSON.stringify(tokens),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ── OAuth2: Refresh token ────────────────────────
+    if (path === "oauth/refresh" && req.method === "POST") {
+      const { refresh_token } = body;
+      const tokens = await refreshToken(refresh_token);
+      return new Response(
+        JSON.stringify(tokens),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ── OAuth2: Test client credentials ──────────────
+    if (path === "oauth/test" && req.method === "POST") {
+      const token = await getClientCredentialsToken();
+      return new Response(
+        JSON.stringify({ ok: true, token_prefix: token.substring(0, 8) + "..." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // ── MTD VAT: Pull Obligations ────────────────────
     if (path === "vat/obligations" && req.method === "POST") {
-      const { clientId, vrn } = body;
-      // Stub: In production, call HMRC GET /organisations/vat/{vrn}/obligations
-      // with OAuth2 bearer token from client_credentials table
-      return new Response(
-        JSON.stringify({
-          stub: true,
-          message: "Wire to HMRC MTD VAT Obligations API",
-          endpoint: `${HMRC_BASE_URL}/organisations/vat/${vrn}/obligations`,
-          requiredHeaders: {
-            Authorization: "Bearer {client_oauth_token}",
+      const { vrn, accessToken, from, to } = body;
+      if (!accessToken) {
+        return new Response(
+          JSON.stringify({ error: "accessToken required (from per-client OAuth)" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const params = new URLSearchParams();
+      if (from) params.set("from", from);
+      if (to) params.set("to", to);
+
+      const hmrcRes = await fetch(
+        `${HMRC_BASE_URL}/organisations/vat/${vrn}/obligations?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
             Accept: "application/vnd.hmrc.1.0+json",
           },
-          notes: [
-            "Register as software vendor at developer.service.hmrc.gov.uk",
-            "Implement OAuth2 authorization code flow per client",
-            "Store tokens in client_credentials with provider='hmrc_mtd_vat'",
-            "Pull obligations and create vat_returns records",
-          ],
-        }),
+        }
+      );
+
+      const hmrcData = await hmrcRes.json();
+      return new Response(
+        JSON.stringify({ status: hmrcRes.status, data: hmrcData }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // ── MTD VAT: Submit Return ───────────────────────
     if (path === "vat/submit" && req.method === "POST") {
-      const { clientId, vrn, periodKey, returnData } = body;
-      return new Response(
-        JSON.stringify({
-          stub: true,
-          message: "Wire to HMRC MTD VAT Submit Return API",
-          endpoint: `${HMRC_BASE_URL}/organisations/vat/${vrn}/returns`,
+      const { vrn, accessToken, periodKey, returnData } = body;
+      if (!accessToken) {
+        return new Response(
+          JSON.stringify({ error: "accessToken required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const hmrcRes = await fetch(
+        `${HMRC_BASE_URL}/organisations/vat/${vrn}/returns`,
+        {
           method: "POST",
-          requiredBody: {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+            Accept: "application/vnd.hmrc.1.0+json",
+          },
+          body: JSON.stringify({
             periodKey,
-            vatDueSales: returnData?.box1,
-            vatDueAcquisitions: returnData?.box2,
-            totalVatDue: returnData?.box3,
-            vatReclaimedCurrPeriod: returnData?.box4,
-            netVatDue: returnData?.box5,
-            totalValueSalesExVAT: returnData?.box6,
-            totalValuePurchasesExVAT: returnData?.box7,
-            totalValueGoodsSuppliedExVAT: returnData?.box8,
-            totalAcquisitionsExVAT: returnData?.box9,
+            vatDueSales: returnData?.box1 ?? 0,
+            vatDueAcquisitions: returnData?.box2 ?? 0,
+            totalVatDue: returnData?.box3 ?? 0,
+            vatReclaimedCurrPeriod: returnData?.box4 ?? 0,
+            netVatDue: returnData?.box5 ?? 0,
+            totalValueSalesExVAT: returnData?.box6 ?? 0,
+            totalValuePurchasesExVAT: returnData?.box7 ?? 0,
+            totalValueGoodsSuppliedExVAT: returnData?.box8 ?? 0,
+            totalAcquisitionsExVAT: returnData?.box9 ?? 0,
             finalised: true,
-          },
-          notes: [
-            "Requires fraud prevention headers (Gov-Client-* headers)",
-            "Use idempotency key via submission_jobs table",
-            "Store HMRC receipt/correlation ID in submission_jobs.response_json",
-          ],
-        }),
+          }),
+        }
+      );
+
+      const hmrcData = await hmrcRes.json();
+      return new Response(
+        JSON.stringify({ status: hmrcRes.status, data: hmrcData }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // ── RTI: Submit FPS ──────────────────────────────
+    // ── RTI: Submit FPS (stub — RTI uses XML) ────────
     if (path === "rti/fps" && req.method === "POST") {
-      const { employerId, payRunId } = body;
       return new Response(
         JSON.stringify({
           stub: true,
-          message: "Wire to HMRC RTI FPS submission",
+          message: "RTI FPS requires XML submission via Government Gateway — not OAuth2. Wire XML builder + GG credentials here.",
           endpoint: `${HMRC_BASE_URL}/organisations/rti/fps`,
-          format: "XML",
-          notes: [
-            "RTI uses XML payloads, not JSON",
-            "Requires HMRC Government Gateway credentials per employer",
-            "Build IRenvelope XML with employee payment details",
-            "Store credentials in client_credentials with provider='hmrc_rti'",
-            "FPS must be submitted on or before pay date",
-            "Parse HMRC XML response for acceptance/rejection",
-          ],
-          xmlStructure: {
-            IRenvelope: {
-              IRheader: "Sender, authentication, tax year",
-              FullPaymentSubmission: {
-                EmpRefs: "PAYE reference, accounts office ref",
-                Employee: "NI number, name, address, payment details",
-              },
-            },
-          },
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // ── RTI: Submit EPS ──────────────────────────────
+    // ── RTI: Submit EPS (stub) ───────────────────────
     if (path === "rti/eps" && req.method === "POST") {
-      const { employerId, taxMonth } = body;
       return new Response(
         JSON.stringify({
           stub: true,
-          message: "Wire to HMRC RTI EPS submission",
+          message: "RTI EPS requires XML submission via Government Gateway.",
           endpoint: `${HMRC_BASE_URL}/organisations/rti/eps`,
-          format: "XML",
-          notes: [
-            "EPS for no-payment periods, statutory pay recovery, CIS deductions",
-            "Same authentication as FPS",
-            "Must be submitted by 19th of following tax month",
-          ],
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );

@@ -1,1 +1,7 @@
 project_id = "yvlvxppigamtbbisyoln"
+
+[functions.hmrc]
+verify_jwt = false
+
+[functions.companies-house]
+verify_jwt = false
