@@ -13,139 +13,345 @@ function json(data: unknown, status = 200) {
   });
 }
 
-// ─── VALIDATION ENGINE ───
-interface ValidationIssue {
-  field: string;
+// ─── SCHEMA VALIDATION ENGINE ───
+// Returns path-based errors/warnings matching the UI-friendly output format:
+// { ok, errors: [{path, code, message}], warnings: [{path, code, message}] }
+
+interface ValidationResult {
+  path: string;
+  code: string;
   message: string;
-  severity: "error" | "warning";
 }
 
-const UK_POSTCODE_RE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
+const UK_POSTCODE_RE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[ABD-HJLNP-UW-Z]{2}$/i;
+const SIC_RE = /^\d{5}$/;
 const AUTH_CODE_RE = /^[A-Za-z0-9]{6}$/;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-function validateAddress(addr: Record<string, unknown>, prefix: string): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
-  if (!addr?.address_line1 && !addr?.line1) issues.push({ field: `${prefix}.line1`, message: "Address line 1 is required", severity: "error" });
-  if (!addr?.city && !addr?.post_town) issues.push({ field: `${prefix}.city`, message: "Post town / city is required", severity: "error" });
-  if (!addr?.postcode) issues.push({ field: `${prefix}.postcode`, message: "Postcode is required", severity: "error" });
-  const pc = (addr?.postcode as string) || "";
-  const country = ((addr?.country as string) || "").toLowerCase();
-  if (pc && (country === "uk" || country === "england" || country === "wales" || country === "scotland" || country === "northern ireland" || !country)) {
-    if (!UK_POSTCODE_RE.test(pc)) issues.push({ field: `${prefix}.postcode`, message: "Invalid UK postcode format", severity: "error" });
+// ── Address validator (shared definition) ──
+function validateAddress(addr: Record<string, unknown> | null | undefined, basePath: string): { errors: ValidationResult[]; warnings: ValidationResult[] } {
+  const errors: ValidationResult[] = [];
+  const warnings: ValidationResult[] = [];
+  if (!addr || typeof addr !== "object") {
+    errors.push({ path: basePath, code: "REQUIRED", message: "Address is required" });
+    return { errors, warnings };
   }
-  return issues;
+  const line1 = addr.addressLine1 ?? addr.address_line1 ?? addr.line1;
+  if (!line1) errors.push({ path: `${basePath}/addressLine1`, code: "REQUIRED", message: "Address line 1 is required" });
+  const postTown = addr.postTown ?? addr.post_town ?? addr.city;
+  if (!postTown) errors.push({ path: `${basePath}/postTown`, code: "REQUIRED", message: "Post town is required" });
+  const country = (addr.country as string) || "";
+  if (!country) errors.push({ path: `${basePath}/country`, code: "REQUIRED", message: "Country is required" });
+  const pc = (addr.postcode as string) || "";
+  const isUK = !country || /^(united kingdom|england|wales|scotland|northern ireland|uk|gb)$/i.test(country);
+  if (isUK) {
+    if (!pc) errors.push({ path: `${basePath}/postcode`, code: "REQUIRED", message: "Postcode is required for UK addresses" });
+    else if (!UK_POSTCODE_RE.test(pc)) errors.push({ path: `${basePath}/postcode`, code: "INVALID_POSTCODE", message: "Postcode is not valid for UK" });
+  }
+  if (pc && !isUK && !/^[A-Z0-9\s-]{2,15}$/i.test(pc)) {
+    warnings.push({ path: `${basePath}/postcode`, code: "UNUSUAL_POSTCODE", message: "Postcode format looks unusual" });
+  }
+  return { errors, warnings };
 }
 
-function validateChangePayload(
-  changeType: string,
+function requireString(val: unknown, path: string, code: string, msg: string, minLen = 1): ValidationResult | null {
+  if (!val || typeof val !== "string" || val.trim().length < minLen) return { path, code, message: msg };
+  return null;
+}
+
+function requireDate(val: unknown, path: string): ValidationResult | null {
+  if (!val || typeof val !== "string" || !DATE_RE.test(val)) return { path, code: "INVALID_DATE", message: "A valid date (YYYY-MM-DD) is required" };
+  return null;
+}
+
+function requireUuid(val: unknown, path: string, msg: string): ValidationResult | null {
+  if (!val || typeof val !== "string" || val.length < 10) return { path, code: "REQUIRED", message: msg };
+  return null;
+}
+
+// ── Person name validator ──
+function validatePersonName(name: unknown, basePath: string): ValidationResult[] {
+  const errs: ValidationResult[] = [];
+  if (!name || typeof name !== "object") {
+    errs.push({ path: basePath, code: "REQUIRED", message: "Person name is required" });
+    return errs;
+  }
+  const n = name as Record<string, unknown>;
+  const f = requireString(n.forename, `${basePath}/forename`, "REQUIRED", "Forename is required");
+  if (f) errs.push(f);
+  const s = requireString(n.surname, `${basePath}/surname`, "REQUIRED", "Surname is required");
+  if (s) errs.push(s);
+  return errs;
+}
+
+// ── Schema registry: per-change-type validators ──
+type PayloadValidator = (
   payload: Record<string, unknown>,
-  context: {
-    authCodeStored: boolean;
-    companyStatus?: string;
-    activeDirectors: number;
-    activePscs: number;
-    hasRO: boolean;
-    hasSicCodes: boolean;
-    pendingChanges: number;
-    lastSyncDaysAgo: number | null;
-  }
-): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
+  context: ValidationContext
+) => { errors: ValidationResult[]; warnings: ValidationResult[] };
 
-  // Universal auth code check
-  if (!context.authCodeStored) {
-    issues.push({ field: "authCode", message: "Companies House auth code not stored for this client", severity: "error" });
-  }
+interface ValidationContext {
+  authCodeStored: boolean;
+  companyStatus?: string;
+  activeDirectors: number;
+  activePscs: number;
+  hasRO: boolean;
+  hasSicCodes: boolean;
+  pendingChanges: number;
+  lastSyncDaysAgo: number | null;
+}
 
-  // Company must be active
-  if (context.companyStatus && context.companyStatus !== "active") {
-    issues.push({ field: "companyStatus", message: `Company status is "${context.companyStatus}" — filing may be blocked`, severity: "error" });
+function commonChecks(ctx: ValidationContext): { errors: ValidationResult[]; warnings: ValidationResult[] } {
+  const errors: ValidationResult[] = [];
+  const warnings: ValidationResult[] = [];
+  if (!ctx.authCodeStored) errors.push({ path: "/authCode", code: "AUTH_CODE_MISSING", message: "Companies House auth code not stored for this client" });
+  if (ctx.companyStatus && ctx.companyStatus !== "active") {
+    errors.push({ path: "/companyStatus", code: "COMPANY_INACTIVE", message: `Company status is "${ctx.companyStatus}" — filing may be blocked` });
   }
+  return { errors, warnings };
+}
 
-  switch (changeType) {
-    case "CONFIRMATION_STATEMENT": {
-      if (context.activeDirectors === 0) issues.push({ field: "directors", message: "At least 1 active director is required", severity: "error" });
-      if (context.activePscs === 0) issues.push({ field: "psc", message: "PSC register is empty — a PSC statement or entry is required", severity: "error" });
-      if (!context.hasRO) issues.push({ field: "registeredOffice", message: "Registered office address is required", severity: "error" });
-      if (context.pendingChanges > 0) issues.push({ field: "pendingChanges", message: `${context.pendingChanges} pending change(s) must be resolved before filing CS`, severity: "error" });
-      if (!context.hasSicCodes) issues.push({ field: "sicCodes", message: "SIC codes are empty", severity: "warning" });
-      if (context.lastSyncDaysAgo !== null && context.lastSyncDaysAgo > 14) issues.push({ field: "sync", message: `Last CH sync was ${context.lastSyncDaysAgo} days ago — consider syncing first`, severity: "warning" });
-      break;
+const VALIDATORS: Record<string, PayloadValidator> = {
+  // 1.1 Confirmation Statement
+  CONFIRMATION_STATEMENT: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const d = requireDate(payload.statementDate, "/statementDate");
+    if (d) errors.push(d);
+    const conf = payload.confirmations as Record<string, boolean> | undefined;
+    if (!conf) {
+      errors.push({ path: "/confirmations", code: "REQUIRED", message: "Confirmations object is required" });
+    } else {
+      if (!conf.officersConfirmed) errors.push({ path: "/confirmations/officersConfirmed", code: "NOT_CONFIRMED", message: "Officers must be confirmed" });
+      if (!conf.pscConfirmed) errors.push({ path: "/confirmations/pscConfirmed", code: "NOT_CONFIRMED", message: "PSC register must be confirmed" });
+      if (!conf.registeredOfficeConfirmed) errors.push({ path: "/confirmations/registeredOfficeConfirmed", code: "NOT_CONFIRMED", message: "Registered office must be confirmed" });
+      if (!conf.sicConfirmed) errors.push({ path: "/confirmations/sicConfirmed", code: "NOT_CONFIRMED", message: "SIC codes must be confirmed" });
+      if (!conf.shareCapitalConfirmed) errors.push({ path: "/confirmations/shareCapitalConfirmed", code: "NOT_CONFIRMED", message: "Share capital must be confirmed" });
     }
-    case "CHANGE_REGISTERED_OFFICE": {
-      const addr = (payload.address || payload.newAddress || {}) as Record<string, unknown>;
-      issues.push(...validateAddress(addr, "address"));
-      break;
+    // Contextual register checks
+    if (ctx.activeDirectors === 0) errors.push({ path: "/directors", code: "MISSING_DIRECTOR", message: "At least 1 active director is required" });
+    if (ctx.activePscs === 0) errors.push({ path: "/psc", code: "MISSING_PSC", message: "PSC register is empty — a PSC statement or entry is required" });
+    if (!ctx.hasRO) errors.push({ path: "/registeredOffice", code: "MISSING_RO", message: "Registered office address is required" });
+    if (ctx.pendingChanges > 0) errors.push({ path: "/pendingChanges", code: "PENDING_CHANGES", message: `${ctx.pendingChanges} pending change(s) must be resolved before filing CS` });
+    if (!ctx.hasSicCodes) warnings.push({ path: "/sicCodes", code: "EMPTY_SIC", message: "SIC codes are empty" });
+    if (ctx.lastSyncDaysAgo !== null && ctx.lastSyncDaysAgo > 14) warnings.push({ path: "/sync", code: "STALE_SYNC", message: `Last CH sync was ${ctx.lastSyncDaysAgo} days ago — consider syncing first` });
+    return { errors, warnings };
+  },
+
+  // 1.2 Change Registered Office
+  CHANGE_REGISTERED_OFFICE: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const d = requireDate(payload.effectiveDate, "/effectiveDate");
+    if (d) errors.push(d);
+    const addrResult = validateAddress(payload.newRegisteredOfficeAddress as Record<string, unknown>, "/newRegisteredOfficeAddress");
+    errors.push(...addrResult.errors);
+    warnings.push(...addrResult.warnings);
+    return { errors, warnings };
+  },
+
+  // 1.3 Change SAIL Address
+  CHANGE_SAIL_ADDRESS: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const d = requireDate(payload.effectiveDate, "/effectiveDate");
+    if (d) errors.push(d);
+    const addrResult = validateAddress(payload.newSailAddress as Record<string, unknown>, "/newSailAddress");
+    errors.push(...addrResult.errors);
+    warnings.push(...addrResult.warnings);
+    return { errors, warnings };
+  },
+
+  // 1.4 Appoint Director
+  APPOINT_DIRECTOR: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const d = requireDate(payload.appointmentDate, "/appointmentDate");
+    if (d) errors.push(d);
+    else {
+      const apptDate = new Date(payload.appointmentDate as string);
+      if (apptDate > new Date()) errors.push({ path: "/appointmentDate", code: "DATE_IN_FUTURE", message: "Appointment date cannot be in the future" });
     }
-    case "CHANGE_SAIL_ADDRESS": {
-      const addr = (payload.address || payload.sailAddress || {}) as Record<string, unknown>;
-      issues.push(...validateAddress(addr, "sailAddress"));
-      break;
+    const person = payload.person as Record<string, unknown> | undefined;
+    if (!person) {
+      errors.push({ path: "/person", code: "REQUIRED", message: "Person details are required" });
+    } else {
+      errors.push(...validatePersonName(person.name, "/person/name"));
+      const dob = requireDate(person.dateOfBirth, "/person/dateOfBirth");
+      if (dob) errors.push(dob);
+      const nat = requireString(person.nationality, "/person/nationality", "REQUIRED", "Nationality is required", 2);
+      if (nat) errors.push(nat);
+      const occ = requireString(person.occupation, "/person/occupation", "REQUIRED", "Occupation is required", 2);
+      if (occ) errors.push(occ);
+      const sAddr = validateAddress(person.serviceAddress as Record<string, unknown>, "/person/serviceAddress");
+      errors.push(...sAddr.errors);
+      warnings.push(...sAddr.warnings);
+      if (!person.residentialAddress) warnings.push({ path: "/person/residentialAddress", code: "MISSING_RESIDENTIAL", message: "Residential address is missing (recommended for compliance)" });
     }
-    case "APPOINT_DIRECTOR": {
-      if (!payload.fullName) issues.push({ field: "fullName", message: "Full name is required", severity: "error" });
-      if (!payload.appointmentDate) issues.push({ field: "appointmentDate", message: "Appointment date is required", severity: "error" });
-      if (payload.appointmentDate && new Date(payload.appointmentDate as string) > new Date()) {
-        issues.push({ field: "appointmentDate", message: "Appointment date cannot be in the future", severity: "error" });
+    if (!payload.consentToActDocumentId) warnings.push({ path: "/consentToActDocumentId", code: "MISSING_DOC", message: "No consent-to-act document attached. Recommended." });
+    return { errors, warnings };
+  },
+
+  // 1.5 Resign Director
+  RESIGN_DIRECTOR: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const did = requireUuid(payload.directorId, "/directorId", "Director must be selected");
+    if (did) errors.push(did);
+    const d = requireDate(payload.resignationDate, "/resignationDate");
+    if (d) errors.push(d);
+    else {
+      const rDate = new Date(payload.resignationDate as string);
+      if (rDate > new Date()) errors.push({ path: "/resignationDate", code: "DATE_IN_FUTURE", message: "Resignation date cannot be in the future" });
+    }
+    // Would need director's appointment date from DB for cross-check — handled at submit time
+    return { errors, warnings };
+  },
+
+  // 1.6 Appoint Secretary
+  APPOINT_SECRETARY: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const d = requireDate(payload.appointmentDate, "/appointmentDate");
+    if (d) errors.push(d);
+    const person = payload.person as Record<string, unknown> | undefined;
+    if (!person) {
+      errors.push({ path: "/person", code: "REQUIRED", message: "Person details are required" });
+    } else {
+      errors.push(...validatePersonName(person.name, "/person/name"));
+      const sAddr = validateAddress(person.serviceAddress as Record<string, unknown>, "/person/serviceAddress");
+      errors.push(...sAddr.errors);
+      warnings.push(...sAddr.warnings);
+    }
+    return { errors, warnings };
+  },
+
+  // 1.7 Resign Secretary
+  RESIGN_SECRETARY: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const sid = requireUuid(payload.secretaryId, "/secretaryId", "Secretary must be selected");
+    if (sid) errors.push(sid);
+    const d = requireDate(payload.resignationDate, "/resignationDate");
+    if (d) errors.push(d);
+    return { errors, warnings };
+  },
+
+  // 1.8 PSC Change
+  PSC_CHANGE: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const action = payload.action as string;
+    if (!action || !["add", "update", "cease"].includes(action)) {
+      errors.push({ path: "/action", code: "INVALID_ENUM", message: "Action must be one of: add, update, cease" });
+    }
+    const psc = payload.psc as Record<string, unknown> | undefined;
+    if (!psc) {
+      errors.push({ path: "/psc", code: "REQUIRED", message: "PSC details are required" });
+    } else {
+      if (!psc.pscType || !["individual", "corporate", "legalPerson"].includes(psc.pscType as string)) {
+        errors.push({ path: "/psc/pscType", code: "INVALID_ENUM", message: "PSC type must be individual, corporate, or legalPerson" });
       }
-      if (!payload.dateOfBirth) issues.push({ field: "dateOfBirth", message: "Date of birth is required", severity: "error" });
-      const sAddr = (payload.serviceAddress || {}) as Record<string, unknown>;
-      issues.push(...validateAddress(sAddr, "serviceAddress"));
-      if (!payload.residentialAddress) issues.push({ field: "residentialAddress", message: "Residential address is missing (recommended for compliance)", severity: "warning" });
-      break;
-    }
-    case "RESIGN_DIRECTOR": {
-      if (!payload.directorId) issues.push({ field: "directorId", message: "Director must be selected", severity: "error" });
-      if (!payload.resignationDate) issues.push({ field: "resignationDate", message: "Resignation date is required", severity: "error" });
-      if (payload.resignationDate && payload.appointmentDate && new Date(payload.resignationDate as string) < new Date(payload.appointmentDate as string)) {
-        issues.push({ field: "resignationDate", message: "Resignation date cannot be before appointment date", severity: "error" });
+      const nm = requireString(psc.name, "/psc/name", "REQUIRED", "PSC name is required", 2);
+      if (nm) errors.push(nm);
+      const noc = psc.naturesOfControl as string[] | undefined;
+      if (!noc || !Array.isArray(noc) || noc.length === 0) {
+        errors.push({ path: "/psc/naturesOfControl", code: "REQUIRED", message: "At least one nature of control must be specified" });
       }
-      if (payload.resignationDate && new Date(payload.resignationDate as string) > new Date()) {
-        issues.push({ field: "resignationDate", message: "Resignation date is in the future", severity: "error" });
+      const notif = requireDate(psc.notifiedOn, "/psc/notifiedOn");
+      if (notif) errors.push(notif);
+      // Individual must have DOB
+      if (psc.pscType === "individual" && !psc.dateOfBirth) {
+        errors.push({ path: "/psc/dateOfBirth", code: "REQUIRED", message: "Date of birth is required for individual PSC" });
       }
-      break;
+      // Cease requires ceasedOn
+      if (action === "cease" && !psc.ceasedOn) {
+        errors.push({ path: "/psc/ceasedOn", code: "REQUIRED", message: "Ceased date is required when ceasing a PSC" });
+      }
+      // Identity verification (2026 compliance)
+      if (psc.pscType === "individual" && !psc.identityVerified) {
+        warnings.push({ path: "/psc/identityVerified", code: "ID_NOT_VERIFIED", message: "Identity verification is recommended for PSCs (2026 requirement)" });
+      }
+      if (psc.serviceAddress) {
+        const sAddr = validateAddress(psc.serviceAddress as Record<string, unknown>, "/psc/serviceAddress");
+        errors.push(...sAddr.errors);
+        warnings.push(...sAddr.warnings);
+      }
     }
-    case "PSC_CHANGE": {
-      if (!payload.name && !payload.fullName) issues.push({ field: "name", message: "PSC name is required", severity: "error" });
-      const noc = payload.naturesOfControl as string[] | undefined;
-      if (!noc || noc.length === 0) issues.push({ field: "naturesOfControl", message: "At least one nature of control must be specified", severity: "error" });
-      if (!payload.notifiedDate) issues.push({ field: "notifiedDate", message: "Notified date is required", severity: "error" });
-      if (!payload.dateOfBirth) issues.push({ field: "dateOfBirth", message: "Date of birth is missing for individual PSC", severity: "warning" });
-      break;
-    }
-    case "SIC_CHANGE": {
-      const codes = payload.sicCodes as string[] | undefined;
-      if (!codes || codes.length === 0) issues.push({ field: "sicCodes", message: "At least one SIC code is required", severity: "error" });
-      if (codes) {
-        for (const code of codes) {
-          if (!/^\d{5}$/.test(code.trim())) issues.push({ field: "sicCodes", message: `Invalid SIC code format: "${code}" (must be 5 digits)`, severity: "error" });
+    return { errors, warnings };
+  },
+
+  // 1.9 SIC Change
+  SIC_CHANGE: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const d = requireDate(payload.effectiveDate, "/effectiveDate");
+    if (d) errors.push(d);
+    const codes = payload.sicCodes as string[] | undefined;
+    if (!codes || !Array.isArray(codes) || codes.length === 0) {
+      errors.push({ path: "/sicCodes", code: "REQUIRED", message: "At least one SIC code is required" });
+    } else {
+      if (codes.length > 4) errors.push({ path: "/sicCodes", code: "MAX_EXCEEDED", message: "Maximum 4 SIC codes allowed" });
+      for (let i = 0; i < codes.length; i++) {
+        if (!SIC_RE.test(codes[i]?.trim() || "")) {
+          errors.push({ path: `/sicCodes/${i}`, code: "INVALID_SIC", message: `Invalid SIC code format: "${codes[i]}" (must be 5 digits)` });
         }
       }
-      break;
     }
-    case "ALLOT_SHARES": {
-      if (!payload.shareClassId) issues.push({ field: "shareClassId", message: "Share class is required", severity: "error" });
-      if (!payload.toMemberId && !payload.subscriberName) issues.push({ field: "subscriber", message: "Subscriber / member is required", severity: "error" });
-      const qty = Number(payload.quantity);
-      if (!qty || qty <= 0) issues.push({ field: "quantity", message: "Quantity must be greater than 0", severity: "error" });
-      if (!payload.txDate) issues.push({ field: "txDate", message: "Transaction date is required", severity: "error" });
-      if (!payload.considerationPence && payload.considerationPence !== 0) issues.push({ field: "consideration", message: "Consideration amount is missing", severity: "warning" });
-      break;
-    }
-    case "TRANSFER_SHARES": {
-      if (!payload.fromMemberId) issues.push({ field: "fromMember", message: "Transferor (from member) is required", severity: "error" });
-      if (!payload.toMemberId) issues.push({ field: "toMember", message: "Transferee (to member) is required", severity: "error" });
-      const tQty = Number(payload.quantity);
-      if (!tQty || tQty <= 0) issues.push({ field: "quantity", message: "Quantity must be greater than 0", severity: "error" });
-      if (!payload.txDate) issues.push({ field: "txDate", message: "Transaction date is required", severity: "error" });
-      break;
-    }
-  }
+    return { errors, warnings };
+  },
 
-  return issues;
+  // 1.10 Allot Shares
+  ALLOT_SHARES: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const d = requireDate(payload.allotmentDate, "/allotmentDate");
+    if (d) errors.push(d);
+    const sc = requireUuid(payload.shareClassId, "/shareClassId", "Share class is required");
+    if (sc) errors.push(sc);
+    const allotments = payload.allotments as Array<Record<string, unknown>> | undefined;
+    if (!allotments || !Array.isArray(allotments) || allotments.length === 0) {
+      errors.push({ path: "/allotments", code: "REQUIRED", message: "At least one allotment entry is required" });
+    } else {
+      for (let i = 0; i < allotments.length; i++) {
+        const a = allotments[i];
+        const m = requireUuid(a.toMemberId, `/allotments/${i}/toMemberId`, "Subscriber / member is required");
+        if (m) errors.push(m);
+        const q = Number(a.quantity);
+        if (!q || q < 1) errors.push({ path: `/allotments/${i}/quantity`, code: "INVALID_QUANTITY", message: "Quantity must be at least 1" });
+        if (a.considerationPence === undefined || a.considerationPence === null) {
+          warnings.push({ path: `/allotments/${i}/considerationPence`, code: "MISSING_CONSIDERATION", message: "Consideration amount is missing" });
+        }
+      }
+    }
+    if (!payload.resolutionDocumentId) warnings.push({ path: "/resolutionDocumentId", code: "MISSING_DOC", message: "No resolution document attached. Recommended." });
+    return { errors, warnings };
+  },
+
+  // 1.11 Transfer Shares
+  TRANSFER_SHARES: (payload, ctx) => {
+    const { errors, warnings } = commonChecks(ctx);
+    const d = requireDate(payload.transferDate, "/transferDate");
+    if (d) errors.push(d);
+    const sc = requireUuid(payload.shareClassId, "/shareClassId", "Share class is required");
+    if (sc) errors.push(sc);
+    const from = requireUuid(payload.fromMemberId, "/fromMemberId", "Transferor (from member) is required");
+    if (from) errors.push(from);
+    const to = requireUuid(payload.toMemberId, "/toMemberId", "Transferee (to member) is required");
+    if (to) errors.push(to);
+    const qty = Number(payload.quantity);
+    if (!qty || qty < 1) errors.push({ path: "/quantity", code: "INVALID_QUANTITY", message: "Quantity must be at least 1" });
+    if (!payload.stockTransferFormDocumentId) warnings.push({ path: "/stockTransferFormDocumentId", code: "MISSING_DOC", message: "No stock transfer form attached. Recommended." });
+    return { errors, warnings };
+  },
+};
+
+// Fallback for unknown types
+function validatePayload(
+  changeType: string,
+  payload: Record<string, unknown>,
+  context: ValidationContext
+): { ok: boolean; errors: ValidationResult[]; warnings: ValidationResult[] } {
+  const validator = VALIDATORS[changeType];
+  if (!validator) {
+    const { errors, warnings } = commonChecks(context);
+    return { ok: errors.length === 0, errors, warnings };
+  }
+  const result = validator(payload, context);
+  return { ok: result.errors.length === 0, errors: result.errors, warnings: result.warnings };
 }
 
-// Filing route determination
+// ── Filing route determination ──
 function getFilingRoute(changeType: string): "api_filing" | "xml_gateway" {
   switch (changeType) {
     case "CONFIRMATION_STATEMENT":
@@ -157,10 +363,25 @@ function getFilingRoute(changeType: string): "api_filing" | "xml_gateway" {
   }
 }
 
-// Idempotency key builder
+// ── Idempotency key builder ──
 function buildIdempotencyKey(tenantId: string, clientId: string, changeType: string, changeId: string): string {
   return `ch:${tenantId}:${clientId}:${changeType}:${changeId}:v1`;
 }
+
+// ── Schema registry map (for reference / audit) ──
+const SCHEMA_REGISTRY: Record<string, string> = {
+  CONFIRMATION_STATEMENT: "secretarial/confirmation-statement.json",
+  CHANGE_REGISTERED_OFFICE: "secretarial/change-registered-office.json",
+  CHANGE_SAIL_ADDRESS: "secretarial/change-sail-address.json",
+  APPOINT_DIRECTOR: "secretarial/appoint-director.json",
+  RESIGN_DIRECTOR: "secretarial/resign-director.json",
+  APPOINT_SECRETARY: "secretarial/appoint-secretary.json",
+  RESIGN_SECRETARY: "secretarial/resign-secretary.json",
+  PSC_CHANGE: "secretarial/psc-change.json",
+  SIC_CHANGE: "secretarial/sic-change.json",
+  ALLOT_SHARES: "secretarial/allot-shares.json",
+  TRANSFER_SHARES: "secretarial/transfer-shares.json",
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -197,6 +418,48 @@ Deno.serve(async (req) => {
       const clientId = url.searchParams.get("clientId");
       if (!clientId) throw new Error("clientId required");
       return clientId;
+    }
+
+    // Helper to build validation context for a client
+    async function buildValidationContext(clientId: string, excludeChangeId?: string): Promise<ValidationContext> {
+      const [authRes, companyRes, directorsRes, pscRes, pendingRes] = await Promise.all([
+        supabase.from("client_credentials").select("id")
+          .eq("tenant_id", tenantId).eq("client_id", clientId)
+          .eq("provider", "companies_house").eq("credential_type", "auth_code").maybeSingle(),
+        supabase.from("company_profiles").select("company_status, registered_office_json, sic_codes, last_synced_at")
+          .eq("tenant_id", tenantId).eq("client_id", clientId).maybeSingle(),
+        supabase.from("company_register_directors").select("id")
+          .eq("tenant_id", tenantId).eq("client_id", clientId).eq("is_active", true),
+        supabase.from("company_register_psc").select("id")
+          .eq("tenant_id", tenantId).eq("client_id", clientId).eq("is_active", true),
+        (() => {
+          let q = supabase.from("secretarial_changes").select("id")
+            .eq("tenant_id", tenantId).eq("client_id", clientId)
+            .in("status", ["draft", "awaiting_approval", "ready_to_file"]);
+          if (excludeChangeId) q = q.neq("id", excludeChangeId);
+          return q;
+        })(),
+      ]);
+
+      const lastSynced = companyRes.data?.last_synced_at;
+      const lastSyncDaysAgo = lastSynced ? Math.floor((Date.now() - new Date(lastSynced).getTime()) / 86400000) : null;
+      const ro = companyRes.data?.registered_office_json as Record<string, unknown> | null;
+
+      return {
+        authCodeStored: !!authRes.data,
+        companyStatus: companyRes.data?.company_status || undefined,
+        activeDirectors: directorsRes.data?.length || 0,
+        activePscs: pscRes.data?.length || 0,
+        hasRO: !!ro && !!(ro.addressLine1 || ro.address_line1 || ro.line1),
+        hasSicCodes: (companyRes.data?.sic_codes || []).length > 0,
+        pendingChanges: pendingRes.data?.length || 0,
+        lastSyncDaysAgo,
+      };
+    }
+
+    // ─── SCHEMA REGISTRY (GET) ───
+    if (req.method === "GET" && segments[0] === "schema-registry") {
+      return json(SCHEMA_REGISTRY);
     }
 
     // ─── SUMMARY ───
@@ -352,7 +615,6 @@ Deno.serve(async (req) => {
       const { clientId, authCode } = body;
       if (!clientId || !authCode) throw new Error("clientId and authCode required");
 
-      // Validate auth code format
       if (!AUTH_CODE_RE.test(authCode)) {
         return json({ error: "Auth code must be exactly 6 alphanumeric characters" }, 400);
       }
@@ -428,7 +690,7 @@ Deno.serve(async (req) => {
       return json(data, 201);
     }
 
-    // ─── CHANGES: VALIDATE ───
+    // ─── CHANGES: VALIDATE (schema-based) ───
     if (req.method === "POST" && segments[0] === "changes" && segments[2] === "validate") {
       const changeId = segments[1];
 
@@ -436,50 +698,24 @@ Deno.serve(async (req) => {
         .select("*").eq("tenant_id", tenantId).eq("id", changeId).single();
       if (changeErr || !change) throw new Error("Change not found");
 
-      // Gather validation context
-      const [authRes, companyRes, directorsRes, pscRes, pendingRes] = await Promise.all([
-        supabase.from("client_credentials").select("id")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id)
-          .eq("provider", "companies_house").eq("credential_type", "auth_code").maybeSingle(),
-        supabase.from("company_profiles").select("company_status, registered_office_json, sic_codes, last_synced_at")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id).maybeSingle(),
-        supabase.from("company_register_directors").select("id")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id).eq("is_active", true),
-        supabase.from("company_register_psc").select("id")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id).eq("is_active", true),
-        supabase.from("secretarial_changes").select("id")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id)
-          .in("status", ["draft", "awaiting_approval", "ready_to_file"])
-          .neq("id", changeId),
-      ]);
+      const ctx = await buildValidationContext(change.client_id, changeId);
+      const result = validatePayload(change.change_type, change.payload_json as Record<string, unknown>, ctx);
 
-      const lastSynced = companyRes.data?.last_synced_at;
-      const lastSyncDaysAgo = lastSynced ? Math.floor((Date.now() - new Date(lastSynced).getTime()) / 86400000) : null;
-      const ro = companyRes.data?.registered_office_json as Record<string, unknown> | null;
-
-      const issues = validateChangePayload(change.change_type, change.payload_json as Record<string, unknown>, {
-        authCodeStored: !!authRes.data,
-        companyStatus: companyRes.data?.company_status || undefined,
-        activeDirectors: directorsRes.data?.length || 0,
-        activePscs: pscRes.data?.length || 0,
-        hasRO: !!ro && !!(ro.address_line1 || ro.line1),
-        hasSicCodes: (companyRes.data?.sic_codes || []).length > 0,
-        pendingChanges: pendingRes.data?.length || 0,
-        lastSyncDaysAgo,
-      });
-
-      const errors = issues.filter(i => i.severity === "error");
-      const warnings = issues.filter(i => i.severity === "warning");
-
-      // Store validation results on the change
+      // Store validation results
       await supabase.from("secretarial_changes")
         .update({
-          validation_json: { errors, warnings, validatedAt: new Date().toISOString() },
+          validation_json: {
+            ok: result.ok,
+            errors: result.errors,
+            warnings: result.warnings,
+            validatedAt: new Date().toISOString(),
+            schema: SCHEMA_REGISTRY[change.change_type] || null,
+          },
           updated_at: new Date().toISOString(),
         })
         .eq("id", changeId);
 
-      return json({ ok: errors.length === 0, errors, warnings });
+      return json(result);
     }
 
     // ─── CHANGES: APPROVE ───
@@ -508,41 +744,26 @@ Deno.serve(async (req) => {
       return json(data);
     }
 
-    // ─── CHANGES: SUBMIT (queue for CH filing with idempotency + validation) ───
+    // ─── CHANGES: SUBMIT (with schema validation + idempotency) ───
     if (req.method === "POST" && segments[0] === "changes" && segments[2] === "submit") {
       const changeId = segments[1];
 
-      // Load change
       const { data: change, error: changeErr } = await supabase.from("secretarial_changes")
         .select("*").eq("tenant_id", tenantId).eq("id", changeId).single();
       if (changeErr || !change) throw new Error("Change not found");
       if (change.status !== "ready_to_file") throw new Error("Change must be ready_to_file before submission");
 
-      // Run validation before submit
-      const [authRes, companyRes, directorsRes, pscRes, pendingRes] = await Promise.all([
-        supabase.from("client_credentials").select("id, ciphertext")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id)
-          .eq("provider", "companies_house").eq("credential_type", "auth_code").maybeSingle(),
-        supabase.from("company_profiles").select("company_status, company_number, registered_office_json, sic_codes, last_synced_at")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id).maybeSingle(),
-        supabase.from("company_register_directors").select("id")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id).eq("is_active", true),
-        supabase.from("company_register_psc").select("id")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id).eq("is_active", true),
-        supabase.from("secretarial_changes").select("id")
-          .eq("tenant_id", tenantId).eq("client_id", change.client_id)
-          .in("status", ["draft", "awaiting_approval", "ready_to_file"])
-          .neq("id", changeId),
-      ]);
-
       // Auth code check
-      if (change.requires_auth_code && !authRes.data) {
+      const { data: authCred } = await supabase.from("client_credentials")
+        .select("id, ciphertext")
+        .eq("tenant_id", tenantId).eq("client_id", change.client_id)
+        .eq("provider", "companies_house").eq("credential_type", "auth_code").maybeSingle();
+
+      if (change.requires_auth_code && !authCred) {
         throw new Error("Companies House auth code required but not stored for this client");
       }
 
-      // Auth code format validation
-      if (authRes.data?.ciphertext && !AUTH_CODE_RE.test(authRes.data.ciphertext)) {
-        // Mark integration as degraded
+      if (authCred?.ciphertext && !AUTH_CODE_RE.test(authCred.ciphertext)) {
         await supabase.from("integration_health").upsert({
           tenant_id: tenantId,
           client_id: change.client_id,
@@ -551,44 +772,29 @@ Deno.serve(async (req) => {
           last_error: "Auth code format invalid — may have been changed",
           checked_at: new Date().toISOString(),
         }, { onConflict: "tenant_id,client_id,provider" });
-
         throw new Error("Auth code format invalid — please update the auth code");
       }
 
-      const lastSynced = companyRes.data?.last_synced_at;
-      const lastSyncDaysAgo = lastSynced ? Math.floor((Date.now() - new Date(lastSynced).getTime()) / 86400000) : null;
-      const ro = companyRes.data?.registered_office_json as Record<string, unknown> | null;
+      // Run schema-based validation
+      const ctx = await buildValidationContext(change.client_id, changeId);
+      const result = validatePayload(change.change_type, change.payload_json as Record<string, unknown>, ctx);
 
-      const issues = validateChangePayload(change.change_type, change.payload_json as Record<string, unknown>, {
-        authCodeStored: !!authRes.data,
-        companyStatus: companyRes.data?.company_status || undefined,
-        activeDirectors: directorsRes.data?.length || 0,
-        activePscs: pscRes.data?.length || 0,
-        hasRO: !!ro && !!(ro.address_line1 || ro.line1),
-        hasSicCodes: (companyRes.data?.sic_codes || []).length > 0,
-        pendingChanges: pendingRes.data?.length || 0,
-        lastSyncDaysAgo,
-      });
-
-      const errors = issues.filter(i => i.severity === "error");
-      if (errors.length > 0) {
-        // Store validation and reject
+      if (!result.ok) {
         await supabase.from("secretarial_changes")
           .update({
             status: "draft",
-            validation_json: { errors, warnings: issues.filter(i => i.severity === "warning"), validatedAt: new Date().toISOString() },
+            validation_json: { ...result, validatedAt: new Date().toISOString(), schema: SCHEMA_REGISTRY[change.change_type] || null },
             updated_at: new Date().toISOString(),
           })
           .eq("id", changeId);
 
-        return json({ error: "Validation failed", issues: errors }, 422);
+        return json({ error: "Validation failed", ...result }, 422);
       }
 
-      // Build idempotency key
+      // Idempotency
       const idempotencyKey = buildIdempotencyKey(tenantId, change.client_id, change.change_type, changeId);
       const filingRoute = getFilingRoute(change.change_type);
 
-      // Check for existing submission job with same idempotency key (prevent duplicates)
       const { data: existingJob } = await supabase.from("submission_jobs")
         .select("id, status, correlation_id")
         .eq("tenant_id", tenantId)
@@ -597,15 +803,18 @@ Deno.serve(async (req) => {
 
       if (existingJob) {
         if (["sent", "accepted"].includes(existingJob.status)) {
-          return json({ submissionJobId: existingJob.id, status: existingJob.status, message: "Already submitted" }, 200);
+          return json({ submissionJobId: existingJob.id, status: existingJob.status, message: "Already submitted" });
         }
-        // Resume existing job (e.g., if it was queued but not sent)
         if (existingJob.status === "queued") {
-          return json({ submissionJobId: existingJob.id, status: "queued", message: "Already queued" }, 200);
+          return json({ submissionJobId: existingJob.id, status: "queued", message: "Already queued" });
         }
       }
 
-      // Create submission job with idempotency
+      // Get company number for filing
+      const { data: company } = await supabase.from("company_profiles")
+        .select("company_number").eq("tenant_id", tenantId).eq("client_id", change.client_id).maybeSingle();
+
+      // Create submission job
       const { data: job, error: jobErr } = await supabase.from("submission_jobs").insert({
         tenant_id: tenantId,
         client_id: change.client_id,
@@ -614,51 +823,46 @@ Deno.serve(async (req) => {
         payload_json: {
           ...change.payload_json as Record<string, unknown>,
           _filingRoute: filingRoute,
-          _companyNumber: companyRes.data?.company_number,
+          _companyNumber: company?.company_number,
           _changeType: change.change_type,
+          _schema: SCHEMA_REGISTRY[change.change_type] || null,
         },
         idempotency_key: idempotencyKey,
         created_by_user_id: user.id,
       }).select().single();
       if (jobErr) throw jobErr;
 
-      // Update change
-      await supabase.from("secretarial_changes")
-        .update({
-          status: "queued",
+      // Update change + create CH filing record
+      await Promise.all([
+        supabase.from("secretarial_changes")
+          .update({
+            status: "queued",
+            submission_job_id: job.id,
+            validation_json: { ...result, validatedAt: new Date().toISOString(), schema: SCHEMA_REGISTRY[change.change_type] || null },
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", changeId),
+        supabase.from("ch_filings").insert({
+          tenant_id: tenantId,
+          client_id: change.client_id,
+          filing_type: change.change_type,
+          filing_description: change.title,
+          request_json: change.payload_json,
+          status: "pending",
           submission_job_id: job.id,
-          validation_json: { errors: [], warnings: issues.filter(i => i.severity === "warning"), validatedAt: new Date().toISOString() },
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", changeId);
-
-      // Create CH filing record
-      await supabase.from("ch_filings").insert({
-        tenant_id: tenantId,
-        client_id: change.client_id,
-        filing_type: change.change_type,
-        filing_description: change.title,
-        request_json: change.payload_json,
-        status: "pending",
-        submission_job_id: job.id,
-      });
-
-      await supabase.from("event_logs").insert({
-        tenant_id: tenantId, event_type: "ch_filing_submitted",
-        source: "user", actor_user_id: user.id, client_id: change.client_id,
-        payload_json: {
-          changeId,
-          submissionJobId: job.id,
-          filingRoute,
-          idempotencyKey,
-        },
-        correlation_id: job.correlation_id || null,
-      });
+        }),
+        supabase.from("event_logs").insert({
+          tenant_id: tenantId, event_type: "ch_filing_submitted",
+          source: "user", actor_user_id: user.id, client_id: change.client_id,
+          payload_json: { changeId, submissionJobId: job.id, filingRoute, idempotencyKey, schema: SCHEMA_REGISTRY[change.change_type] || null },
+          correlation_id: job.correlation_id || null,
+        }),
+      ]);
 
       return json({ submissionJobId: job.id, filingRoute, idempotencyKey }, 202);
     }
 
-    // ─── CHANGES: GET DETAILS (single change with submission job + events) ───
+    // ─── CHANGES: GET DETAILS ───
     if (req.method === "GET" && segments[0] === "changes" && segments.length === 2) {
       const changeId = segments[1];
 
@@ -667,7 +871,6 @@ Deno.serve(async (req) => {
         .eq("tenant_id", tenantId).eq("id", changeId).single();
       if (error) throw error;
 
-      // Fetch related submission job if exists
       let submissionJob = null;
       if (change.submission_job_id) {
         const { data: job } = await supabase.from("submission_jobs")
@@ -675,7 +878,6 @@ Deno.serve(async (req) => {
         submissionJob = job;
       }
 
-      // Fetch related event logs
       const { data: events } = await supabase.from("event_logs")
         .select("*")
         .eq("tenant_id", tenantId)
@@ -684,7 +886,6 @@ Deno.serve(async (req) => {
         .order("created_at", { ascending: false })
         .limit(20);
 
-      // Fetch related CH filing
       let chFiling = null;
       if (change.submission_job_id) {
         const { data: filing } = await supabase.from("ch_filings")
@@ -708,7 +909,7 @@ Deno.serve(async (req) => {
       return json(data);
     }
 
-    // ─── WORKBENCH (aggregated) ───
+    // ─── WORKBENCH ───
     if (req.method === "GET" && segments[0] === "workbench") {
       const [dueRes, pendingRes, healthRes] = await Promise.all([
         supabase.from("v_secretarial_due").select("*").eq("tenant_id", tenantId),

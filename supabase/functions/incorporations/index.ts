@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
       return json(data, 201);
     }
 
-    // ─── VALIDATE ───
+    // ─── VALIDATE (schema-based, path-style output) ───
     if (req.method === "POST" && segments[0] === "applications" && segments[2] === "validate") {
       const appId = segments[1];
 
@@ -193,34 +193,122 @@ Deno.serve(async (req) => {
       const app = appRes.data;
       const people = peopleRes.data || [];
       const shares = sharesRes.data || [];
-      const issues: Array<{ field: string; message: string; severity: string }> = [];
 
-      if (!app.proposed_name) issues.push({ field: "companyName", message: "Company name is required", severity: "error" });
-      if (!app.sic_codes?.length) issues.push({ field: "sicCodes", message: "At least one SIC code is required", severity: "error" });
-      if (!people.some((p: { role: string }) => p.role === "director")) {
-        issues.push({ field: "people", message: "At least one director is required", severity: "error" });
-      }
-      if (!people.some((p: { role: string }) => ["psc", "subscriber"].includes(p.role))) {
-        issues.push({ field: "people", message: "At least one PSC/subscriber is required", severity: "error" });
-      }
-      if (!shares.length) issues.push({ field: "shareStructure", message: "Share structure is required", severity: "error" });
+      const UK_POSTCODE_RE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[ABD-HJLNP-UW-Z]{2}$/i;
+      const SIC_RE = /^\d{5}$/;
+      const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-      // KYC check
-      const kycPending = people.filter((p: { kyc_status: string }) => p.kyc_status !== "approved");
-      if (kycPending.length) {
-        issues.push({ field: "kyc", message: `${kycPending.length} person(s) have pending KYC checks`, severity: "warning" });
+      const errors: Array<{ path: string; code: string; message: string }> = [];
+      const warnings: Array<{ path: string; code: string; message: string }> = [];
+
+      // Company name
+      if (!app.proposed_name || app.proposed_name.trim().length < 2) {
+        errors.push({ path: "/companyName", code: "REQUIRED", message: "Company name is required (min 2 chars)" });
+      } else if (app.proposed_name.length > 160) {
+        errors.push({ path: "/companyName", code: "MAX_LENGTH", message: "Company name must be under 160 characters" });
       }
 
-      // Consent check
-      const noConsent = people.filter((p: { role: string; consent_to_act: boolean }) =>
-        p.role === "director" && !p.consent_to_act);
-      if (noConsent.length) {
-        issues.push({ field: "consent", message: `${noConsent.length} director(s) have not given consent to act`, severity: "error" });
+      // SIC codes
+      const sicCodes = app.sic_codes || [];
+      if (sicCodes.length === 0) {
+        errors.push({ path: "/sicCodes", code: "REQUIRED", message: "At least one SIC code is required" });
+      } else {
+        if (sicCodes.length > 4) errors.push({ path: "/sicCodes", code: "MAX_EXCEEDED", message: "Maximum 4 SIC codes allowed" });
+        for (let i = 0; i < sicCodes.length; i++) {
+          if (!SIC_RE.test(sicCodes[i]?.trim() || "")) {
+            errors.push({ path: `/sicCodes/${i}`, code: "INVALID_SIC", message: `Invalid SIC code: "${sicCodes[i]}" (must be 5 digits)` });
+          }
+        }
       }
 
-      const ok = !issues.some(i => i.severity === "error");
+      // Registered office address
+      const ro = app.registered_office_json as Record<string, unknown> | null;
+      if (!ro || typeof ro !== "object" || Object.keys(ro).length === 0) {
+        errors.push({ path: "/registeredOfficeAddress", code: "REQUIRED", message: "Registered office address is required" });
+      } else {
+        const line1 = ro.addressLine1 ?? ro.address_line1 ?? ro.line1;
+        if (!line1) errors.push({ path: "/registeredOfficeAddress/addressLine1", code: "REQUIRED", message: "Address line 1 is required" });
+        const postTown = ro.postTown ?? ro.post_town ?? ro.city;
+        if (!postTown) errors.push({ path: "/registeredOfficeAddress/postTown", code: "REQUIRED", message: "Post town is required" });
+        const country = (ro.country as string) || "";
+        if (!country) errors.push({ path: "/registeredOfficeAddress/country", code: "REQUIRED", message: "Country is required" });
+        const pc = (ro.postcode as string) || "";
+        const isUK = !country || /^(united kingdom|england|wales|scotland|northern ireland|uk|gb)$/i.test(country);
+        if (isUK && !pc) errors.push({ path: "/registeredOfficeAddress/postcode", code: "REQUIRED", message: "Postcode is required for UK addresses" });
+        else if (isUK && pc && !UK_POSTCODE_RE.test(pc)) errors.push({ path: "/registeredOfficeAddress/postcode", code: "INVALID_POSTCODE", message: "Invalid UK postcode format" });
+      }
 
-      return json({ ok, issues });
+      // People validation
+      if (people.length === 0) {
+        errors.push({ path: "/people", code: "REQUIRED", message: "At least one person (director) is required" });
+      } else {
+        const directors = people.filter((p: { role: string }) => p.role === "director");
+        const pscs = people.filter((p: { role: string }) => ["psc", "subscriber"].includes(p.role));
+
+        if (directors.length === 0) {
+          errors.push({ path: "/people", code: "MISSING_DIRECTOR", message: "At least one director is required" });
+        }
+        if (pscs.length === 0) {
+          errors.push({ path: "/people", code: "MISSING_PSC", message: "At least one PSC/subscriber is required" });
+        }
+
+        for (let i = 0; i < people.length; i++) {
+          const p = people[i] as Record<string, unknown>;
+          const prefix = `/people/${i}`;
+
+          if (!p.first_name) errors.push({ path: `${prefix}/name/forename`, code: "REQUIRED", message: "Forename is required" });
+          if (!p.last_name) errors.push({ path: `${prefix}/name/surname`, code: "REQUIRED", message: "Surname is required" });
+
+          // Individual requires DOB
+          if (!p.date_of_birth) {
+            errors.push({ path: `${prefix}/dateOfBirth`, code: "REQUIRED", message: "Date of birth is required" });
+          } else if (typeof p.date_of_birth === "string" && !DATE_RE.test(p.date_of_birth)) {
+            errors.push({ path: `${prefix}/dateOfBirth`, code: "INVALID_DATE", message: "Invalid date format (YYYY-MM-DD)" });
+          }
+
+          // Service address
+          const sAddr = p.service_address_json as Record<string, unknown> | null;
+          if (!sAddr || typeof sAddr !== "object" || Object.keys(sAddr).length === 0) {
+            errors.push({ path: `${prefix}/serviceAddress`, code: "REQUIRED", message: "Service address is required" });
+          }
+
+          // Directors must consent
+          if (p.role === "director" && !p.consent_to_act) {
+            errors.push({ path: `${prefix}/consentToAct`, code: "NOT_CONFIRMED", message: "Director must give consent to act" });
+          }
+
+          // PSC natures of control
+          if ((p.role === "psc" || p.role === "subscriber") && (!p.natures_of_control || !(p.natures_of_control as string[]).length)) {
+            warnings.push({ path: `${prefix}/naturesOfControl`, code: "MISSING_NOC", message: "Natures of control should be specified for PSC" });
+          }
+        }
+
+        // KYC checks
+        const kycPending = people.filter((p: { kyc_status: string }) => p.kyc_status !== "approved");
+        if (kycPending.length > 0) {
+          warnings.push({ path: "/kyc/status", code: "KYC_PENDING", message: `${kycPending.length} person(s) have pending KYC checks` });
+        }
+      }
+
+      // Share structure
+      if (shares.length === 0) {
+        errors.push({ path: "/shareStructure/shareClasses", code: "REQUIRED", message: "At least one share class is required" });
+      } else {
+        for (let i = 0; i < shares.length; i++) {
+          const s = shares[i] as Record<string, unknown>;
+          const prefix = `/shareStructure/shareClasses/${i}`;
+          if (!s.class_name) errors.push({ path: `${prefix}/className`, code: "REQUIRED", message: "Share class name is required" });
+          if (!s.nominal_value_pence || Number(s.nominal_value_pence) < 1) {
+            errors.push({ path: `${prefix}/nominalValuePence`, code: "INVALID", message: "Nominal value must be at least 1 pence" });
+          }
+          if (!s.total_shares || Number(s.total_shares) < 1) {
+            errors.push({ path: `${prefix}/totalShares`, code: "INVALID", message: "Total shares must be at least 1" });
+          }
+        }
+      }
+
+      const ok = errors.length === 0;
+      return json({ ok, errors, warnings, schema: "incorporation/incorporation-application.json" });
     }
 
     // ─── PAY ───
