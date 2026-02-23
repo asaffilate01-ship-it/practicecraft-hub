@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   CloudCog,
   FilePlus2,
+  Send,
+  Briefcase,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -39,10 +41,12 @@ const mainNav: NavItem[] = [
   { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"] },
   { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"] },
   { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"] },
-  { title: "AML / KYC", url: "/kyc", icon: ShieldCheck, permission: ["aml", "view"] },
+  { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"] },
+  { title: "Submissions", url: "/submissions", icon: Send, permission: ["submissions", "view"] },
   { title: "Billing", url: "/billing", icon: CreditCard, permission: ["billing", "view"] },
   { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"] },
   { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"] },
+  { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"] },
 ];
 
 const bottomNav: NavItem[] = [
