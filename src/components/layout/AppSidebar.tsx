@@ -55,6 +55,7 @@ const mainNav: NavItem[] = [
   { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
   { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
   { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
+  { title: "Tenant Onboarding", url: "/practice/onboarding", icon: FilePlus2, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
 ];
 
 const bottomNav: NavItem[] = [

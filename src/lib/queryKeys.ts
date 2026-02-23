@@ -83,6 +83,8 @@ export const qk = {
     branding: ["practice", "branding"] as const,
     features: ["practice", "features"] as const,
     tenants: ["practice", "tenants"] as const,
+    onboarding: (tenantId: string) => ["practice", "onboarding", tenantId] as const,
+    templatesCatalog: ["practice", "templates", "catalog"] as const,
   },
 
   // ── Settings ────────────────────────────────────────
