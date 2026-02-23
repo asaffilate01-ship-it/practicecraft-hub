@@ -44,6 +44,7 @@ import TenantAdmin from "@/pages/TenantAdmin";
 // ── Auth pages ──────────────────────────────────────────────
 import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
+import PortalSignup from "@/pages/auth/PortalSignup";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import HmrcCallback from "@/pages/auth/HmrcCallback";
@@ -87,7 +88,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   if (loading) return null;
-  if (session) return <Navigate to="/" replace />;
+  // Don't auto-redirect on public routes — let the login page handle redirect after auth
+  if (session) {
+    // Simple redirect; the login page does the smart redirect via get_user_type RPC
+    return <Navigate to="/" replace />;
+  }
   return <>{children}</>;
 }
 
@@ -126,6 +131,7 @@ const AppRoutes = () => (
     {/* ── Public auth routes ───────────────────────────── */}
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+    <Route path="/portal/signup" element={<PublicRoute><PortalSignup /></PublicRoute>} />
     <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/auth-redirect" element={<HmrcCallback />} />

@@ -61,6 +61,44 @@ Deno.serve(async (req) => {
   // For now, staff can pass clientId query param
   let clientId = url.searchParams.get("clientId");
 
+  const body = req.method !== "GET" ? await req.json().catch(() => ({})) : {};
+
+  // ── Accept Invite (can be called right after signup) ────
+  if (body?.action === "accept-invite") {
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const { data: inv, error: invErr } = await serviceClient
+      .from("portal_invitations")
+      .select("*")
+      .eq("token", body.token)
+      .eq("status", "pending")
+      .gt("expires_at", new Date().toISOString())
+      .single();
+
+    if (invErr || !inv) return json({ error: "Invalid or expired invitation" }, 400);
+
+    // Create portal_users record
+    await serviceClient.from("portal_users").upsert({
+      user_id: body.userId,
+      tenant_id: inv.tenant_id,
+      client_id: inv.client_id,
+      portal_role: inv.portal_role,
+      display_name: body.displayName || "",
+      status: "active",
+    }, { onConflict: "user_id,tenant_id" });
+
+    // Mark invitation as accepted
+    await serviceClient
+      .from("portal_invitations")
+      .update({ status: "accepted", accepted_at: new Date().toISOString() })
+      .eq("id", inv.id);
+
+    return json({ ok: true });
+  }
+
   try {
     switch (endpoint) {
       case "summary": {
