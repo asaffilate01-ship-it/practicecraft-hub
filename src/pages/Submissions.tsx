@@ -11,10 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Search, Send, RotateCcw, XCircle, Eye, CheckCircle2,
-  AlertTriangle, Clock, Loader2, Ban,
+  AlertTriangle, Clock, Loader2, Ban, Copy, RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { qk } from "@/lib/queryKeys";
@@ -273,85 +275,209 @@ export default function SubmissionsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Job Detail Dialog */}
-      <Dialog open={!!viewJob} onOpenChange={(open) => { if (!open) setViewJob(null); }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Submission Details</DialogTitle></DialogHeader>
-          {viewJob && (
-            <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-3">
+      {/* Job Detail Sheet */}
+      <SubmissionDetailSheet
+        job={viewJob}
+        onClose={() => setViewJob(null)}
+        onRetry={(id) => { retryMutation.mutate(id); setViewJob(null); }}
+        onCancel={(id) => { cancelMutation.mutate(id); setViewJob(null); }}
+      />
+    </div>
+  );
+}
+
+/* ───────── Submission Detail Sheet with Attempts ───────── */
+
+function SubmissionDetailSheet({
+  job,
+  onClose,
+  onRetry,
+  onCancel,
+}: {
+  job: any;
+  onClose: () => void;
+  onRetry: (id: string) => void;
+  onCancel: (id: string) => void;
+}) {
+  const { data: attempts = [], isLoading: attemptsLoading, refetch } = useQuery({
+    queryKey: ["submission_attempts", job?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("submission_attempts")
+        .select("*")
+        .eq("job_id", job.id)
+        .order("attempt_no", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!job?.id,
+  });
+
+  const copyCorrelationId = async () => {
+    const val = job?.correlation_id;
+    if (!val) return;
+    try {
+      await navigator.clipboard.writeText(val);
+      toast.success("Correlation ID copied");
+    } catch {
+      toast.error("Copy failed");
+    }
+  };
+
+  return (
+    <Sheet open={!!job} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <SheetContent className="w-full sm:max-w-lg p-0 flex flex-col">
+        <SheetHeader className="px-6 pt-6 pb-4 border-b">
+          <SheetTitle>Submission Details</SheetTitle>
+        </SheetHeader>
+
+        <ScrollArea className="flex-1">
+          {job && (
+            <div className="p-6 space-y-6">
+              {/* Summary grid */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Client</span>
-                  <p className="font-medium">{viewJob.clients?.legal_name || "—"}</p>
+                  <span className="text-muted-foreground text-xs">Client</span>
+                  <p className="font-medium">{job.clients?.legal_name || "—"}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Provider</span>
-                  <p className="font-medium">{providerLabels[viewJob.provider] || viewJob.provider}</p>
+                  <span className="text-muted-foreground text-xs">Provider</span>
+                  <p className="font-medium">{providerLabels[job.provider] || job.provider}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Type</span>
-                  <p className="font-medium capitalize">{viewJob.submission_type.replace(/_/g, " ")}</p>
+                  <span className="text-muted-foreground text-xs">Type</span>
+                  <p className="font-medium capitalize">{job.submission_type.replace(/_/g, " ")}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Status</span>
-                  <div className="mt-0.5"><StatusBadge status={viewJob.status} /></div>
+                  <span className="text-muted-foreground text-xs">Status</span>
+                  <div className="mt-0.5"><StatusBadge status={job.status} /></div>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Attempts</span>
-                  <p className="font-medium">{viewJob.attempt_count}</p>
+                  <span className="text-muted-foreground text-xs">Attempts</span>
+                  <p className="font-medium">{job.attempt_count} / {job.max_attempts ?? 8}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Idempotency Key</span>
-                  <p className="font-mono text-xs break-all">{viewJob.idempotency_key}</p>
+                  <span className="text-muted-foreground text-xs">Idempotency Key</span>
+                  <p className="font-mono text-xs break-all">{job.idempotency_key}</p>
                 </div>
-                {viewJob.correlation_id && (
-                  <div className="col-span-2">
-                    <span className="text-muted-foreground">Correlation ID</span>
-                    <p className="font-mono text-xs break-all">{viewJob.correlation_id}</p>
+              </div>
+
+              {/* Correlation ID with copy */}
+              {job.correlation_id && (
+                <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs text-muted-foreground">Correlation ID</span>
+                    <p className="font-mono text-xs break-all">{job.correlation_id}</p>
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={copyCorrelationId}>
+                    <Copy className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              )}
+
+              {/* Last error */}
+              {job.last_error && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                  <p className="text-xs font-medium text-destructive mb-1">Last Error</p>
+                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{job.last_error}</p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => refetch()}>
+                  <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                </Button>
+                {["rejected", "draft"].includes(job.status) && (
+                  <Button size="sm" className="gap-1.5" onClick={() => onRetry(job.id)}>
+                    <RotateCcw className="w-3.5 h-3.5" /> Retry
+                  </Button>
+                )}
+                {["queued", "draft"].includes(job.status) && (
+                  <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => onCancel(job.id)}>
+                    <XCircle className="w-3.5 h-3.5" /> Cancel
+                  </Button>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Attempts timeline */}
+              <div>
+                <h3 className="text-sm font-semibold mb-3">Attempts</h3>
+                {attemptsLoading ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading attempts…
+                  </div>
+                ) : attempts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-2">No attempts recorded yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {attempts.map((a: any) => (
+                      <div key={a.id} className="rounded-lg border p-3 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={a.status === "succeeded" ? "default" : "destructive"} className="text-[10px] px-1.5">
+                              #{a.attempt_no} — {a.status}
+                            </Badge>
+                            {a.http_status && (
+                              <span className="text-muted-foreground">HTTP {a.http_status}</span>
+                            )}
+                          </div>
+                          {a.duration_ms != null && (
+                            <span className="text-muted-foreground">{a.duration_ms}ms</span>
+                          )}
+                        </div>
+                        <div className="text-muted-foreground">
+                          {a.started_at && (
+                            <span>{new Date(a.started_at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+                          )}
+                        </div>
+                        {(a.provider_message || a.error_message) && (
+                          <p className="text-muted-foreground">{a.provider_message || a.error_message}</p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {viewJob.last_error && (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-                  <p className="text-xs font-medium text-destructive mb-1">Last Error</p>
-                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{viewJob.last_error}</p>
-                </div>
-              )}
+              <Separator />
 
-              {viewJob.response_json && Object.keys(viewJob.response_json).length > 0 && (
+              {/* Safe payload viewer */}
+              {job.request_json && Object.keys(job.request_json).length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Response</p>
+                  <h3 className="text-sm font-semibold mb-2">Request (safe)</h3>
                   <pre className="text-xs bg-muted rounded-lg p-3 overflow-auto max-h-40 whitespace-pre-wrap">
-                    {JSON.stringify(viewJob.response_json, null, 2)}
+                    {JSON.stringify(job.request_json, null, 2)}
                   </pre>
                 </div>
               )}
 
-              <div className="text-xs text-muted-foreground border-t pt-2 flex justify-between">
-                <span>Created: {new Date(viewJob.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-                <span>Updated: {new Date(viewJob.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-              </div>
+              {job.response_json && Object.keys(job.response_json).length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">Response (safe)</h3>
+                  <pre className="text-xs bg-muted rounded-lg p-3 overflow-auto max-h-40 whitespace-pre-wrap">
+                    {JSON.stringify(job.response_json, null, 2)}
+                  </pre>
+                </div>
+              )}
 
-              {/* Actions */}
-              {["rejected", "draft"].includes(viewJob.status) && (
-                <div className="flex gap-2 pt-1">
-                  <Button size="sm" className="gap-1.5" onClick={() => { retryMutation.mutate(viewJob.id); setViewJob(null); }}>
-                    <RotateCcw className="w-3.5 h-3.5" /> Retry
-                  </Button>
-                </div>
-              )}
-              {["queued", "draft"].includes(viewJob.status) && (
-                <div className="flex gap-2 pt-1">
-                  <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => { cancelMutation.mutate(viewJob.id); setViewJob(null); }}>
-                    <XCircle className="w-3.5 h-3.5" /> Cancel
-                  </Button>
-                </div>
-              )}
+              {/* Security note */}
+              <p className="text-[10px] text-muted-foreground/60 italic">
+                Encrypted payloads are never displayed. Only safe summaries are shown.
+              </p>
+
+              {/* Timestamps */}
+              <div className="text-xs text-muted-foreground border-t pt-3 flex justify-between">
+                <span>Created: {new Date(job.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                <span>Updated: {new Date(job.updated_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+              </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-    </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
   );
 }
