@@ -6000,6 +6000,75 @@ export type Database = {
           },
         ]
       }
+      submission_attempts: {
+        Row: {
+          attempt_no: number
+          duration_ms: number | null
+          error_class: string | null
+          error_detail: string | null
+          error_message: string | null
+          finished_at: string | null
+          http_status: number | null
+          id: string
+          job_id: string
+          provider_code: string | null
+          provider_message: string | null
+          request_meta_redacted: Json | null
+          response_meta_redacted: Json | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          attempt_no: number
+          duration_ms?: number | null
+          error_class?: string | null
+          error_detail?: string | null
+          error_message?: string | null
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          job_id: string
+          provider_code?: string | null
+          provider_message?: string | null
+          request_meta_redacted?: Json | null
+          response_meta_redacted?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          attempt_no?: number
+          duration_ms?: number | null
+          error_class?: string | null
+          error_detail?: string | null
+          error_message?: string | null
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          job_id?: string
+          provider_code?: string | null
+          provider_message?: string | null
+          request_meta_redacted?: Json | null
+          response_meta_redacted?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_attempts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "submission_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submission_attempts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_jobs_recent"
+            referencedColumns: ["submission_job_id"]
+          },
+        ]
+      }
       submission_jobs: {
         Row: {
           attempt_count: number

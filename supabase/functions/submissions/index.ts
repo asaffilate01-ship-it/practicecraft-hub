@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       }), { headers: jsonHeaders });
     }
 
-    // GET /submissions/{id} - get details
+    // GET /submissions/{id} - get details + attempts
     if (req.method === "GET" && resourceId && !action) {
       const { data, error } = await supabase
         .from("submission_jobs")
@@ -69,7 +69,14 @@ Deno.serve(async (req) => {
         .eq("id", resourceId)
         .single();
       if (error) throw error;
-      return new Response(JSON.stringify(data), { headers: jsonHeaders });
+
+      const { data: attempts } = await supabase
+        .from("submission_attempts")
+        .select("*")
+        .eq("job_id", resourceId)
+        .order("attempt_no", { ascending: false });
+
+      return new Response(JSON.stringify({ ...data, attempts: attempts ?? [] }), { headers: jsonHeaders });
     }
 
     // POST /submissions/{id}/retry
@@ -100,7 +107,7 @@ Deno.serve(async (req) => {
         .single();
       if (error) throw error;
 
-      // Log the retry event
+      // Log the retry event + create attempt record
       const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).single();
       if (profile?.tenant_id) {
         await supabase.from("event_logs").insert({
@@ -113,6 +120,14 @@ Deno.serve(async (req) => {
           correlation_id: job.correlation_id,
         });
       }
+
+      // Record the new attempt
+      await supabase.from("submission_attempts").insert({
+        job_id: resourceId,
+        attempt_no: job.attempt_count + 1,
+        status: "started",
+        request_meta_redacted: { trigger: "manual_retry", user_id: user.id, reason: body.reason || null },
+      });
 
       return new Response(JSON.stringify(data), { status: 202, headers: jsonHeaders });
     }
