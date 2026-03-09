@@ -43,6 +43,9 @@ import EmailTemplates from "@/pages/EmailTemplates";
 import TenantAdmin from "@/pages/TenantAdmin";
 import FpsBuilderPage from "@/pages/rti/FpsBuilderPage";
 import EpsBuilderPage from "@/pages/rti/EpsBuilderPage";
+import SelfAssessment from "@/pages/SelfAssessment";
+import CorporationTax from "@/pages/CorporationTax";
+import { StaffUsersTab } from "@/pages/practice/StaffUsersTab";
 
 // ── Auth pages ──────────────────────────────────────────────
 import Login from "@/pages/auth/Login";
