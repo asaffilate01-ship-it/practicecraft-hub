@@ -111,7 +111,7 @@ export default function CorporationTax() {
                           <TableCell className="text-muted-foreground font-mono text-xs">{client?.company_number ?? "—"}</TableCell>
                           <TableCell>{p.period_start} — {p.period_end}</TableCell>
                           <TableCell>
-                            {p.filing_deadline ? <DueDatePill date={p.filing_deadline} /> : "—"}
+                            {p.filing_deadline ? <DueDatePill dueDate={p.filing_deadline} /> : "—"}
                           </TableCell>
                           <TableCell>
                             <Badge variant={sc.variant} className="gap-1">

@@ -119,7 +119,7 @@ export default function SelfAssessment() {
                           </TableCell>
                           <TableCell>{p.period_start} — {p.period_end}</TableCell>
                           <TableCell>
-                            {p.filing_deadline ? <DueDatePill date={p.filing_deadline} /> : "—"}
+                            {p.filing_deadline ? <DueDatePill dueDate={p.filing_deadline} /> : "—"}
                           </TableCell>
                           <TableCell>
                             <Badge variant={sc.variant} className="gap-1">
