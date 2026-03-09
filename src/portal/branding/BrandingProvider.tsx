@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { usePermissions } from "@/hooks/usePermissions";
 
 type Branding = {
   portalName: string;
@@ -17,27 +20,43 @@ export function useBranding() {
   return useContext(BrandingCtx);
 }
 
-// Mock branding data — later replaced with API call
-const MOCK_BRANDING: Branding = {
-  practiceName: "IQ Advisory",
-  portalName: "IQ Advisory Client Portal",
-  logoUrl: "https://dummyimage.com/160x40/000/fff&text=IQ+Advisory",
-  primaryColor: "#111111",
-  accentColor: "#111111",
-  supportEmail: "support@iqadvisory.co.uk",
-  supportPhone: "+44 20 0000 0000",
-  legalLinks: {
-    termsUrl: "https://example.com/terms",
-    privacyUrl: "https://example.com/privacy",
-  },
-};
-
 export function BrandingProvider({ children }: { children: React.ReactNode }) {
-  const branding = MOCK_BRANDING;
+  const { tenantId } = usePermissions();
+
+  const { data: branding } = useQuery({
+    queryKey: ["portal-branding", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select("firm_name, trading_name, logo_url, brand_primary_color, brand_secondary_color, support_email, phone")
+        .eq("id", tenantId!)
+        .single();
+
+      if (error || !data) {
+        return {
+          practiceName: "Practice",
+          portalName: "Client Portal",
+        } as Branding;
+      }
+
+      const name = data.trading_name || data.firm_name;
+      return {
+        practiceName: name,
+        portalName: `${name} Client Portal`,
+        logoUrl: data.logo_url ?? undefined,
+        primaryColor: data.brand_primary_color ?? "#111111",
+        accentColor: data.brand_secondary_color ?? data.brand_primary_color ?? "#111111",
+        supportEmail: data.support_email ?? undefined,
+        supportPhone: data.phone ?? undefined,
+      } as Branding;
+    },
+    enabled: !!tenantId,
+    staleTime: 5 * 60_000,
+  });
 
   useEffect(() => {
     if (branding?.portalName) document.title = branding.portalName;
   }, [branding]);
 
-  return <BrandingCtx.Provider value={branding}>{children}</BrandingCtx.Provider>;
+  return <BrandingCtx.Provider value={branding ?? null}>{children}</BrandingCtx.Provider>;
 }

@@ -116,8 +116,8 @@ export function StaffUsersTab() {
       const { error } = await supabase.from("portal_invitations").insert({
         tenant_id: tenantId!,
         email: inviteEmail,
-        portal_role: "client_admin",
-        invited_by_user_id: user!.id,
+        portal_role: inviteRole || "client_admin",
+        invited_by: user!.id,
       });
       if (error) throw error;
     },

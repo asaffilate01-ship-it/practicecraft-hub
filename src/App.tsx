@@ -43,6 +43,9 @@ import EmailTemplates from "@/pages/EmailTemplates";
 import TenantAdmin from "@/pages/TenantAdmin";
 import FpsBuilderPage from "@/pages/rti/FpsBuilderPage";
 import EpsBuilderPage from "@/pages/rti/EpsBuilderPage";
+import SelfAssessment from "@/pages/SelfAssessment";
+import CorporationTax from "@/pages/CorporationTax";
+import { StaffUsersTab } from "@/pages/practice/StaffUsersTab";
 
 // ── Auth pages ──────────────────────────────────────────────
 import Login from "@/pages/auth/Login";
@@ -192,7 +195,12 @@ const AppRoutes = () => (
     {/* ── Accounts Production ──────────────────────────── */}
     <Route path="/accounts" element={<Guarded module="accounts" action="view"><AccountsPage /></Guarded>} />
 
-    {/* ── Secretarial ──────────────────────────────────── */}
+    {/* ── Self Assessment ──────────────────────────────── */}
+    <Route path="/self-assessment" element={<Guarded module="accounts" action="view"><SelfAssessment /></Guarded>} />
+
+    {/* ── Corporation Tax ──────────────────────────────── */}
+    <Route path="/corporation-tax" element={<Guarded module="accounts" action="view"><CorporationTax /></Guarded>} />
+
     <Route path="/secretarial" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><PlaceholderPage title="Change Detail" description="Secretarial change request detail, validation, and submission" /></Guarded>} />
@@ -236,7 +244,7 @@ const AppRoutes = () => (
 
     {/* ── Practice Management ──────────────────────────── */}
     <Route path="/practice" element={<Guarded module="settings" action="view"><PracticePage /></Guarded>} />
-    <Route path="/practice/users" element={<Guarded module="settings" action="view"><PlaceholderPage title="Users" description="Staff user management" /></Guarded>} />
+    <Route path="/practice/users" element={<Guarded module="settings" action="view"><StaffUsersTab /></Guarded>} />
     <Route path="/practice/roles" element={<Guarded module="settings" action="view"><PlaceholderPage title="Roles" description="Role and permission management" /></Guarded>} />
     <Route path="/practice/workflows" element={<Guarded module="automations" action="view"><PlaceholderPage title="Workflows" description="Automation rules and workflow configuration" /></Guarded>} />
     <Route path="/practice/integrations" element={<Guarded module="integrations" action="view"><PlaceholderPage title="Integrations" description="Third-party integrations and API connections" /></Guarded>} />
