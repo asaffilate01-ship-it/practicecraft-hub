@@ -57,6 +57,8 @@ const mainNav: NavItem[] = [
   { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
   { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
   { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+  { title: "Self Assessment", url: "/self-assessment", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+  { title: "Corporation Tax", url: "/corporation-tax", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
   { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
   { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"], featureKey: "incorporations", moduleKey: "incorporations" },
   { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },

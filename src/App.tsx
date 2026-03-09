@@ -195,7 +195,12 @@ const AppRoutes = () => (
     {/* ── Accounts Production ──────────────────────────── */}
     <Route path="/accounts" element={<Guarded module="accounts" action="view"><AccountsPage /></Guarded>} />
 
-    {/* ── Secretarial ──────────────────────────────────── */}
+    {/* ── Self Assessment ──────────────────────────────── */}
+    <Route path="/self-assessment" element={<Guarded module="accounts" action="view"><SelfAssessment /></Guarded>} />
+
+    {/* ── Corporation Tax ──────────────────────────────── */}
+    <Route path="/corporation-tax" element={<Guarded module="accounts" action="view"><CorporationTax /></Guarded>} />
+
     <Route path="/secretarial" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><PlaceholderPage title="Change Detail" description="Secretarial change request detail, validation, and submission" /></Guarded>} />
