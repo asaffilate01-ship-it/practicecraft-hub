@@ -371,6 +371,72 @@ export default function ReportsPage() {
         </Card>
       </div>
 
+      {/* Revenue Forecast */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold">Revenue Forecast (3-Month Projection)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(forecastQ.data?.length ?? 0) > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={forecastQ.data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `£${(v / 100).toFixed(0)}`} />
+                <Tooltip formatter={(v: number) => [`£${(v / 100).toLocaleString()}`, ""]} />
+                <Line type="monotone" dataKey="actual" stroke="hsl(199, 89%, 48%)" strokeWidth={2} dot name="Actual" connectNulls={false} />
+                <Line type="monotone" dataKey="forecast" stroke="hsl(38, 92%, 50%)" strokeWidth={2} strokeDasharray="6 3" dot={{ r: 4 }} name="Forecast" connectNulls={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[260px] flex items-center justify-center text-muted-foreground text-sm">Need at least 2 months of invoice data for forecasting.</div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Client Profitability */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold">Client Profitability (Top 20)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(profitabilityQ.data?.length ?? 0) > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client</TableHead>
+                  <TableHead className="text-right">Revenue</TableHead>
+                  <TableHead className="text-right">Est. Cost</TableHead>
+                  <TableHead className="text-right">Profit</TableHead>
+                  <TableHead className="text-right">Margin</TableHead>
+                  <TableHead className="text-right">Hours</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(profitabilityQ.data || []).map((c) => (
+                  <TableRow key={c.client}>
+                    <TableCell className="text-sm font-medium">{c.client}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">£{(c.revenue / 100).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-mono text-sm text-muted-foreground">£{(c.cost / 100).toLocaleString()}</TableCell>
+                    <TableCell className={`text-right font-mono text-sm ${c.profit < 0 ? "text-destructive" : ""}`}>
+                      £{(c.profit / 100).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={c.margin >= 50 ? "default" : c.margin >= 20 ? "secondary" : "destructive"} className="text-xs">
+                        {c.margin}%
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm">{c.hours}h</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="h-[120px] flex items-center justify-center text-muted-foreground text-sm">No client revenue data yet.</div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Staff Utilisation */}
       <Card>
         <CardHeader className="pb-2">
