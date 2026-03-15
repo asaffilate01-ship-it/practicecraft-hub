@@ -1,11 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
-import { Zap, Mail, ClipboardList, Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Zap, Mail, ClipboardList, Bell, Plus, Pencil, Trash2 } from "lucide-react";
+import { AutomationBuilder } from "@/components/workflows/AutomationBuilder";
+import { toast } from "sonner";
 
 export function WorkflowsTab() {
   const { user } = useAuth();
