@@ -1,7 +1,9 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useBranding } from "@/portal/branding/BrandingProvider";
 import { useFeatures } from "@/portal/features/FeaturesProvider";
-import { getPortalSession } from "@/portal/auth/session";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/contexts/AuthContext";
+import { buildPortalSession } from "@/portal/auth/session";
 import { ClientSwitcher } from "@/portal/components/ClientSwitcher";
 import {
   Home,
@@ -57,7 +59,9 @@ function PortalNavLink({ to, label, icon: Icon }: { to: string; label: string; i
 export function PortalShell() {
   const branding = useBranding();
   const features = useFeatures();
-  const session = getPortalSession();
+  const { role } = usePermissions();
+  const { user } = useAuth();
+  const session = buildPortalSession(role, user?.user_metadata?.full_name, user?.email);
 
   function isEnabled(feature: string) {
     if (feature === "home" || feature === "settings") return true;
