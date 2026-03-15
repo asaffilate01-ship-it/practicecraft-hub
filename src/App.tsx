@@ -184,6 +184,7 @@ const AppRoutes = () => (
     <Route path="/bookkeeping" element={<Guarded module="ledger" action="view"><Bookkeeping /></Guarded>} />
     <Route path="/bank-feeds" element={<Guarded module="ledger" action="view"><BankFeeds /></Guarded>} />
     <Route path="/categorisation-rules" element={<Guarded module="ledger" action="view"><CategorisationRules /></Guarded>} />
+    <Route path="/invoice-entry" element={<Guarded module="ledger" action="view"><InvoiceEntry /></Guarded>} />
     <Route path="/client-onboarding" element={<Guarded module="clients" action="view"><ClientOnboarding /></Guarded>} />
 
     {/* ── VAT (MTD) ────────────────────────────────────── */}
