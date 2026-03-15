@@ -278,6 +278,8 @@ export default function TimeRecording() {
           </Table>
         </CardContent>
       </Card>
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }
