@@ -263,6 +263,15 @@ export function WorkflowsTab() {
           </div>
         </CardContent>
       </Card>
+
+      {tenantId && (
+        <AutomationBuilder
+          open={showBuilder}
+          onOpenChange={(v) => { setShowBuilder(v); if (!v) setEditRule(null); }}
+          tenantId={tenantId}
+          editRule={editRule}
+        />
+      )}
     </div>
   );
 }
