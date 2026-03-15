@@ -164,10 +164,21 @@ export function WorkflowsTab() {
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Switch checked={rule.is_enabled ?? true} disabled />
+                    <Switch
+                      checked={rule.is_enabled ?? true}
+                      onCheckedChange={(v) => toggleRule.mutate({ id: rule.id, enabled: v })}
+                    />
                   </TableCell>
-                </TableRow>
-              ))}
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditRule(rule); setShowBuilder(true); }}>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteRule.mutate(rule.id)}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
               {automations.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
