@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.gocardless]
 verify_jwt = false
+
+[functions.receipt-ocr]
+verify_jwt = false
+
+[functions.open-banking]
+verify_jwt = false

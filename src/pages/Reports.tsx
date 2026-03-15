@@ -114,6 +114,82 @@ export default function ReportsPage() {
     enabled: !!tenantId,
   });
 
+  // Revenue forecast (simple linear projection)
+  const forecastQ = useQuery({
+    queryKey: ["reports-forecast", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase.from("invoices").select("issue_date, total, status").order("issue_date");
+      const byMonth: Record<string, number> = {};
+      for (const inv of data || []) {
+        const m = (inv as any).issue_date?.slice(0, 7);
+        if (m) byMonth[m] = (byMonth[m] || 0) + Number((inv as any).total || 0);
+      }
+      const months = Object.entries(byMonth).sort(([a], [b]) => a.localeCompare(b)).slice(-6);
+      if (months.length < 2) return [];
+
+      // Simple moving average forecast
+      const vals = months.map(([, v]) => v);
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const trend = vals.length > 1 ? (vals[vals.length - 1] - vals[0]) / (vals.length - 1) : 0;
+
+      const result = months.map(([m, v]) => ({ month: m, actual: v, forecast: null as number | null }));
+      const lastMonth = months[months.length - 1][0];
+      for (let i = 1; i <= 3; i++) {
+        const d = new Date(lastMonth + "-01");
+        d.setMonth(d.getMonth() + i);
+        const fm = d.toISOString().slice(0, 7);
+        result.push({ month: fm, actual: null as any, forecast: Math.max(0, avg + trend * i) });
+      }
+      return result;
+    },
+    enabled: !!tenantId,
+  });
+
+  // Client profitability
+  const profitabilityQ = useQuery({
+    queryKey: ["reports-profitability", tenantId],
+    queryFn: async () => {
+      const [invoicesRes, timeRes, clientsRes] = await Promise.all([
+        supabase.from("invoices").select("client_id, total, status"),
+        supabase.from("time_entries").select("client_id, duration_minutes, is_billable, hourly_rate_pence"),
+        supabase.from("clients").select("id, legal_name").eq("status", "active"),
+      ]);
+
+      const nameMap: Record<string, string> = {};
+      for (const c of clientsRes.data || []) nameMap[c.id] = c.legal_name;
+
+      const byClient: Record<string, { revenue: number; cost: number; hours: number }> = {};
+      for (const inv of invoicesRes.data || []) {
+        const cid = (inv as any).client_id;
+        if (!cid) continue;
+        if (!byClient[cid]) byClient[cid] = { revenue: 0, cost: 0, hours: 0 };
+        if ((inv as any).status === "paid") byClient[cid].revenue += Number((inv as any).total || 0);
+      }
+      for (const te of timeRes.data || []) {
+        const cid = (te as any).client_id;
+        if (!cid) continue;
+        if (!byClient[cid]) byClient[cid] = { revenue: 0, cost: 0, hours: 0 };
+        byClient[cid].hours += (te as any).duration_minutes / 60;
+        // Approximate cost at £40/hr internal rate
+        byClient[cid].cost += ((te as any).duration_minutes / 60) * 4000;
+      }
+
+      return Object.entries(byClient)
+        .map(([id, d]) => ({
+          client: nameMap[id] || "Unknown",
+          revenue: d.revenue,
+          cost: d.cost,
+          profit: d.revenue - d.cost,
+          margin: d.revenue > 0 ? Math.round(((d.revenue - d.cost) / d.revenue) * 100) : 0,
+          hours: Math.round(d.hours * 10) / 10,
+        }))
+        .filter(c => c.revenue > 0 || c.hours > 0)
+        .sort((a, b) => b.profit - a.profit)
+        .slice(0, 20);
+    },
+    enabled: !!tenantId,
+  });
+
   // Staff utilisation
   const utilisationQ = useQuery({
     queryKey: ["reports-utilisation", tenantId],
@@ -294,6 +370,72 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Revenue Forecast */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold">Revenue Forecast (3-Month Projection)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(forecastQ.data?.length ?? 0) > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={forecastQ.data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `£${(v / 100).toFixed(0)}`} />
+                <Tooltip formatter={(v: number) => [`£${(v / 100).toLocaleString()}`, ""]} />
+                <Line type="monotone" dataKey="actual" stroke="hsl(199, 89%, 48%)" strokeWidth={2} dot name="Actual" connectNulls={false} />
+                <Line type="monotone" dataKey="forecast" stroke="hsl(38, 92%, 50%)" strokeWidth={2} strokeDasharray="6 3" dot={{ r: 4 }} name="Forecast" connectNulls={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[260px] flex items-center justify-center text-muted-foreground text-sm">Need at least 2 months of invoice data for forecasting.</div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Client Profitability */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold">Client Profitability (Top 20)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(profitabilityQ.data?.length ?? 0) > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client</TableHead>
+                  <TableHead className="text-right">Revenue</TableHead>
+                  <TableHead className="text-right">Est. Cost</TableHead>
+                  <TableHead className="text-right">Profit</TableHead>
+                  <TableHead className="text-right">Margin</TableHead>
+                  <TableHead className="text-right">Hours</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(profitabilityQ.data || []).map((c) => (
+                  <TableRow key={c.client}>
+                    <TableCell className="text-sm font-medium">{c.client}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">£{(c.revenue / 100).toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-mono text-sm text-muted-foreground">£{(c.cost / 100).toLocaleString()}</TableCell>
+                    <TableCell className={`text-right font-mono text-sm ${c.profit < 0 ? "text-destructive" : ""}`}>
+                      £{(c.profit / 100).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={c.margin >= 50 ? "default" : c.margin >= 20 ? "secondary" : "destructive"} className="text-xs">
+                        {c.margin}%
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm">{c.hours}h</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="h-[120px] flex items-center justify-center text-muted-foreground text-sm">No client revenue data yet.</div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Staff Utilisation */}
       <Card>
