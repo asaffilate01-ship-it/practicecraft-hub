@@ -155,6 +155,18 @@ export default function TimeRecording() {
         <p className="text-sm text-muted-foreground">Track billable and non-billable hours across clients and tasks.</p>
       </div>
 
+      <Tabs defaultValue="entries">
+        <TabsList>
+          <TabsTrigger value="entries">Time Entries</TabsTrigger>
+          <TabsTrigger value="wip">WIP Report</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="wip" className="mt-4">
+          <WipReport />
+        </TabsContent>
+
+        <TabsContent value="entries" className="mt-4 space-y-6">
+
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Today" value={formatDuration(todayMinutes)} icon={Clock} iconColor="bg-accent" />
