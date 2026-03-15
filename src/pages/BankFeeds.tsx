@@ -202,6 +202,11 @@ export default function BankFeeds() {
           <p className="text-sm text-muted-foreground">Manage bank connections and imported transactions</p>
         </div>
         <div className="flex gap-2">
+          {uncategorisedCount > 0 && (
+            <Button variant="outline" className="gap-2" onClick={() => aiCategorise.mutate()} disabled={aiCategorise.isPending}>
+              <Sparkles className="w-4 h-4" /> {aiCategorise.isPending ? "Categorising…" : `AI Categorise (${uncategorisedCount})`}
+            </Button>
+          )}
           <Button variant="outline" className="gap-2" onClick={() => setShowAddTxn(true)}>
             <Plus className="w-4 h-4" /> Add Transaction
           </Button>

@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.companies-house]
 verify_jwt = false
+
+[functions.ai-categorise]
+verify_jwt = false
+
+[functions.gocardless]
+verify_jwt = false
