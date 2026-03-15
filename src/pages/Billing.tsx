@@ -375,6 +375,9 @@ export default function Billing() {
               )}
 
               <div className="flex gap-2 justify-end">
+                {(viewInvoice.status === "sent" || viewInvoice.status === "overdue") && (
+                  <InvoicePaymentButton invoiceId={viewInvoice.id} checkoutUrl={viewInvoice.stripe_checkout_url} />
+                )}
                 {viewInvoice.status === "draft" && (
                   <Button variant="outline" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "sent" })}>
                     Mark Sent
@@ -390,6 +393,9 @@ export default function Billing() {
           )}
         </DialogContent>
       </Dialog>
+
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }
