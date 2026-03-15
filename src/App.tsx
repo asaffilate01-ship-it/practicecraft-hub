@@ -310,6 +310,7 @@ const App = () => (
         <ClientContextProvider>
           <BrowserRouter>
             <AppRoutes />
+            <CookieConsent />
           </BrowserRouter>
         </ClientContextProvider>
       </AuthProvider>
