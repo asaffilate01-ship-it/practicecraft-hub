@@ -30,10 +30,12 @@ import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/contexts/AuthContext";
 import { usePracticeBranding } from "@/practice/branding/PracticeBrandingProvider";
 import { usePracticeFeatures } from "@/practice/features/PracticeFeaturesProvider";
 import { TenantSwitcher } from "@/practice/components/TenantSwitcher";
-import { getStaffSession, canUseModule } from "@/practice/auth/staffSession";
+import { buildStaffSession, canUseModule } from "@/practice/auth/staffSession";
+
 
 type NavItem = {
   title: string;
