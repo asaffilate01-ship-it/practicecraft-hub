@@ -8,6 +8,13 @@ import { ClientContextProvider } from "@/contexts/ClientContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
+import { CookieConsent } from "@/components/CookieConsent";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ClientContextProvider } from "@/contexts/ClientContext";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { PermissionGuard } from "@/components/PermissionGuard";
+import { usePermissions } from "@/hooks/usePermissions";
 
 // ── Pages ───────────────────────────────────────────────────
 import Dashboard from "@/pages/Dashboard";
