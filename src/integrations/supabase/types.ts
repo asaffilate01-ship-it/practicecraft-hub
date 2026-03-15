@@ -2815,8 +2815,10 @@ export type Database = {
           issue_date: string
           notes: string | null
           status: string
+          stripe_checkout_url: string | null
           stripe_invoice_id: string | null
           stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           subtotal: number
           tenant_id: string
           total: number
@@ -2833,8 +2835,10 @@ export type Database = {
           issue_date?: string
           notes?: string | null
           status?: string
+          stripe_checkout_url?: string | null
           stripe_invoice_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           subtotal?: number
           tenant_id: string
           total?: number
@@ -2851,8 +2855,10 @@ export type Database = {
           issue_date?: string
           notes?: string | null
           status?: string
+          stripe_checkout_url?: string | null
           stripe_invoice_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           subtotal?: number
           tenant_id?: string
           total?: number
@@ -6615,6 +6621,7 @@ export type Database = {
           phone: string | null
           plan_code: string | null
           primary_domain: string | null
+          stripe_customer_id: string | null
           support_email: string | null
           timezone: string | null
           trading_name: string | null
@@ -6632,6 +6639,7 @@ export type Database = {
           phone?: string | null
           plan_code?: string | null
           primary_domain?: string | null
+          stripe_customer_id?: string | null
           support_email?: string | null
           timezone?: string | null
           trading_name?: string | null
@@ -6649,6 +6657,7 @@ export type Database = {
           phone?: string | null
           plan_code?: string | null
           primary_domain?: string | null
+          stripe_customer_id?: string | null
           support_email?: string | null
           timezone?: string | null
           trading_name?: string | null
