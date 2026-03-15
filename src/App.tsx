@@ -8,6 +8,9 @@ import { ClientContextProvider } from "@/contexts/ClientContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
+import { CookieConsent } from "@/components/CookieConsent";
+
+
 
 // ── Pages ───────────────────────────────────────────────────
 import Dashboard from "@/pages/Dashboard";
@@ -45,6 +48,8 @@ import FpsBuilderPage from "@/pages/rti/FpsBuilderPage";
 import EpsBuilderPage from "@/pages/rti/EpsBuilderPage";
 import SelfAssessment from "@/pages/SelfAssessment";
 import CorporationTax from "@/pages/CorporationTax";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
 import { StaffUsersTab } from "@/pages/practice/StaffUsersTab";
 
 // ── Auth pages ──────────────────────────────────────────────
@@ -160,6 +165,8 @@ const AppRoutes = () => (
     <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/auth-redirect" element={<HmrcCallback />} />
+    <Route path="/privacy" element={<PrivacyPolicy />} />
+    <Route path="/terms" element={<TermsOfService />} />
 
     {/* ── Dashboard ────────────────────────────────────── */}
     <Route path="/" element={<Protected><Dashboard /></Protected>} />
@@ -303,6 +310,7 @@ const App = () => (
         <ClientContextProvider>
           <BrowserRouter>
             <AppRoutes />
+            <CookieConsent />
           </BrowserRouter>
         </ClientContextProvider>
       </AuthProvider>
