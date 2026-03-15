@@ -13,6 +13,9 @@ import { toast } from "sonner";
 
 export function WorkflowsTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [editRule, setEditRule] = useState<any>(null);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
