@@ -176,6 +176,23 @@ export default function BankFeeds() {
   };
 
   const uncategorisedCount = transactions.filter((t: any) => t.categorisation_status === "uncategorised").length;
+  const uncategorisedIds = transactions.filter((t: any) => t.categorisation_status === "uncategorised").map((t: any) => t.id);
+
+  const aiCategorise = useMutation({
+    mutationFn: async () => {
+      if (!uncategorisedIds.length) throw new Error("No uncategorised transactions");
+      const { data, error } = await supabase.functions.invoke("ai-categorise", {
+        body: { transaction_ids: uncategorisedIds.slice(0, 50) },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
+      toast.success(`AI suggested categories for ${data?.updated || 0} transactions`);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
 
   return (
     <div className="space-y-6">
