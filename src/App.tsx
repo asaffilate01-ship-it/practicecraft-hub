@@ -165,6 +165,8 @@ const AppRoutes = () => (
     <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/auth-redirect" element={<HmrcCallback />} />
+    <Route path="/privacy" element={<PrivacyPolicy />} />
+    <Route path="/terms" element={<TermsOfService />} />
 
     {/* ── Dashboard ────────────────────────────────────── */}
     <Route path="/" element={<Protected><Dashboard /></Protected>} />
