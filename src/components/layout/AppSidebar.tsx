@@ -56,6 +56,7 @@ const mainNav: NavItem[] = [
   { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
   { title: "Bank Feeds", url: "/bank-feeds", icon: Landmark, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
   { title: "Auto-Categorise", url: "/categorisation-rules", icon: Zap, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+  { title: "Quick Entry", url: "/invoice-entry", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
   { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
   { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
   { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
