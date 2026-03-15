@@ -52,6 +52,8 @@ import FpsBuilderPage from "@/pages/rti/FpsBuilderPage";
 import EpsBuilderPage from "@/pages/rti/EpsBuilderPage";
 import SelfAssessment from "@/pages/SelfAssessment";
 import CorporationTax from "@/pages/CorporationTax";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
 import { StaffUsersTab } from "@/pages/practice/StaffUsersTab";
 
 // ── Auth pages ──────────────────────────────────────────────
