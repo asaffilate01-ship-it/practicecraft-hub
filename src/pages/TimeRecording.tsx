@@ -10,9 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Clock, Plus, Play, Square, Timer, TrendingUp } from "lucide-react";
 import { KPICard } from "@/components/dashboard/KPICard";
+import { WipReport } from "@/components/time/WipReport";
 import { format } from "date-fns";
 
 export default function TimeRecording() {
