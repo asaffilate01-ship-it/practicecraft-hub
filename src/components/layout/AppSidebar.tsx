@@ -87,10 +87,11 @@ const bottomNav: NavItem[] = [
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const { can, loading } = usePermissions();
+  const { can, loading, role } = usePermissions();
+  const { user } = useAuth();
   const branding = usePracticeBranding();
   const features = usePracticeFeatures();
-  const session = getStaffSession();
+  const session = buildStaffSession(role, user?.user_metadata?.full_name, user?.email);
 
   const isVisible = (item: NavItem) => {
     // RBAC permission check
