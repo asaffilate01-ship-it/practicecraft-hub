@@ -294,6 +294,45 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Staff Utilisation */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold">Staff Utilisation (Last 30 Days)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(utilisationQ.data?.length ?? 0) > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Staff Member</TableHead>
+                  <TableHead className="text-right">Total Hours</TableHead>
+                  <TableHead className="text-right">Billable Hours</TableHead>
+                  <TableHead className="text-right">Utilisation</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(utilisationQ.data || []).map((u) => (
+                  <TableRow key={u.name}>
+                    <TableCell className="text-sm font-medium">{u.name}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{u.totalHours}h</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{u.billableHours}h</TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={u.utilisation >= 70 ? "default" : u.utilisation >= 50 ? "secondary" : "destructive"} className="text-xs">
+                        {u.utilisation}%
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="h-[120px] flex items-center justify-center text-muted-foreground text-sm">
+              No time entries in the last 30 days.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
