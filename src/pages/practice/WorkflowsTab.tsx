@@ -144,7 +144,7 @@ export function WorkflowsTab() {
                 <TableHead>Trigger</TableHead>
                 <TableHead>Action</TableHead>
                 <TableHead className="text-center">Enabled</TableHead>
-              </TableRow>
+                <TableHead className="w-20"></TableHead>
             </TableHeader>
             <TableBody>
               {automations.map((rule) => (
