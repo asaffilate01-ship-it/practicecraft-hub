@@ -10,9 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Clock, Plus, Play, Square, Timer, TrendingUp } from "lucide-react";
 import { KPICard } from "@/components/dashboard/KPICard";
+import { WipReport } from "@/components/time/WipReport";
 import { format } from "date-fns";
 
 export default function TimeRecording() {
@@ -153,6 +155,18 @@ export default function TimeRecording() {
         <p className="text-sm text-muted-foreground">Track billable and non-billable hours across clients and tasks.</p>
       </div>
 
+      <Tabs defaultValue="entries">
+        <TabsList>
+          <TabsTrigger value="entries">Time Entries</TabsTrigger>
+          <TabsTrigger value="wip">WIP Report</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="wip" className="mt-4">
+          <WipReport />
+        </TabsContent>
+
+        <TabsContent value="entries" className="mt-4 space-y-6">
+
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Today" value={formatDuration(todayMinutes)} icon={Clock} iconColor="bg-accent" />
@@ -264,6 +278,8 @@ export default function TimeRecording() {
           </Table>
         </CardContent>
       </Card>
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }

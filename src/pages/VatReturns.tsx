@@ -15,6 +15,7 @@ import { Plus, FileText, Send, Eye, Upload, Download, Pencil, Trash2 } from "luc
 import { toast } from "sonner";
 import { useRef, useCallback } from "react";
 import { HmrcConnectButton } from "@/components/HmrcConnectButton";
+import { HmrcObligations } from "@/components/vat/HmrcObligations";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 function parseCsvToBoxes(csvText: string): Partial<Record<string, string>> | null {
@@ -323,6 +324,11 @@ export default function VatReturns() {
           </Button>
         </div>
       </div>
+
+      {/* HMRC Live Obligations */}
+      {profile?.tenant_id && (
+        <HmrcObligations clientId="" vrn="" tenantId={profile.tenant_id} />
+      )}
 
       <Card>
         <CardContent className="pt-6">

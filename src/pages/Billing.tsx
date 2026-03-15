@@ -11,8 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, Eye, CreditCard, Banknote } from "lucide-react";
 import { toast } from "sonner";
+import { InvoicePaymentButton } from "@/components/billing/InvoicePaymentButton";
+import { SubscriptionPlans } from "@/components/billing/SubscriptionPlans";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -159,6 +162,18 @@ export default function Billing() {
           <Plus className="w-4 h-4" /> New Invoice
         </Button>
       </div>
+
+      <Tabs defaultValue="invoices">
+        <TabsList>
+          <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="subscription" className="mt-4">
+          <SubscriptionPlans currentPlan="starter" />
+        </TabsContent>
+
+        <TabsContent value="invoices" className="mt-4 space-y-4">
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -372,6 +387,9 @@ export default function Billing() {
               )}
 
               <div className="flex gap-2 justify-end">
+                {(viewInvoice.status === "sent" || viewInvoice.status === "overdue") && (
+                  <InvoicePaymentButton invoiceId={viewInvoice.id} checkoutUrl={viewInvoice.stripe_checkout_url} />
+                )}
                 {viewInvoice.status === "draft" && (
                   <Button variant="outline" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "sent" })}>
                     Mark Sent
@@ -387,6 +405,9 @@ export default function Billing() {
           )}
         </DialogContent>
       </Dialog>
+
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }

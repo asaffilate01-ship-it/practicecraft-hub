@@ -114,6 +114,42 @@ export default function ReportsPage() {
     enabled: !!tenantId,
   });
 
+  // Staff utilisation
+  const utilisationQ = useQuery({
+    queryKey: ["reports-utilisation", tenantId],
+    queryFn: async () => {
+      const { data: entries } = await supabase
+        .from("time_entries")
+        .select("user_id, duration_minutes, is_billable")
+        .gte("date", new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10));
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name");
+
+      const nameMap: Record<string, string> = {};
+      for (const p of profiles || []) nameMap[p.id] = p.full_name || "Unknown";
+
+      const byUser: Record<string, { name: string; total: number; billable: number }> = {};
+      for (const e of entries || []) {
+        const uid = e.user_id;
+        if (!byUser[uid]) byUser[uid] = { name: nameMap[uid] || "Unknown", total: 0, billable: 0 };
+        byUser[uid].total += e.duration_minutes;
+        if (e.is_billable) byUser[uid].billable += e.duration_minutes;
+      }
+
+      return Object.values(byUser)
+        .map((u) => ({
+          ...u,
+          totalHours: (u.total / 60).toFixed(1),
+          billableHours: (u.billable / 60).toFixed(1),
+          utilisation: u.total > 0 ? Math.round((u.billable / u.total) * 100) : 0,
+        }))
+        .sort((a, b) => b.utilisation - a.utilisation);
+    },
+    enabled: !!tenantId,
+  });
+
   const kpis = kpisQ.data;
   const loading = kpisQ.isLoading;
 
@@ -258,6 +294,45 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Staff Utilisation */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold">Staff Utilisation (Last 30 Days)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(utilisationQ.data?.length ?? 0) > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Staff Member</TableHead>
+                  <TableHead className="text-right">Total Hours</TableHead>
+                  <TableHead className="text-right">Billable Hours</TableHead>
+                  <TableHead className="text-right">Utilisation</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(utilisationQ.data || []).map((u) => (
+                  <TableRow key={u.name}>
+                    <TableCell className="text-sm font-medium">{u.name}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{u.totalHours}h</TableCell>
+                    <TableCell className="text-right font-mono text-sm">{u.billableHours}h</TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={u.utilisation >= 70 ? "default" : u.utilisation >= 50 ? "secondary" : "destructive"} className="text-xs">
+                        {u.utilisation}%
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="h-[120px] flex items-center justify-center text-muted-foreground text-sm">
+              No time entries in the last 30 days.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
