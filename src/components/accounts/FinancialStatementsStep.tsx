@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AccountsPdfPreview } from "./AccountsPdfPreview";
 import type { TBEntry } from "./TrialBalanceStep";
 
 const pence = (v: number) => (v / 100).toFixed(2);
@@ -69,6 +72,24 @@ export function FinancialStatementsStep({ entries, entityType, standard, periodS
   );
 
   return (
+    <Tabs defaultValue="interactive" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="interactive">Interactive View</TabsTrigger>
+        <TabsTrigger value="pdf">PDF Preview</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="pdf">
+        <AccountsPdfPreview
+          entries={entries}
+          entityType={entityType}
+          standard={standard}
+          periodStart={periodStart}
+          periodEnd={periodEnd}
+          clientName={clientName}
+        />
+      </TabsContent>
+
+      <TabsContent value="interactive">
     <div className="space-y-6">
       <div className="text-center border-b pb-4">
         <h2 className="text-lg font-bold">{clientName}</h2>
@@ -162,5 +183,7 @@ export function FinancialStatementsStep({ entries, entityType, standard, periodS
         </CardContent>
       </Card>
     </div>
+      </TabsContent>
+    </Tabs>
   );
 }

@@ -1,14 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
-import { Zap, Mail, ClipboardList, Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Zap, Mail, ClipboardList, Bell, Plus, Pencil, Trash2 } from "lucide-react";
+import { AutomationBuilder } from "@/components/workflows/AutomationBuilder";
+import { toast } from "sonner";
 
 export function WorkflowsTab() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [editRule, setEditRule] = useState<any>(null);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -92,6 +99,25 @@ export function WorkflowsTab() {
     );
   }
 
+  const toggleRule = useMutation({
+    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      const { error } = await supabase.from("automation_rules").update({ is_enabled: enabled }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["automation-rules"] }),
+  });
+
+  const deleteRule = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("automation_rules").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["automation-rules"] });
+      toast.success("Rule deleted");
+    },
+  });
+
   return (
     <div className="space-y-6">
       {/* Automation Rules */}
@@ -103,7 +129,12 @@ export function WorkflowsTab() {
             </CardTitle>
             <CardDescription>Event-driven automations that create tasks or send emails</CardDescription>
           </div>
-          <Badge variant="secondary">{automations.length} rule{automations.length !== 1 ? "s" : ""}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">{automations.length} rule{automations.length !== 1 ? "s" : ""}</Badge>
+            <Button size="sm" className="gap-1" onClick={() => { setEditRule(null); setShowBuilder(true); }}>
+              <Plus className="w-3.5 h-3.5" /> New Rule
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -113,6 +144,7 @@ export function WorkflowsTab() {
                 <TableHead>Trigger</TableHead>
                 <TableHead>Action</TableHead>
                 <TableHead className="text-center">Enabled</TableHead>
+                <TableHead className="w-20"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -133,13 +165,26 @@ export function WorkflowsTab() {
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Switch checked={rule.is_enabled ?? true} disabled />
+                    <Switch
+                      checked={rule.is_enabled ?? true}
+                      onCheckedChange={(v) => toggleRule.mutate({ id: rule.id, enabled: v })}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditRule(rule); setShowBuilder(true); }}>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteRule.mutate(rule.id)}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
               {automations.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     No automation rules configured
                   </TableCell>
                 </TableRow>
@@ -218,6 +263,15 @@ export function WorkflowsTab() {
           </div>
         </CardContent>
       </Card>
+
+      {tenantId && (
+        <AutomationBuilder
+          open={showBuilder}
+          onOpenChange={(v) => { setShowBuilder(v); if (!v) setEditRule(null); }}
+          tenantId={tenantId}
+          editRule={editRule}
+        />
+      )}
     </div>
   );
 }

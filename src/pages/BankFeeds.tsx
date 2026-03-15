@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Landmark, Plus, RefreshCw, ArrowUpRight, ArrowDownLeft, CheckCircle2, Tag } from "lucide-react";
+import { Landmark, Plus, RefreshCw, ArrowUpRight, ArrowDownLeft, CheckCircle2, Tag, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -176,6 +176,23 @@ export default function BankFeeds() {
   };
 
   const uncategorisedCount = transactions.filter((t: any) => t.categorisation_status === "uncategorised").length;
+  const uncategorisedIds = transactions.filter((t: any) => t.categorisation_status === "uncategorised").map((t: any) => t.id);
+
+  const aiCategorise = useMutation({
+    mutationFn: async () => {
+      if (!uncategorisedIds.length) throw new Error("No uncategorised transactions");
+      const { data, error } = await supabase.functions.invoke("ai-categorise", {
+        body: { transaction_ids: uncategorisedIds.slice(0, 50) },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
+      toast.success(`AI suggested categories for ${data?.updated || 0} transactions`);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
 
   return (
     <div className="space-y-6">
@@ -185,6 +202,11 @@ export default function BankFeeds() {
           <p className="text-sm text-muted-foreground">Manage bank connections and imported transactions</p>
         </div>
         <div className="flex gap-2">
+          {uncategorisedCount > 0 && (
+            <Button variant="outline" className="gap-2" onClick={() => aiCategorise.mutate()} disabled={aiCategorise.isPending}>
+              <Sparkles className="w-4 h-4" /> {aiCategorise.isPending ? "Categorising…" : `AI Categorise (${uncategorisedCount})`}
+            </Button>
+          )}
           <Button variant="outline" className="gap-2" onClick={() => setShowAddTxn(true)}>
             <Plus className="w-4 h-4" /> Add Transaction
           </Button>
