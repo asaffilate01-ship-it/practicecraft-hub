@@ -325,6 +325,11 @@ export default function VatReturns() {
         </div>
       </div>
 
+      {/* HMRC Live Obligations */}
+      {profile?.tenant_id && (
+        <HmrcObligations clientId="" vrn="" tenantId={profile.tenant_id} />
+      )}
+
       <Card>
         <CardContent className="pt-6">
           {isLoading ? (
