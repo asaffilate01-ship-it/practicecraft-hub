@@ -99,6 +99,25 @@ export function WorkflowsTab() {
     );
   }
 
+  const toggleRule = useMutation({
+    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      const { error } = await supabase.from("automation_rules").update({ is_enabled: enabled }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["automation-rules"] }),
+  });
+
+  const deleteRule = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("automation_rules").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["automation-rules"] });
+      toast.success("Rule deleted");
+    },
+  });
+
   return (
     <div className="space-y-6">
       {/* Automation Rules */}
@@ -110,7 +129,12 @@ export function WorkflowsTab() {
             </CardTitle>
             <CardDescription>Event-driven automations that create tasks or send emails</CardDescription>
           </div>
-          <Badge variant="secondary">{automations.length} rule{automations.length !== 1 ? "s" : ""}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">{automations.length} rule{automations.length !== 1 ? "s" : ""}</Badge>
+            <Button size="sm" className="gap-1" onClick={() => { setEditRule(null); setShowBuilder(true); }}>
+              <Plus className="w-3.5 h-3.5" /> New Rule
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
