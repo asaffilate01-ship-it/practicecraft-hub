@@ -163,6 +163,18 @@ export default function Billing() {
         </Button>
       </div>
 
+      <Tabs defaultValue="invoices">
+        <TabsList>
+          <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="subscription" className="mt-4">
+          <SubscriptionPlans currentPlan="starter" />
+        </TabsContent>
+
+        <TabsContent value="invoices" className="mt-4 space-y-4">
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4">
