@@ -183,5 +183,7 @@ export function FinancialStatementsStep({ entries, entityType, standard, periodS
         </CardContent>
       </Card>
     </div>
+      </TabsContent>
+    </Tabs>
   );
 }
