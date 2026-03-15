@@ -145,6 +145,7 @@ export function WorkflowsTab() {
                 <TableHead>Action</TableHead>
                 <TableHead className="text-center">Enabled</TableHead>
                 <TableHead className="w-20"></TableHead>
+              </TableRow>
             </TableHeader>
             <TableBody>
               {automations.map((rule) => (
@@ -179,9 +180,11 @@ export function WorkflowsTab() {
                       </Button>
                     </div>
                   </TableCell>
+                </TableRow>
+              ))}
               {automations.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                     No automation rules configured
                   </TableCell>
                 </TableRow>
