@@ -51,7 +51,7 @@ export function RecurringInvoiceBuilder() {
   const { data: templates = [], isLoading } = useQuery({
     queryKey: ["recurring-invoices", profile?.tenant_id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("recurring_invoice_templates")
         .select("*, clients(legal_name)")
         .order("created_at", { ascending: false });
