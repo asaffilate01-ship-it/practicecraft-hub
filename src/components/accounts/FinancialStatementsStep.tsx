@@ -87,6 +87,9 @@ export function FinancialStatementsStep({ entries, entityType, standard, periodS
           periodEnd={periodEnd}
           clientName={clientName}
         />
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          Full statutory accounts pack with cover page, accountant's report, directors' report, statements & notes
+        </p>
       </TabsContent>
 
       <TabsContent value="interactive">
