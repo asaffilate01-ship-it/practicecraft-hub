@@ -1,13 +1,51 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const MOCK_SUBMISSIONS = [
-  { id: "s1", provider: "HMRC", type: "VAT Return Q3", status: "accepted", at: "2026-01-10T12:00:00Z" },
-  { id: "s2", provider: "Companies House", type: "Confirmation Statement", status: "accepted", at: "2025-11-20T09:30:00Z" },
-  { id: "s3", provider: "HMRC", type: "RTI FPS Month 10", status: "pending", at: "2026-02-01T08:00:00Z" },
-];
+import { Loader2, Send } from "lucide-react";
 
 export default function PortalSubmissionsPage() {
+  const { user } = useAuth();
+
+  const { data: portalUser } = useQuery({
+    queryKey: ["portal-user", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("portal_users")
+        .select("client_id, tenant_id")
+        .eq("user_id", user!.id)
+        .eq("status", "active")
+        .limit(1)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const { data: submissions = [], isLoading } = useQuery({
+    queryKey: ["portal-submissions", portalUser?.client_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("submission_jobs")
+        .select("id, channel, filing_type, status, submitted_at, created_at")
+        .eq("client_id", portalUser!.client_id!)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!portalUser?.client_id,
+  });
+
+  const statusVariant = (s: string): "default" | "secondary" | "destructive" | "outline" => {
+    if (s === "accepted") return "default";
+    if (s === "rejected") return "destructive";
+    if (s === "queued" || s === "pending") return "outline";
+    return "secondary";
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -23,16 +61,29 @@ export default function PortalSubmissionsPage() {
             <div className="col-span-2">Status</div>
             <div className="col-span-3">When</div>
           </div>
-          {MOCK_SUBMISSIONS.map((r) => (
-            <div key={r.id} className="grid grid-cols-12 px-4 py-3 border-t text-sm items-center">
-              <div className="col-span-3 text-muted-foreground">{r.provider}</div>
-              <div className="col-span-4 font-medium">{r.type}</div>
-              <div className="col-span-2">
-                <Badge variant={r.status === "accepted" ? "secondary" : "outline"}>{r.status}</Badge>
-              </div>
-              <div className="col-span-3 text-xs text-muted-foreground">{new Date(r.at).toLocaleString()}</div>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
-          ))}
+          ) : submissions.length === 0 ? (
+            <div className="flex flex-col items-center py-12 gap-2">
+              <Send className="w-8 h-8 text-muted-foreground opacity-40" />
+              <p className="text-sm text-muted-foreground">No submissions yet.</p>
+            </div>
+          ) : (
+            submissions.map((r: any) => (
+              <div key={r.id} className="grid grid-cols-12 px-4 py-3 border-t text-sm items-center">
+                <div className="col-span-3 text-muted-foreground">{r.channel || "—"}</div>
+                <div className="col-span-4 font-medium">{r.filing_type}</div>
+                <div className="col-span-2">
+                  <Badge variant={statusVariant(r.status)}>{r.status}</Badge>
+                </div>
+                <div className="col-span-3 text-xs text-muted-foreground">
+                  {new Date(r.submitted_at || r.created_at).toLocaleString()}
+                </div>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
     </div>
