@@ -214,8 +214,8 @@ const AppRoutes = () => (
     {/* ── Payroll (RTI) ────────────────────────────────── */}
     <Route path="/payroll" element={<Guarded module="payroll" action="view"><PayrollWorkbench /></Guarded>} />
     <Route path="/payroll/workbench" element={<Guarded module="payroll" action="view"><PayrollWorkbench /></Guarded>} />
-    <Route path="/payroll/employers/:employerId" element={<Guarded module="payroll" action="view"><PlaceholderPage title="Employer" description="Employer payroll setup and runs" /></Guarded>} />
-    <Route path="/payroll/runs/:runId" element={<Guarded module="payroll" action="view"><PlaceholderPage title="Payroll Run" description="Payroll run detail, payslips, and RTI submission" /></Guarded>} />
+    <Route path="/payroll/employers/:employerId" element={<Guarded module="payroll" action="view"><PayrollEmployerDetail /></Guarded>} />
+    <Route path="/payroll/runs/:runId" element={<Guarded module="payroll" action="view"><PayrollRunDetail /></Guarded>} />
     <Route path="/payroll/rti/fps/:payrunId" element={<Guarded module="payroll" action="view"><FpsBuilderPage /></Guarded>} />
     <Route path="/payroll/rti/eps/:employerId/:period" element={<Guarded module="payroll" action="view"><EpsBuilderPage /></Guarded>} />
 
