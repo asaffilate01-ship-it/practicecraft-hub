@@ -170,7 +170,7 @@ export function BulkOperationsPanel() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>Priority</Label>
-                    <Select value={taskPriority} onValueChange={setTaskPriority}>
+                    <Select value={taskPriority} onValueChange={(v) => setTaskPriority(v as "low" | "medium" | "high" | "urgent")}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="low">Low</SelectItem>
