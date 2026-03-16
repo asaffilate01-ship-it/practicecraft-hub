@@ -384,7 +384,7 @@ export default function Billing() {
                 {(viewInvoice.status === "sent" || viewInvoice.status === "overdue") && (
                   <>
                     <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "paid", amount_paid: parseFloat(viewInvoice.total) })}>Mark Paid</Button>
-                    <InvoicePaymentButton invoiceId={viewInvoice.id} amount={parseFloat(viewInvoice.total)} />
+                    <InvoicePaymentButton invoiceId={viewInvoice.id} />
                   </>
                 )}
               </div>

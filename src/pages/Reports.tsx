@@ -508,6 +508,9 @@ export default function ReportsPage() {
 
       {/* AI Practice Intelligence */}
       <AIIntelligencePanel />
+
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
