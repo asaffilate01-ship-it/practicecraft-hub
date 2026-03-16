@@ -111,6 +111,8 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         adjustment_credit_pence: e.adjustment_credit_pence,
         adjustment_notes: e.adjustment_notes || "",
         sort_order: e.sort_order,
+        comparative_debit_pence: e.comparative_debit_pence || 0,
+        comparative_credit_pence: e.comparative_credit_pence || 0,
       })));
     }
   }, [existingTB]);
