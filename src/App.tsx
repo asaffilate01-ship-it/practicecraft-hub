@@ -60,6 +60,15 @@ import CorporationTax from "@/pages/CorporationTax";
 import InvoiceEntry from "@/pages/InvoiceEntry";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
+import VatReturnDetail from "@/pages/VatReturnDetail";
+import VatObligations from "@/pages/VatObligations";
+import PayrollEmployerDetail from "@/pages/PayrollEmployerDetail";
+import PayrollRunDetail from "@/pages/PayrollRunDetail";
+import SecretarialChangeDetail from "@/pages/SecretarialChangeDetail";
+import IncorporationDetail from "@/pages/IncorporationDetail";
+import AmlCaseDetail from "@/pages/AmlCaseDetail";
+import BillingPlans from "@/pages/BillingPlans";
+import RolesManagement from "@/pages/RolesManagement";
 import { StaffUsersTab } from "@/pages/practice/StaffUsersTab";
 
 // ── Auth pages ──────────────────────────────────────────────
