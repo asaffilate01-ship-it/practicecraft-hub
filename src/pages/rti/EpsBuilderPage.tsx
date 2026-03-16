@@ -59,10 +59,12 @@ export default function EpsBuilderPage() {
     setDraft(d => ({ ...d, employerId, period }));
   }, [employerId, period]);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<any>(null);
+
   const queueEps = useMutation({
     mutationFn: async () => {
       if (!profile) throw new Error("Missing profile");
-      // Get employer's client_id
       const { data: emp } = await supabase.from("payroll_employers").select("client_id").eq("id", employerId).single();
       const clientId = emp?.client_id || "";
       const { error } = await supabase.from("submission_jobs").insert({
@@ -82,6 +84,36 @@ export default function EpsBuilderPage() {
     },
     onError: (err: any) => toast.error(err.message),
   });
+
+  const submitToHmrc = async () => {
+    if (!profile) return;
+    setSubmitting(true);
+    try {
+      const { data: emp } = await supabase.from("payroll_employers").select("client_id").eq("id", employerId).single();
+      const { data, error } = await supabase.functions.invoke("rti-processor", {
+        body: {
+          action: "submit_eps",
+          tenant_id: profile.tenant_id,
+          client_id: emp?.client_id,
+          employer_id: employerId,
+          period,
+          eps_data: draft,
+        },
+      });
+      if (error) throw error;
+      setSubmissionResult(data);
+      setDraft(d => ({ ...d, status: data?.accepted ? "submitted" : "error" }));
+      if (data?.accepted) {
+        toast.success("EPS submitted to HMRC successfully");
+      } else {
+        toast.error(data?.message || "HMRC rejected the EPS");
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
   if (!employer) return <div className="p-6 text-sm text-muted-foreground">Employer not found.</div>;
