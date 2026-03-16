@@ -39,7 +39,7 @@ export function AIIntelligencePanel() {
   const staffQ = useQuery({
     queryKey: ["ai-intelligence", "staff_utilisation"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("mobile", { body: { action: "staff_utilisation" } });
+      const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "staff_utilisation" } });
       if (error) throw error;
       return data;
     },
