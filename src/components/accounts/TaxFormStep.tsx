@@ -4,8 +4,12 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TBEntry } from "./TrialBalanceStep";
 import type { TaxCompData } from "./TaxComputationStep";
+import { SASupplementaryForms } from "./forms/SASupplementaryForms";
+import { CT600SupplementaryForms } from "./forms/CT600SupplementaryForms";
+import { VATReturnForm } from "./forms/VATReturnForm";
 
 const pence = (v: number) => (v / 100).toFixed(2);
 
@@ -13,12 +17,7 @@ function netBalance(e: TBEntry) {
   return (e.debit_pence + e.adjustment_debit_pence) - (e.credit_pence + e.adjustment_credit_pence);
 }
 
-type FormField = {
-  box: string;
-  label: string;
-  value: string;
-  readonly?: boolean;
-};
+type FormField = { box: string; label: string; value: string; readonly?: boolean };
 
 type Props = {
   entries: TBEntry[];
@@ -31,9 +30,10 @@ type Props = {
   clientName: string;
   companyNumber?: string;
   utr?: string;
+  vatNumber?: string;
 };
 
-export function TaxFormStep({ entries, entityType, compData, formData, onFormChange, periodStart, periodEnd, clientName, companyNumber, utr }: Props) {
+export function TaxFormStep({ entries, entityType, compData, formData, onFormChange, periodStart, periodEnd, clientName, companyNumber, utr, vatNumber }: Props) {
   const isLtd = entityType === "ltd" || entityType === "llp";
 
   const incomeEntries = entries.filter(e => e.account_type === "income");
@@ -61,103 +61,106 @@ export function TaxFormStep({ entries, entityType, compData, formData, onFormCha
         <Label className="text-xs">{label}</Label>
       </div>
       <div className="col-span-3">
-        <Input
-          className="h-7 text-xs text-right font-mono"
-          value={value}
-          readOnly={readonly}
-          onChange={readonly ? undefined : (e) => update(box, e.target.value)}
-        />
+        <Input className="h-7 text-xs text-right font-mono" value={value} readOnly={readonly} onChange={readonly ? undefined : (e) => update(box, e.target.value)} />
       </div>
     </div>
   );
 
   if (isLtd) {
     return (
-      <div className="space-y-4">
-        <div className="text-center border-b pb-3">
-          <h2 className="text-lg font-bold">CT600 — Company Tax Return</h2>
-          <p className="text-xs text-muted-foreground">HM Revenue & Customs</p>
-          <div className="flex justify-center gap-4 mt-2 text-xs">
-            <span>Company: <strong>{clientName}</strong></span>
-            <span>Company No: <strong>{companyNumber || "—"}</strong></span>
-            <span>UTR: <strong>{utr || "—"}</strong></span>
+      <Tabs defaultValue="ct600" className="space-y-4">
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="ct600" className="text-xs">CT600 Main</TabsTrigger>
+          <TabsTrigger value="ct600_supp" className="text-xs">CT600 Supplements</TabsTrigger>
+          <TabsTrigger value="vat" className="text-xs">VAT Return</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="ct600" className="space-y-4">
+          <div className="text-center border-b pb-3">
+            <h2 className="text-lg font-bold">CT600 — Company Tax Return</h2>
+            <p className="text-xs text-muted-foreground">HM Revenue & Customs</p>
+            <div className="flex justify-center gap-4 mt-2 text-xs">
+              <span>Company: <strong>{clientName}</strong></span>
+              <span>Company No: <strong>{companyNumber || "—"}</strong></span>
+              <span>UTR: <strong>{utr || "—"}</strong></span>
+            </div>
+            <div className="flex justify-center gap-4 mt-1 text-xs text-muted-foreground">
+              <span>Period: {periodStart} to {periodEnd}</span>
+            </div>
           </div>
-          <div className="flex justify-center gap-4 mt-1 text-xs text-muted-foreground">
-            <span>Period: {periodStart} to {periodEnd}</span>
-          </div>
-        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Part 3 — Tax Calculation</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <FormRow box="145" label="Turnover / Revenue" value={pence(totalIncome)} readonly />
-            <FormRow box="155" label="Trading profits" value={pence(accountingProfit)} readonly />
-            <FormRow box="160" label="Trading losses brought forward" value={pence(compData.tradingLossesBf)} readonly />
-            <FormRow box="165" label="Net trading profits" value={pence(Math.max(0, accountingProfit - compData.tradingLossesBf))} readonly />
-            <FormRow box="170" label="Non-trading loan relationships income" value={formData["170"] || "0.00"} />
-            <FormRow box="190" label="Income from property" value={formData["190"] || "0.00"} />
-            <FormRow box="205" label="Gross chargeable gains" value={formData["205"] || "0.00"} />
-            <FormRow box="235" label="Profits before deductions and reliefs" value={pence(taxableProfit_ct + compData.tradingLossesBf)} readonly />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Part 3 — Tax Calculation</CardTitle></CardHeader>
+            <CardContent className="space-y-1">
+              <FormRow box="145" label="Turnover / Revenue" value={pence(totalIncome)} readonly />
+              <FormRow box="155" label="Trading profits" value={pence(accountingProfit)} readonly />
+              <FormRow box="160" label="Trading losses brought forward" value={pence(compData.tradingLossesBf)} readonly />
+              <FormRow box="165" label="Net trading profits" value={pence(Math.max(0, accountingProfit - compData.tradingLossesBf))} readonly />
+              <FormRow box="170" label="Non-trading loan relationships income" value={formData["170"] || "0.00"} />
+              <FormRow box="190" label="Income from property" value={formData["190"] || "0.00"} />
+              <FormRow box="205" label="Gross chargeable gains" value={formData["205"] || "0.00"} />
+              <FormRow box="235" label="Profits before deductions and reliefs" value={pence(taxableProfit_ct + compData.tradingLossesBf)} readonly />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Part 4 — Deductions & Reliefs</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <FormRow box="275" label="Management expenses" value={formData["275"] || "0.00"} />
-            <FormRow box="285" label="Trading losses (this period)" value={formData["285"] || "0.00"} />
-            <FormRow box="305" label="Non-trade capital allowances" value={formData["305"] || "0.00"} />
-            <FormRow box="315" label="Total deductions" value={formData["315"] || "0.00"} />
-            <FormRow box="330" label="Qualifying donations" value={pence(compData.charitableDonations)} readonly />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Part 4 — Deductions & Reliefs</CardTitle></CardHeader>
+            <CardContent className="space-y-1">
+              <FormRow box="275" label="Management expenses" value={formData["275"] || "0.00"} />
+              <FormRow box="285" label="Trading losses (this period)" value={formData["285"] || "0.00"} />
+              <FormRow box="305" label="Non-trade capital allowances" value={formData["305"] || "0.00"} />
+              <FormRow box="315" label="Total deductions" value={formData["315"] || "0.00"} />
+              <FormRow box="330" label="Qualifying donations" value={pence(compData.charitableDonations)} readonly />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Part 5 — Tax Calculation</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <FormRow box="345" label="Profits chargeable to CT" value={pence(taxableProfit_ct)} readonly />
-            <FormRow box="360" label="Corporation Tax @ {(ctRate * 100).toFixed(0)}%" value={pence(ctLiability)} readonly />
-            <FormRow box="380" label="Marginal relief" value={formData["380"] || "0.00"} />
-            <FormRow box="390" label="CT payable" value={pence(ctLiability)} readonly />
-            <FormRow box="395" label="Tax already paid" value={formData["395"] || "0.00"} />
-            <Separator />
-            <div className="bg-primary/10 rounded p-3 mt-2">
-              <div className="flex justify-between items-center">
-                <span className="font-bold">Box 400 — Tax Payable / (Repayable)</span>
-                <span className="font-mono font-bold text-lg">£{pence(ctLiability - (Math.round(parseFloat(formData["395"] || "0") * 100)))}</span>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Part 5 — Tax Calculation</CardTitle></CardHeader>
+            <CardContent className="space-y-1">
+              <FormRow box="345" label="Profits chargeable to CT" value={pence(taxableProfit_ct)} readonly />
+              <FormRow box="360" label={`Corporation Tax @ ${(ctRate * 100).toFixed(0)}%`} value={pence(ctLiability)} readonly />
+              <FormRow box="380" label="Marginal relief" value={formData["380"] || "0.00"} />
+              <FormRow box="390" label="CT payable" value={pence(ctLiability)} readonly />
+              <FormRow box="395" label="Tax already paid" value={formData["395"] || "0.00"} />
+              <Separator />
+              <div className="bg-primary/10 rounded p-3 mt-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold">Box 400 — Tax Payable / (Repayable)</span>
+                  <span className="font-mono font-bold text-lg">£{pence(ctLiability - (Math.round(parseFloat(formData["395"] || "0") * 100)))}</span>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Part 8 — Declaration</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Checkbox checked={formData["declaration"] === "true"} onCheckedChange={(c) => update("declaration", c ? "true" : "false")} />
-              <Label className="text-xs">I declare that the information in this return is correct and complete to the best of my knowledge</Label>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs">Name of signatory</Label>
-                <Input className="h-8 text-xs" value={formData["signatory"] || ""} onChange={(e) => update("signatory", e.target.value)} />
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Part 8 — Declaration</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Checkbox checked={formData["declaration"] === "true"} onCheckedChange={(c) => update("declaration", c ? "true" : "false")} />
+                <Label className="text-xs">I declare that the information in this return is correct and complete to the best of my knowledge</Label>
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Date</Label>
-                <Input className="h-8 text-xs" type="date" value={formData["sign_date"] || ""} onChange={(e) => update("sign_date", e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Name of signatory</Label>
+                  <Input className="h-8 text-xs" value={formData["signatory"] || ""} onChange={(e) => update("signatory", e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Date</Label>
+                  <Input className="h-8 text-xs" type="date" value={formData["sign_date"] || ""} onChange={(e) => update("sign_date", e.target.value)} />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ct600_supp">
+          <CT600SupplementaryForms formData={formData} onFormChange={onFormChange} />
+        </TabsContent>
+
+        <TabsContent value="vat">
+          <VATReturnForm formData={formData} onFormChange={onFormChange} periodStart={periodStart} periodEnd={periodEnd} clientName={clientName} vatNumber={vatNumber} />
+        </TabsContent>
+      </Tabs>
     );
   }
 
@@ -167,95 +170,105 @@ export function TaxFormStep({ entries, entityType, compData, formData, onFormCha
   const taxableIncome = Math.max(0, totalSaIncome - compData.personalAllowance - compData.pensionContributions - compData.giftAid);
 
   return (
-    <div className="space-y-4">
-      <div className="text-center border-b pb-3">
-        <h2 className="text-lg font-bold">SA100 — Tax Return</h2>
-        <p className="text-xs text-muted-foreground">HM Revenue & Customs — Self Assessment</p>
-        <div className="flex justify-center gap-4 mt-2 text-xs">
-          <span>Name: <strong>{clientName}</strong></span>
-          <span>UTR: <strong>{utr || "—"}</strong></span>
-        </div>
-        <div className="flex justify-center gap-4 mt-1 text-xs text-muted-foreground">
-          <span>Tax Year: {periodStart} to {periodEnd}</span>
-        </div>
-      </div>
+    <Tabs defaultValue="sa100" className="space-y-4">
+      <TabsList className="grid grid-cols-3 w-full">
+        <TabsTrigger value="sa100" className="text-xs">SA100 Main</TabsTrigger>
+        <TabsTrigger value="sa_supp" className="text-xs">SA Supplements</TabsTrigger>
+        <TabsTrigger value="vat" className="text-xs">VAT Return</TabsTrigger>
+      </TabsList>
 
-      {entityType === "partnership" && (
+      <TabsContent value="sa100" className="space-y-4">
+        <div className="text-center border-b pb-3">
+          <h2 className="text-lg font-bold">SA100 — Tax Return</h2>
+          <p className="text-xs text-muted-foreground">HM Revenue & Customs — Self Assessment</p>
+          <div className="flex justify-center gap-4 mt-2 text-xs">
+            <span>Name: <strong>{clientName}</strong></span>
+            <span>UTR: <strong>{utr || "—"}</strong></span>
+          </div>
+          <div className="flex justify-center gap-4 mt-1 text-xs text-muted-foreground">
+            <span>Tax Year: {periodStart} to {periodEnd}</span>
+          </div>
+        </div>
+
+        {entityType === "partnership" && (
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">SA800 — Partnership Return Summary</CardTitle></CardHeader>
+            <CardContent className="space-y-1">
+              <FormRow box="3.1" label="Partnership turnover" value={pence(totalIncome)} readonly />
+              <FormRow box="3.4" label="Allowable expenses" value={pence(totalExpenses)} readonly />
+              <FormRow box="3.24" label="Net profit" value={pence(accountingProfit)} readonly />
+              <FormRow box="3.25" label="Add: Disallowable" value={pence(compData.disallowableExpenses)} readonly />
+              <FormRow box="3.26" label="Less: Capital allowances" value={pence(compData.capitalAllowances)} readonly />
+              <FormRow box="3.73" label="Adjusted profit" value={pence(tradingProfit)} readonly />
+              <FormRow box="P.1" label="Your share (%)" value={`${compData.partnerSharePercent}%`} readonly />
+              <FormRow box="P.2" label="Your profit share" value={pence(partnerShare)} readonly />
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">SA800 — Partnership Return Summary</CardTitle>
+            <CardTitle className="text-sm">SA103 — Self-Employment</CardTitle>
+            <CardDescription className="text-xs">Business income and expenses</CardDescription>
           </CardHeader>
           <CardContent className="space-y-1">
-            <FormRow box="3.1" label="Partnership turnover" value={pence(totalIncome)} readonly />
-            <FormRow box="3.4" label="Allowable expenses" value={pence(totalExpenses)} readonly />
-            <FormRow box="3.24" label="Net profit" value={pence(accountingProfit)} readonly />
-            <FormRow box="3.25" label="Add: Disallowable" value={pence(compData.disallowableExpenses)} readonly />
-            <FormRow box="3.26" label="Less: Capital allowances" value={pence(compData.capitalAllowances)} readonly />
-            <FormRow box="3.73" label="Adjusted profit" value={pence(tradingProfit)} readonly />
-            <FormRow box="P.1" label="Your share (%)" value={`${compData.partnerSharePercent}%`} readonly />
-            <FormRow box="P.2" label="Your profit share" value={pence(partnerShare)} readonly />
+            <FormRow box="15" label="Turnover" value={pence(totalIncome)} readonly />
+            <FormRow box="17" label="Allowable business expenses" value={pence(totalExpenses)} readonly />
+            <FormRow box="24" label="Disallowable expenses" value={pence(compData.disallowableExpenses)} readonly />
+            <FormRow box="25" label="Capital allowances" value={pence(compData.capitalAllowances)} readonly />
+            <FormRow box="27" label="Total allowable expenses" value={pence(totalExpenses - compData.disallowableExpenses + compData.capitalAllowances)} readonly />
+            <FormRow box="29" label="Net business profit" value={pence(tradingProfit)} readonly />
+            <FormRow box="31" label="Losses brought forward" value={formData["31"] || "0.00"} />
+            <FormRow box="32" label="Taxable profit" value={pence(tradingProfit)} readonly />
           </CardContent>
         </Card>
-      )}
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">SA103 — Self-Employment</CardTitle>
-          <CardDescription className="text-xs">Business income and expenses</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          <FormRow box="15" label="Turnover" value={pence(totalIncome)} readonly />
-          <FormRow box="17" label="Allowable business expenses" value={pence(totalExpenses)} readonly />
-          <FormRow box="24" label="Disallowable expenses" value={pence(compData.disallowableExpenses)} readonly />
-          <FormRow box="25" label="Capital allowances" value={pence(compData.capitalAllowances)} readonly />
-          <FormRow box="27" label="Total allowable expenses" value={pence(totalExpenses - compData.disallowableExpenses + compData.capitalAllowances)} readonly />
-          <FormRow box="29" label="Net business profit" value={pence(tradingProfit)} readonly />
-          <FormRow box="31" label="Losses brought forward" value={formData["31"] || "0.00"} />
-          <FormRow box="32" label="Taxable profit" value={pence(tradingProfit)} readonly />
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">SA100 — Income Summary</CardTitle></CardHeader>
+          <CardContent className="space-y-1">
+            <FormRow box="TR1" label="Self-employment profit" value={pence(entityType === "partnership" ? partnerShare : tradingProfit)} readonly />
+            <FormRow box="TR2" label="Employment income" value={pence(compData.otherEmploymentIncome)} readonly />
+            <FormRow box="TR3" label="Property income" value={pence(compData.propertyIncome)} readonly />
+            <FormRow box="TR4" label="Savings & investments" value={pence(compData.savingsInterest)} readonly />
+            <FormRow box="TR5" label="Dividends" value={pence(compData.dividendIncome)} readonly />
+            <FormRow box="TR6" label="Capital gains" value={pence(compData.capitalGains)} readonly />
+            <Separator className="my-2" />
+            <FormRow box="TR7" label="Total income" value={pence(totalSaIncome)} readonly />
+            <FormRow box="TR8" label="Personal allowance" value={pence(compData.personalAllowance)} readonly />
+            <FormRow box="TR9" label="Pension contributions" value={pence(compData.pensionContributions)} readonly />
+            <FormRow box="TR10" label="Gift Aid" value={pence(compData.giftAid)} readonly />
+            <FormRow box="TR11" label="Taxable income" value={pence(taxableIncome)} readonly />
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">SA100 — Income Summary</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          <FormRow box="TR1" label="Self-employment profit" value={pence(entityType === "partnership" ? partnerShare : tradingProfit)} readonly />
-          <FormRow box="TR2" label="Employment income" value={pence(compData.otherEmploymentIncome)} readonly />
-          <FormRow box="TR3" label="Property income" value={pence(compData.propertyIncome)} readonly />
-          <FormRow box="TR4" label="Savings & investments" value={pence(compData.savingsInterest)} readonly />
-          <FormRow box="TR5" label="Dividends" value={pence(compData.dividendIncome)} readonly />
-          <FormRow box="TR6" label="Capital gains" value={pence(compData.capitalGains)} readonly />
-          <Separator className="my-2" />
-          <FormRow box="TR7" label="Total income" value={pence(totalSaIncome)} readonly />
-          <FormRow box="TR8" label="Personal allowance" value={pence(compData.personalAllowance)} readonly />
-          <FormRow box="TR9" label="Pension contributions" value={pence(compData.pensionContributions)} readonly />
-          <FormRow box="TR10" label="Gift Aid" value={pence(compData.giftAid)} readonly />
-          <FormRow box="TR11" label="Taxable income" value={pence(taxableIncome)} readonly />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Declaration</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Checkbox checked={formData["declaration"] === "true"} onCheckedChange={(c) => update("declaration", c ? "true" : "false")} />
-            <Label className="text-xs">I declare that the information in this return is correct and complete</Label>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs">Taxpayer name</Label>
-              <Input className="h-8 text-xs" value={formData["taxpayer_name"] || ""} onChange={(e) => update("taxpayer_name", e.target.value)} />
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Declaration</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Checkbox checked={formData["declaration"] === "true"} onCheckedChange={(c) => update("declaration", c ? "true" : "false")} />
+              <Label className="text-xs">I declare that the information in this return is correct and complete</Label>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Date</Label>
-              <Input className="h-8 text-xs" type="date" value={formData["sign_date"] || ""} onChange={(e) => update("sign_date", e.target.value)} />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Taxpayer name</Label>
+                <Input className="h-8 text-xs" value={formData["taxpayer_name"] || ""} onChange={(e) => update("taxpayer_name", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Date</Label>
+                <Input className="h-8 text-xs" type="date" value={formData["sign_date"] || ""} onChange={(e) => update("sign_date", e.target.value)} />
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="sa_supp">
+        <SASupplementaryForms formData={formData} onFormChange={onFormChange} entityType={entityType} />
+      </TabsContent>
+
+      <TabsContent value="vat">
+        <VATReturnForm formData={formData} onFormChange={onFormChange} periodStart={periodStart} periodEnd={periodEnd} clientName={clientName} vatNumber={vatNumber} />
+      </TabsContent>
+    </Tabs>
   );
 }
