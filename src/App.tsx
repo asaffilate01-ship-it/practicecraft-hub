@@ -248,7 +248,7 @@ const AppRoutes = () => (
     {/* ── Billing ──────────────────────────────────────── */}
     <Route path="/billing" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
     <Route path="/billing/invoices" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
-    <Route path="/billing/plans" element={<Guarded module="billing" action="view"><PlaceholderPage title="Billing Plans" description="Recurring fee plans and subscriptions" /></Guarded>} />
+    <Route path="/billing/plans" element={<Guarded module="billing" action="view"><BillingPlans /></Guarded>} />
     <Route path="/billing/payments" element={<Guarded module="billing" action="view"><PaymentHistory /></Guarded>} />
 
     {/* ── Documents ────────────────────────────────────── */}
