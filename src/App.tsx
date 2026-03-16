@@ -252,7 +252,7 @@ const AppRoutes = () => (
     {/* ── Submissions ──────────────────────────────────── */}
     <Route path="/submissions" element={<Guarded module="submissions" action="view"><Submissions /></Guarded>} />
     <Route path="/submissions/jobs" element={<Guarded module="submissions" action="view"><Submissions /></Guarded>} />
-    <Route path="/submissions/jobs/:jobId" element={<Guarded module="submissions" action="view"><PlaceholderPage title="Submission Job" description="Submission job detail, timeline, and retry controls" /></Guarded>} />
+    <Route path="/submissions/jobs/:jobId" element={<Guarded module="submissions" action="view"><SubmissionJobDetail /></Guarded>} />
 
     {/* ── Time Recording ─────────────────────────────── */}
     <Route path="/time" element={<Guarded module="tasks" action="view"><TimeRecording /></Guarded>} />
