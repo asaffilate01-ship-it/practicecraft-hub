@@ -26,6 +26,10 @@ import { HmrcConnectButton } from "@/components/HmrcConnectButton";
 import { AbsencesTab } from "@/components/payroll/AbsencesTab";
 import { BenefitsTab } from "@/components/payroll/BenefitsTab";
 import { FormsTab } from "@/components/payroll/FormsTab";
+import { PayDetailsGrid } from "@/components/payroll/PayDetailsGrid";
+import { RtiSchedule } from "@/components/payroll/RtiSchedule";
+import { PaymentsSummary } from "@/components/payroll/PaymentsSummary";
+import { PayslipsBatch } from "@/components/payroll/PayslipsBatch";
 import { calculatePay, type PayFrequency } from "@/components/payroll/PayCalculationEngine";
 
 const fmt = (pence: number) => `£${(pence / 100).toFixed(2)}`;
@@ -501,15 +505,30 @@ export default function PayrollWorkbench() {
         <KPICard title="Total Net Pay" value={fmt(totalNet)} change="All runs" changeType="neutral" icon={Banknote} iconColor="bg-primary/10" />
       </div>
 
-      <Tabs defaultValue="runs">
+      <Tabs defaultValue="pay-details">
         <TabsList className="flex-wrap">
+          <TabsTrigger value="pay-details">Pay Details</TabsTrigger>
           <TabsTrigger value="runs">Pay Runs ({payRuns.length})</TabsTrigger>
           <TabsTrigger value="employees">Employees ({employees.length})</TabsTrigger>
+          <TabsTrigger value="rti-schedule"><Send className="w-3 h-3 mr-1" /> RTI Schedule</TabsTrigger>
+          <TabsTrigger value="payslips"><FileText className="w-3 h-3 mr-1" /> Payslips</TabsTrigger>
+          <TabsTrigger value="payments"><Banknote className="w-3 h-3 mr-1" /> Payments</TabsTrigger>
           <TabsTrigger value="employers">Employers ({employers.length})</TabsTrigger>
           <TabsTrigger value="absences" className="gap-1"><Palmtree className="w-3 h-3" /> Absences</TabsTrigger>
           <TabsTrigger value="benefits" className="gap-1"><Car className="w-3 h-3" /> P11D Benefits</TabsTrigger>
           <TabsTrigger value="forms" className="gap-1"><FileText className="w-3 h-3" /> Forms</TabsTrigger>
         </TabsList>
+
+        {/* ── Pay Details (Moneysoft year grid) ── */}
+        <TabsContent value="pay-details" className="mt-4">
+          <PayDetailsGrid
+            employees={employees}
+            payRuns={payRuns}
+            payslips={payslips.length > 0 ? payslips : []}
+            frequency={employers[0]?.pay_frequency || "monthly"}
+            taxYear={employers[0]?.tax_year || "2025/26"}
+          />
+        </TabsContent>
 
         {/* ── Pay Runs ─────────────────────── */}
         <TabsContent value="runs" className="mt-4 space-y-4">
@@ -727,6 +746,38 @@ export default function PayrollWorkbench() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ── RTI Schedule (Moneysoft-style) ── */}
+        <TabsContent value="rti-schedule" className="mt-4">
+          <RtiSchedule
+            payRuns={payRuns}
+            frequency={employers[0]?.pay_frequency || "monthly"}
+            taxYear={employers[0]?.tax_year || "2025/26"}
+            employerName={employers[0]?.employer_name}
+          />
+        </TabsContent>
+
+        {/* ── Payslips Batch ── */}
+        <TabsContent value="payslips" className="mt-4">
+          {selectedRun ? (
+            <PayslipsBatch payslips={payslips} payRun={selectedRun} />
+          ) : (
+            <Card className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">Select a pay run from the Pay Runs tab to view payslips.</p>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* ── Payments Summary ── */}
+        <TabsContent value="payments" className="mt-4">
+          {selectedRun ? (
+            <PaymentsSummary payslips={payslips} payRun={selectedRun} employees={employees} />
+          ) : (
+            <Card className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">Select a pay run from the Pay Runs tab to view payment summary.</p>
+            </Card>
+          )}
         </TabsContent>
 
         {/* ── Absences ─────────────────────── */}
