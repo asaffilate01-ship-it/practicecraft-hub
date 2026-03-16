@@ -100,11 +100,13 @@ export default function FpsBuilderPage() {
   const updateLine = (i: number, patch: Partial<RtiFpsLine>) =>
     setDraft(d => d ? { ...d, lines: d.lines.map((l, idx) => idx === i ? { ...l, ...patch } : l) } : d);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<any>(null);
+
   // Queue FPS submission job
   const queueFps = useMutation({
     mutationFn: async () => {
       if (!draft || !profile) throw new Error("Missing data");
-      // Get employer's client_id
       const { data: emp } = await supabase.from("payroll_employers").select("client_id").eq("id", draft.employerId).single();
       const clientId = emp?.client_id || "";
       const { error } = await supabase.from("submission_jobs").insert({
@@ -124,6 +126,40 @@ export default function FpsBuilderPage() {
     },
     onError: (err: any) => toast.error(err.message),
   });
+
+  // Direct HMRC submission via edge function
+  const submitToHmrc = async () => {
+    if (!draft || !profile) return;
+    setSubmitting(true);
+    try {
+      const { data: emp } = await supabase.from("payroll_employers").select("client_id").eq("id", draft.employerId).single();
+      const { data, error } = await supabase.functions.invoke("rti-processor", {
+        body: {
+          action: "submit_fps",
+          tenant_id: profile.tenant_id,
+          client_id: emp?.client_id,
+          employer_id: draft.employerId,
+          payrun_id: payrunId,
+          fps_data: draft,
+        },
+      });
+      if (error) throw error;
+      setSubmissionResult(data);
+      setDraft(d => d ? { ...d, status: data?.accepted ? "submitted" : "error" } : d);
+      if (data?.accepted) {
+        toast.success("FPS submitted to HMRC successfully");
+        // Update pay run status
+        await supabase.from("pay_runs").update({ rti_status: "submitted" }).eq("id", payrunId);
+        qc.invalidateQueries({ queryKey: qk.payroll.run(payrunId) });
+      } else {
+        toast.error(data?.message || "HMRC rejected the FPS");
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (prLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
   if (!payRun || !draft) return <div className="p-6 text-sm text-muted-foreground">Pay run not found.</div>;
