@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ShieldCheck, AlertTriangle, User, FileText } from "lucide-react";
+import { ArrowLeft, ShieldCheck, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -46,9 +46,7 @@ export default function AmlCaseDetail() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/aml")}>
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/aml")}><ArrowLeft className="w-4 h-4" /></Button>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">AML Case</h1>
           <p className="text-sm text-muted-foreground">{(kycCase as any)?.clients?.legal_name}</p>
@@ -61,11 +59,11 @@ export default function AmlCaseDetail() {
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><User className="w-4 h-4" /> Case Info</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Status</span><Badge>{kycCase?.status}</Badge></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Subject Name</span><span>{kycCase?.subject_name || "—"}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Risk Level</span><span className="capitalize">{kycCase?.risk_level || "—"}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Next Review</span><span>{kycCase?.next_review_date || "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">PEP</span><span>{kycCase?.is_pep ? "Yes" : "No"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Sanctions</span><span>{kycCase?.sanctions_hit ? "Yes" : "No"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">PEP Check</span><span>{kycCase?.pep_check ? "Done" : "Pending"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Sanctions Check</span><span>{kycCase?.sanctions_check ? "Done" : "Pending"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Adverse Media</span><span>{kycCase?.adverse_media_check ? "Done" : "Pending"}</span></div>
           </CardContent>
         </Card>
 
@@ -90,13 +88,6 @@ export default function AmlCaseDetail() {
           </CardContent>
         </Card>
       </div>
-
-      {kycCase?.notes && (
-        <Card>
-          <CardHeader><CardTitle className="text-base">Notes</CardTitle></CardHeader>
-          <CardContent><p className="text-sm whitespace-pre-wrap">{kycCase.notes}</p></CardContent>
-        </Card>
-      )}
 
       <Button variant="outline" onClick={() => navigate("/aml")}><ArrowLeft className="w-4 h-4 mr-2" /> Back</Button>
     </div>
