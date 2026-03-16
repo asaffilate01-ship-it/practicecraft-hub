@@ -35,6 +35,7 @@ const accountTypeColors: Record<string, string> = {
 export default function Bookkeeping() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { selectedClientId } = useClientContext();
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showAddJournal, setShowAddJournal] = useState(false);
   const [accountForm, setAccountForm] = useState({ code: "", name: "", account_type: "expense" });
