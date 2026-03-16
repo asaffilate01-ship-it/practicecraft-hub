@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,9 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
-  Building2, Palette, LayoutGrid, Plug, FileStack, Users, CheckCircle2, ChevronRight, ChevronLeft, Plus, Trash2,
+  Building2, Palette, LayoutGrid, Plug, Users, CheckCircle2, ChevronRight, ChevronLeft, Plus, Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 
 type StepKey = "basics" | "branding" | "modules" | "integrations" | "users" | "review";
 
@@ -32,47 +31,38 @@ const ALL_MODULES = [
 ];
 
 export default function TenantOnboarding() {
-  const { user } = useAuth();
   const [tenantId, setTenantId] = useState("");
   const [step, setStep] = useState<StepKey>("basics");
   const [draft, setDraft] = useState<any>(null);
 
   const currentIdx = STEPS.findIndex((s) => s.key === step);
-
   function goto(next: StepKey) { setStep(next); }
   function goNext() { if (currentIdx < STEPS.length - 1) goto(STEPS[currentIdx + 1].key); }
   function goBack() { if (currentIdx > 0) goto(STEPS[currentIdx - 1].key); }
 
-  /* ── Step: Basics ──────────────────────────────────────── */
   function BasicsStep() {
     const [form, setForm] = useState({
       practiceName: draft?.basics?.practiceName ?? "",
       region: draft?.basics?.region ?? "UK",
       plan: draft?.basics?.plan ?? "starter",
       contactEmail: draft?.basics?.contactEmail ?? "",
-      contactPhone: draft?.basics?.contactPhone ?? "",
     });
 
     const handleCreate = async () => {
       if (!form.practiceName) { toast.error("Practice name is required"); return; }
 
-      // Create tenant
       const { data: tenant, error: tErr } = await supabase
         .from("tenants")
-        .insert({ firm_name: form.practiceName })
+        .insert({
+          firm_name: form.practiceName,
+          support_email: form.contactEmail || null,
+          plan_code: form.plan,
+        })
         .select("id")
         .single();
 
       if (tErr || !tenant) { toast.error("Failed to create tenant: " + tErr?.message); return; }
 
-      // Update branding
-      await supabase.from("tenant_branding").insert({
-        tenant_id: tenant.id,
-        practice_name: form.practiceName,
-        support_email: form.contactEmail || null,
-      });
-
-      // Create subscription on starter plan
       const { data: starterPlan } = await supabase
         .from("subscription_plans")
         .select("id")
@@ -89,7 +79,6 @@ export default function TenantOnboarding() {
         });
       }
 
-      // Seed tenant data
       await supabase.rpc("seed_tenant", { p_tenant_id: tenant.id });
       await supabase.rpc("seed_templates_and_automations", { p_tenant_id: tenant.id });
 
@@ -123,26 +112,22 @@ export default function TenantOnboarding() {
               </Select>
             </div>
             <div className="space-y-2"><Label>Support Email</Label><Input value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} /></div>
-            <div className="space-y-2"><Label>Support Phone</Label><Input value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></div>
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button onClick={handleCreate}>Create & Continue <ChevronRight className="w-4 h-4 ml-1" /></Button>
-          </div>
+          <div className="flex justify-end"><Button onClick={handleCreate}>Create & Continue <ChevronRight className="w-4 h-4 ml-1" /></Button></div>
         </CardContent>
       </Card>
     );
   }
 
-  /* ── Step: Branding ────────────────────────────────────── */
   function BrandingStep() {
     const [form, setForm] = useState({ logoUrl: "", primaryColor: "#111111", accentColor: "#111111" });
 
     const handleSave = async () => {
-      await supabase.from("tenant_branding").update({
+      await supabase.from("tenants").update({
         logo_url: form.logoUrl || null,
-        primary_color: form.primaryColor,
-        accent_color: form.accentColor,
-      }).eq("tenant_id", tenantId);
+        brand_primary_color: form.primaryColor,
+        brand_secondary_color: form.accentColor,
+      }).eq("id", tenantId);
       toast.success("Branding saved");
     };
 
@@ -150,7 +135,6 @@ export default function TenantOnboarding() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2"><Palette className="w-5 h-5" /> Branding</CardTitle>
-          <CardDescription>Set logo and brand colours for this tenant</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -170,37 +154,18 @@ export default function TenantOnboarding() {
               </div>
             </div>
           </div>
-          <div className="rounded-xl border p-4 space-y-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Preview</p>
-            <div className="flex items-center gap-4">
-              {form.logoUrl ? <img src={form.logoUrl} alt="" className="h-10 object-contain" /> : <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-xs font-bold">Logo</div>}
-              <div className="flex gap-2">
-                <div className="w-8 h-8 rounded" style={{ backgroundColor: form.primaryColor }} />
-                <div className="w-8 h-8 rounded" style={{ backgroundColor: form.accentColor }} />
-              </div>
-            </div>
-          </div>
           <NavButtons onSave={handleSave} />
         </CardContent>
       </Card>
     );
   }
 
-  /* ── Step: Modules ─────────────────────────────────────── */
   function ModulesStep() {
     const [mods, setMods] = useState<Record<string, boolean>>(draft?.modules ?? Object.fromEntries(ALL_MODULES.map((m) => [m, true])));
-
-    const handleSave = () => {
-      setDraft((d: any) => ({ ...d, modules: mods }));
-      toast.success("Modules saved");
-    };
-
+    const handleSave = () => { setDraft((d: any) => ({ ...d, modules: mods })); toast.success("Modules saved"); };
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"><LayoutGrid className="w-5 h-5" /> Modules</CardTitle>
-          <CardDescription>Enable or disable modules for this tenant's plan</CardDescription>
-        </CardHeader>
+        <CardHeader><CardTitle className="text-lg flex items-center gap-2"><LayoutGrid className="w-5 h-5" /> Modules</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {ALL_MODULES.map((k) => (
@@ -216,23 +181,11 @@ export default function TenantOnboarding() {
     );
   }
 
-  /* ── Step: Integrations ────────────────────────────────── */
   function IntegrationsStep() {
     const [v, setV] = useState<any>(draft?.integrations ?? {});
-
     function toggle(key: string, enabled: boolean) { setV((p: any) => ({ ...p, [key]: { ...p[key], enabled } })); }
     function setField(key: string, field: string, value: string) { setV((p: any) => ({ ...p, [key]: { ...p[key], [field]: value } })); }
-
-    const handleSave = async () => {
-      // Store integration config in tenant_settings
-      await supabase.from("tenant_settings").upsert({
-        tenant_id: tenantId,
-        key: "integrations",
-        value_json: v,
-      }, { onConflict: "tenant_id,key" });
-      setDraft((d: any) => ({ ...d, integrations: v }));
-      toast.success("Integrations saved");
-    };
+    const handleSave = () => { setDraft((d: any) => ({ ...d, integrations: v })); toast.success("Integrations noted"); };
 
     const IntSection = ({ title, keyName, fields }: { title: string; keyName: string; fields: { name: string; label: string; type?: string }[] }) => (
       <div className="rounded-lg border p-4 space-y-3">
@@ -265,56 +218,30 @@ export default function TenantOnboarding() {
 
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"><Plug className="w-5 h-5" /> Integrations</CardTitle>
-          <CardDescription>Configure Companies House, HMRC, payments, and banking</CardDescription>
-        </CardHeader>
+        <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Plug className="w-5 h-5" /> Integrations</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <IntSection title="Companies House" keyName="companiesHouse" fields={[
-            { name: "apiKey", label: "API Key" },
-            { name: "presenterId", label: "Presenter ID" },
-            { name: "email", label: "Presenter Email" },
-          ]} />
-          <IntSection title="HMRC (VAT / RTI / SA / CT)" keyName="hmrc" fields={[
-            { name: "clientId", label: "Client ID" },
-            { name: "clientSecret", label: "Client Secret" },
-            { name: "environment", label: "Environment", type: "select" },
-          ]} />
-          <IntSection title="GoCardless" keyName="gocardless" fields={[
-            { name: "accessToken", label: "Access Token" },
-            { name: "environment", label: "Environment", type: "select" },
-          ]} />
-          <IntSection title="Stripe" keyName="stripe" fields={[
-            { name: "publishableKey", label: "Publishable Key" },
-          ]} />
+          <IntSection title="Companies House" keyName="companiesHouse" fields={[{ name: "apiKey", label: "API Key" }, { name: "presenterId", label: "Presenter ID" }]} />
+          <IntSection title="HMRC" keyName="hmrc" fields={[{ name: "clientId", label: "Client ID" }, { name: "clientSecret", label: "Client Secret" }, { name: "environment", label: "Environment", type: "select" }]} />
+          <IntSection title="GoCardless" keyName="gocardless" fields={[{ name: "accessToken", label: "Access Token" }, { name: "environment", label: "Environment", type: "select" }]} />
           <NavButtons onSave={handleSave} />
         </CardContent>
       </Card>
     );
   }
 
-  /* ── Step: Users ────────────────────────────────────────── */
   function UsersStep() {
     const [users, setUsers] = useState<any[]>(draft?.users ?? []);
-
     function update(i: number, patch: any) { setUsers((u) => u.map((x, idx) => (idx === i ? { ...x, ...patch } : x))); }
     function add() { setUsers((u) => [...u, { email: "", name: "", role: "viewer" }]); }
     function remove(i: number) { setUsers((u) => u.filter((_, idx) => idx !== i)); }
-
-    const handleSave = () => {
-      setDraft((d: any) => ({ ...d, users }));
-      toast.success("Users saved — they will be invited on finish");
-    };
+    const handleSave = () => { setDraft((d: any) => ({ ...d, users })); toast.success("Users saved"); };
 
     return (
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg flex items-center gap-2"><Users className="w-5 h-5" /> Users & Roles</CardTitle>
-              <CardDescription>Define initial staff accounts for the tenant</CardDescription>
-            </div>
-            <Button size="sm" variant="outline" onClick={add}><Plus className="w-4 h-4 mr-1" /> Add User</Button>
+            <CardTitle className="text-lg flex items-center gap-2"><Users className="w-5 h-5" /> Users & Roles</CardTitle>
+            <Button size="sm" variant="outline" onClick={add}><Plus className="w-4 h-4 mr-1" /> Add</Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -326,31 +253,21 @@ export default function TenantOnboarding() {
                 <Label className="text-xs">Role</Label>
                 <Select value={u.role} onValueChange={(v) => update(i, { role: v })}>
                   <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["owner", "admin", "manager", "bookkeeper", "payroll", "viewer"].map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{["owner", "admin", "manager", "bookkeeper", "payroll", "viewer"].map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <Button size="icon" variant="ghost" className="shrink-0" onClick={() => remove(i)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
             </div>
           ))}
-          {users.length === 0 && <p className="text-sm text-muted-foreground py-4 text-center">No users yet. Click "Add User" above.</p>}
+          {users.length === 0 && <p className="text-sm text-muted-foreground py-4 text-center">No users yet.</p>}
           <NavButtons onSave={handleSave} />
         </CardContent>
       </Card>
     );
   }
 
-  /* ── Step: Review ──────────────────────────────────────── */
   function ReviewStep() {
     const handleFinish = async () => {
-      // Update tenant status
-      const { error } = await supabase
-        .from("tenants")
-        .update({ onboarding_completed: true })
-        .eq("id", tenantId);
-
-      if (error) { toast.error("Failed to complete: " + error.message); return; }
       toast.success("Tenant onboarding completed ✅");
       setTenantId("");
       setDraft(null);
@@ -366,10 +283,7 @@ export default function TenantOnboarding() {
 
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"><CheckCircle2 className="w-5 h-5" /> Review & Finish</CardTitle>
-          <CardDescription>Verify the configuration then finish onboarding</CardDescription>
-        </CardHeader>
+        <CardHeader><CardTitle className="text-lg flex items-center gap-2"><CheckCircle2 className="w-5 h-5" /> Review & Finish</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <Section title="Basics" data={draft?.basics} />
           <Section title="Modules" data={draft?.modules} />
@@ -385,7 +299,6 @@ export default function TenantOnboarding() {
     );
   }
 
-  /* ── Shared Nav Buttons ────────────────────────────────── */
   function NavButtons({ onSave }: { onSave: () => void }) {
     return (
       <div className="flex justify-between pt-2">
@@ -407,32 +320,21 @@ export default function TenantOnboarding() {
           {tenantId && <Badge variant="secondary" className="mt-1">Tenant: {tenantId.slice(0, 8)}…</Badge>}
         </div>
         {tenantId && (
-          <Button variant="outline" size="sm" onClick={() => { setTenantId(""); setDraft(null); setStep("basics"); }}>
-            Start New
-          </Button>
+          <Button variant="outline" size="sm" onClick={() => { setTenantId(""); setDraft(null); setStep("basics"); }}>Start New</Button>
         )}
       </div>
-
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {STEPS.map((s, i) => {
           const isActive = step === s.key;
           const isPast = currentIdx > i;
           return (
-            <button
-              key={s.key}
-              onClick={() => tenantId ? goto(s.key) : undefined}
-              disabled={!tenantId && s.key !== "basics"}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${
-                isActive ? "bg-primary text-primary-foreground" : isPast ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-              } disabled:opacity-40`}
-            >
-              <s.icon className="w-3.5 h-3.5" />
-              {s.label}
+            <button key={s.key} onClick={() => tenantId ? goto(s.key) : undefined} disabled={!tenantId && s.key !== "basics"}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap ${isActive ? "bg-primary text-primary-foreground" : isPast ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"} disabled:opacity-40`}>
+              <s.icon className="w-3.5 h-3.5" />{s.label}
             </button>
           );
         })}
       </div>
-
       {step === "basics" && <BasicsStep />}
       {step === "branding" && tenantId && <BrandingStep />}
       {step === "modules" && tenantId && <ModulesStep />}
