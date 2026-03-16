@@ -269,6 +269,58 @@ export type Database = {
           },
         ]
       }
+      automation_execution_log: {
+        Row: {
+          executed_at: string
+          id: string
+          result_message: string | null
+          rule_id: string | null
+          status: string
+          tenant_id: string
+          trigger_data_json: Json | null
+        }
+        Insert: {
+          executed_at?: string
+          id?: string
+          result_message?: string | null
+          rule_id?: string | null
+          status?: string
+          tenant_id: string
+          trigger_data_json?: Json | null
+        }
+        Update: {
+          executed_at?: string
+          id?: string
+          result_message?: string | null
+          rule_id?: string | null
+          status?: string
+          tenant_id?: string
+          trigger_data_json?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_execution_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_execution_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_execution_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       automation_rules: {
         Row: {
           action_payload_json: Json
@@ -3161,9 +3213,11 @@ export type Database = {
           client_id: string | null
           created_at: string
           due_date: string | null
+          dunning_count: number | null
           id: string
           invoice_number: string
           issue_date: string
+          last_dunning_at: string | null
           notes: string | null
           status: string
           stripe_checkout_url: string | null
@@ -3181,9 +3235,11 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           due_date?: string | null
+          dunning_count?: number | null
           id?: string
           invoice_number: string
           issue_date?: string
+          last_dunning_at?: string | null
           notes?: string | null
           status?: string
           stripe_checkout_url?: string | null
@@ -3201,9 +3257,11 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           due_date?: string | null
+          dunning_count?: number | null
           id?: string
           invoice_number?: string
           issue_date?: string
+          last_dunning_at?: string | null
           notes?: string | null
           status?: string
           stripe_checkout_url?: string | null
@@ -6530,6 +6588,97 @@ export type Database = {
           },
           {
             foreignKeyName: "receipt_extractions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      recurring_invoice_templates: {
+        Row: {
+          client_id: string
+          created_at: string
+          description: string
+          frequency: string
+          id: string
+          is_active: boolean
+          last_issued_at: string | null
+          net_amount_pence: number
+          next_issue_date: string | null
+          tenant_id: string
+          total_pence: number
+          updated_at: string
+          vat_rate: number
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          description?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_issued_at?: string | null
+          net_amount_pence?: number
+          next_issue_date?: string | null
+          tenant_id: string
+          total_pence?: number
+          updated_at?: string
+          vat_rate?: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          description?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_issued_at?: string | null
+          net_amount_pence?: number
+          next_issue_date?: string | null
+          tenant_id?: string
+          total_pence?: number
+          updated_at?: string
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_invoice_templates_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_invoice_templates_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "recurring_invoice_templates_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "recurring_invoice_templates_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "recurring_invoice_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_invoice_templates_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"

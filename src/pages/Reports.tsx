@@ -7,11 +7,16 @@ import { KPICard } from "@/components/dashboard/KPICard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from "recharts";
 import { Users, CheckSquare, Receipt, TrendingUp, Clock, Briefcase } from "lucide-react";
+import { AgedDebtReport } from "@/components/reports/AgedDebtReport";
+import { DeadlineComplianceReport } from "@/components/reports/DeadlineComplianceReport";
+import { FeeRecoveryReport } from "@/components/reports/FeeRecoveryReport";
+import { WipReport } from "@/components/time/WipReport";
 
 const COLORS = [
   "hsl(199, 89%, 48%)", "hsl(142, 71%, 45%)", "hsl(38, 92%, 50%)",
@@ -236,6 +241,30 @@ export default function ReportsPage() {
         <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>Practice Reports</h1>
         <p className="text-sm text-muted-foreground">KPIs, revenue analysis, compliance metrics, and workforce utilisation.</p>
       </div>
+
+      <Tabs defaultValue="overview">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="aged_debt">Aged Debt</TabsTrigger>
+          <TabsTrigger value="fee_recovery">Fee Recovery</TabsTrigger>
+          <TabsTrigger value="deadlines">Deadline Compliance</TabsTrigger>
+          <TabsTrigger value="wip">WIP</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="aged_debt" className="mt-4">
+          <AgedDebtReport />
+        </TabsContent>
+        <TabsContent value="fee_recovery" className="mt-4">
+          <FeeRecoveryReport />
+        </TabsContent>
+        <TabsContent value="deadlines" className="mt-4">
+          <DeadlineComplianceReport />
+        </TabsContent>
+        <TabsContent value="wip" className="mt-4">
+          <WipReport />
+        </TabsContent>
+
+        <TabsContent value="overview" className="mt-4 space-y-6">
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
@@ -479,6 +508,9 @@ export default function ReportsPage() {
 
       {/* AI Practice Intelligence */}
       <AIIntelligencePanel />
+
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
