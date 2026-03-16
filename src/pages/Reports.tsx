@@ -242,6 +242,30 @@ export default function ReportsPage() {
         <p className="text-sm text-muted-foreground">KPIs, revenue analysis, compliance metrics, and workforce utilisation.</p>
       </div>
 
+      <Tabs defaultValue="overview">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="aged_debt">Aged Debt</TabsTrigger>
+          <TabsTrigger value="fee_recovery">Fee Recovery</TabsTrigger>
+          <TabsTrigger value="deadlines">Deadline Compliance</TabsTrigger>
+          <TabsTrigger value="wip">WIP</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="aged_debt" className="mt-4">
+          <AgedDebtReport />
+        </TabsContent>
+        <TabsContent value="fee_recovery" className="mt-4">
+          <FeeRecoveryReport />
+        </TabsContent>
+        <TabsContent value="deadlines" className="mt-4">
+          <DeadlineComplianceReport />
+        </TabsContent>
+        <TabsContent value="wip" className="mt-4">
+          <WipReport />
+        </TabsContent>
+
+        <TabsContent value="overview" className="mt-4 space-y-6">
+
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         {loading ? (
