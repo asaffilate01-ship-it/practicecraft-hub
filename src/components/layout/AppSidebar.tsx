@@ -91,6 +91,7 @@ const navGroups: NavGroup[] = [
     label: "Productivity",
     items: [
       { title: "Time Recording", url: "/time", icon: ClipboardList, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
+      { title: "Calendar", url: "/calendar", icon: CalendarDays, featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
       { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
     ],
   },

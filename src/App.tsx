@@ -248,6 +248,18 @@ const AppRoutes = () => (
     {/* ── Pensions ──────────────────────────────────────── */}
     <Route path="/pensions" element={<Guarded module="payroll" action="view"><PensionWorkbench /></Guarded>} />
 
+    {/* ── Multi-Currency & EC Sales ────────────────────── */}
+    <Route path="/multi-currency" element={<Guarded module="ledger" action="view"><MultiCurrency /></Guarded>} />
+
+    {/* ── Proposals ────────────────────────────────────── */}
+    <Route path="/proposals" element={<Guarded module="billing" action="view"><Proposals /></Guarded>} />
+
+    {/* ── Calendar ─────────────────────────────────────── */}
+    <Route path="/calendar" element={<Protected><Calendar /></Protected>} />
+
+    {/* ── Trial Balance Import ─────────────────────────── */}
+    <Route path="/import" element={<Guarded module="ledger" action="view"><TrialBalanceImport /></Guarded>} />
+
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><SecretarialChangeDetail /></Guarded>} />
     <Route path="/secretarial/filings" element={<Guarded module="secretarial" action="view"><FilingHistory /></Guarded>} />
