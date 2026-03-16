@@ -34,7 +34,7 @@ import DocumentsLibrary from "@/pages/DocumentsLibrary";
 import ReportsPage from "@/pages/Reports";
 import PracticePage from "@/pages/Practice";
 import TenantOnboarding from "@/pages/TenantOnboarding";
-import PlaceholderPage from "@/pages/PlaceholderPage";
+
 import BrandingSettings from "@/pages/BrandingSettings";
 import NotificationSettings from "@/pages/NotificationSettings";
 import GdprSettings from "@/pages/GdprSettings";

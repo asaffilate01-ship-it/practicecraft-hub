@@ -1,5 +1,5 @@
-import PlaceholderPage from "@/pages/PlaceholderPage";
+import { Navigate } from "react-router-dom";
 
 export default function PortalHome() {
-  return <PlaceholderPage title="Client Portal" description="Welcome to your client portal — deadlines, documents, invoices, and messages." />;
+  return <Navigate to="/portal/home" replace />;
 }
