@@ -116,8 +116,8 @@ export default function NotificationSettings() {
                     </div>
                   </div>
                   <Switch
-                    checked={rule.is_active !== false}
-                    onCheckedChange={(checked) => toggleRule.mutate({ id: rule.id, is_active: checked })}
+                    checked={rule.is_enabled !== false}
+                    onCheckedChange={(checked) => toggleRule.mutate({ id: rule.id, is_enabled: checked })}
                   />
                 </div>
               );
