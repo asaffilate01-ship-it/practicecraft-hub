@@ -117,7 +117,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
   // Track which groups are open
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(navGroups.map((g) => [g.label, g.defaultOpen ?? false]))
+    Object.fromEntries(navGroups.map((g) => [g.label, true]))
   );
 
   const toggleGroup = (label: string) => {
