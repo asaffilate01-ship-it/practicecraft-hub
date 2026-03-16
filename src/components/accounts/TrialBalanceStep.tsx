@@ -336,8 +336,8 @@ export function TrialBalanceStep({ entries, onChange, entityType, showAdjustment
                     <TableHead className="w-28 text-right">Final Cr £</TableHead>
                   </>}
                   {showComp && <>
-                    <TableHead className="w-28 text-right bg-blue-50 dark:bg-blue-950/30">Comp Dr £</TableHead>
-                    <TableHead className="w-28 text-right bg-blue-50 dark:bg-blue-950/30">Comp Cr £</TableHead>
+                    <TableHead className="w-28 text-right bg-accent/30">Comp Dr £</TableHead>
+                    <TableHead className="w-28 text-right bg-accent/30">Comp Cr £</TableHead>
                   </>}
                   <TableHead className="w-10" />
                 </TableRow>
