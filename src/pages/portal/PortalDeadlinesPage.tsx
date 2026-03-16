@@ -41,10 +41,24 @@ export default function PortalDeadlinesPage() {
     enabled: !!portalUser?.client_id,
   });
 
+  const daysUntil = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const now = new Date();
+    return Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  };
+
   const statusVariant = (s: string): "default" | "secondary" | "destructive" | "outline" => {
     if (s === "awaiting_client") return "outline";
     if (s === "in_progress") return "secondary";
     return "default";
+  };
+
+  const urgencyColor = (dateStr: string) => {
+    const days = daysUntil(dateStr);
+    if (days < 0) return "text-destructive font-semibold";
+    if (days <= 7) return "text-warning font-medium";
+    if (days <= 14) return "text-muted-foreground";
+    return "text-muted-foreground";
   };
 
   return (
