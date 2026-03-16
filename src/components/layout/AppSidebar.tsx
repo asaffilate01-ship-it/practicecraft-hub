@@ -3,7 +3,7 @@ import {
   FileText, Building2, ShieldCheck, CreditCard, FolderOpen, BarChart3,
   Settings, ChevronLeft, CloudCog, FilePlus2, Send, Briefcase,
   Landmark, Zap, UserPlus, ClipboardList, FileQuestion, PenTool,
-  Eye, Crown, ChevronDown,
+  Eye, Crown, ChevronDown, HardHat, TrendingUp, Code2, PiggyBank,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
