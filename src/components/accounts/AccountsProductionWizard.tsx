@@ -111,6 +111,8 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         adjustment_credit_pence: e.adjustment_credit_pence,
         adjustment_notes: e.adjustment_notes || "",
         sort_order: e.sort_order,
+        comparative_debit_pence: e.comparative_debit_pence || 0,
+        comparative_credit_pence: e.comparative_credit_pence || 0,
       })));
     }
   }, [existingTB]);
@@ -147,6 +149,8 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
           adjustment_credit_pence: e.adjustment_credit_pence,
           adjustment_notes: e.adjustment_notes,
           sort_order: (i + 1) * 10,
+          comparative_debit_pence: e.comparative_debit_pence || 0,
+          comparative_credit_pence: e.comparative_credit_pence || 0,
         }));
         const { error } = await supabase.from("trial_balance_entries").insert(rows);
         if (error) throw error;
@@ -262,10 +266,10 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
 
       {/* Step content */}
       {currentStep.key === "tb" && (
-        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} />
+        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} periodId={period.id} showComparatives />
       )}
       {currentStep.key === "adj" && (
-        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} showAdjustments />
+        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} periodId={period.id} showAdjustments showComparatives />
       )}
       {currentStep.key === "fixed_assets" && (
         <FixedAssetScheduleStep

@@ -8594,12 +8594,16 @@ export type Database = {
           adjustment_credit_pence: number
           adjustment_debit_pence: number
           adjustment_notes: string | null
+          brought_forward: boolean
+          comparative_credit_pence: number
+          comparative_debit_pence: number
           created_at: string
           credit_pence: number
           debit_pence: number
           id: string
           period_id: string
           sort_order: number
+          source_period_id: string | null
           tenant_id: string
           updated_at: string
         }
@@ -8610,12 +8614,16 @@ export type Database = {
           adjustment_credit_pence?: number
           adjustment_debit_pence?: number
           adjustment_notes?: string | null
+          brought_forward?: boolean
+          comparative_credit_pence?: number
+          comparative_debit_pence?: number
           created_at?: string
           credit_pence?: number
           debit_pence?: number
           id?: string
           period_id: string
           sort_order?: number
+          source_period_id?: string | null
           tenant_id: string
           updated_at?: string
         }
@@ -8626,12 +8634,16 @@ export type Database = {
           adjustment_credit_pence?: number
           adjustment_debit_pence?: number
           adjustment_notes?: string | null
+          brought_forward?: boolean
+          comparative_credit_pence?: number
+          comparative_debit_pence?: number
           created_at?: string
           credit_pence?: number
           debit_pence?: number
           id?: string
           period_id?: string
           sort_order?: number
+          source_period_id?: string | null
           tenant_id?: string
           updated_at?: string
         }
@@ -8639,6 +8651,13 @@ export type Database = {
           {
             foreignKeyName: "trial_balance_entries_period_id_fkey"
             columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trial_balance_entries_source_period_id_fkey"
+            columns: ["source_period_id"]
             isOneToOne: false
             referencedRelation: "accounts_periods"
             referencedColumns: ["id"]
