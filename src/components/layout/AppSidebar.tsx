@@ -3,7 +3,7 @@ import {
   FileText, Building2, ShieldCheck, CreditCard, FolderOpen, BarChart3,
   Settings, ChevronLeft, CloudCog, FilePlus2, Send, Briefcase,
   Landmark, Zap, UserPlus, ClipboardList, FileQuestion, PenTool,
-  Eye, Crown,
+  Eye, Crown, ChevronDown,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -24,36 +24,78 @@ type NavItem = {
   moduleKey?: string;
 };
 
-const mainNav: NavItem[] = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Clients", url: "/clients", icon: Users, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
-  { title: "Tasks", url: "/tasks", icon: CheckSquare, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
-  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
-  { title: "Bank Feeds", url: "/bank-feeds", icon: Landmark, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
-  { title: "Auto-Categorise", url: "/categorisation-rules", icon: Zap, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
-  { title: "Quick Entry", url: "/invoice-entry", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
-  { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
-  { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
-  { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
-  { title: "Self Assessment", url: "/self-assessment", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
-  { title: "Corporation Tax", url: "/corporation-tax", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
-  { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
-  { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"], featureKey: "incorporations", moduleKey: "incorporations" },
-  { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
-  { title: "AML Monitoring", url: "/aml/monitoring", icon: Eye, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
-  { title: "Submissions", url: "/submissions", icon: Send, permission: ["submissions", "view"], featureKey: "submissions", moduleKey: "submissions" },
-  { title: "Billing", url: "/billing", icon: CreditCard, permission: ["billing", "view"], featureKey: "billing", moduleKey: "billing" },
-  { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
-  { title: "Doc Requests", url: "/documents/requests", icon: FileQuestion, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
-  { title: "e-Signatures", url: "/documents/signatures", icon: PenTool, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
-  { title: "Time Recording", url: "/time", icon: ClipboardList, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
-  { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
-  { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
-  { title: "CH Wizard", url: "/practice/integrations/companies-house", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
-  { title: "HMRC Wizard", url: "/practice/integrations/hmrc", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
-  { title: "Audit Log", url: "/practice/audit-log", icon: ClipboardList, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
-  { title: "Tenant Onboarding", url: "/practice/onboarding", icon: FilePlus2, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
-  { title: "Client Onboarding", url: "/client-onboarding", icon: UserPlus, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+  defaultOpen?: boolean;
+};
+
+const navGroups: NavGroup[] = [
+  {
+    label: "Core",
+    defaultOpen: true,
+    items: [
+      { title: "Dashboard", url: "/", icon: LayoutDashboard },
+      { title: "Clients", url: "/clients", icon: Users, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
+      { title: "Tasks", url: "/tasks", icon: CheckSquare, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
+      { title: "Client Onboarding", url: "/client-onboarding", icon: UserPlus, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
+    ],
+  },
+  {
+    label: "Bookkeeping",
+    items: [
+      { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+      { title: "Bank Feeds", url: "/bank-feeds", icon: Landmark, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+      { title: "Auto-Categorise", url: "/categorisation-rules", icon: Zap, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+      { title: "Quick Entry", url: "/invoice-entry", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+    ],
+  },
+  {
+    label: "Compliance",
+    items: [
+      { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
+      { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
+      { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "Self Assessment", url: "/self-assessment", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "Corporation Tax", url: "/corporation-tax", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
+      { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"], featureKey: "incorporations", moduleKey: "incorporations" },
+    ],
+  },
+  {
+    label: "Risk & Submissions",
+    items: [
+      { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
+      { title: "AML Monitoring", url: "/aml/monitoring", icon: Eye, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
+      { title: "Submissions", url: "/submissions", icon: Send, permission: ["submissions", "view"], featureKey: "submissions", moduleKey: "submissions" },
+    ],
+  },
+  {
+    label: "Billing & Documents",
+    items: [
+      { title: "Billing", url: "/billing", icon: CreditCard, permission: ["billing", "view"], featureKey: "billing", moduleKey: "billing" },
+      { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
+      { title: "Doc Requests", url: "/documents/requests", icon: FileQuestion, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
+      { title: "e-Signatures", url: "/documents/signatures", icon: PenTool, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
+    ],
+  },
+  {
+    label: "Productivity",
+    items: [
+      { title: "Time Recording", url: "/time", icon: ClipboardList, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
+      { title: "Reports", url: "/reports", icon: BarChart3, permission: ["reports", "view"], featureKey: "reports", moduleKey: "reports" },
+    ],
+  },
+  {
+    label: "Practice",
+    items: [
+      { title: "Practice", url: "/practice", icon: Briefcase, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
+      { title: "CH Wizard", url: "/practice/integrations/companies-house", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
+      { title: "HMRC Wizard", url: "/practice/integrations/hmrc", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
+      { title: "Audit Log", url: "/practice/audit-log", icon: ClipboardList, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
+      { title: "Tenant Onboarding", url: "/practice/onboarding", icon: FilePlus2, permission: ["settings", "view"], featureKey: "practice_mgmt", moduleKey: "practice_mgmt" },
+    ],
+  },
 ];
 
 const bottomNav: NavItem[] = [
@@ -73,6 +115,15 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const features = usePracticeFeatures();
   const session = buildStaffSession(role, user?.user_metadata?.full_name, user?.email);
 
+  // Track which groups are open
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(navGroups.map((g) => [g.label, g.defaultOpen ?? false]))
+  );
+
+  const toggleGroup = (label: string) => {
+    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
+
   const isVisible = (item: NavItem) => {
     if (item.permission && !can(item.permission[0], item.permission[1])) return false;
     if (item.featureKey && features[item.featureKey] === false) return false;
@@ -80,7 +131,6 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
     return true;
   };
 
-  const visibleMainNav = mainNav.filter(isVisible);
   const visibleBottomNav = bottomNav.filter(isVisible);
 
   const handleNavClick = () => {
@@ -131,7 +181,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
       )}
 
       {/* Main nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
         {loading ? (
           <div className="space-y-2 px-3 py-2">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -139,19 +189,57 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             ))}
           </div>
         ) : (
-          visibleMainNav.map((item) => (
-            <NavLink
-              key={item.url}
-              to={item.url}
-              end={item.url === "/"}
-              onClick={handleNavClick}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-              activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-            >
-              <item.icon className="w-4 h-4 shrink-0" />
-              {!collapsed && <span>{item.title}</span>}
-            </NavLink>
-          ))
+          navGroups.map((group) => {
+            const visibleItems = group.items.filter(isVisible);
+            if (visibleItems.length === 0) return null;
+            const isOpen = openGroups[group.label] ?? false;
+
+            if (collapsed) {
+              // In collapsed mode, just show icons without groups
+              return visibleItems.map((item) => (
+                <NavLink
+                  key={item.url}
+                  to={item.url}
+                  end={item.url === "/"}
+                  onClick={handleNavClick}
+                  className="flex items-center justify-center p-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+                  activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                  title={item.title}
+                >
+                  <item.icon className="w-4 h-4 shrink-0" />
+                </NavLink>
+              ));
+            }
+
+            return (
+              <div key={group.label}>
+                <button
+                  onClick={() => toggleGroup(group.label)}
+                  className="flex items-center justify-between w-full px-3 py-1.5 text-[11px] uppercase tracking-wider font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
+                >
+                  <span>{group.label}</span>
+                  <ChevronDown className={cn("w-3 h-3 transition-transform", isOpen && "rotate-180")} />
+                </button>
+                {isOpen && (
+                  <div className="space-y-0.5 mt-0.5">
+                    {visibleItems.map((item) => (
+                      <NavLink
+                        key={item.url}
+                        to={item.url}
+                        end={item.url === "/"}
+                        onClick={handleNavClick}
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                      >
+                        <item.icon className="w-4 h-4 shrink-0" />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </nav>
 
@@ -170,7 +258,10 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             key={item.url}
             to={item.url}
             onClick={handleNavClick}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors",
+              collapsed && "justify-center"
+            )}
             activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
           >
             <item.icon className="w-4 h-4 shrink-0" />
