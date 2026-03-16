@@ -240,7 +240,7 @@ const AppRoutes = () => (
     <Route path="/billing" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
     <Route path="/billing/invoices" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
     <Route path="/billing/plans" element={<Guarded module="billing" action="view"><PlaceholderPage title="Billing Plans" description="Recurring fee plans and subscriptions" /></Guarded>} />
-    <Route path="/billing/payments" element={<Guarded module="billing" action="view"><PlaceholderPage title="Payments" description="Payment history and reconciliation" /></Guarded>} />
+    <Route path="/billing/payments" element={<Guarded module="billing" action="view"><PaymentHistory /></Guarded>} />
 
     {/* ── Documents ────────────────────────────────────── */}
     <Route path="/documents" element={<Guarded module="documents" action="view"><DocumentsLibrary /></Guarded>} />
