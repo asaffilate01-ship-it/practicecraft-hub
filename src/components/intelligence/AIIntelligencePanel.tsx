@@ -49,7 +49,7 @@ export function AIIntelligencePanel() {
   const revenueQ = useQuery({
     queryKey: ["ai-intelligence", "revenue_insights"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("mobile", { body: { action: "revenue_insights" } });
+      const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "revenue_insights" } });
       if (error) throw error;
       return data;
     },
