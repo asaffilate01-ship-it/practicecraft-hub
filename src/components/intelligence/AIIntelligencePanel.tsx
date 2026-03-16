@@ -12,7 +12,7 @@ function useIntelligenceQuery(action: string) {
   return useQuery({
     queryKey: ["ai-intelligence", action],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("mobile", {
+      const { data, error } = await supabase.functions.invoke("ai-intelligence", {
         body: { action },
       });
       if (error) throw error;
