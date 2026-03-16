@@ -39,8 +39,8 @@ export default function NotificationSettings() {
   });
 
   const toggleRule = useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase.from("notification_rules").update({ is_enabled: is_active }).eq("id", id);
+    mutationFn: async ({ id, is_enabled }: { id: string; is_enabled: boolean }) => {
+      const { error } = await supabase.from("notification_rules").update({ is_enabled }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
