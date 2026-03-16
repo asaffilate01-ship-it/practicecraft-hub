@@ -67,7 +67,7 @@ export function RecurringInvoiceBuilder() {
       const net = Math.round(parseFloat(amount) * 100);
       if (!net) throw new Error("Enter an amount");
       const vat = Math.round(net * (parseFloat(vatRate) / 100));
-      const { error } = await supabase.from("recurring_invoice_templates").insert({
+      const { error } = await (supabase as any).from("recurring_invoice_templates").insert({
         tenant_id: profile.tenant_id,
         client_id: clientId,
         frequency,
