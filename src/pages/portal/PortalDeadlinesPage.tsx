@@ -90,7 +90,12 @@ export default function PortalDeadlinesPage() {
               <div key={d.id} className="grid grid-cols-12 px-4 py-3 border-t text-sm items-center">
                 <div className="col-span-5 font-medium">{d.title}</div>
                 <div className="col-span-2 text-muted-foreground text-xs">{d.service || "—"}</div>
-                <div className="col-span-3 text-muted-foreground">{new Date(d.due_date).toLocaleDateString()}</div>
+                <div className={`col-span-3 ${urgencyColor(d.due_date)}`}>
+                  {new Date(d.due_date).toLocaleDateString("en-GB")}
+                  <span className="text-xs ml-1.5">
+                    {daysUntil(d.due_date) < 0 ? `(${Math.abs(daysUntil(d.due_date))}d overdue)` : daysUntil(d.due_date) === 0 ? "(today)" : `(${daysUntil(d.due_date)}d)`}
+                  </span>
+                </div>
                 <div className="col-span-2">
                   <Badge variant={statusVariant(d.status)}>{d.status.replace(/_/g, " ")}</Badge>
                 </div>
