@@ -776,23 +776,53 @@ export default function PayrollWorkbench() {
         </TabsContent>
 
         {/* ── Payslips Batch ── */}
-        <TabsContent value="payslips" className="mt-4">
+        <TabsContent value="payslips" className="mt-4 space-y-3">
+          {payRuns.length > 0 && (
+            <div className="flex items-center gap-3">
+              <Label className="text-sm whitespace-nowrap">Pay Run:</Label>
+              <Select value={selectedRun?.id || ""} onValueChange={(v) => setSelectedRun(payRuns.find((r: any) => r.id === v) || null)}>
+                <SelectTrigger className="w-[400px]"><SelectValue placeholder="Select a pay run" /></SelectTrigger>
+                <SelectContent>
+                  {payRuns.map((r: any) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      P{r.tax_period} · {r.payroll_employers?.employer_name} · {new Date(r.pay_date).toLocaleDateString("en-GB")} · {fmt(r.total_net_pence || 0)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {selectedRun ? (
             <PayslipsBatch payslips={payslips} payRun={selectedRun} />
           ) : (
             <Card className="py-12 text-center">
-              <p className="text-sm text-muted-foreground">Select a pay run from the Pay Runs tab to view payslips.</p>
+              <p className="text-sm text-muted-foreground">Select a pay run above to view payslips.</p>
             </Card>
           )}
         </TabsContent>
 
         {/* ── Payments Summary ── */}
-        <TabsContent value="payments" className="mt-4">
+        <TabsContent value="payments" className="mt-4 space-y-3">
+          {payRuns.length > 0 && (
+            <div className="flex items-center gap-3">
+              <Label className="text-sm whitespace-nowrap">Pay Run:</Label>
+              <Select value={selectedRun?.id || ""} onValueChange={(v) => setSelectedRun(payRuns.find((r: any) => r.id === v) || null)}>
+                <SelectTrigger className="w-[400px]"><SelectValue placeholder="Select a pay run" /></SelectTrigger>
+                <SelectContent>
+                  {payRuns.map((r: any) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      P{r.tax_period} · {r.payroll_employers?.employer_name} · {new Date(r.pay_date).toLocaleDateString("en-GB")} · {fmt(r.total_net_pence || 0)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {selectedRun ? (
             <PaymentsSummary payslips={payslips} payRun={selectedRun} employees={employees} />
           ) : (
             <Card className="py-12 text-center">
-              <p className="text-sm text-muted-foreground">Select a pay run from the Pay Runs tab to view payment summary.</p>
+              <p className="text-sm text-muted-foreground">Select a pay run above to view payment summary.</p>
             </Card>
           )}
         </TabsContent>
