@@ -38,6 +38,12 @@ import PlaceholderPage from "@/pages/PlaceholderPage";
 import BrandingSettings from "@/pages/BrandingSettings";
 import NotificationSettings from "@/pages/NotificationSettings";
 import GdprSettings from "@/pages/GdprSettings";
+import SecuritySettings from "@/pages/SecuritySettings";
+import FilingHistory from "@/pages/FilingHistory";
+import WorkflowsPage from "@/pages/WorkflowsPage";
+import IntegrationsHub from "@/pages/IntegrationsHub";
+import SubmissionJobDetail from "@/pages/SubmissionJobDetail";
+import PaymentHistory from "@/pages/PaymentHistory";
 import CompaniesHouseWizard from "@/pages/CompaniesHouseWizard";
 import HmrcWizard from "@/pages/HmrcWizard";
 import AuditLog from "@/pages/AuditLog";
@@ -216,7 +222,7 @@ const AppRoutes = () => (
     <Route path="/secretarial" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><PlaceholderPage title="Change Detail" description="Secretarial change request detail, validation, and submission" /></Guarded>} />
-    <Route path="/secretarial/filings" element={<Guarded module="secretarial" action="view"><PlaceholderPage title="Filing History" description="Companies House filing history" /></Guarded>} />
+    <Route path="/secretarial/filings" element={<Guarded module="secretarial" action="view"><FilingHistory /></Guarded>} />
 
     {/* ── Incorporations ───────────────────────────────── */}
     <Route path="/incorporations" element={<Guarded module="incorporations" action="view"><Incorporations /></Guarded>} />
@@ -234,7 +240,7 @@ const AppRoutes = () => (
     <Route path="/billing" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
     <Route path="/billing/invoices" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
     <Route path="/billing/plans" element={<Guarded module="billing" action="view"><PlaceholderPage title="Billing Plans" description="Recurring fee plans and subscriptions" /></Guarded>} />
-    <Route path="/billing/payments" element={<Guarded module="billing" action="view"><PlaceholderPage title="Payments" description="Payment history and reconciliation" /></Guarded>} />
+    <Route path="/billing/payments" element={<Guarded module="billing" action="view"><PaymentHistory /></Guarded>} />
 
     {/* ── Documents ────────────────────────────────────── */}
     <Route path="/documents" element={<Guarded module="documents" action="view"><DocumentsLibrary /></Guarded>} />
@@ -246,7 +252,7 @@ const AppRoutes = () => (
     {/* ── Submissions ──────────────────────────────────── */}
     <Route path="/submissions" element={<Guarded module="submissions" action="view"><Submissions /></Guarded>} />
     <Route path="/submissions/jobs" element={<Guarded module="submissions" action="view"><Submissions /></Guarded>} />
-    <Route path="/submissions/jobs/:jobId" element={<Guarded module="submissions" action="view"><PlaceholderPage title="Submission Job" description="Submission job detail, timeline, and retry controls" /></Guarded>} />
+    <Route path="/submissions/jobs/:jobId" element={<Guarded module="submissions" action="view"><SubmissionJobDetail /></Guarded>} />
 
     {/* ── Time Recording ─────────────────────────────── */}
     <Route path="/time" element={<Guarded module="tasks" action="view"><TimeRecording /></Guarded>} />
@@ -258,8 +264,8 @@ const AppRoutes = () => (
     <Route path="/practice" element={<Guarded module="settings" action="view"><PracticePage /></Guarded>} />
     <Route path="/practice/users" element={<Guarded module="settings" action="view"><StaffUsersTab /></Guarded>} />
     <Route path="/practice/roles" element={<Guarded module="settings" action="view"><PlaceholderPage title="Roles" description="Role and permission management" /></Guarded>} />
-    <Route path="/practice/workflows" element={<Guarded module="automations" action="view"><PlaceholderPage title="Workflows" description="Automation rules and workflow configuration" /></Guarded>} />
-    <Route path="/practice/integrations" element={<Guarded module="integrations" action="view"><PlaceholderPage title="Integrations" description="Third-party integrations and API connections" /></Guarded>} />
+    <Route path="/practice/workflows" element={<Guarded module="automations" action="view"><WorkflowsPage /></Guarded>} />
+    <Route path="/practice/integrations" element={<Guarded module="integrations" action="view"><IntegrationsHub /></Guarded>} />
     <Route path="/practice/integrations/companies-house" element={<Guarded module="secretarial" action="view"><CompaniesHouseWizard /></Guarded>} />
     <Route path="/practice/integrations/hmrc" element={<Guarded module="vat" action="view"><HmrcWizard /></Guarded>} />
     <Route path="/practice/audit-log" element={<Guarded module="settings" action="view"><AuditLog /></Guarded>} />
@@ -272,7 +278,7 @@ const AppRoutes = () => (
     <Route path="/settings/branding" element={<Guarded module="settings" action="view"><BrandingSettings /></Guarded>} />
     <Route path="/settings/notifications" element={<Guarded module="notifications" action="view"><NotificationSettings /></Guarded>} />
     <Route path="/settings/gdpr" element={<Guarded module="settings" action="view"><GdprSettings /></Guarded>} />
-    <Route path="/settings/security" element={<Guarded module="settings" action="view"><PlaceholderPage title="Security" description="Authentication, MFA, and session settings" /></Guarded>} />
+    <Route path="/settings/security" element={<Guarded module="settings" action="view"><SecuritySettings /></Guarded>} />
 
     {/* ── Client Portal (aud=client) ───────────────────── */}
     <Route path="/portal" element={
