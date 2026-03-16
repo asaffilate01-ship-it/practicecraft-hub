@@ -13,7 +13,7 @@ export function WorkflowExecutionLog() {
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ["automation-log", tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("automation_execution_log")
         .select("*, automation_rules(name)")
         .order("executed_at", { ascending: false })

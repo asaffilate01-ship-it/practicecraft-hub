@@ -31,10 +31,10 @@ export function DunningWorkflow() {
 
   const sendReminderMut = useMutation({
     mutationFn: async (invoiceId: string) => {
-      const { data: inv } = await supabase.from("invoices").select("dunning_count").eq("id", invoiceId).single();
+      const { data: inv } = await supabase.from("invoices").select("dunning_count, last_dunning_at").eq("id", invoiceId).single() as any;
       const { error } = await supabase.from("invoices").update({
         status: "overdue",
-        dunning_count: (inv?.dunning_count || 0) + 1,
+        dunning_count: ((inv as any)?.dunning_count || 0) + 1,
         last_dunning_at: new Date().toISOString(),
       }).eq("id", invoiceId);
       if (error) throw error;

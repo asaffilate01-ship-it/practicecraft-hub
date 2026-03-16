@@ -26,7 +26,7 @@ export function AgedDebtReport() {
 
       const today = new Date();
       for (const inv of invoices || []) {
-        const outstanding = parseFloat(inv.total) - parseFloat(inv.amount_paid || 0);
+        const outstanding = parseFloat(String(inv.total)) - parseFloat(String(inv.amount_paid || 0));
         if (outstanding <= 0) continue;
         const days = differenceInDays(today, new Date(inv.due_date));
         const clientName = (inv as any).clients?.legal_name || "Unknown";
