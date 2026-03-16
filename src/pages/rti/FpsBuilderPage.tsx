@@ -148,8 +148,6 @@ export default function FpsBuilderPage() {
       setDraft(d => d ? { ...d, status: data?.accepted ? "submitted" : "error" } : d);
       if (data?.accepted) {
         toast.success("FPS submitted to HMRC successfully");
-        // Update pay run status
-        await supabase.from("pay_runs").update({ rti_status: "submitted" }).eq("id", payrunId);
         qc.invalidateQueries({ queryKey: qk.payroll.run(payrunId) });
       } else {
         toast.error(data?.message || "HMRC rejected the FPS");

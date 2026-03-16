@@ -36,7 +36,7 @@ export type RtiEpsDraft = {
     sapRecovered: number;
     shppRecovered: number;
   };
-  status: "draft" | "queued" | "submitted" | "accepted" | "rejected";
+  status: "draft" | "queued" | "submitted" | "accepted" | "rejected" | "error";
 };
 
 export type RtiFpsPayload = {
