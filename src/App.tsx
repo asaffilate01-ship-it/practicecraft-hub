@@ -35,6 +35,9 @@ import ReportsPage from "@/pages/Reports";
 import PracticePage from "@/pages/Practice";
 import TenantOnboarding from "@/pages/TenantOnboarding";
 import PlaceholderPage from "@/pages/PlaceholderPage";
+import BrandingSettings from "@/pages/BrandingSettings";
+import NotificationSettings from "@/pages/NotificationSettings";
+import GdprSettings from "@/pages/GdprSettings";
 import CompaniesHouseWizard from "@/pages/CompaniesHouseWizard";
 import HmrcWizard from "@/pages/HmrcWizard";
 import AuditLog from "@/pages/AuditLog";
@@ -266,8 +269,9 @@ const AppRoutes = () => (
     {/* ── Settings ─────────────────────────────────────── */}
     <Route path="/settings" element={<Guarded module="settings" action="view"><Settings /></Guarded>} />
     <Route path="/settings/tenant" element={<Guarded module="settings" action="view"><Settings /></Guarded>} />
-    <Route path="/settings/branding" element={<Guarded module="settings" action="view"><PlaceholderPage title="Branding" description="Logo, colours, and portal branding" /></Guarded>} />
-    <Route path="/settings/notifications" element={<Guarded module="notifications" action="view"><PlaceholderPage title="Notification Settings" description="Email, in-app, and webhook notification configuration" /></Guarded>} />
+    <Route path="/settings/branding" element={<Guarded module="settings" action="view"><BrandingSettings /></Guarded>} />
+    <Route path="/settings/notifications" element={<Guarded module="notifications" action="view"><NotificationSettings /></Guarded>} />
+    <Route path="/settings/gdpr" element={<Guarded module="settings" action="view"><GdprSettings /></Guarded>} />
     <Route path="/settings/security" element={<Guarded module="settings" action="view"><PlaceholderPage title="Security" description="Authentication, MFA, and session settings" /></Guarded>} />
 
     {/* ── Client Portal (aud=client) ───────────────────── */}
