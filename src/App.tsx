@@ -230,7 +230,7 @@ const AppRoutes = () => (
 
     <Route path="/secretarial" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
-    <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><PlaceholderPage title="Change Detail" description="Secretarial change request detail, validation, and submission" /></Guarded>} />
+    <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><SecretarialChangeDetail /></Guarded>} />
     <Route path="/secretarial/filings" element={<Guarded module="secretarial" action="view"><FilingHistory /></Guarded>} />
 
     {/* ── Incorporations ───────────────────────────────── */}
