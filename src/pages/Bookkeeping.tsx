@@ -211,6 +211,7 @@ export default function Bookkeeping() {
           <TabsTrigger value="accounts">Chart of Accounts</TabsTrigger>
           <TabsTrigger value="journals">Journal Entries</TabsTrigger>
           <TabsTrigger value="trial-balance">Trial Balance</TabsTrigger>
+          <TabsTrigger value="receipts" className="gap-1"><Camera className="w-3.5 h-3.5" /> Receipts & Import</TabsTrigger>
         </TabsList>
 
         {/* Chart of Accounts */}
