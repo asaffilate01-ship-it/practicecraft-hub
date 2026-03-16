@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { AIIntelligencePanel } from "@/components/intelligence/AIIntelligencePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -475,6 +476,9 @@ export default function ReportsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Practice Intelligence */}
+      <AIIntelligencePanel />
     </div>
   );
 }
