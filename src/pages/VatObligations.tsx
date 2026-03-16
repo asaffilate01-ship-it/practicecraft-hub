@@ -9,8 +9,7 @@ import { toast } from "sonner";
 import { DueDatePill } from "@/components/ui/due-date-pill";
 
 export default function VatObligations() {
-  const ctx = useContext(ClientContext);
-  const selectedClientId = ctx?.selectedClientId;
+  const { selectedClientId } = useClientContext();
 
   const { data: obligations = [], isLoading, refetch } = useQuery({
     queryKey: ["vat-obligations", selectedClientId],
