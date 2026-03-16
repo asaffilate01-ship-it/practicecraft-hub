@@ -59,10 +59,12 @@ export default function EpsBuilderPage() {
     setDraft(d => ({ ...d, employerId, period }));
   }, [employerId, period]);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<any>(null);
+
   const queueEps = useMutation({
     mutationFn: async () => {
       if (!profile) throw new Error("Missing profile");
-      // Get employer's client_id
       const { data: emp } = await supabase.from("payroll_employers").select("client_id").eq("id", employerId).single();
       const clientId = emp?.client_id || "";
       const { error } = await supabase.from("submission_jobs").insert({
@@ -82,6 +84,36 @@ export default function EpsBuilderPage() {
     },
     onError: (err: any) => toast.error(err.message),
   });
+
+  const submitToHmrc = async () => {
+    if (!profile) return;
+    setSubmitting(true);
+    try {
+      const { data: emp } = await supabase.from("payroll_employers").select("client_id").eq("id", employerId).single();
+      const { data, error } = await supabase.functions.invoke("rti-processor", {
+        body: {
+          action: "submit_eps",
+          tenant_id: profile.tenant_id,
+          client_id: emp?.client_id,
+          employer_id: employerId,
+          period,
+          eps_data: draft,
+        },
+      });
+      if (error) throw error;
+      setSubmissionResult(data);
+      setDraft(d => ({ ...d, status: data?.accepted ? "submitted" : "error" }));
+      if (data?.accepted) {
+        toast.success("EPS submitted to HMRC successfully");
+      } else {
+        toast.error(data?.message || "HMRC rejected the EPS");
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
   if (!employer) return <div className="p-6 text-sm text-muted-foreground">Employer not found.</div>;
@@ -153,16 +185,40 @@ export default function EpsBuilderPage() {
         </CardContent>
       </Card>
 
+      {/* Submission Result */}
+      {submissionResult && (
+        <Card className={submissionResult.accepted ? "border-success" : "border-destructive"}>
+          <CardContent className="pt-6 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant={submissionResult.accepted ? "default" : "destructive"}>
+                {submissionResult.accepted ? "ACCEPTED" : "REJECTED"}
+              </Badge>
+              {submissionResult.externalRef && (
+                <span className="text-xs font-mono text-muted-foreground">Ref: {submissionResult.externalRef}</span>
+              )}
+            </div>
+            {submissionResult.message && <p className="text-sm">{submissionResult.message}</p>}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Actions */}
       <div className="flex justify-end gap-3">
         <Button variant="outline" onClick={() => toast.success("Draft saved locally")}>
           <Save className="h-4 w-4 mr-1" /> Save Draft
         </Button>
         <Button
-          disabled={queueEps.isPending || draft.status === "queued"}
+          variant="outline"
+          disabled={queueEps.isPending || draft.status === "submitted"}
           onClick={() => queueEps.mutate()}
         >
-          <Send className="h-4 w-4 mr-1" /> Queue EPS Submission
+          Queue for Later
+        </Button>
+        <Button
+          disabled={submitting || draft.status === "submitted"}
+          onClick={submitToHmrc}
+        >
+          <Send className="h-4 w-4 mr-1" /> {submitting ? "Submitting…" : "Submit EPS to HMRC"}
         </Button>
       </div>
     </div>

@@ -41,10 +41,24 @@ export default function PortalDeadlinesPage() {
     enabled: !!portalUser?.client_id,
   });
 
+  const daysUntil = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const now = new Date();
+    return Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  };
+
   const statusVariant = (s: string): "default" | "secondary" | "destructive" | "outline" => {
     if (s === "awaiting_client") return "outline";
     if (s === "in_progress") return "secondary";
     return "default";
+  };
+
+  const urgencyColor = (dateStr: string) => {
+    const days = daysUntil(dateStr);
+    if (days < 0) return "text-destructive font-semibold";
+    if (days <= 7) return "text-warning font-medium";
+    if (days <= 14) return "text-muted-foreground";
+    return "text-muted-foreground";
   };
 
   return (
@@ -76,7 +90,12 @@ export default function PortalDeadlinesPage() {
               <div key={d.id} className="grid grid-cols-12 px-4 py-3 border-t text-sm items-center">
                 <div className="col-span-5 font-medium">{d.title}</div>
                 <div className="col-span-2 text-muted-foreground text-xs">{d.service || "—"}</div>
-                <div className="col-span-3 text-muted-foreground">{new Date(d.due_date).toLocaleDateString()}</div>
+                <div className={`col-span-3 ${urgencyColor(d.due_date)}`}>
+                  {new Date(d.due_date).toLocaleDateString("en-GB")}
+                  <span className="text-xs ml-1.5">
+                    {daysUntil(d.due_date) < 0 ? `(${Math.abs(daysUntil(d.due_date))}d overdue)` : daysUntil(d.due_date) === 0 ? "(today)" : `(${daysUntil(d.due_date)}d)`}
+                  </span>
+                </div>
                 <div className="col-span-2">
                   <Badge variant={statusVariant(d.status)}>{d.status.replace(/_/g, " ")}</Badge>
                 </div>

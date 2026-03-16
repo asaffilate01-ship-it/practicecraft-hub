@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
-import { FolderOpen, Upload, FileText, Image, File, Download, Tag } from "lucide-react";
+import { FolderOpen, Upload, FileText, Image, File, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const iconForMime = (mime: string) => {
@@ -129,6 +129,17 @@ export default function PortalDocumentsPage() {
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-xs capitalize">{doc.document_type.replace(/_/g, " ")}</Badge>
                   <Badge variant={doc.status === "processed" ? "default" : "secondary"} className="text-xs capitalize">{doc.status}</Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={async () => {
+                      const { data } = await supabase.storage.from("client-documents").createSignedUrl(doc.storage_path, 60);
+                      if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                    }}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </Button>
                 </div>
               </div>
             );

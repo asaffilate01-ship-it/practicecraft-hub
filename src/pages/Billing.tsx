@@ -376,16 +376,58 @@ export default function Billing() {
               )}
 
               <div className="text-right text-lg font-bold font-mono">Total: £{parseFloat(viewInvoice.total).toFixed(2)}</div>
+              {parseFloat(viewInvoice.amount_paid) > 0 && parseFloat(viewInvoice.amount_paid) < parseFloat(viewInvoice.total) && (
+                <div className="text-right text-sm text-muted-foreground">
+                  Paid: £{parseFloat(viewInvoice.amount_paid).toFixed(2)} · Outstanding: £{(parseFloat(viewInvoice.total) - parseFloat(viewInvoice.amount_paid)).toFixed(2)}
+                </div>
+              )}
 
-              <div className="flex gap-2 justify-end">
+              <div className="flex gap-2 justify-end flex-wrap">
                 {viewInvoice.status === "draft" && (
-                  <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "sent" })}>Mark as Sent</Button>
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "sent" })}>
+                      Mark as Sent
+                    </Button>
+                    <Button size="sm" onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.functions.invoke("stripe", {
+                          body: {
+                            action: "create_checkout",
+                            invoice_id: viewInvoice.id,
+                            amount: parseFloat(viewInvoice.total),
+                            description: `Invoice ${viewInvoice.invoice_number}`,
+                          },
+                        });
+                        if (error) throw error;
+                        if (data?.checkout_url) {
+                          await supabase.from("invoices").update({
+                            stripe_checkout_url: data.checkout_url,
+                            status: "sent",
+                          }).eq("id", viewInvoice.id);
+                          queryClient.invalidateQueries({ queryKey: ["invoices"] });
+                          toast.success("Payment link created and invoice sent");
+                          setViewInvoice(null);
+                        }
+                      } catch (err: any) {
+                        toast.error(err.message || "Failed to create payment link");
+                      }
+                    }}>
+                      <CreditCard className="w-3.5 h-3.5 mr-1" /> Send with Payment Link
+                    </Button>
+                  </>
                 )}
                 {(viewInvoice.status === "sent" || viewInvoice.status === "overdue") && (
                   <>
                     <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "paid", amount_paid: parseFloat(viewInvoice.total) })}>Mark Paid</Button>
                     <InvoicePaymentButton invoiceId={viewInvoice.id} />
                   </>
+                )}
+                {viewInvoice.stripe_checkout_url && viewInvoice.status !== "paid" && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={viewInvoice.stripe_checkout_url} target="_blank" rel="noopener noreferrer">
+                      <CreditCard className="w-3.5 h-3.5 mr-1" /> View Payment Link
+                    </a>
+                  </Button>
                 )}
               </div>
             </div>
