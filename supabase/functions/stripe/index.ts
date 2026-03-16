@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@17.7.0?target=deno";
+import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,7 +21,7 @@ Deno.serve(async (req: Request) => {
   try {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-04-30.basil" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -46,7 +46,6 @@ Deno.serve(async (req: Request) => {
         });
       }
 
-      // Get or create Stripe customer for tenant
       const { data: tenant } = await supabase
         .from("tenants")
         .select("id, firm_name, stripe_customer_id")
@@ -100,7 +99,18 @@ Deno.serve(async (req: Request) => {
 
       const totalPence = Math.round(Number(invoice.total) * 100);
 
+      // Check for existing customer by client email
+      let customerId: string | undefined;
+      if (invoice.clients?.email) {
+        const customers = await stripe.customers.list({ email: invoice.clients.email, limit: 1 });
+        if (customers.data.length > 0) {
+          customerId = customers.data[0].id;
+        }
+      }
+
       const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        customer_email: customerId ? undefined : invoice.clients?.email || undefined,
         mode: "payment",
         line_items: [{
           price_data: {
@@ -113,9 +123,11 @@ Deno.serve(async (req: Request) => {
         success_url: `${req.headers.get("origin")}/portal/invoices/${invoiceId}?payment=success`,
         cancel_url: `${req.headers.get("origin")}/portal/invoices/${invoiceId}?payment=cancelled`,
         metadata: { invoice_id: invoiceId, tenant_id: tenantId },
+        payment_intent_data: {
+          metadata: { invoice_id: invoiceId, tenant_id: tenantId },
+        },
       });
 
-      // Store payment link on invoice
       await supabase.from("invoices")
         .update({ stripe_checkout_url: session.url, stripe_session_id: session.id })
         .eq("id", invoiceId);
@@ -125,9 +137,86 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // ── Verify payment status ──
+    if (action === "verify-payment") {
+      const { sessionId } = body;
+      if (!sessionId) {
+        return new Response(JSON.stringify({ error: "sessionId required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      const paid = session.payment_status === "paid";
+
+      if (paid && session.metadata?.invoice_id) {
+        const { data: inv } = await supabase
+          .from("invoices")
+          .select("total")
+          .eq("id", session.metadata.invoice_id)
+          .single();
+
+        await supabase.from("invoices")
+          .update({
+            status: "paid",
+            amount_paid: inv?.total || 0,
+            stripe_payment_intent_id: session.payment_intent as string,
+          })
+          .eq("id", session.metadata.invoice_id);
+      }
+
+      return new Response(JSON.stringify({
+        paid,
+        paymentStatus: session.payment_status,
+        customerEmail: session.customer_details?.email,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ── List payment history for tenant ──
+    if (action === "payment-history") {
+      const { tenantId, limit: histLimit } = body;
+      if (!tenantId) {
+        return new Response(JSON.stringify({ error: "tenantId required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: tenant } = await supabase
+        .from("tenants")
+        .select("stripe_customer_id")
+        .eq("id", tenantId)
+        .single();
+
+      if (!tenant?.stripe_customer_id) {
+        return new Response(JSON.stringify({ payments: [] }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const payments = await stripe.paymentIntents.list({
+        customer: tenant.stripe_customer_id,
+        limit: histLimit || 25,
+      });
+
+      const formatted = payments.data.map((pi) => ({
+        id: pi.id,
+        amount: pi.amount,
+        currency: pi.currency,
+        status: pi.status,
+        created: new Date(pi.created * 1000).toISOString(),
+        description: pi.description,
+        invoiceId: pi.metadata?.invoice_id || null,
+      }));
+
+      return new Response(JSON.stringify({ payments: formatted }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ── Webhook handler ──
     if (action === "webhook") {
-      // Simplified webhook — in production use stripe.webhooks.constructEvent
       const event = body.event;
       if (!event) {
         return new Response(JSON.stringify({ error: "event required" }), {
@@ -142,7 +231,6 @@ Deno.serve(async (req: Request) => {
         const invoiceId = session.metadata?.invoice_id;
 
         if (tenantId && planCode) {
-          // Subscription checkout completed — update tenant subscription
           const { data: plan } = await supabase
             .from("subscription_plans")
             .select("id")
@@ -162,7 +250,6 @@ Deno.serve(async (req: Request) => {
         }
 
         if (invoiceId) {
-          // Invoice payment completed
           const { data: inv } = await supabase
             .from("invoices")
             .select("total")
@@ -176,6 +263,43 @@ Deno.serve(async (req: Request) => {
               stripe_payment_intent_id: session.payment_intent,
             })
             .eq("id", invoiceId);
+
+          // Log payment event in audit_log
+          await supabase.from("audit_log").insert({
+            tenant_id: tenantId || invoiceId,
+            entity_name: "invoice",
+            entity_id: invoiceId,
+            action: "payment_received",
+            after_json: { amount: inv?.total, stripe_pi: session.payment_intent },
+          });
+        }
+      }
+
+      // Handle subscription cancellation
+      if (event.type === "customer.subscription.deleted") {
+        const subscription = event.data.object;
+        const tenantId = subscription.metadata?.tenant_id;
+        if (tenantId) {
+          await supabase.from("tenant_subscriptions")
+            .update({ status: "cancelled" })
+            .eq("stripe_subscription_id", subscription.id);
+        }
+      }
+
+      // Handle failed payments
+      if (event.type === "invoice.payment_failed") {
+        const stripeInvoice = event.data.object;
+        const tenantId = stripeInvoice.subscription_details?.metadata?.tenant_id;
+        if (tenantId) {
+          await supabase.from("audit_log").insert({
+            tenant_id: tenantId,
+            entity_name: "subscription",
+            action: "payment_failed",
+            after_json: {
+              stripe_invoice_id: stripeInvoice.id,
+              attempt_count: stripeInvoice.attempt_count,
+            },
+          });
         }
       }
 
