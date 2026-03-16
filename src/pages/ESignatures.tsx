@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,7 +12,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PenTool, Plus, Search, Send, CheckCircle2, Clock, Eye, XCircle, Bell, Loader2 } from "lucide-react";
+import { PenTool, Plus, Search, Send, CheckCircle2, Clock, Eye, XCircle, Bell, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -35,6 +35,8 @@ export default function ESignatures() {
   const [title, setTitle] = useState("");
   const [signerName, setSignerName] = useState("");
   const [signerEmail, setSignerEmail] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const profileQ = useQuery({
     queryKey: ["profile", user?.id],
@@ -74,6 +76,18 @@ export default function ESignatures() {
       if (!selectedClientId || !title.trim() || !signerName.trim() || !signerEmail.trim()) {
         throw new Error("All fields are required");
       }
+
+      let documentPath: string | null = null;
+
+      // Upload document if provided
+      if (file) {
+        const ext = file.name.split(".").pop();
+        const path = `${profileQ.data!.tenant_id}/esign/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("client-documents").upload(path, file);
+        if (upErr) throw upErr;
+        documentPath = path;
+      }
+
       const { error } = await supabase.from("signature_requests").insert({
         tenant_id: profileQ.data!.tenant_id,
         client_id: selectedClientId,
@@ -84,6 +98,7 @@ export default function ESignatures() {
         sent_at: new Date().toISOString(),
         created_by_user_id: user!.id,
         expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        document_storage_path: documentPath,
       });
       if (error) throw error;
     },
@@ -95,6 +110,7 @@ export default function ESignatures() {
       setSignerName("");
       setSignerEmail("");
       setSelectedClientId("");
+      setFile(null);
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -111,6 +127,20 @@ export default function ESignatures() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["signature-requests"] });
       toast.success("Reminder sent");
+    },
+  });
+
+  const markSignedMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("signature_requests").update({
+        status: "signed",
+        signed_at: new Date().toISOString(),
+      }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["signature-requests"] });
+      toast.success("Marked as signed");
     },
   });
 
@@ -135,7 +165,7 @@ export default function ESignatures() {
           <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
             e-Signatures
           </h1>
-          <p className="text-sm text-muted-foreground">Send documents for signature and track completion</p>
+          <p className="text-sm text-muted-foreground">Send documents for signature, track status, and store signed copies</p>
         </div>
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className="w-4 h-4 mr-1.5" /> New Signature Request
@@ -229,16 +259,18 @@ export default function ESignatures() {
                         {r.reminder_count || 0}
                       </TableCell>
                       <TableCell>
-                        {["sent", "viewed"].includes(r.status) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => sendReminderMut.mutate(r.id)}
-                            className="text-xs gap-1"
-                          >
-                            <Bell className="w-3 h-3" /> Remind
-                          </Button>
-                        )}
+                        <div className="flex gap-1">
+                          {["sent", "viewed"].includes(r.status) && (
+                            <>
+                              <Button variant="ghost" size="sm" onClick={() => sendReminderMut.mutate(r.id)} className="text-xs gap-1">
+                                <Bell className="w-3 h-3" /> Remind
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => markSignedMut.mutate(r.id)} className="text-xs gap-1">
+                                <CheckCircle2 className="w-3 h-3" /> Mark Signed
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -277,6 +309,20 @@ export default function ESignatures() {
               <div className="space-y-1.5">
                 <Label>Signer Email</Label>
                 <Input type="email" value={signerEmail} onChange={(e) => setSignerEmail(e.target.value)} placeholder="john@example.com" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Attach Document (PDF)</Label>
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="gap-1.5">
+                  <Upload className="w-3.5 h-3.5" /> {file ? file.name : "Choose file…"}
+                </Button>
+                {file && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setFile(null)} className="text-xs text-muted-foreground">
+                    Remove
+                  </Button>
+                )}
+                <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
               </div>
             </div>
           </div>
