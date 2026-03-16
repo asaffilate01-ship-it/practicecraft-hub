@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,8 @@ import { Plus, Trash2, Eye, CreditCard, Banknote } from "lucide-react";
 import { toast } from "sonner";
 import { InvoicePaymentButton } from "@/components/billing/InvoicePaymentButton";
 import { SubscriptionPlans } from "@/components/billing/SubscriptionPlans";
+import { RecurringInvoiceBuilder } from "@/components/billing/RecurringInvoiceBuilder";
+import { DunningWorkflow } from "@/components/billing/DunningWorkflow";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -141,7 +143,6 @@ export default function Billing() {
     setLines(updated);
   };
 
-  // Generate next invoice number
   const nextInvoiceNumber = () => {
     const nums = invoices.map((i: any) => {
       const match = i.invoice_number.match(/(\d+)$/);
@@ -156,7 +157,7 @@ export default function Billing() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Billing</h1>
-          <p className="text-sm text-muted-foreground">Invoicing, payment tracking & Stripe integration</p>
+          <p className="text-sm text-muted-foreground">Invoicing, recurring billing, payment tracking & collections</p>
         </div>
         <Button className="gap-2" onClick={() => { setForm({ ...form, invoice_number: nextInvoiceNumber() }); setShowCreate(true); }}>
           <Plus className="w-4 h-4" /> New Invoice
@@ -166,6 +167,8 @@ export default function Billing() {
       <Tabs defaultValue="invoices">
         <TabsList>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="recurring">Recurring</TabsTrigger>
+          <TabsTrigger value="dunning">Collections</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
         </TabsList>
 
@@ -173,70 +176,79 @@ export default function Billing() {
           <SubscriptionPlans currentPlan="starter" />
         </TabsContent>
 
+        <TabsContent value="recurring" className="mt-4">
+          <RecurringInvoiceBuilder />
+        </TabsContent>
+
+        <TabsContent value="dunning" className="mt-4">
+          <DunningWorkflow />
+        </TabsContent>
+
         <TabsContent value="invoices" className="mt-4 space-y-4">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="p-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Banknote className="w-4 h-4" /> Outstanding</div>
+              <p className="text-2xl font-bold font-mono">
+                £{invoices.filter((i: any) => i.status === "sent" || i.status === "overdue").reduce((s: number, i: any) => s + (parseFloat(i.total) - parseFloat(i.amount_paid)), 0).toFixed(2)}
+              </p>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><CreditCard className="w-4 h-4" /> Paid (All Time)</div>
+              <p className="text-2xl font-bold font-mono">
+                £{invoices.filter((i: any) => i.status === "paid").reduce((s: number, i: any) => s + parseFloat(i.total), 0).toFixed(2)}
+              </p>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Banknote className="w-4 h-4" /> Overdue</div>
+              <p className="text-2xl font-bold font-mono text-destructive">
+                £{invoices.filter((i: any) => i.status === "overdue").reduce((s: number, i: any) => s + (parseFloat(i.total) - parseFloat(i.amount_paid)), 0).toFixed(2)}
+              </p>
+            </Card>
+          </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Banknote className="w-4 h-4" /> Outstanding</div>
-          <p className="text-2xl font-bold font-mono">
-            £{invoices.filter((i: any) => i.status === "sent" || i.status === "overdue").reduce((s: number, i: any) => s + (parseFloat(i.total) - parseFloat(i.amount_paid)), 0).toFixed(2)}
-          </p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><CreditCard className="w-4 h-4" /> Paid (All Time)</div>
-          <p className="text-2xl font-bold font-mono">
-            £{invoices.filter((i: any) => i.status === "paid").reduce((s: number, i: any) => s + parseFloat(i.total), 0).toFixed(2)}
-          </p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><Banknote className="w-4 h-4" /> Overdue</div>
-          <p className="text-2xl font-bold font-mono text-destructive">
-            £{invoices.filter((i: any) => i.status === "overdue").reduce((s: number, i: any) => s + (parseFloat(i.total) - parseFloat(i.amount_paid)), 0).toFixed(2)}
-          </p>
-        </Card>
-      </div>
-
-      <Card>
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <p className="text-center text-muted-foreground py-8">Loading...</p>
-          ) : invoices.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No invoices yet. Create your first invoice to get started.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Invoice #</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Due</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-10"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invoices.map((inv: any) => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="font-mono text-sm font-medium">{inv.invoice_number}</TableCell>
-                    <TableCell>{inv.clients?.legal_name || "—"}</TableCell>
-                    <TableCell className="text-sm">{new Date(inv.issue_date).toLocaleDateString("en-GB")}</TableCell>
-                    <TableCell className="text-sm">{inv.due_date ? new Date(inv.due_date).toLocaleDateString("en-GB") : "—"}</TableCell>
-                    <TableCell className="text-right font-mono">£{parseFloat(inv.total).toFixed(2)}</TableCell>
-                    <TableCell><Badge className={statusColors[inv.status]}>{inv.status}</Badge></TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewInvoice(inv)}>
-                        <Eye className="w-3.5 h-3.5" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+          <Card>
+            <CardContent className="pt-6">
+              {isLoading ? (
+                <p className="text-center text-muted-foreground py-8">Loading...</p>
+              ) : invoices.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No invoices yet.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Invoice #</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Due</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-10"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {invoices.map((inv: any) => (
+                      <TableRow key={inv.id}>
+                        <TableCell className="font-mono text-sm font-medium">{inv.invoice_number}</TableCell>
+                        <TableCell>{inv.clients?.legal_name || "—"}</TableCell>
+                        <TableCell className="text-sm">{new Date(inv.issue_date).toLocaleDateString("en-GB")}</TableCell>
+                        <TableCell className="text-sm">{inv.due_date ? new Date(inv.due_date).toLocaleDateString("en-GB") : "—"}</TableCell>
+                        <TableCell className="text-right font-mono">£{parseFloat(inv.total).toFixed(2)}</TableCell>
+                        <TableCell><Badge className={statusColors[inv.status]}>{inv.status}</Badge></TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewInvoice(inv)}>
+                            <Eye className="w-3.5 h-3.5" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Create Invoice Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
@@ -289,26 +301,14 @@ export default function Billing() {
                   <TableBody>
                     {lines.map((line, i) => (
                       <TableRow key={i}>
-                        <TableCell>
-                          <Input className="h-8" value={line.description} onChange={(e) => updateLine(i, "description", e.target.value)} placeholder="Service description" />
-                        </TableCell>
-                        <TableCell>
-                          <Input className="h-8 font-mono" value={line.quantity} onChange={(e) => updateLine(i, "quantity", e.target.value)} />
-                        </TableCell>
-                        <TableCell>
-                          <Input className="h-8 font-mono" value={line.unit_price} onChange={(e) => updateLine(i, "unit_price", e.target.value)} placeholder="0.00" />
-                        </TableCell>
-                        <TableCell>
-                          <Input className="h-8 font-mono" value={line.vat_rate} onChange={(e) => updateLine(i, "vat_rate", e.target.value)} />
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-sm">
-                          £{calcLine(line).toFixed(2)}
-                        </TableCell>
+                        <TableCell><Input className="h-8" value={line.description} onChange={(e) => updateLine(i, "description", e.target.value)} placeholder="Service description" /></TableCell>
+                        <TableCell><Input className="h-8 font-mono" value={line.quantity} onChange={(e) => updateLine(i, "quantity", e.target.value)} /></TableCell>
+                        <TableCell><Input className="h-8 font-mono" value={line.unit_price} onChange={(e) => updateLine(i, "unit_price", e.target.value)} placeholder="0.00" /></TableCell>
+                        <TableCell><Input className="h-8 font-mono" value={line.vat_rate} onChange={(e) => updateLine(i, "vat_rate", e.target.value)} /></TableCell>
+                        <TableCell className="text-right font-mono text-sm">£{calcLine(line).toFixed(2)}</TableCell>
                         <TableCell>
                           {lines.length > 1 && (
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeLine(i)}>
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeLine(i)}><Trash2 className="w-3 h-3" /></Button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -352,7 +352,7 @@ export default function Billing() {
                 <div><span className="text-muted-foreground">Due:</span> <span className="font-medium ml-1">{viewInvoice.due_date ? new Date(viewInvoice.due_date).toLocaleDateString("en-GB") : "—"}</span></div>
               </div>
 
-              {viewInvoice.invoice_lines && viewInvoice.invoice_lines.length > 0 && (
+              {viewInvoice.invoice_lines?.length > 0 && (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -375,39 +375,23 @@ export default function Billing() {
                 </Table>
               )}
 
-              <div className="text-sm space-y-1 text-right border-t pt-2">
-                <div><span className="text-muted-foreground">Subtotal:</span> <span className="font-mono ml-2">£{parseFloat(viewInvoice.subtotal).toFixed(2)}</span></div>
-                <div><span className="text-muted-foreground">VAT:</span> <span className="font-mono ml-2">£{parseFloat(viewInvoice.vat_amount).toFixed(2)}</span></div>
-                <div className="font-bold"><span>Total:</span> <span className="font-mono ml-2">£{parseFloat(viewInvoice.total).toFixed(2)}</span></div>
-                <div><span className="text-muted-foreground">Paid:</span> <span className="font-mono ml-2">£{parseFloat(viewInvoice.amount_paid).toFixed(2)}</span></div>
-              </div>
-
-              {viewInvoice.stripe_invoice_id && (
-                <p className="text-xs text-muted-foreground">Stripe Invoice: {viewInvoice.stripe_invoice_id}</p>
-              )}
+              <div className="text-right text-lg font-bold font-mono">Total: £{parseFloat(viewInvoice.total).toFixed(2)}</div>
 
               <div className="flex gap-2 justify-end">
-                {(viewInvoice.status === "sent" || viewInvoice.status === "overdue") && (
-                  <InvoicePaymentButton invoiceId={viewInvoice.id} checkoutUrl={viewInvoice.stripe_checkout_url} />
-                )}
                 {viewInvoice.status === "draft" && (
-                  <Button variant="outline" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "sent" })}>
-                    Mark Sent
-                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "sent" })}>Mark as Sent</Button>
                 )}
                 {(viewInvoice.status === "sent" || viewInvoice.status === "overdue") && (
-                  <Button className="gap-1.5" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "paid", amount_paid: parseFloat(viewInvoice.total) })}>
-                    <CreditCard className="w-3.5 h-3.5" /> Mark Paid
-                  </Button>
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "paid", amount_paid: parseFloat(viewInvoice.total) })}>Mark Paid</Button>
+                    <InvoicePaymentButton invoiceId={viewInvoice.id} amount={parseFloat(viewInvoice.total)} />
+                  </>
                 )}
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
-
-      </TabsContent>
-      </Tabs>
     </div>
   );
 }
