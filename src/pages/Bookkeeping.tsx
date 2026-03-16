@@ -354,6 +354,93 @@ export default function Bookkeeping() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Receipts & Import */}
+        <TabsContent value="receipts" className="mt-4 space-y-4">
+          {selectedClientId && profile?.tenant_id ? (
+            <ReceiptUploader
+              clientId={selectedClientId}
+              accounts={accounts.map((a: any) => ({ id: a.id, code: a.code, name: a.name, account_type: a.account_type }))}
+              tenantId={profile.tenant_id}
+            />
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <Camera className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <p className="text-sm font-medium">Select a client from the top bar to scan receipts</p>
+                <p className="text-xs mt-1">The Receipt Scanner uses AI to extract supplier, amounts, and VAT from images — then posts directly to the ledger.</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* CSV Bank Statement Import */}
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <Upload className="w-4 h-4" />
+                <h3 className="text-sm font-semibold">CSV Bank Statement Import</h3>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Upload a CSV bank statement (Date, Description, Amount columns). Transactions will be created as uncategorised bank transactions for review.
+              </p>
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => {
+                  if (!selectedClientId) { toast.error("Select a client first"); return; }
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = ".csv";
+                  input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file || !profile?.tenant_id) return;
+                    const text = await file.text();
+                    const lines = text.split("\n").filter(Boolean);
+                    if (lines.length < 2) { toast.error("CSV must have a header row and at least one data row"); return; }
+                    const rows = lines.slice(1).map(line => {
+                      const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+                      return { date: cols[0], description: cols[1], amount: parseFloat(cols[2] || "0") };
+                    }).filter(r => r.description && !isNaN(r.amount));
+
+                    if (rows.length === 0) { toast.error("No valid rows found. Expected: Date, Description, Amount"); return; }
+
+                    // Find or create a default bank connection placeholder
+                    const { data: bankConns } = await supabase.from("bank_connections").select("id").eq("client_id", selectedClientId).limit(1);
+                    let bankConnId = bankConns?.[0]?.id;
+                    if (!bankConnId) {
+                      const { data: newConn } = await supabase.from("bank_connections").insert({
+                        tenant_id: profile.tenant_id,
+                        client_id: selectedClientId,
+                        account_name: "CSV Import",
+                        provider: "csv",
+                        status: "active",
+                      }).select("id").single();
+                      bankConnId = newConn?.id;
+                    }
+                    if (!bankConnId) { toast.error("Could not create bank connection"); return; }
+
+                    const txRows = rows.map(r => ({
+                      tenant_id: profile.tenant_id,
+                      client_id: selectedClientId,
+                      bank_connection_id: bankConnId,
+                      transaction_date: r.date || new Date().toISOString().split("T")[0],
+                      description: r.description,
+                      amount_pence: Math.round(r.amount * 100),
+                      categorisation_status: "uncategorised",
+                    }));
+
+                    const { error } = await supabase.from("bank_transactions").insert(txRows);
+                    if (error) { toast.error(error.message); return; }
+                    toast.success(`Imported ${txRows.length} bank transactions for categorisation`);
+                  };
+                  input.click();
+                }}
+              >
+                <Upload className="w-4 h-4" /> Import CSV Bank Statement
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Add Account Dialog */}
