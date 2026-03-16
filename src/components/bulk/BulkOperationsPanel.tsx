@@ -65,9 +65,9 @@ export function BulkOperationsPanel() {
         client_id: clientId,
         title: taskTitle.trim(),
         description: taskDescription.trim() || null,
-        priority: taskPriority,
+        priority: taskPriority as "low" | "medium" | "high" | "urgent",
         due_date: taskDueDate || null,
-        status: "todo",
+        status: "todo" as const,
       }));
       const { error } = await supabase.from("tasks").insert(rows);
       if (error) throw error;
