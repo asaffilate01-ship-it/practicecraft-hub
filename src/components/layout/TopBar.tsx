@@ -1,4 +1,4 @@
-import { Search, Bell, ChevronDown, User, LogOut } from "lucide-react";
+import { Search, Bell, ChevronDown, User, LogOut, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,11 @@ import { useNavigate } from "react-router-dom";
 import { usePracticeBranding } from "@/practice/branding/PracticeBrandingProvider";
 import { ClientSelector } from "@/components/layout/ClientSelector";
 
-export function TopBar() {
+interface TopBarProps {
+  onMenuClick?: () => void;
+}
+
+export function TopBar({ onMenuClick }: TopBarProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const branding = usePracticeBranding();
@@ -32,13 +36,20 @@ export function TopBar() {
   };
 
   return (
-    <header className="h-14 border-b bg-card flex items-center justify-between px-6 shrink-0 sticky top-0 z-10">
-      <div className="relative w-80">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Search clients, tasks..." className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1" />
+    <header className="h-14 border-b bg-card flex items-center justify-between px-4 md:px-6 shrink-0 sticky top-0 z-10">
+      <div className="flex items-center gap-3">
+        {onMenuClick && (
+          <Button variant="ghost" size="icon" onClick={onMenuClick} className="md:hidden">
+            <Menu className="w-5 h-5" />
+          </Button>
+        )}
+        <div className="relative w-48 md:w-80 hidden sm:block">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Search clients, tasks..." className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1" />
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         <ClientSelector />
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="w-4 h-4" />

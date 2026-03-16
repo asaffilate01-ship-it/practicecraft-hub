@@ -60,6 +60,15 @@ import CorporationTax from "@/pages/CorporationTax";
 import InvoiceEntry from "@/pages/InvoiceEntry";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
+import VatReturnDetail from "@/pages/VatReturnDetail";
+import VatObligations from "@/pages/VatObligations";
+import PayrollEmployerDetail from "@/pages/PayrollEmployerDetail";
+import PayrollRunDetail from "@/pages/PayrollRunDetail";
+import SecretarialChangeDetail from "@/pages/SecretarialChangeDetail";
+import IncorporationDetail from "@/pages/IncorporationDetail";
+import AmlCaseDetail from "@/pages/AmlCaseDetail";
+import BillingPlans from "@/pages/BillingPlans";
+import RolesManagement from "@/pages/RolesManagement";
 import { StaffUsersTab } from "@/pages/practice/StaffUsersTab";
 
 // ── Auth pages ──────────────────────────────────────────────
@@ -199,14 +208,14 @@ const AppRoutes = () => (
     {/* ── VAT (MTD) ────────────────────────────────────── */}
     <Route path="/vat" element={<Guarded module="vat" action="view"><VatReturns /></Guarded>} />
     <Route path="/vat/workbench" element={<Guarded module="vat" action="view"><VatReturns /></Guarded>} />
-    <Route path="/vat/returns/:returnId" element={<Guarded module="vat" action="view"><PlaceholderPage title="VAT Return" description="VAT return detail and submission" /></Guarded>} />
-    <Route path="/vat/obligations" element={<Guarded module="vat" action="view"><PlaceholderPage title="VAT Obligations" description="HMRC VAT obligations tracker" /></Guarded>} />
+    <Route path="/vat/returns/:returnId" element={<Guarded module="vat" action="view"><VatReturnDetail /></Guarded>} />
+    <Route path="/vat/obligations" element={<Guarded module="vat" action="view"><VatObligations /></Guarded>} />
 
     {/* ── Payroll (RTI) ────────────────────────────────── */}
     <Route path="/payroll" element={<Guarded module="payroll" action="view"><PayrollWorkbench /></Guarded>} />
     <Route path="/payroll/workbench" element={<Guarded module="payroll" action="view"><PayrollWorkbench /></Guarded>} />
-    <Route path="/payroll/employers/:employerId" element={<Guarded module="payroll" action="view"><PlaceholderPage title="Employer" description="Employer payroll setup and runs" /></Guarded>} />
-    <Route path="/payroll/runs/:runId" element={<Guarded module="payroll" action="view"><PlaceholderPage title="Payroll Run" description="Payroll run detail, payslips, and RTI submission" /></Guarded>} />
+    <Route path="/payroll/employers/:employerId" element={<Guarded module="payroll" action="view"><PayrollEmployerDetail /></Guarded>} />
+    <Route path="/payroll/runs/:runId" element={<Guarded module="payroll" action="view"><PayrollRunDetail /></Guarded>} />
     <Route path="/payroll/rti/fps/:payrunId" element={<Guarded module="payroll" action="view"><FpsBuilderPage /></Guarded>} />
     <Route path="/payroll/rti/eps/:employerId/:period" element={<Guarded module="payroll" action="view"><EpsBuilderPage /></Guarded>} />
 
@@ -221,25 +230,25 @@ const AppRoutes = () => (
 
     <Route path="/secretarial" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
-    <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><PlaceholderPage title="Change Detail" description="Secretarial change request detail, validation, and submission" /></Guarded>} />
+    <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><SecretarialChangeDetail /></Guarded>} />
     <Route path="/secretarial/filings" element={<Guarded module="secretarial" action="view"><FilingHistory /></Guarded>} />
 
     {/* ── Incorporations ───────────────────────────────── */}
     <Route path="/incorporations" element={<Guarded module="incorporations" action="view"><Incorporations /></Guarded>} />
     <Route path="/incorporations/pipeline" element={<Guarded module="incorporations" action="view"><Incorporations /></Guarded>} />
-    <Route path="/incorporations/applications/:applicationId" element={<Guarded module="incorporations" action="view"><PlaceholderPage title="Incorporation Application" description="Application wizard — company, people, shares, KYC, payment, submit" /></Guarded>} />
+    <Route path="/incorporations/applications/:applicationId" element={<Guarded module="incorporations" action="view"><IncorporationDetail /></Guarded>} />
 
     {/* ── AML / KYC ────────────────────────────────────── */}
     <Route path="/kyc" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
     <Route path="/aml" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
     <Route path="/aml/workbench" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
-    <Route path="/aml/cases/:caseId" element={<Guarded module="aml" action="view"><PlaceholderPage title="AML Case" description="Client risk assessment and verification case detail" /></Guarded>} />
+    <Route path="/aml/cases/:caseId" element={<Guarded module="aml" action="view"><AmlCaseDetail /></Guarded>} />
     <Route path="/aml/monitoring" element={<Guarded module="aml" action="view"><AmlMonitoring /></Guarded>} />
 
     {/* ── Billing ──────────────────────────────────────── */}
     <Route path="/billing" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
     <Route path="/billing/invoices" element={<Guarded module="billing" action="view"><Billing /></Guarded>} />
-    <Route path="/billing/plans" element={<Guarded module="billing" action="view"><PlaceholderPage title="Billing Plans" description="Recurring fee plans and subscriptions" /></Guarded>} />
+    <Route path="/billing/plans" element={<Guarded module="billing" action="view"><BillingPlans /></Guarded>} />
     <Route path="/billing/payments" element={<Guarded module="billing" action="view"><PaymentHistory /></Guarded>} />
 
     {/* ── Documents ────────────────────────────────────── */}
@@ -263,7 +272,7 @@ const AppRoutes = () => (
     {/* ── Practice Management ──────────────────────────── */}
     <Route path="/practice" element={<Guarded module="settings" action="view"><PracticePage /></Guarded>} />
     <Route path="/practice/users" element={<Guarded module="settings" action="view"><StaffUsersTab /></Guarded>} />
-    <Route path="/practice/roles" element={<Guarded module="settings" action="view"><PlaceholderPage title="Roles" description="Role and permission management" /></Guarded>} />
+    <Route path="/practice/roles" element={<Guarded module="settings" action="view"><RolesManagement /></Guarded>} />
     <Route path="/practice/workflows" element={<Guarded module="automations" action="view"><WorkflowsPage /></Guarded>} />
     <Route path="/practice/integrations" element={<Guarded module="integrations" action="view"><IntegrationsHub /></Guarded>} />
     <Route path="/practice/integrations/companies-house" element={<Guarded module="secretarial" action="view"><CompaniesHouseWizard /></Guarded>} />
