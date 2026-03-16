@@ -272,7 +272,7 @@ const AppRoutes = () => (
     {/* ── Practice Management ──────────────────────────── */}
     <Route path="/practice" element={<Guarded module="settings" action="view"><PracticePage /></Guarded>} />
     <Route path="/practice/users" element={<Guarded module="settings" action="view"><StaffUsersTab /></Guarded>} />
-    <Route path="/practice/roles" element={<Guarded module="settings" action="view"><PlaceholderPage title="Roles" description="Role and permission management" /></Guarded>} />
+    <Route path="/practice/roles" element={<Guarded module="settings" action="view"><RolesManagement /></Guarded>} />
     <Route path="/practice/workflows" element={<Guarded module="automations" action="view"><WorkflowsPage /></Guarded>} />
     <Route path="/practice/integrations" element={<Guarded module="integrations" action="view"><IntegrationsHub /></Guarded>} />
     <Route path="/practice/integrations/companies-house" element={<Guarded module="secretarial" action="view"><CompaniesHouseWizard /></Guarded>} />
