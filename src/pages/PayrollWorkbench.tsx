@@ -139,6 +139,23 @@ export default function PayrollWorkbench() {
     enabled: !!selectedRun,
   });
 
+  // ALL payslips across all runs for the year (for PayDetailsGrid)
+  const allRunIds = useMemo(() => payRuns.map((r: any) => r.id), [payRuns]);
+  const { data: allPayslips = [] } = useQuery({
+    queryKey: ["all-payslips", allRunIds],
+    queryFn: async () => {
+      if (allRunIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from("payslips")
+        .select("*")
+        .in("pay_run_id", allRunIds)
+        .order("employee_name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: allRunIds.length > 0,
+  });
+
   // Employees
   const [empSearch, setEmpSearch] = useState("");
   const [empStatusFilter, setEmpStatusFilter] = useState("active");
