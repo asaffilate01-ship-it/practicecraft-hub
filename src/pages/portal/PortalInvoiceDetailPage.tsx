@@ -1,61 +1,114 @@
-import { useParams } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-const MOCK_INVOICES: Record<string, any> = {
-  "inv-1": { number: "INV-0042", issuedAt: "2026-01-15", dueDate: "2026-02-15", amountPence: 120000, status: "paid", payUrl: null },
-  "inv-2": { number: "INV-0043", issuedAt: "2026-02-01", dueDate: "2026-03-01", amountPence: 95000, status: "outstanding", payUrl: "https://example.com/pay/inv-2" },
-  "inv-3": { number: "INV-0044", issuedAt: "2026-02-15", dueDate: "2026-03-15", amountPence: 150000, status: "outstanding", payUrl: "https://example.com/pay/inv-3" },
-};
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function PortalInvoiceDetailPage() {
   const { invoiceId = "" } = useParams();
-  const inv = MOCK_INVOICES[invoiceId];
 
-  if (!inv) {
+  const { data: inv, isLoading } = useQuery({
+    queryKey: ["portal-invoice-detail", invoiceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("invoices")
+        .select("*")
+        .eq("id", invoiceId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!invoiceId,
+  });
+
+  const { data: lines = [] } = useQuery({
+    queryKey: ["portal-invoice-lines", invoiceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("invoice_lines")
+        .select("*")
+        .eq("invoice_id", invoiceId)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!invoiceId,
+  });
+
+  if (isLoading) {
     return (
-      <div className="p-6">
-        <p className="text-sm text-muted-foreground">Invoice not found.</p>
+      <div className="flex justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-foreground">Invoice</h1>
-        <p className="text-sm text-muted-foreground">{inv.number}</p>
+  if (!inv) {
+    return (
+      <div className="p-6 space-y-4">
+        <Link to="/portal/invoices"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button></Link>
+        <p className="text-muted-foreground">Invoice not found.</p>
       </div>
+    );
+  }
+
+  const statusVariant = (s: string): "default" | "secondary" | "destructive" | "outline" => {
+    if (s === "paid") return "default";
+    if (s === "overdue") return "destructive";
+    return "outline";
+  };
+
+  return (
+    <div className="p-6 space-y-6 max-w-2xl">
+      <Link to="/portal/invoices"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-1" /> Back to Invoices</Button></Link>
 
       <Card>
-        <CardContent className="p-6 space-y-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-sm font-semibold">{inv.number}</div>
-              <div className="text-xs text-muted-foreground">Issued: {inv.issuedAt} • Due: {inv.dueDate}</div>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>{inv.invoice_number}</CardTitle>
+            <Badge variant={statusVariant(inv.status)}>{inv.status}</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div><span className="text-muted-foreground">Issued:</span> {new Date(inv.issue_date).toLocaleDateString()}</div>
+            <div><span className="text-muted-foreground">Due:</span> {new Date(inv.due_date).toLocaleDateString()}</div>
+            <div><span className="text-muted-foreground">Subtotal:</span> £{Number(inv.subtotal).toFixed(2)}</div>
+            <div><span className="text-muted-foreground">VAT:</span> £{Number(inv.vat_amount).toFixed(2)}</div>
+            <div className="font-semibold"><span className="text-muted-foreground">Total:</span> £{Number(inv.total).toFixed(2)}</div>
+            <div><span className="text-muted-foreground">Paid:</span> £{Number(inv.amount_paid || 0).toFixed(2)}</div>
+          </div>
+
+          {lines.length > 0 && (
+            <div className="border rounded-lg overflow-hidden">
+              <div className="grid grid-cols-12 bg-muted/50 text-xs font-medium text-muted-foreground px-4 py-2">
+                <div className="col-span-6">Description</div>
+                <div className="col-span-2 text-right">Qty</div>
+                <div className="col-span-2 text-right">Rate</div>
+                <div className="col-span-2 text-right">Amount</div>
+              </div>
+              {lines.map((line: any) => (
+                <div key={line.id} className="grid grid-cols-12 px-4 py-2 border-t text-sm">
+                  <div className="col-span-6">{line.description}</div>
+                  <div className="col-span-2 text-right">{line.quantity}</div>
+                  <div className="col-span-2 text-right">£{Number(line.unit_price_pence || 0).toFixed(2)}</div>
+                  <div className="col-span-2 text-right">£{Number(line.line_total_pence || 0).toFixed(2)}</div>
+                </div>
+              ))}
             </div>
-            <Badge variant={inv.status === "paid" ? "secondary" : "outline"}>{inv.status}</Badge>
-          </div>
+          )}
 
-          <div className="text-3xl font-semibold">£{(inv.amountPence / 100).toFixed(2)}</div>
+          {inv.notes && <p className="text-sm text-muted-foreground">{inv.notes}</p>}
 
-          <div className="flex gap-2">
-            {inv.payUrl ? (
-              <Button asChild>
-                <a href={inv.payUrl} target="_blank" rel="noreferrer">Pay now</a>
-              </Button>
-            ) : (
-              <Button disabled>No payment link</Button>
-            )}
-            <Button variant="outline" onClick={() => alert("Wire PDF download")}>
-              Download PDF
+          {inv.status !== "paid" && inv.stripe_checkout_url && (
+            <Button className="w-full" asChild>
+              <a href={inv.stripe_checkout_url} target="_blank" rel="noopener noreferrer">
+                Pay £{Number(inv.total).toFixed(2)}
+              </a>
             </Button>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            Note: In production, payment links are generated via Stripe / GoCardless / Access PaySuite.
-          </p>
+          )}
         </CardContent>
       </Card>
     </div>
