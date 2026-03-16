@@ -1,22 +1,49 @@
 import React, { useState, useEffect } from "react";
 import { getSelectedClientId, setSelectedClientId } from "@/portal/clients/clientStore";
-
-// Mock accessible clients — later replaced with API call
-const MOCK_CLIENTS = [
-  { id: "pc-1", name: "Kitchen313 Group Ltd", entityType: "ltd", reference: "14500123" },
-  { id: "pc-2", name: "EventPlanr Ltd", entityType: "ltd", reference: "14077891" },
-  { id: "pc-3", name: "IQ Advisory (Sole Trader)", entityType: "sole_trader", reference: "UTR-***" },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function ClientSwitcher() {
-  const rows = MOCK_CLIENTS;
-  const [selected, setSelected] = useState(getSelectedClientId() ?? rows[0]?.id ?? "");
+  const { user } = useAuth();
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [selected, setSelected] = useState(getSelectedClientId() ?? "");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!selected && rows[0]?.id) setSelected(rows[0].id);
-  }, [rows, selected]);
+    if (!user) return;
+    (async () => {
+      // Portal users see clients linked to them via portal_users
+      const { data: portalLinks } = await supabase
+        .from("portal_users")
+        .select("client_id")
+        .eq("user_id", user.id)
+        .eq("status", "active");
 
-  if (rows.length <= 1) return null;
+      if (!portalLinks?.length) {
+        setLoading(false);
+        return;
+      }
+
+      const clientIds = portalLinks.map((l) => l.client_id).filter(Boolean) as string[];
+      if (!clientIds.length) { setLoading(false); return; }
+
+      const { data: clientRows } = await supabase
+        .from("clients")
+        .select("id, legal_name")
+        .in("id", clientIds);
+
+      const rows = (clientRows ?? []).map((c) => ({ id: c.id, name: c.legal_name }));
+      setClients(rows);
+
+      if (!selected && rows[0]?.id) {
+        setSelected(rows[0].id);
+        setSelectedClientId(rows[0].id);
+      }
+      setLoading(false);
+    })();
+  }, [user]);
+
+  if (loading || clients.length <= 1) return null;
 
   return (
     <div className="px-2">
@@ -31,7 +58,7 @@ export function ClientSwitcher() {
           window.location.reload();
         }}
       >
-        {rows.map((c) => (
+        {clients.map((c) => (
           <option key={c.id} value={c.id}>{c.name}</option>
         ))}
       </select>
