@@ -748,6 +748,38 @@ export default function PayrollWorkbench() {
           </Card>
         </TabsContent>
 
+        {/* ── RTI Schedule (Moneysoft-style) ── */}
+        <TabsContent value="rti-schedule" className="mt-4">
+          <RtiSchedule
+            payRuns={payRuns}
+            frequency={employers[0]?.pay_frequency || "monthly"}
+            taxYear={employers[0]?.tax_year || "2025/26"}
+            employerName={employers[0]?.employer_name}
+          />
+        </TabsContent>
+
+        {/* ── Payslips Batch ── */}
+        <TabsContent value="payslips" className="mt-4">
+          {selectedRun ? (
+            <PayslipsBatch payslips={payslips} payRun={selectedRun} />
+          ) : (
+            <Card className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">Select a pay run from the Pay Runs tab to view payslips.</p>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* ── Payments Summary ── */}
+        <TabsContent value="payments" className="mt-4">
+          {selectedRun ? (
+            <PaymentsSummary payslips={payslips} payRun={selectedRun} employees={employees} />
+          ) : (
+            <Card className="py-12 text-center">
+              <p className="text-sm text-muted-foreground">Select a pay run from the Pay Runs tab to view payment summary.</p>
+            </Card>
+          )}
+        </TabsContent>
+
         {/* ── Absences ─────────────────────── */}
         <TabsContent value="absences" className="mt-4">
           {profile?.tenant_id && <AbsencesTab tenantId={profile.tenant_id} employers={employers} employees={employees} />}
