@@ -56,7 +56,7 @@ export default function IncorporationDetail() {
         <Card>
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><FileText className="w-4 h-4" /> Status</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Step</span><span className="capitalize">{app?.step || "details"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="capitalize">{app?.status || "draft"}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span>{app?.payment_status || "pending"}</span></div>
             {app?.ch_submission_id && <div className="flex justify-between"><span className="text-muted-foreground">CH Reference</span><span>{app.ch_submission_id}</span></div>}
             {app?.ch_company_number && <div className="flex justify-between"><span className="text-muted-foreground">Company Number</span><span>{app.ch_company_number}</span></div>}
