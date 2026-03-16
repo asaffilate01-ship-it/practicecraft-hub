@@ -42,6 +42,9 @@ export default function Bookkeeping() {
   const [showAddJournal, setShowAddJournal] = useState(false);
   const [accountForm, setAccountForm] = useState({ code: "", name: "", account_type: "expense" });
   const [journalForm, setJournalForm] = useState({ entry_date: new Date().toISOString().split("T")[0], reference: "", narration: "", client_id: "" });
+  const [tbEntries, setTbEntries] = useState<TBEntry[]>([]);
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
+  const [tbSaving, setTbSaving] = useState(false);
   const [journalLines, setJournalLines] = useState<{ account_id: string; debit: string; credit: string; description: string }[]>([
     { account_id: "", debit: "", credit: "", description: "" },
     { account_id: "", debit: "", credit: "", description: "" },
