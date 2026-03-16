@@ -3,7 +3,7 @@ import {
   FileText, Building2, ShieldCheck, CreditCard, FolderOpen, BarChart3,
   Settings, ChevronLeft, CloudCog, FilePlus2, Send, Briefcase,
   Landmark, Zap, UserPlus, ClipboardList, FileQuestion, PenTool,
-  Eye, Crown, ChevronDown,
+  Eye, Crown, ChevronDown, HardHat, TrendingUp, Code2, PiggyBank,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -58,6 +58,10 @@ const navGroups: NavGroup[] = [
       { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Self Assessment", url: "/self-assessment", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Corporation Tax", url: "/corporation-tax", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "CIS", url: "/cis", icon: HardHat, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "MTD IT (ITSA)", url: "/itsa", icon: TrendingUp, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "iXBRL Tagging", url: "/ixbrl", icon: Code2, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "Pensions", url: "/pensions", icon: PiggyBank, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
       { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
       { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"], featureKey: "incorporations", moduleKey: "incorporations" },
     ],

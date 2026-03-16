@@ -57,6 +57,10 @@ import FpsBuilderPage from "@/pages/rti/FpsBuilderPage";
 import EpsBuilderPage from "@/pages/rti/EpsBuilderPage";
 import SelfAssessment from "@/pages/SelfAssessment";
 import CorporationTax from "@/pages/CorporationTax";
+import CisWorkbench from "@/pages/CisWorkbench";
+import ItsaWorkbench from "@/pages/ItsaWorkbench";
+import IxbrlTagging from "@/pages/IxbrlTagging";
+import PensionWorkbench from "@/pages/PensionWorkbench";
 import InvoiceEntry from "@/pages/InvoiceEntry";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
@@ -228,7 +232,18 @@ const AppRoutes = () => (
     {/* ── Corporation Tax ──────────────────────────────── */}
     <Route path="/corporation-tax" element={<Guarded module="accounts" action="view"><CorporationTax /></Guarded>} />
 
-    <Route path="/secretarial" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
+    {/* ── CIS ───────────────────────────────────────────── */}
+    <Route path="/cis" element={<Guarded module="accounts" action="view"><CisWorkbench /></Guarded>} />
+
+    {/* ── MTD IT (ITSA) ─────────────────────────────────── */}
+    <Route path="/itsa" element={<Guarded module="accounts" action="view"><ItsaWorkbench /></Guarded>} />
+
+    {/* ── iXBRL Tagging ─────────────────────────────────── */}
+    <Route path="/ixbrl" element={<Guarded module="accounts" action="view"><IxbrlTagging /></Guarded>} />
+
+    {/* ── Pensions ──────────────────────────────────────── */}
+    <Route path="/pensions" element={<Guarded module="payroll" action="view"><PensionWorkbench /></Guarded>} />
+
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><SecretarialChangeDetail /></Guarded>} />
     <Route path="/secretarial/filings" element={<Guarded module="secretarial" action="view"><FilingHistory /></Guarded>} />
