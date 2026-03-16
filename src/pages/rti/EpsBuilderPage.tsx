@@ -185,16 +185,40 @@ export default function EpsBuilderPage() {
         </CardContent>
       </Card>
 
+      {/* Submission Result */}
+      {submissionResult && (
+        <Card className={submissionResult.accepted ? "border-success" : "border-destructive"}>
+          <CardContent className="pt-6 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant={submissionResult.accepted ? "default" : "destructive"}>
+                {submissionResult.accepted ? "ACCEPTED" : "REJECTED"}
+              </Badge>
+              {submissionResult.externalRef && (
+                <span className="text-xs font-mono text-muted-foreground">Ref: {submissionResult.externalRef}</span>
+              )}
+            </div>
+            {submissionResult.message && <p className="text-sm">{submissionResult.message}</p>}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Actions */}
       <div className="flex justify-end gap-3">
         <Button variant="outline" onClick={() => toast.success("Draft saved locally")}>
           <Save className="h-4 w-4 mr-1" /> Save Draft
         </Button>
         <Button
-          disabled={queueEps.isPending || draft.status === "queued"}
+          variant="outline"
+          disabled={queueEps.isPending || draft.status === "submitted"}
           onClick={() => queueEps.mutate()}
         >
-          <Send className="h-4 w-4 mr-1" /> Queue EPS Submission
+          Queue for Later
+        </Button>
+        <Button
+          disabled={submitting || draft.status === "submitted"}
+          onClick={submitToHmrc}
+        >
+          <Send className="h-4 w-4 mr-1" /> {submitting ? "Submitting…" : "Submit EPS to HMRC"}
         </Button>
       </div>
     </div>

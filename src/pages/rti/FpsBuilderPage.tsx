@@ -280,22 +280,42 @@ export default function FpsBuilderPage() {
         </CardContent>
       </Card>
 
+      {/* Submission Result */}
+      {submissionResult && (
+        <Card className={submissionResult.accepted ? "border-success" : "border-destructive"}>
+          <CardContent className="pt-6 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant={submissionResult.accepted ? "default" : "destructive"}>
+                {submissionResult.accepted ? "ACCEPTED" : "REJECTED"}
+              </Badge>
+              {submissionResult.externalRef && (
+                <span className="text-xs font-mono text-muted-foreground">Ref: {submissionResult.externalRef}</span>
+              )}
+            </div>
+            {submissionResult.message && <p className="text-sm">{submissionResult.message}</p>}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Actions */}
       <div className="flex justify-end gap-3">
-        <Button variant="outline" disabled={draft.status === "queued"} onClick={() => toast.success("Draft saved locally")}>
+        <Button variant="outline" disabled={draft.status === "submitted"} onClick={() => toast.success("Draft saved locally")}>
           <Save className="h-4 w-4 mr-1" /> Save Draft
         </Button>
         <Button
-          disabled={queueFps.isPending || draft.lines.length === 0 || draft.status === "queued"}
+          variant="outline"
+          disabled={queueFps.isPending || draft.lines.length === 0 || draft.status === "submitted"}
           onClick={() => queueFps.mutate()}
         >
-          <Send className="h-4 w-4 mr-1" /> Queue FPS Submission
+          Queue for Later
+        </Button>
+        <Button
+          disabled={submitting || draft.lines.length === 0 || draft.status === "submitted"}
+          onClick={submitToHmrc}
+        >
+          <Send className="h-4 w-4 mr-1" /> {submitting ? "Submitting…" : "Submit FPS to HMRC"}
         </Button>
       </div>
-
-      <p className="text-xs text-muted-foreground">
-        This FPS draft will be mapped to an HMRC RTI XML payload and submitted via the GOV.UK Gateway.
-      </p>
     </div>
   );
 }
