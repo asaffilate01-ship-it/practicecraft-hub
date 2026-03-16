@@ -1,5 +1,6 @@
 import { AppSidebar } from "./AppSidebar";
 import { TopBar } from "./TopBar";
+import { DevBanner } from "@/components/DevBanner";
 import { PracticeBrandingProvider } from "@/practice/branding/PracticeBrandingProvider";
 import { PracticeFeaturesProvider } from "@/practice/features/PracticeFeaturesProvider";
 import { useState } from "react";
