@@ -26,6 +26,10 @@ import { HmrcConnectButton } from "@/components/HmrcConnectButton";
 import { AbsencesTab } from "@/components/payroll/AbsencesTab";
 import { BenefitsTab } from "@/components/payroll/BenefitsTab";
 import { FormsTab } from "@/components/payroll/FormsTab";
+import { PayDetailsGrid } from "@/components/payroll/PayDetailsGrid";
+import { RtiSchedule } from "@/components/payroll/RtiSchedule";
+import { PaymentsSummary } from "@/components/payroll/PaymentsSummary";
+import { PayslipsBatch } from "@/components/payroll/PayslipsBatch";
 import { calculatePay, type PayFrequency } from "@/components/payroll/PayCalculationEngine";
 
 const fmt = (pence: number) => `£${(pence / 100).toFixed(2)}`;
