@@ -266,10 +266,10 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
 
       {/* Step content */}
       {currentStep.key === "tb" && (
-        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} />
+        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} periodId={period.id} showComparatives />
       )}
       {currentStep.key === "adj" && (
-        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} showAdjustments />
+        <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} periodId={period.id} showAdjustments showComparatives />
       )}
       {currentStep.key === "fixed_assets" && (
         <FixedAssetScheduleStep
