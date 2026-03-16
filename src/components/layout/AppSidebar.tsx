@@ -4,6 +4,7 @@ import {
   Settings, ChevronLeft, CloudCog, FilePlus2, Send, Briefcase,
   Landmark, Zap, UserPlus, ClipboardList, FileQuestion, PenTool,
   Eye, Crown, ChevronDown, HardHat, TrendingUp, Code2, PiggyBank,
+  Globe, CalendarDays, Upload, FileSpreadsheet,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
