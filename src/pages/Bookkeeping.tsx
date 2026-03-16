@@ -567,6 +567,9 @@ export default function Bookkeeping() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AI Anomaly Detection */}
+      <AnomalyDetectionPanel />
     </div>
   );
 }
