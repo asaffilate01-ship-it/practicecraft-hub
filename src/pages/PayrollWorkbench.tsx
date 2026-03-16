@@ -541,7 +541,7 @@ export default function PayrollWorkbench() {
           <PayDetailsGrid
             employees={employees}
             payRuns={payRuns}
-            payslips={payslips.length > 0 ? payslips : []}
+            payslips={allPayslips}
             frequency={employers[0]?.pay_frequency || "monthly"}
             taxYear={employers[0]?.tax_year || "2025/26"}
           />
