@@ -90,7 +90,92 @@ export default function Bookkeeping() {
     enabled: !!profile?.tenant_id,
   });
 
-  const addAccount = useMutation({
+  // Periods for selected client (for standalone TB entry)
+  const { data: clientPeriods = [] } = useQuery({
+    queryKey: ["client-periods-tb", selectedClientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("accounts_periods")
+        .select("id, period_start, period_end, status")
+        .eq("client_id", selectedClientId!)
+        .order("period_end", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedClientId,
+  });
+
+  // Load TB entries when period selected
+  const { data: savedTbEntries } = useQuery({
+    queryKey: ["tb-entries-standalone", selectedPeriodId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trial_balance_entries")
+        .select("*")
+        .eq("period_id", selectedPeriodId)
+        .order("sort_order");
+      if (error) throw error;
+      if (data && data.length > 0) {
+        const mapped: TBEntry[] = data.map((e: any) => ({
+          id: e.id,
+          account_code: e.account_code,
+          account_name: e.account_name,
+          account_type: e.account_type,
+          debit_pence: e.debit_pence || 0,
+          credit_pence: e.credit_pence || 0,
+          adjustment_debit_pence: e.adjustment_debit_pence || 0,
+          adjustment_credit_pence: e.adjustment_credit_pence || 0,
+          adjustment_notes: e.adjustment_notes || "",
+          sort_order: e.sort_order || 0,
+          comparative_debit_pence: e.comparative_debit_pence || 0,
+          comparative_credit_pence: e.comparative_credit_pence || 0,
+        }));
+        setTbEntries(mapped);
+      }
+      return data;
+    },
+    enabled: !!selectedPeriodId,
+  });
+
+  const saveTbEntries = async () => {
+    if (!selectedPeriodId || !profile?.tenant_id || !selectedClientId) {
+      toast.error("Select a client and period first");
+      return;
+    }
+    setTbSaving(true);
+    try {
+      // Delete existing entries for this period
+      await supabase.from("trial_balance_entries").delete().eq("period_id", selectedPeriodId);
+      // Insert new entries
+      if (tbEntries.length > 0) {
+        const rows = tbEntries.map((e, i) => ({
+          period_id: selectedPeriodId,
+          tenant_id: profile.tenant_id,
+          account_code: e.account_code,
+          account_name: e.account_name,
+          account_type: e.account_type,
+          debit_pence: e.debit_pence,
+          credit_pence: e.credit_pence,
+          adjustment_debit_pence: e.adjustment_debit_pence,
+          adjustment_credit_pence: e.adjustment_credit_pence,
+          adjustment_notes: e.adjustment_notes,
+          sort_order: e.sort_order || (i + 1) * 10,
+          comparative_debit_pence: e.comparative_debit_pence || 0,
+          comparative_credit_pence: e.comparative_credit_pence || 0,
+        }));
+        const { error } = await supabase.from("trial_balance_entries").insert(rows);
+        if (error) throw error;
+      }
+      toast.success(`Saved ${tbEntries.length} trial balance entries`);
+      queryClient.invalidateQueries({ queryKey: ["tb-entries-standalone", selectedPeriodId] });
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setTbSaving(false);
+    }
+  };
+
+
     mutationFn: async () => {
       if (!profile?.tenant_id) throw new Error("No tenant");
       const { error } = await supabase.from("chart_of_accounts").insert({
