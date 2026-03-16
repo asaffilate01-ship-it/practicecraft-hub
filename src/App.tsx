@@ -278,7 +278,7 @@ const AppRoutes = () => (
     <Route path="/settings/branding" element={<Guarded module="settings" action="view"><BrandingSettings /></Guarded>} />
     <Route path="/settings/notifications" element={<Guarded module="notifications" action="view"><NotificationSettings /></Guarded>} />
     <Route path="/settings/gdpr" element={<Guarded module="settings" action="view"><GdprSettings /></Guarded>} />
-    <Route path="/settings/security" element={<Guarded module="settings" action="view"><PlaceholderPage title="Security" description="Authentication, MFA, and session settings" /></Guarded>} />
+    <Route path="/settings/security" element={<Guarded module="settings" action="view"><SecuritySettings /></Guarded>} />
 
     {/* ── Client Portal (aud=client) ───────────────────── */}
     <Route path="/portal" element={
