@@ -11,8 +11,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, BookOpen, Trash2, Check } from "lucide-react";
+import { Plus, BookOpen, Trash2, Check, Upload, Camera } from "lucide-react";
 import { toast } from "sonner";
+import { ReceiptUploader } from "@/components/bookkeeping/ReceiptUploader";
+import { useClientContext } from "@/contexts/ClientContext";
 
 const accountTypes = [
   { value: "asset", label: "Asset" },
