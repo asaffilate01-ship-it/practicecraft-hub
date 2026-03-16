@@ -1,14 +1,22 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useClientContext } from "@/contexts/ClientContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DueDatePill } from "@/components/ui/due-date-pill";
-import { FileText, Send, Calculator, CheckCircle2, Clock, AlertTriangle, PoundSterling } from "lucide-react";
+import { KPICard } from "@/components/dashboard/KPICard";
+import { FileText, Send, Calculator, CheckCircle2, Clock, AlertTriangle, PoundSterling, Plus, Pencil, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive"; icon: typeof Clock }> = {
   not_started: { label: "Not Started", variant: "outline", icon: Clock },
@@ -22,19 +30,24 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
 export default function CorporationTax() {
   const { tenantId } = usePermissions();
   const { selectedClientId } = useClientContext();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [showNewPeriod, setShowNewPeriod] = useState(false);
+  const [newPeriodStart, setNewPeriodStart] = useState("");
+  const [newPeriodEnd, setNewPeriodEnd] = useState("");
+  const [newPeriodClientId, setNewPeriodClientId] = useState("");
+  const [newPeriodStandard, setNewPeriodStandard] = useState("FRS 102 1A");
 
   const { data: periods = [], isLoading } = useQuery({
     queryKey: ["ct-periods", tenantId, selectedClientId],
     queryFn: async () => {
       let q = supabase
         .from("accounts_periods")
-        .select("*, clients(legal_name, company_number)")
+        .select("*, clients(legal_name, company_number, utr)")
         .eq("tenant_id", tenantId!)
-        .eq("period_type", "ct600")
+        .in("period_type", ["ct600", "annual"])
         .order("filing_deadline", { ascending: true });
-
       if (selectedClientId) q = q.eq("client_id", selectedClientId);
-
       const { data, error } = await q.limit(200);
       if (error) throw error;
       return data ?? [];
@@ -42,46 +55,75 @@ export default function CorporationTax() {
     enabled: !!tenantId,
   });
 
+  const { data: clients = [] } = useQuery({
+    queryKey: ["clients-ltd", tenantId],
+    queryFn: async () => {
+      const { data } = await supabase.from("clients").select("id, legal_name, company_number").eq("status", "active").in("entity_type", ["ltd", "llp"]).order("legal_name");
+      return data ?? [];
+    },
+    enabled: !!tenantId,
+  });
+
+  const createPeriod = useMutation({
+    mutationFn: async () => {
+      const deadline = new Date(newPeriodEnd);
+      deadline.setMonth(deadline.getMonth() + 9);
+      const { error } = await supabase.from("accounts_periods").insert({
+        tenant_id: tenantId!,
+        client_id: newPeriodClientId,
+        period_start: newPeriodStart,
+        period_end: newPeriodEnd,
+        period_type: "ct600",
+        accounts_standard: newPeriodStandard,
+        filing_deadline: deadline.toISOString().split("T")[0],
+        status: "not_started",
+        ct600_status: "not_started",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ct-periods"] });
+      setShowNewPeriod(false);
+      toast.success("CT600 period created");
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
+  const inProgress = periods.filter((p: any) => p.ct600_status === "in_progress").length;
+  const awaitingFiling = periods.filter((p: any) => p.ct600_status === "approved").length;
+  const filed = periods.filter((p: any) => p.ct600_status === "submitted").length;
+  const totalTaxPence = 0; // Would come from tax_computations
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Corporation Tax</h1>
-        <p className="text-muted-foreground">CT600 preparation, computation & filing</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Corporation Tax</h1>
+          <p className="text-muted-foreground">CT600 preparation, computation & filing</p>
+        </div>
+        <Button className="gap-1.5" onClick={() => setShowNewPeriod(true)}>
+          <Plus className="w-4 h-4" /> New CT600 Period
+        </Button>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[
-          { label: "Total Periods", value: periods.length, icon: FileText },
-          { label: "In Progress", value: periods.filter((p: any) => p.ct600_status === "in_progress").length, icon: Calculator },
-          { label: "Awaiting Filing", value: periods.filter((p: any) => p.ct600_status === "approved").length, icon: Send },
-          { label: "Filed", value: periods.filter((p: any) => p.ct600_status === "submitted").length, icon: CheckCircle2 },
-        ].map((card) => (
-          <Card key={card.label}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{card.label}</p>
-                  <p className="text-2xl font-bold">{card.value}</p>
-                </div>
-                <card.icon className="w-8 h-8 text-muted-foreground/40" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KPICard title="Total Periods" value={periods.length} change="All CT600 periods" changeType="neutral" icon={FileText} iconColor="bg-muted" />
+        <KPICard title="In Progress" value={inProgress} change="Being prepared" changeType={inProgress > 0 ? "negative" : "positive"} icon={Calculator} iconColor="bg-warning/10" />
+        <KPICard title="Awaiting Filing" value={awaitingFiling} change="Approved, ready to submit" changeType="neutral" icon={Send} iconColor="bg-[hsl(var(--info))]/10" />
+        <KPICard title="Filed" value={filed} change="Submitted to HMRC" changeType="positive" icon={CheckCircle2} iconColor="bg-[hsl(var(--success))]/10" />
       </div>
 
       <Tabs defaultValue="active">
         <TabsList>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="filed">Filed</TabsTrigger>
+          <TabsTrigger value="active">Active ({periods.filter((p: any) => p.ct600_status !== "submitted").length})</TabsTrigger>
+          <TabsTrigger value="filed">Filed ({filed})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Active CT600 Periods</CardTitle>
-              <CardDescription>Corporation tax returns in preparation</CardDescription>
+              <CardDescription>Corporation tax returns in preparation — click to open in the Accounts Wizard</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -98,6 +140,7 @@ export default function CorporationTax() {
                       <TableHead>Filing Deadline</TableHead>
                       <TableHead>CT600 Status</TableHead>
                       <TableHead>Accounts Status</TableHead>
+                      <TableHead className="w-24">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -106,10 +149,10 @@ export default function CorporationTax() {
                       const sc = statusConfig[p.ct600_status] || statusConfig.not_started;
                       const Icon = sc.icon;
                       return (
-                        <TableRow key={p.id}>
+                        <TableRow key={p.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/accounts`)}>
                           <TableCell className="font-medium">{client?.legal_name ?? "—"}</TableCell>
                           <TableCell className="text-muted-foreground font-mono text-xs">{client?.company_number ?? "—"}</TableCell>
-                          <TableCell>{p.period_start} — {p.period_end}</TableCell>
+                          <TableCell className="text-sm">{p.period_start} — {p.period_end}</TableCell>
                           <TableCell>
                             {p.filing_deadline ? <DueDatePill dueDate={p.filing_deadline} /> : "—"}
                           </TableCell>
@@ -123,13 +166,18 @@ export default function CorporationTax() {
                               {p.status}
                             </Badge>
                           </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm" className="gap-1" onClick={(e) => { e.stopPropagation(); navigate("/accounts"); }}>
+                              <Pencil className="w-3 h-3" /> Open <ArrowRight className="w-3 h-3" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       );
                     })}
                     {periods.filter((p: any) => p.ct600_status !== "submitted").length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
-                          No active CT600 periods. Create an accounts period with CT600 type to begin.
+                        <TableCell colSpan={7} className="text-center text-muted-foreground py-12">
+                          No active CT600 periods. Click "New CT600 Period" to create one.
                         </TableCell>
                       </TableRow>
                     )}
@@ -184,6 +232,52 @@ export default function CorporationTax() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* New Period Dialog */}
+      <Dialog open={showNewPeriod} onOpenChange={setShowNewPeriod}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create CT600 Period</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Company</Label>
+              <Select value={newPeriodClientId} onValueChange={setNewPeriodClientId}>
+                <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
+                <SelectContent>
+                  {clients.map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>{c.legal_name} {c.company_number ? `(${c.company_number})` : ""}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Period Start</Label>
+                <Input type="date" value={newPeriodStart} onChange={(e) => setNewPeriodStart(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Period End</Label>
+                <Input type="date" value={newPeriodEnd} onChange={(e) => setNewPeriodEnd(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Accounts Standard</Label>
+              <Select value={newPeriodStandard} onValueChange={setNewPeriodStandard}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FRS 102 1A">FRS 102 Section 1A (Small)</SelectItem>
+                  <SelectItem value="FRS 105">FRS 105 (Micro)</SelectItem>
+                  <SelectItem value="FRS 102">FRS 102 (Full)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button className="w-full" onClick={() => createPeriod.mutate()} disabled={!newPeriodClientId || !newPeriodStart || !newPeriodEnd}>
+              Create Period
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
