@@ -279,17 +279,33 @@ export default function BankFeeds() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const confirmedCount = transactions.filter((t: any) => t.categorisation_status === "confirmed").length;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Bank Feeds</h1>
-          <p className="text-sm text-muted-foreground">Manage bank connections and imported transactions</p>
+          <p className="text-sm text-muted-foreground">Manage bank connections, sync transactions, and auto-categorise</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
+          <Button variant="outline" className="gap-2" onClick={() => syncOpenBanking.mutate()} disabled={syncOpenBanking.isPending}>
+            <RefreshCw className={`w-4 h-4 ${syncOpenBanking.isPending ? "animate-spin" : ""}`} />
+            {syncOpenBanking.isPending ? "Syncing…" : "Sync Open Banking"}
+          </Button>
           {uncategorisedCount > 0 && (
             <Button variant="outline" className="gap-2" onClick={() => aiCategorise.mutate()} disabled={aiCategorise.isPending}>
               <Sparkles className="w-4 h-4" /> {aiCategorise.isPending ? "Categorising…" : `AI Categorise (${uncategorisedCount})`}
+            </Button>
+          )}
+          {suggestedCount > 0 && (
+            <Button variant="outline" className="gap-2" onClick={() => bulkConfirm.mutate()} disabled={bulkConfirm.isPending}>
+              <CheckCircle2 className="w-4 h-4" /> Confirm All ({suggestedCount})
+            </Button>
+          )}
+          {confirmedCount > 0 && (
+            <Button variant="default" className="gap-2" onClick={() => postToLedger.mutate()} disabled={postToLedger.isPending}>
+              <ArrowUpRight className="w-4 h-4" /> {postToLedger.isPending ? "Posting…" : `Post to Ledger (${confirmedCount})`}
             </Button>
           )}
           <Button variant="outline" className="gap-2" onClick={() => setShowAddTxn(true)}>
