@@ -22,7 +22,7 @@ export function BulkOperationsPanel() {
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
-  const [taskPriority, setTaskPriority] = useState("medium");
+  const [taskPriority, setTaskPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
   const [taskDueDate, setTaskDueDate] = useState("");
   const [commSubject, setCommSubject] = useState("");
   const [commBody, setCommBody] = useState("");
