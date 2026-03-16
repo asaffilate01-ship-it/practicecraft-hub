@@ -29,7 +29,7 @@ export function AIIntelligencePanel() {
   const churnQ = useQuery({
     queryKey: ["ai-intelligence", "churn_risk"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("mobile", { body: { action: "churn_risk" } });
+      const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "churn_risk" } });
       if (error) throw error;
       return data;
     },
