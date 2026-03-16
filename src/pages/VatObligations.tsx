@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Calendar, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useContext } from "react";
-import { ClientContext } from "@/contexts/ClientContext";
+import { useClientContext } from "@/contexts/ClientContext";
 import { toast } from "sonner";
 import { DueDatePill } from "@/components/ui/due-date-pill";
 
