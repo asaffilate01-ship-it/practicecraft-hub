@@ -34,7 +34,7 @@ export default function IntegrationsHub() {
 
   const getStatus = (key: string) => {
     const h = health?.find((h: any) => h.provider === key);
-    return h ? { status: h.status, lastCheck: h.last_checked_at } : null;
+    return h ? { status: h.status, lastCheck: h.checked_at } : null;
   };
 
   return (
