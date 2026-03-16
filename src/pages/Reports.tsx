@@ -476,6 +476,9 @@ export default function ReportsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Practice Intelligence */}
+      <AIIntelligencePanel />
     </div>
   );
 }
