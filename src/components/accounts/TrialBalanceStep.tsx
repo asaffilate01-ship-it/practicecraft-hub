@@ -390,12 +390,12 @@ export function TrialBalanceStep({ entries, onChange, entityType, showAdjustment
                       </TableCell>
                     </>}
                     {showComp && <>
-                      <TableCell className="p-1 bg-blue-50/50 dark:bg-blue-950/20">
+                      <TableCell className="p-1 bg-accent/10">
                         <Input className="h-8 text-xs text-right" type="number" step="0.01"
                           value={penceToStr(entry.comparative_debit_pence || 0)}
                           onChange={(e) => updateEntry(idx, "comparative_debit_pence", strToPence(e.target.value))} />
                       </TableCell>
-                      <TableCell className="p-1 bg-blue-50/50 dark:bg-blue-950/20">
+                      <TableCell className="p-1 bg-accent/10">
                         <Input className="h-8 text-xs text-right" type="number" step="0.01"
                           value={penceToStr(entry.comparative_credit_pence || 0)}
                           onChange={(e) => updateEntry(idx, "comparative_credit_pence", strToPence(e.target.value))} />
