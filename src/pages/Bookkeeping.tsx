@@ -11,10 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, BookOpen, Trash2, Check, Upload, Camera } from "lucide-react";
+import { Plus, BookOpen, Trash2, Check, Upload, Camera, Save } from "lucide-react";
 import { toast } from "sonner";
 import { ReceiptUploader } from "@/components/bookkeeping/ReceiptUploader";
 import { AnomalyDetectionPanel } from "@/components/intelligence/AnomalyDetectionPanel";
+import { TrialBalanceStep, type TBEntry } from "@/components/accounts/TrialBalanceStep";
 import { useClientContext } from "@/contexts/ClientContext";
 
 const accountTypes = [
@@ -41,6 +42,9 @@ export default function Bookkeeping() {
   const [showAddJournal, setShowAddJournal] = useState(false);
   const [accountForm, setAccountForm] = useState({ code: "", name: "", account_type: "expense" });
   const [journalForm, setJournalForm] = useState({ entry_date: new Date().toISOString().split("T")[0], reference: "", narration: "", client_id: "" });
+  const [tbEntries, setTbEntries] = useState<TBEntry[]>([]);
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
+  const [tbSaving, setTbSaving] = useState(false);
   const [journalLines, setJournalLines] = useState<{ account_id: string; debit: string; credit: string; description: string }[]>([
     { account_id: "", debit: "", credit: "", description: "" },
     { account_id: "", debit: "", credit: "", description: "" },
@@ -85,6 +89,91 @@ export default function Bookkeeping() {
     },
     enabled: !!profile?.tenant_id,
   });
+
+  // Periods for selected client (for standalone TB entry)
+  const { data: clientPeriods = [] } = useQuery({
+    queryKey: ["client-periods-tb", selectedClientId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("accounts_periods")
+        .select("id, period_start, period_end, status")
+        .eq("client_id", selectedClientId!)
+        .order("period_end", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedClientId,
+  });
+
+  // Load TB entries when period selected
+  const { data: savedTbEntries } = useQuery({
+    queryKey: ["tb-entries-standalone", selectedPeriodId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trial_balance_entries")
+        .select("*")
+        .eq("period_id", selectedPeriodId)
+        .order("sort_order");
+      if (error) throw error;
+      if (data && data.length > 0) {
+        const mapped: TBEntry[] = data.map((e: any) => ({
+          id: e.id,
+          account_code: e.account_code,
+          account_name: e.account_name,
+          account_type: e.account_type,
+          debit_pence: e.debit_pence || 0,
+          credit_pence: e.credit_pence || 0,
+          adjustment_debit_pence: e.adjustment_debit_pence || 0,
+          adjustment_credit_pence: e.adjustment_credit_pence || 0,
+          adjustment_notes: e.adjustment_notes || "",
+          sort_order: e.sort_order || 0,
+          comparative_debit_pence: e.comparative_debit_pence || 0,
+          comparative_credit_pence: e.comparative_credit_pence || 0,
+        }));
+        setTbEntries(mapped);
+      }
+      return data;
+    },
+    enabled: !!selectedPeriodId,
+  });
+
+  const saveTbEntries = async () => {
+    if (!selectedPeriodId || !profile?.tenant_id || !selectedClientId) {
+      toast.error("Select a client and period first");
+      return;
+    }
+    setTbSaving(true);
+    try {
+      // Delete existing entries for this period
+      await supabase.from("trial_balance_entries").delete().eq("period_id", selectedPeriodId);
+      // Insert new entries
+      if (tbEntries.length > 0) {
+        const rows = tbEntries.map((e, i) => ({
+          period_id: selectedPeriodId,
+          tenant_id: profile.tenant_id,
+          account_code: e.account_code,
+          account_name: e.account_name,
+          account_type: e.account_type,
+          debit_pence: e.debit_pence,
+          credit_pence: e.credit_pence,
+          adjustment_debit_pence: e.adjustment_debit_pence,
+          adjustment_credit_pence: e.adjustment_credit_pence,
+          adjustment_notes: e.adjustment_notes,
+          sort_order: e.sort_order || (i + 1) * 10,
+          comparative_debit_pence: e.comparative_debit_pence || 0,
+          comparative_credit_pence: e.comparative_credit_pence || 0,
+        }));
+        const { error } = await supabase.from("trial_balance_entries").insert(rows);
+        if (error) throw error;
+      }
+      toast.success(`Saved ${tbEntries.length} trial balance entries`);
+      queryClient.invalidateQueries({ queryKey: ["tb-entries-standalone", selectedPeriodId] });
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setTbSaving(false);
+    }
+  };
 
   const addAccount = useMutation({
     mutationFn: async () => {
@@ -315,45 +404,105 @@ export default function Bookkeeping() {
           </Card>
         </TabsContent>
 
-        {/* Trial Balance */}
+        {/* Trial Balance — Manual Entry (IRIS / Taxfiler style) */}
         <TabsContent value="trial-balance" className="mt-4 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Trial Balance</CardTitle>
-              <CardDescription>Based on posted journal entries only</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {trialBalance.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No posted entries yet. Post journal entries to see the trial balance.</p>
+          {!selectedClientId ? (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <p className="text-sm font-medium">Select a client to enter a trial balance</p>
+                <p className="text-xs mt-1">Use the client selector in the top bar, then choose or create an accounting period below.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Period selector + save bar */}
+              <Card>
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-end gap-4 flex-wrap">
+                    <div className="space-y-1.5 min-w-[260px]">
+                      <Label className="text-xs font-medium">Accounting Period</Label>
+                      <Select value={selectedPeriodId} onValueChange={(v) => { setSelectedPeriodId(v); setTbEntries([]); }}>
+                        <SelectTrigger><SelectValue placeholder="Select period…" /></SelectTrigger>
+                        <SelectContent>
+                          {clientPeriods.map((p: any) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {new Date(p.period_start).toLocaleDateString("en-GB", { month: "short", year: "numeric" })} – {new Date(p.period_end).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                              {p.status !== "draft" && ` (${p.status})`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {selectedPeriodId && (
+                      <Button onClick={saveTbEntries} disabled={tbSaving} className="gap-1.5">
+                        <Save className="w-4 h-4" />
+                        {tbSaving ? "Saving…" : "Save Trial Balance"}
+                      </Button>
+                    )}
+                    {clientPeriods.length === 0 && (
+                      <p className="text-xs text-muted-foreground">No periods found. Create one in <span className="font-medium">Accounts</span> first.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {selectedPeriodId ? (
+                <TrialBalanceStep
+                  entries={tbEntries}
+                  onChange={setTbEntries}
+                  entityType="ltd_company"
+                  showAdjustments={false}
+                  clientId={selectedClientId}
+                  periodId={selectedPeriodId}
+                  showComparatives={false}
+                />
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Account</TableHead>
-                      <TableHead className="text-right">Debit (£)</TableHead>
-                      <TableHead className="text-right">Credit (£)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {trialBalance.map((a: any) => (
-                      <TableRow key={a.id}>
-                        <TableCell className="font-mono text-sm">{a.code}</TableCell>
-                        <TableCell className="font-medium">{a.name}</TableCell>
-                        <TableCell className="text-right font-mono">{a.balanceDebit > 0 ? a.balanceDebit.toFixed(2) : ""}</TableCell>
-                        <TableCell className="text-right font-mono">{a.balanceCredit > 0 ? a.balanceCredit.toFixed(2) : ""}</TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow className="font-bold border-t-2">
-                      <TableCell colSpan={2}>Total</TableCell>
-                      <TableCell className="text-right font-mono">{tbTotalDebit.toFixed(2)}</TableCell>
-                      <TableCell className="text-right font-mono">{tbTotalCredit.toFixed(2)}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    <p className="text-sm">Select or create a period above, then enter your trial balance manually, import CSV, pull from ledger, or bring forward from a prior year.</p>
+                  </CardContent>
+                </Card>
               )}
-            </CardContent>
-          </Card>
+
+              {/* Ledger-computed TB for reference */}
+              {trialBalance.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Ledger Trial Balance (read-only)</CardTitle>
+                    <CardDescription>Auto-computed from posted journal entries</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Code</TableHead>
+                          <TableHead>Account</TableHead>
+                          <TableHead className="text-right">Debit (£)</TableHead>
+                          <TableHead className="text-right">Credit (£)</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {trialBalance.map((a: any) => (
+                          <TableRow key={a.id}>
+                            <TableCell className="font-mono text-sm">{a.code}</TableCell>
+                            <TableCell className="font-medium">{a.name}</TableCell>
+                            <TableCell className="text-right font-mono">{a.balanceDebit > 0 ? a.balanceDebit.toFixed(2) : ""}</TableCell>
+                            <TableCell className="text-right font-mono">{a.balanceCredit > 0 ? a.balanceCredit.toFixed(2) : ""}</TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="font-bold border-t-2">
+                          <TableCell colSpan={2}>Total</TableCell>
+                          <TableCell className="text-right font-mono">{tbTotalDebit.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-mono">{tbTotalCredit.toFixed(2)}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
         </TabsContent>
 
         {/* Receipts & Import */}
