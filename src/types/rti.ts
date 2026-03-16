@@ -21,7 +21,7 @@ export type RtiFpsDraft = {
   period: string;       // e.g. "2026-02" or tax period number
   paymentDate: string;  // YYYY-MM-DD
   lines: RtiFpsLine[];
-  status: "draft" | "queued" | "submitted" | "accepted" | "rejected";
+  status: "draft" | "queued" | "submitted" | "accepted" | "rejected" | "error";
 };
 
 export type RtiEpsDraft = {
