@@ -60,6 +60,10 @@ import CorporationTax from "@/pages/CorporationTax";
 import CisWorkbench from "@/pages/CisWorkbench";
 import ItsaWorkbench from "@/pages/ItsaWorkbench";
 import IxbrlTagging from "@/pages/IxbrlTagging";
+import MultiCurrency from "@/pages/MultiCurrency";
+import Proposals from "@/pages/Proposals";
+import Calendar from "@/pages/Calendar";
+import TrialBalanceImport from "@/pages/TrialBalanceImport";
 import PensionWorkbench from "@/pages/PensionWorkbench";
 import InvoiceEntry from "@/pages/InvoiceEntry";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
@@ -243,6 +247,18 @@ const AppRoutes = () => (
 
     {/* ── Pensions ──────────────────────────────────────── */}
     <Route path="/pensions" element={<Guarded module="payroll" action="view"><PensionWorkbench /></Guarded>} />
+
+    {/* ── Multi-Currency & EC Sales ────────────────────── */}
+    <Route path="/multi-currency" element={<Guarded module="ledger" action="view"><MultiCurrency /></Guarded>} />
+
+    {/* ── Proposals ────────────────────────────────────── */}
+    <Route path="/proposals" element={<Guarded module="billing" action="view"><Proposals /></Guarded>} />
+
+    {/* ── Calendar ─────────────────────────────────────── */}
+    <Route path="/calendar" element={<Protected><Calendar /></Protected>} />
+
+    {/* ── Trial Balance Import ─────────────────────────── */}
+    <Route path="/import" element={<Guarded module="ledger" action="view"><TrialBalanceImport /></Guarded>} />
 
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><SecretarialChangeDetail /></Guarded>} />
