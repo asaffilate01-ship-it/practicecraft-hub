@@ -17,7 +17,7 @@ interface NotificationRule {
   template_key: string;
   days_before_due: number;
   applies_to_json: any;
-  is_active?: boolean;
+  is_enabled?: boolean | null;
 }
 
 export default function NotificationSettings() {
