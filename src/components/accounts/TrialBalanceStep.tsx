@@ -436,7 +436,7 @@ export function TrialBalanceStep({ entries, onChange, entityType, showAdjustment
               {showComp && (
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">|</span>
-                  <span className="font-medium text-blue-600 dark:text-blue-400">Comp: Dr £{penceToStr(compTotalDebit)} / Cr £{penceToStr(compTotalCredit)}</span>
+                  <span className="font-medium text-accent-foreground">Comp: Dr £{penceToStr(compTotalDebit)} / Cr £{penceToStr(compTotalCredit)}</span>
                 </div>
               )}
             </div>
