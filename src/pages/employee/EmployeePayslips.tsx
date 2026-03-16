@@ -4,11 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, FileText, Mail, Wallet } from "lucide-react";
+import { Download, FileText, Mail, Wallet, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const fmt = (pence: number) => `£${(pence / 100).toFixed(2)}`;
@@ -17,8 +16,8 @@ export default function EmployeePayslips() {
   const { user } = useAuth();
   const [selected, setSelected] = useState<any>(null);
   const [yearFilter, setYearFilter] = useState("all");
+  const [downloading, setDownloading] = useState(false);
 
-  // Find employee record for this user
   const { data: employee } = useQuery({
     queryKey: ["employee-record", user?.id],
     queryFn: async () => {
@@ -37,7 +36,6 @@ export default function EmployeePayslips() {
     staleTime: 5 * 60_000,
   });
 
-  // Payslips for this employee
   const { data: payslips = [], isLoading } = useQuery({
     queryKey: ["employee-payslips", employee?.id],
     queryFn: async () => {
@@ -54,14 +52,12 @@ export default function EmployeePayslips() {
     enabled: !!employee?.id,
   });
 
-  // Get unique tax years
   const taxYears = [...new Set(payslips.map((p: any) => {
     const payDate = p.pay_runs?.pay_date;
     if (!payDate) return null;
     const d = new Date(payDate);
     const month = d.getMonth();
     const year = d.getFullYear();
-    // UK tax year: April–March
     return month >= 3 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
   }).filter(Boolean))];
 
@@ -77,13 +73,34 @@ export default function EmployeePayslips() {
         return ty === yearFilter;
       });
 
-  // KPIs
   const totalNet = filtered.reduce((s: number, p: any) => s + (p.net_pay_pence || 0), 0);
   const totalTax = filtered.reduce((s: number, p: any) => s + (p.tax_pence || 0), 0);
   const totalNi = filtered.reduce((s: number, p: any) => s + (p.ni_pence || 0), 0);
 
   const employerName = (employee?.payroll_employers as any)?.employer_name ?? "—";
   const employeeName = employee ? `${employee.first_name} ${employee.last_name}` : "—";
+
+  const handleDownloadPdf = async (payslip: any) => {
+    if (!payslip.pdf_storage_path) {
+      toast.info("PDF not yet available for this payslip.");
+      return;
+    }
+    setDownloading(true);
+    try {
+      const { data, error } = await supabase.storage
+        .from("client-documents")
+        .createSignedUrl(payslip.pdf_storage_path, 300); // 5 min expiry
+      if (error) throw error;
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, "_blank");
+        toast.success("Downloading payslip…");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to download");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -145,10 +162,8 @@ export default function EmployeePayslips() {
         <Card>
           <CardContent className="pt-4">
             {isLoading ? (
-              <div className="space-y-3 py-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-10 rounded bg-muted animate-pulse" />
-                ))}
+              <div className="flex justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : filtered.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground">
@@ -211,7 +226,6 @@ export default function EmployeePayslips() {
             </SheetHeader>
             {selected && (
               <div className="mt-6 space-y-4">
-                {/* Earnings */}
                 <Card>
                   <CardContent className="p-4 space-y-2">
                     <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Earnings</div>
@@ -222,7 +236,6 @@ export default function EmployeePayslips() {
                   </CardContent>
                 </Card>
 
-                {/* Deductions */}
                 <Card>
                   <CardContent className="p-4 space-y-2">
                     <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Deductions</div>
@@ -249,7 +262,6 @@ export default function EmployeePayslips() {
                   </CardContent>
                 </Card>
 
-                {/* Net pay */}
                 <Card className="bg-primary/5 border-primary/20">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
@@ -259,20 +271,14 @@ export default function EmployeePayslips() {
                   </CardContent>
                 </Card>
 
-                {/* Actions */}
                 <div className="flex gap-2">
                   <Button
                     className="flex-1 gap-1.5"
-                    onClick={() => {
-                      if (selected.pdf_storage_path) {
-                        toast.info("Downloading payslip PDF…");
-                        // In production, generate signed URL from storage
-                      } else {
-                        toast.info("PDF not yet available for this payslip.");
-                      }
-                    }}
+                    disabled={downloading}
+                    onClick={() => handleDownloadPdf(selected)}
                   >
-                    <Download className="w-3.5 h-3.5" /> Download PDF
+                    {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                    Download PDF
                   </Button>
                   <Button
                     variant="outline"

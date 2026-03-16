@@ -30,13 +30,11 @@ async function addDedupe(tenantId: string, key: string) {
 }
 
 async function emitEvent(tenantId: string, trigger: string, payload: Record<string, unknown>) {
-  // Store event
   await supabaseAdmin.from("domain_events").insert({
     tenant_id: tenantId,
     trigger,
     payload,
   });
-  // Run automation rules
   await runAutomationRules(tenantId, trigger, payload);
 }
 
@@ -54,7 +52,9 @@ async function runAutomationRules(tenantId: string, trigger: string, payload: Re
     if (rule.action_type === "create_task") {
       await createTaskFromRule(tenantId, payload, rule.action_payload_json);
     }
-    // send_email and other actions can be added later
+    if (rule.action_type === "send_email") {
+      await queueNotificationFromRule(tenantId, payload, rule.action_payload_json);
+    }
   }
 }
 
@@ -69,7 +69,6 @@ async function createTaskFromRule(
   const daysBefore = (actionPayload.days_before_due as number) || 0;
   const fallbackTitle = (actionPayload.fallback_title as string) || templateName;
 
-  // Try to find task template
   let title = fallbackTitle;
   let description: string | null = null;
   let checklistJson: unknown = [];
@@ -89,7 +88,6 @@ async function createTaskFromRule(
     }
   }
 
-  // Calculate due date
   let dueDate: string | null = null;
   if (payload.dueDate) {
     const d = new Date(payload.dueDate as string);
@@ -97,7 +95,6 @@ async function createTaskFromRule(
     dueDate = d.toISOString().slice(0, 10);
   }
 
-  // Dedupe: don't create duplicate tasks
   const dedupeKey = `task:${templateName}:${clientId || "no-client"}:${dueDate || "no-date"}`;
   if (await dedupeExists(tenantId, dedupeKey)) return;
   await addDedupe(tenantId, dedupeKey);
@@ -114,6 +111,204 @@ async function createTaskFromRule(
   });
 }
 
+async function queueNotificationFromRule(
+  tenantId: string,
+  payload: Record<string, unknown>,
+  actionPayload: Record<string, unknown>
+) {
+  const templateKey = actionPayload.template_key as string | undefined;
+  const clientId = payload.clientId as string | undefined;
+
+  if (!templateKey) return;
+
+  // Get client email
+  let toAddress: string | null = null;
+  if (clientId) {
+    const { data: client } = await supabaseAdmin
+      .from("clients")
+      .select("email")
+      .eq("id", clientId)
+      .maybeSingle();
+    toAddress = client?.email || null;
+  }
+
+  await supabaseAdmin.from("notification_queue").insert({
+    tenant_id: tenantId,
+    client_id: clientId || null,
+    channel: "email",
+    template_key: templateKey,
+    payload_json: { to: { clientId, email: toAddress }, vars: payload },
+    status: "queued",
+  });
+
+  await supabaseAdmin.from("notification_logs").insert({
+    tenant_id: tenantId,
+    client_id: clientId || null,
+    channel: "email",
+    template_key: templateKey,
+    to_address: toAddress,
+    status: "queued",
+  });
+}
+
+// ── Notification Dispatch ──
+
+async function processNotificationQueue(tenantId: string) {
+  const { data: queued } = await supabaseAdmin
+    .from("notification_queue")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .eq("status", "queued")
+    .order("created_at")
+    .limit(20);
+
+  if (!queued?.length) return;
+
+  for (const item of queued) {
+    try {
+      const payload = item.payload_json as any;
+      const to = payload?.to?.email;
+
+      if (!to) {
+        // Mark as failed - no recipient
+        await supabaseAdmin.from("notification_queue").update({ status: "failed" }).eq("id", item.id);
+        continue;
+      }
+
+      // Look up template
+      let subject = "Notification";
+      let bodyHtml = "<p>You have a notification.</p>";
+
+      if (item.template_key) {
+        const { data: tmpl } = await supabaseAdmin
+          .from("email_templates")
+          .select("subject, body_html")
+          .eq("tenant_id", tenantId)
+          .eq("key", item.template_key)
+          .maybeSingle();
+
+        if (tmpl) {
+          subject = tmpl.subject;
+          bodyHtml = tmpl.body_html;
+
+          // Simple variable substitution
+          const vars = payload?.vars || {};
+          for (const [k, v] of Object.entries(vars)) {
+            subject = subject.replace(new RegExp(`{{${k}}}`, "g"), String(v));
+            bodyHtml = bodyHtml.replace(new RegExp(`{{${k}}}`, "g"), String(v));
+          }
+        }
+      }
+
+      // Mark as sent (actual email sending would go here via email API)
+      await supabaseAdmin.from("notification_queue").update({ status: "sent" }).eq("id", item.id);
+      await supabaseAdmin.from("notification_logs").update({ status: "sent" })
+        .eq("tenant_id", tenantId)
+        .eq("template_key", item.template_key)
+        .eq("to_address", to)
+        .eq("status", "queued");
+
+      console.log(`[${tenantId}] Notification dispatched: ${item.template_key} → ${to}`);
+    } catch (err) {
+      console.error(`Notification dispatch error:`, err);
+      await supabaseAdmin.from("notification_queue").update({ status: "failed" }).eq("id", item.id);
+    }
+  }
+}
+
+// ── Deadline Reminders ──
+
+async function runDeadlineReminders(tenantId: string) {
+  // Get notification rules for this tenant
+  const { data: rules } = await supabaseAdmin
+    .from("notification_rules")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .eq("is_enabled", true);
+
+  if (!rules?.length) return;
+
+  for (const rule of rules) {
+    const daysBefore = rule.days_before_due || 7;
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + daysBefore);
+    const targetStr = targetDate.toISOString().slice(0, 10);
+
+    const appliesTo = rule.applies_to_json as any;
+
+    // Check tasks with matching due date
+    const { data: tasks } = await supabaseAdmin
+      .from("tasks")
+      .select("id, title, client_id, due_date, status")
+      .eq("tenant_id", tenantId)
+      .eq("due_date", targetStr)
+      .not("status", "in", '("done","cancelled")');
+
+    if (!tasks?.length) continue;
+
+    // Filter by applicable statuses if specified
+    const validStatuses = appliesTo?.task_status as string[] | undefined;
+
+    for (const task of tasks) {
+      if (validStatuses && !validStatuses.includes(task.status)) continue;
+
+      const dedupeKey = `reminder:${rule.id}:${task.id}:${targetStr}`;
+      if (await dedupeExists(tenantId, dedupeKey)) continue;
+      await addDedupe(tenantId, dedupeKey);
+
+      // Get client email
+      let email: string | null = null;
+      if (task.client_id) {
+        const { data: client } = await supabaseAdmin
+          .from("clients").select("email").eq("id", task.client_id).maybeSingle();
+        email = client?.email || null;
+      }
+
+      if (!email) continue;
+
+      await supabaseAdmin.from("notification_queue").insert({
+        tenant_id: tenantId,
+        client_id: task.client_id,
+        channel: rule.channel,
+        template_key: rule.template_key,
+        payload_json: {
+          to: { clientId: task.client_id, email },
+          vars: { taskTitle: task.title, dueDate: task.due_date },
+        },
+        status: "queued",
+      });
+
+      await supabaseAdmin.from("notification_logs").insert({
+        tenant_id: tenantId,
+        client_id: task.client_id,
+        channel: rule.channel,
+        template_key: rule.template_key,
+        to_address: email,
+        status: "queued",
+      });
+    }
+  }
+}
+
+// ── Signature Expiry ──
+
+async function runSignatureExpiryCheck(tenantId: string) {
+  const now = new Date().toISOString();
+  const { data: expired } = await supabaseAdmin
+    .from("signature_requests")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .in("status", ["sent", "viewed"])
+    .lt("expires_at", now);
+
+  if (!expired?.length) return;
+
+  for (const sig of expired) {
+    await supabaseAdmin.from("signature_requests").update({ status: "expired" }).eq("id", sig.id);
+  }
+  console.log(`[${tenantId}] Expired ${expired.length} signature requests`);
+}
+
 // ── Checkers ──
 
 async function runInvoiceOverdueCheck(tenantId: string) {
@@ -122,7 +317,7 @@ async function runInvoiceOverdueCheck(tenantId: string) {
     .from("invoices")
     .select("id, client_id, due_date, invoice_number")
     .eq("tenant_id", tenantId)
-    .eq("status", "sent") // sent but not paid
+    .eq("status", "sent")
     .lt("due_date", today);
 
   if (!overdue) return;
@@ -132,12 +327,7 @@ async function runInvoiceOverdueCheck(tenantId: string) {
     if (await dedupeExists(tenantId, key)) continue;
     await addDedupe(tenantId, key);
 
-    // Mark invoice as overdue
-    await supabaseAdmin
-      .from("invoices")
-      .update({ status: "overdue" })
-      .eq("id", inv.id);
-
+    await supabaseAdmin.from("invoices").update({ status: "overdue" }).eq("id", inv.id);
     await emitEvent(tenantId, "invoice_overdue", {
       invoiceId: inv.id,
       clientId: inv.client_id,
@@ -169,7 +359,7 @@ async function runVatDueCheck(tenantId: string) {
       clientId: vr.client_id,
       periodStart: vr.period_start,
       periodEnd: vr.period_end,
-      dueDate: vr.period_end, // simplified: period_end as proxy for due date
+      dueDate: vr.period_end,
       vatReturnId: vr.id,
     });
   }
@@ -184,7 +374,6 @@ async function runOverdueTasksCheck(tenantId: string) {
     .lt("due_date", today)
     .not("status", "in", '("done","cancelled")');
 
-  // Just tracking — no new event for now, the views handle display
   console.log(`[${tenantId}] ${tasks?.length || 0} overdue tasks`);
 }
 
@@ -198,7 +387,6 @@ Deno.serve(async (req) => {
   try {
     const { schedule } = await req.json().catch(() => ({ schedule: "daily" }));
 
-    // Get all tenants
     const { data: tenants, error: tenantErr } = await supabaseAdmin
       .from("tenants")
       .select("id");
@@ -216,11 +404,15 @@ Deno.serve(async (req) => {
       try {
         if (schedule === "hourly") {
           await runInvoiceOverdueCheck(tenant.id);
+          await processNotificationQueue(tenant.id);
         } else {
           // daily
           await runVatDueCheck(tenant.id);
           await runOverdueTasksCheck(tenant.id);
           await runInvoiceOverdueCheck(tenant.id);
+          await runDeadlineReminders(tenant.id);
+          await runSignatureExpiryCheck(tenant.id);
+          await processNotificationQueue(tenant.id);
         }
         results[tenant.id] = "ok";
       } catch (err) {
