@@ -505,15 +505,30 @@ export default function PayrollWorkbench() {
         <KPICard title="Total Net Pay" value={fmt(totalNet)} change="All runs" changeType="neutral" icon={Banknote} iconColor="bg-primary/10" />
       </div>
 
-      <Tabs defaultValue="runs">
+      <Tabs defaultValue="pay-details">
         <TabsList className="flex-wrap">
+          <TabsTrigger value="pay-details">Pay Details</TabsTrigger>
           <TabsTrigger value="runs">Pay Runs ({payRuns.length})</TabsTrigger>
           <TabsTrigger value="employees">Employees ({employees.length})</TabsTrigger>
+          <TabsTrigger value="rti-schedule"><Send className="w-3 h-3 mr-1" /> RTI Schedule</TabsTrigger>
+          <TabsTrigger value="payslips"><FileText className="w-3 h-3 mr-1" /> Payslips</TabsTrigger>
+          <TabsTrigger value="payments"><Banknote className="w-3 h-3 mr-1" /> Payments</TabsTrigger>
           <TabsTrigger value="employers">Employers ({employers.length})</TabsTrigger>
           <TabsTrigger value="absences" className="gap-1"><Palmtree className="w-3 h-3" /> Absences</TabsTrigger>
           <TabsTrigger value="benefits" className="gap-1"><Car className="w-3 h-3" /> P11D Benefits</TabsTrigger>
           <TabsTrigger value="forms" className="gap-1"><FileText className="w-3 h-3" /> Forms</TabsTrigger>
         </TabsList>
+
+        {/* ── Pay Details (Moneysoft year grid) ── */}
+        <TabsContent value="pay-details" className="mt-4">
+          <PayDetailsGrid
+            employees={employees}
+            payRuns={payRuns}
+            payslips={payslips.length > 0 ? payslips : []}
+            frequency={employers[0]?.pay_frequency || "monthly"}
+            taxYear={employers[0]?.tax_year || "2025/26"}
+          />
+        </TabsContent>
 
         {/* ── Pay Runs ─────────────────────── */}
         <TabsContent value="runs" className="mt-4 space-y-4">
