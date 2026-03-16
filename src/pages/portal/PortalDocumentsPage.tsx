@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
-import { FolderOpen, Upload, FileText, Image, File, Download, Tag } from "lucide-react";
+import { FolderOpen, Upload, FileText, Image, File, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const iconForMime = (mime: string) => {
