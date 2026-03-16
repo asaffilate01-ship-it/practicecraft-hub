@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, BookOpen, Trash2, Check, Upload, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { ReceiptUploader } from "@/components/bookkeeping/ReceiptUploader";
+import { AnomalyDetectionPanel } from "@/components/intelligence/AnomalyDetectionPanel";
 import { useClientContext } from "@/contexts/ClientContext";
 
 const accountTypes = [
@@ -566,6 +567,9 @@ export default function Bookkeeping() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AI Anomaly Detection */}
+      <AnomalyDetectionPanel />
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { useDashboardKPIs, useOverdueTasks, useUpcomingTasks, useBillingKPIs } f
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AIIntelligencePanel } from "@/components/intelligence/AIIntelligencePanel";
+import { TaskSuggestionsPanel } from "@/components/intelligence/TaskSuggestionsPanel";
 
 const entityColors: Record<string, string> = {
   ltd: "hsl(199, 89%, 48%)",
@@ -261,6 +263,12 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Intelligence Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TaskSuggestionsPanel />
+        <AIIntelligencePanel />
+      </div>
     </div>
   );
 }

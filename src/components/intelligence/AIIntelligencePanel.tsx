@@ -12,7 +12,7 @@ function useIntelligenceQuery(action: string) {
   return useQuery({
     queryKey: ["ai-intelligence", action],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("mobile", {
+      const { data, error } = await supabase.functions.invoke("ai-intelligence", {
         body: { action },
       });
       if (error) throw error;
@@ -29,7 +29,7 @@ export function AIIntelligencePanel() {
   const churnQ = useQuery({
     queryKey: ["ai-intelligence", "churn_risk"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("mobile", { body: { action: "churn_risk" } });
+      const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "churn_risk" } });
       if (error) throw error;
       return data;
     },
@@ -39,7 +39,7 @@ export function AIIntelligencePanel() {
   const staffQ = useQuery({
     queryKey: ["ai-intelligence", "staff_utilisation"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("mobile", { body: { action: "staff_utilisation" } });
+      const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "staff_utilisation" } });
       if (error) throw error;
       return data;
     },
@@ -49,7 +49,7 @@ export function AIIntelligencePanel() {
   const revenueQ = useQuery({
     queryKey: ["ai-intelligence", "revenue_insights"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("mobile", { body: { action: "revenue_insights" } });
+      const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "revenue_insights" } });
       if (error) throw error;
       return data;
     },
