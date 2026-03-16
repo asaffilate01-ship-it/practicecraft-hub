@@ -1,30 +1,9 @@
 import {
-  LayoutDashboard,
-  Users,
-  CheckSquare,
-  BookOpen,
-  Receipt,
-  Wallet,
-  FileText,
-  Building2,
-  ShieldCheck,
-  CreditCard,
-  FolderOpen,
-  BarChart3,
-  Settings,
-  ChevronLeft,
-  CloudCog,
-  FilePlus2,
-  Send,
-  Briefcase,
-  Landmark,
-  Zap,
-  UserPlus,
-  ClipboardList,
-  FileQuestion,
-  PenTool,
-  Eye,
-  Crown,
+  LayoutDashboard, Users, CheckSquare, BookOpen, Receipt, Wallet,
+  FileText, Building2, ShieldCheck, CreditCard, FolderOpen, BarChart3,
+  Settings, ChevronLeft, CloudCog, FilePlus2, Send, Briefcase,
+  Landmark, Zap, UserPlus, ClipboardList, FileQuestion, PenTool,
+  Eye, Crown,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -36,16 +15,12 @@ import { usePracticeFeatures } from "@/practice/features/PracticeFeaturesProvide
 import { TenantSwitcher } from "@/practice/components/TenantSwitcher";
 import { buildStaffSession, canUseModule } from "@/practice/auth/staffSession";
 
-
 type NavItem = {
   title: string;
   url: string;
   icon: typeof LayoutDashboard;
-  /** Permission required: [module, action]. Omit for always-visible items. */
   permission?: [string, string];
-  /** Feature flag key for tenant-level gating */
   featureKey?: string;
-  /** Module key for staff-role gating */
   moduleKey?: string;
 };
 
@@ -86,7 +61,11 @@ const bottomNav: NavItem[] = [
   { title: "Settings", url: "/settings", icon: Settings, permission: ["settings", "view"] },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  onNavigate?: () => void;
+}
+
+export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { can, loading, role } = usePermissions();
   const { user } = useAuth();
@@ -95,17 +74,18 @@ export function AppSidebar() {
   const session = buildStaffSession(role, user?.user_metadata?.full_name, user?.email);
 
   const isVisible = (item: NavItem) => {
-    // RBAC permission check
     if (item.permission && !can(item.permission[0], item.permission[1])) return false;
-    // Tenant feature flag check
     if (item.featureKey && features[item.featureKey] === false) return false;
-    // Staff role module check
     if (item.moduleKey && !canUseModule(session.role, item.moduleKey)) return false;
     return true;
   };
 
   const visibleMainNav = mainNav.filter(isVisible);
   const visibleBottomNav = bottomNav.filter(isVisible);
+
+  const handleNavClick = () => {
+    onNavigate?.();
+  };
 
   return (
     <aside
@@ -130,20 +110,17 @@ export function AppSidebar() {
             </h1>
           </div>
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={cn(
-            "ml-auto p-1 rounded-md hover:bg-sidebar-accent transition-colors shrink-0",
-            collapsed && "mx-auto ml-0"
-          )}
-        >
-          <ChevronLeft
+        {!onNavigate && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
             className={cn(
-              "w-4 h-4 text-sidebar-foreground transition-transform",
-              collapsed && "rotate-180"
+              "ml-auto p-1 rounded-md hover:bg-sidebar-accent transition-colors shrink-0",
+              collapsed && "mx-auto ml-0"
             )}
-          />
-        </button>
+          >
+            <ChevronLeft className={cn("w-4 h-4 text-sidebar-foreground transition-transform", collapsed && "rotate-180")} />
+          </button>
+        )}
       </div>
 
       {/* Tenant Switcher */}
@@ -167,6 +144,7 @@ export function AppSidebar() {
               key={item.url}
               to={item.url}
               end={item.url === "/"}
+              onClick={handleNavClick}
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
             >
@@ -191,6 +169,7 @@ export function AppSidebar() {
           <NavLink
             key={item.url}
             to={item.url}
+            onClick={handleNavClick}
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
           >
