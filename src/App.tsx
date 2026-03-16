@@ -236,7 +236,7 @@ const AppRoutes = () => (
     {/* ── Incorporations ───────────────────────────────── */}
     <Route path="/incorporations" element={<Guarded module="incorporations" action="view"><Incorporations /></Guarded>} />
     <Route path="/incorporations/pipeline" element={<Guarded module="incorporations" action="view"><Incorporations /></Guarded>} />
-    <Route path="/incorporations/applications/:applicationId" element={<Guarded module="incorporations" action="view"><PlaceholderPage title="Incorporation Application" description="Application wizard — company, people, shares, KYC, payment, submit" /></Guarded>} />
+    <Route path="/incorporations/applications/:applicationId" element={<Guarded module="incorporations" action="view"><IncorporationDetail /></Guarded>} />
 
     {/* ── AML / KYC ────────────────────────────────────── */}
     <Route path="/kyc" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
