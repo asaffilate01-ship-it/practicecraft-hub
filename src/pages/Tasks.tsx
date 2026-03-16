@@ -228,6 +228,8 @@ export default function Tasks() {
         </Button>
       </div>
 
+      <BulkOperationsPanel />
+
       {isLoading ? (
         <div className="py-12 text-center text-muted-foreground">Loading tasks...</div>
       ) : (
