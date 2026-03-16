@@ -176,6 +176,7 @@ export default function BankFeeds() {
   };
 
   const uncategorisedCount = transactions.filter((t: any) => t.categorisation_status === "uncategorised").length;
+  const suggestedCount = transactions.filter((t: any) => t.categorisation_status === "suggested").length;
   const uncategorisedIds = transactions.filter((t: any) => t.categorisation_status === "uncategorised").map((t: any) => t.id);
 
   const aiCategorise = useMutation({
@@ -190,6 +191,90 @@ export default function BankFeeds() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
       toast.success(`AI suggested categories for ${data?.updated || 0} transactions`);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  // Bulk confirm all suggested → confirmed
+  const bulkConfirm = useMutation({
+    mutationFn: async () => {
+      const suggested = transactions.filter((t: any) => t.categorisation_status === "suggested" && t.suggested_account_id);
+      if (!suggested.length) throw new Error("No suggested transactions to confirm");
+      for (const t of suggested) {
+        await supabase.from("bank_transactions").update({
+          confirmed_account_id: (t as any).suggested_account_id,
+          categorisation_status: "confirmed",
+        }).eq("id", (t as any).id);
+      }
+      return suggested.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
+      toast.success(`${count} transactions confirmed`);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  // Sync via Open Banking
+  const syncOpenBanking = useMutation({
+    mutationFn: async () => {
+      const obConnections = connections.filter((c: any) => c.provider === "truelayer" && c.status === "active");
+      if (!obConnections.length) throw new Error("No active Open Banking connections. Add one first.");
+      const { data, error } = await supabase.functions.invoke("open-banking", {
+        body: {
+          action: "sync_transactions",
+          connection_ids: obConnections.map((c: any) => c.id),
+        },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["bank_connections"] });
+      toast.success(`Synced ${data?.imported || 0} new transactions from Open Banking`);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  // Post confirmed transactions to ledger
+  const postToLedger = useMutation({
+    mutationFn: async () => {
+      if (!profile?.tenant_id) throw new Error("No tenant");
+      const confirmed = transactions.filter((t: any) => t.categorisation_status === "confirmed" && t.confirmed_account_id);
+      if (!confirmed.length) throw new Error("No confirmed transactions to post");
+      for (const t of confirmed as any[]) {
+        const bankAcc = accounts.find((a: any) => a.code === "1000");
+        if (!bankAcc) continue;
+        const { data: journal } = await supabase.from("journal_entries").insert({
+          tenant_id: profile.tenant_id,
+          client_id: t.client_id,
+          entry_date: t.transaction_date,
+          reference: `BF-${t.id.slice(0, 8)}`,
+          narration: t.description,
+          is_posted: true,
+        }).select().single();
+        if (!journal) continue;
+        const lines = t.amount_pence >= 0
+          ? [
+              { journal_entry_id: journal.id, account_id: bankAcc.id, debit: Math.abs(t.amount_pence) / 100, credit: 0, description: t.description },
+              { journal_entry_id: journal.id, account_id: t.confirmed_account_id, debit: 0, credit: Math.abs(t.amount_pence) / 100, description: t.description },
+            ]
+          : [
+              { journal_entry_id: journal.id, account_id: t.confirmed_account_id, debit: Math.abs(t.amount_pence) / 100, credit: 0, description: t.description },
+              { journal_entry_id: journal.id, account_id: bankAcc.id, debit: 0, credit: Math.abs(t.amount_pence) / 100, description: t.description },
+            ];
+        await supabase.from("journal_lines").insert(lines);
+        await supabase.from("bank_transactions").update({
+          categorisation_status: "posted",
+          journal_entry_id: journal.id,
+        }).eq("id", t.id);
+      }
+      return confirmed.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
+      toast.success(`${count} transactions posted to ledger`);
     },
     onError: (e: any) => toast.error(e.message),
   });
