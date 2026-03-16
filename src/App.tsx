@@ -208,8 +208,8 @@ const AppRoutes = () => (
     {/* ── VAT (MTD) ────────────────────────────────────── */}
     <Route path="/vat" element={<Guarded module="vat" action="view"><VatReturns /></Guarded>} />
     <Route path="/vat/workbench" element={<Guarded module="vat" action="view"><VatReturns /></Guarded>} />
-    <Route path="/vat/returns/:returnId" element={<Guarded module="vat" action="view"><PlaceholderPage title="VAT Return" description="VAT return detail and submission" /></Guarded>} />
-    <Route path="/vat/obligations" element={<Guarded module="vat" action="view"><PlaceholderPage title="VAT Obligations" description="HMRC VAT obligations tracker" /></Guarded>} />
+    <Route path="/vat/returns/:returnId" element={<Guarded module="vat" action="view"><VatReturnDetail /></Guarded>} />
+    <Route path="/vat/obligations" element={<Guarded module="vat" action="view"><VatObligations /></Guarded>} />
 
     {/* ── Payroll (RTI) ────────────────────────────────── */}
     <Route path="/payroll" element={<Guarded module="payroll" action="view"><PayrollWorkbench /></Guarded>} />
