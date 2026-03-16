@@ -7,11 +7,16 @@ import { KPICard } from "@/components/dashboard/KPICard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from "recharts";
 import { Users, CheckSquare, Receipt, TrendingUp, Clock, Briefcase } from "lucide-react";
+import { AgedDebtReport } from "@/components/reports/AgedDebtReport";
+import { DeadlineComplianceReport } from "@/components/reports/DeadlineComplianceReport";
+import { FeeRecoveryReport } from "@/components/reports/FeeRecoveryReport";
+import { WipReport } from "@/components/time/WipReport";
 
 const COLORS = [
   "hsl(199, 89%, 48%)", "hsl(142, 71%, 45%)", "hsl(38, 92%, 50%)",
