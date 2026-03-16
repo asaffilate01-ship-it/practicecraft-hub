@@ -81,6 +81,7 @@ const navGroups: NavGroup[] = [
     label: "Billing & Documents",
     items: [
       { title: "Billing", url: "/billing", icon: CreditCard, permission: ["billing", "view"], featureKey: "billing", moduleKey: "billing" },
+      { title: "Proposals", url: "/proposals", icon: FileSpreadsheet, permission: ["billing", "view"], featureKey: "billing", moduleKey: "billing" },
       { title: "Documents", url: "/documents", icon: FolderOpen, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
       { title: "Doc Requests", url: "/documents/requests", icon: FileQuestion, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
       { title: "e-Signatures", url: "/documents/signatures", icon: PenTool, permission: ["documents", "view"], featureKey: "documents", moduleKey: "documents" },
