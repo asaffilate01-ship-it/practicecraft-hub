@@ -242,7 +242,7 @@ const AppRoutes = () => (
     <Route path="/kyc" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
     <Route path="/aml" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
     <Route path="/aml/workbench" element={<Guarded module="aml" action="view"><AmlWorkbench /></Guarded>} />
-    <Route path="/aml/cases/:caseId" element={<Guarded module="aml" action="view"><PlaceholderPage title="AML Case" description="Client risk assessment and verification case detail" /></Guarded>} />
+    <Route path="/aml/cases/:caseId" element={<Guarded module="aml" action="view"><AmlCaseDetail /></Guarded>} />
     <Route path="/aml/monitoring" element={<Guarded module="aml" action="view"><AmlMonitoring /></Guarded>} />
 
     {/* ── Billing ──────────────────────────────────────── */}
