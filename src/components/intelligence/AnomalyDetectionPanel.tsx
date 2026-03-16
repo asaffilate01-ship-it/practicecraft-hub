@@ -10,7 +10,7 @@ import { AlertTriangle, Search, Loader2, RefreshCw, ShieldCheck } from "lucide-r
 import { toast } from "sonner";
 
 export function AnomalyDetectionPanel() {
-  const { selectedClientId } = useClient();
+  const { selectedClientId } = useClientContext();
   const [scanning, setScanning] = useState(false);
 
   const { data, refetch, isLoading } = useQuery({
