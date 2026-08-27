@@ -13,11 +13,11 @@ interface KPICardProps {
 
 export function KPICard({ title, value, change, changeType = "neutral", icon: Icon, iconColor }: KPICardProps) {
   return (
-    <Card className="p-5">
+    <Card className="workspace-panel min-h-36 p-4 sm:min-h-40 sm:p-5">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{title}</p>
+          <p className="font-serif text-2xl font-semibold tracking-tight sm:text-3xl">
             {value}
           </p>
           {change && (
@@ -31,8 +31,8 @@ export function KPICard({ title, value, change, changeType = "neutral", icon: Ic
             </p>
           )}
         </div>
-        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", iconColor || "bg-accent")}>
-          <Icon className="w-5 h-5 text-accent-foreground" />
+        <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", iconColor || "bg-accent")}>
+          <Icon className="h-4 w-4 text-accent-foreground" />
         </div>
       </div>
     </Card>

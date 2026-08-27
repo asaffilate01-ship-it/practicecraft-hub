@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_judgements: {
+        Row: {
+          amount_pence: number | null
+          bank_transaction_id: string | null
+          client_id: string
+          created_at: string
+          created_by_user_id: string | null
+          data_json: Json
+          description: string | null
+          document_id: string | null
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          judgement_type: string
+          period_id: string
+          posted_journal_id: string | null
+          proposed_account_id: string | null
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount_pence?: number | null
+          bank_transaction_id?: string | null
+          client_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          data_json?: Json
+          description?: string | null
+          document_id?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          judgement_type: string
+          period_id: string
+          posted_journal_id?: string | null
+          proposed_account_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount_pence?: number | null
+          bank_transaction_id?: string | null
+          client_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          data_json?: Json
+          description?: string | null
+          document_id?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          judgement_type?: string
+          period_id?: string
+          posted_journal_id?: string | null
+          proposed_account_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       accounts_periods: {
         Row: {
           accounts_standard: string
@@ -107,6 +179,195 @@ export type Database = {
             referencedColumns: ["tenant_id"]
           },
         ]
+      }
+      document_fingerprints: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          document_id: string
+          id: string
+          sha256: string
+          size_bytes: number
+          tenant_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          document_id: string
+          id?: string
+          sha256: string
+          size_bytes?: number
+          tenant_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          sha256?: string
+          size_bytes?: number
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      duplicate_candidates: {
+        Row: {
+          candidate_document_id: string
+          client_id: string
+          confidence: number
+          created_at: string
+          detection_method: string
+          id: string
+          period_id: string | null
+          primary_document_id: string
+          reasons_json: Json
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_document_id: string
+          client_id: string
+          confidence?: number
+          created_at?: string
+          detection_method: string
+          id?: string
+          period_id?: string | null
+          primary_document_id: string
+          reasons_json?: Json
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_document_id?: string
+          client_id?: string
+          confidence?: number
+          created_at?: string
+          detection_method?: string
+          id?: string
+          period_id?: string | null
+          primary_document_id?: string
+          reasons_json?: Json
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      evidence_matches: {
+        Row: {
+          bank_transaction_id: string
+          client_id: string
+          confidence: number
+          created_at: string
+          document_id: string
+          extraction_id: string | null
+          factors_json: Json
+          id: string
+          match_type: string
+          period_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          bank_transaction_id: string
+          client_id: string
+          confidence?: number
+          created_at?: string
+          document_id: string
+          extraction_id?: string | null
+          factors_json?: Json
+          id?: string
+          match_type?: string
+          period_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          bank_transaction_id?: string
+          client_id?: string
+          confidence?: number
+          created_at?: string
+          document_id?: string
+          extraction_id?: string | null
+          factors_json?: Json
+          id?: string
+          match_type?: string
+          period_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      year_end_checks: {
+        Row: {
+          category: string
+          check_key: string
+          client_id: string
+          completed_at: string | null
+          completed_by_user_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          period_id: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          check_key: string
+          client_id: string
+          completed_at?: string | null
+          completed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_id: string
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          check_key?: string
+          client_id?: string
+          completed_at?: string | null
+          completed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_id?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       aml_monitoring_alerts: {
         Row: {
@@ -386,6 +647,7 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          ledger_account_id: string | null
           metadata_json: Json
           provider: string
           provider_connection_id: string | null
@@ -404,6 +666,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          ledger_account_id?: string | null
           metadata_json?: Json
           provider?: string
           provider_connection_id?: string | null
@@ -422,6 +685,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          ledger_account_id?: string | null
           metadata_json?: Json
           provider?: string
           provider_connection_id?: string | null
@@ -9339,6 +9603,18 @@ export type Database = {
       }
     }
     Functions: {
+      post_bank_transaction: {
+        Args: { p_transaction_id: string }
+        Returns: string
+      }
+      run_accounts_intelligence: {
+        Args: { p_client_id: string; p_period_id: string }
+        Returns: Json
+      }
+      seed_year_end_checks: {
+        Args: { p_period_id: string }
+        Returns: number
+      }
       get_tenant_allowed_modules: {
         Args: { p_tenant_id: string }
         Returns: string[]

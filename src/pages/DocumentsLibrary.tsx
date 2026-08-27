@@ -31,6 +31,11 @@ const formatBytes = (bytes: number) => {
   return `${(bytes / 1048576).toFixed(1)} MB`;
 };
 
+const sha256File = async (file: File) => {
+  const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+};
+
 const DOC_TYPES = [
   { value: "all", label: "All Types" },
   { value: "receipt", label: "Receipt" },
@@ -122,6 +127,20 @@ export default function DocumentsLibrary() {
 
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
+        const sha256 = await sha256File(file);
+
+        let duplicateQuery = supabase
+          .from("document_fingerprints")
+          .select("document_id")
+          .eq("tenant_id", profile.tenant_id)
+          .eq("sha256", sha256);
+        duplicateQuery = uploadClientId
+          ? duplicateQuery.eq("client_id", uploadClientId)
+          : duplicateQuery.is("client_id", null);
+        const { data: duplicate, error: duplicateError } = await duplicateQuery.maybeSingle();
+        if (duplicateError) throw duplicateError;
+        if (duplicate) throw new Error(`${file.name} is an exact duplicate of a document already uploaded for this client.`);
+
         const path = `${profile.tenant_id}/${uploadClientId || "general"}/${Date.now()}_${file.name}`;
 
         const { error: storageError } = await supabase.storage
@@ -130,7 +149,7 @@ export default function DocumentsLibrary() {
 
         if (storageError) throw storageError;
 
-        const { error: dbError } = await supabase.from("documents").insert({
+        const { data: document, error: dbError } = await supabase.from("documents").insert({
           tenant_id: profile.tenant_id,
           client_id: uploadClientId || null,
           uploaded_by_user_id: user.id,
@@ -142,9 +161,26 @@ export default function DocumentsLibrary() {
           status: "pending",
           tags: tagArray,
           folder_path: uploadFolder,
+        }).select("id").single();
+
+        if (dbError || !document) {
+          await supabase.storage.from("client-documents").remove([path]);
+          throw dbError ?? new Error("Document record could not be created");
+        }
+
+        const { error: fingerprintError } = await supabase.from("document_fingerprints").insert({
+          tenant_id: profile.tenant_id,
+          client_id: uploadClientId || null,
+          document_id: document.id,
+          sha256,
+          size_bytes: file.size,
         });
 
-        if (dbError) throw dbError;
+        if (fingerprintError) {
+          await supabase.from("documents").delete().eq("id", document.id);
+          await supabase.storage.from("client-documents").remove([path]);
+          throw fingerprintError;
+        }
       }
     },
     onSuccess: () => {

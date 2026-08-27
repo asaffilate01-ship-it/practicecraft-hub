@@ -107,6 +107,25 @@ Deno.serve(async (req) => {
         .select("tenant_id")
         .eq("id", userId)
         .single();
+      if (!prof) return json({ error: "Profile not found" }, 404);
+
+      if (!Array.isArray(lines) || lines.length === 0) {
+        return json({ error: "At least one reviewed debit line is required" }, 400);
+      }
+      const bankAccountId = body.bankAccountId || body.bank_account_id || lines[0]?.bank_account_id;
+      if (!bankAccountId) {
+        return json({ error: "Select the bank or cash account used for payment before posting" }, 400);
+      }
+      const { data: bankAccount } = await supabase
+        .from("chart_of_accounts")
+        .select("id, account_type")
+        .eq("id", bankAccountId)
+        .eq("tenant_id", prof.tenant_id)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (!bankAccount || bankAccount.account_type !== "asset") {
+        return json({ error: "The balancing account must be an active bank or cash asset account" }, 400);
+      }
 
       // Create journal entry
       const { data: journal, error: journalErr } = await supabase
@@ -117,7 +136,7 @@ Deno.serve(async (req) => {
           narration: `Receipt: ${suggestion.document_id}`,
           reference: `OCR-${suggestion.extraction_id || suggestion.id}`,
           created_by: userId,
-          is_posted: true,
+          is_posted: false,
         })
         .select()
         .single();
@@ -125,30 +144,38 @@ Deno.serve(async (req) => {
       if (journalErr) throw journalErr;
 
       // Create journal lines from suggestion lines
-      if (Array.isArray(lines) && lines.length > 0) {
-        const journalLines = [];
-        for (const line of lines) {
-          // Debit the expense account
-          journalLines.push({
-            journal_entry_id: journal.id,
-            account_id: line.account_id || line.coa_id,
-            debit: (line.net_pence || line.gross_pence || 0) / 100,
-            credit: 0,
-            description: line.description || "Receipt expense",
-          });
+      const journalLines = [];
+      for (const line of lines) {
+        const accountId = line.account_id || line.coa_id;
+        const debit = Number(line.net_pence || line.gross_pence || 0) / 100;
+        if (!accountId || !Number.isFinite(debit) || debit <= 0) {
+          await supabase.from("journal_entries").delete().eq("id", journal.id);
+          return json({ error: "Every reviewed line needs an account and positive amount" }, 400);
         }
-        // Credit bank (placeholder - would need tenant's default bank account)
-        const totalDebit = journalLines.reduce((sum: number, l: { debit: number }) => sum + l.debit, 0);
         journalLines.push({
           journal_entry_id: journal.id,
-          account_id: lines[0].bank_account_id || lines[0].account_id,
-          debit: 0,
-          credit: totalDebit,
-          description: "Payment",
+          account_id: accountId,
+          debit,
+          credit: 0,
+          description: line.description || "Receipt expense",
         });
-
-        await supabase.from("journal_lines").insert(journalLines);
       }
+      const totalDebit = journalLines.reduce((sum: number, line: { debit: number }) => sum + line.debit, 0);
+      journalLines.push({
+        journal_entry_id: journal.id,
+        account_id: bankAccount.id,
+        debit: 0,
+        credit: totalDebit,
+        description: "Payment",
+      });
+
+      const { error: linesError } = await supabase.from("journal_lines").insert(journalLines);
+      if (linesError) {
+        await supabase.from("journal_entries").delete().eq("id", journal.id);
+        throw linesError;
+      }
+      const { error: postError } = await supabase.from("journal_entries").update({ is_posted: true }).eq("id", journal.id);
+      if (postError) throw postError;
 
       // Update suggestion
       await supabase

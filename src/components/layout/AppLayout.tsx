@@ -6,6 +6,7 @@ import { PracticeFeaturesProvider } from "@/practice/features/PracticeFeaturesPr
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { MobileBottomNav } from "./MobileBottomNav";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -18,7 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <PracticeBrandingProvider>
       <PracticeFeaturesProvider>
-        <div className="flex min-h-screen w-full">
+        <div className="flex min-h-screen w-full bg-background">
           {isMobile ? (
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetContent side="left" className="p-0 w-64">
@@ -31,9 +32,10 @@ export function AppLayout({ children }: AppLayoutProps) {
           <div className="flex-1 flex flex-col min-w-0">
             <DevBanner />
             <TopBar onMenuClick={isMobile ? () => setSidebarOpen(true) : undefined} />
-            <main className="flex-1 p-4 md:p-6 overflow-auto">
-              {children}
+            <main className="flex-1 overflow-auto px-3 pb-24 pt-4 sm:px-4 md:p-7">
+              <div className="mx-auto w-full max-w-[1540px]">{children}</div>
             </main>
+            {isMobile && <MobileBottomNav />}
           </div>
         </div>
       </PracticeFeaturesProvider>
