@@ -1013,6 +1013,7 @@ export type Database = {
           ch_transaction_id: string | null
           client_id: string
           created_at: string
+          environment: string
           filing_description: string | null
           filing_type: string
           id: string
@@ -1030,6 +1031,7 @@ export type Database = {
           ch_transaction_id?: string | null
           client_id: string
           created_at?: string
+          environment?: string
           filing_description?: string | null
           filing_type: string
           id?: string
@@ -1047,6 +1049,7 @@ export type Database = {
           ch_transaction_id?: string | null
           client_id?: string
           created_at?: string
+          environment?: string
           filing_description?: string | null
           filing_type?: string
           id?: string
@@ -5696,6 +5699,91 @@ export type Database = {
           },
         ]
       }
+      oauth_states: {
+        Row: {
+          client_id: string
+          consumed_at: string | null
+          created_at: string
+          created_by_user_id: string
+          expires_at: string
+          id: string
+          provider: string
+          redirect_uri: string
+          scopes: string[]
+          state_hash: string
+          tenant_id: string
+        }
+        Insert: {
+          client_id: string
+          consumed_at?: string | null
+          created_at?: string
+          created_by_user_id: string
+          expires_at: string
+          id?: string
+          provider: string
+          redirect_uri: string
+          scopes?: string[]
+          state_hash: string
+          tenant_id: string
+        }
+        Update: {
+          client_id?: string
+          consumed_at?: string | null
+          created_at?: string
+          created_by_user_id?: string
+          expires_at?: string
+          id?: string
+          provider?: string
+          redirect_uri?: string
+          scopes?: string[]
+          state_hash?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_states_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oauth_states_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "oauth_states_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "oauth_states_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "oauth_states_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oauth_states_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       ocr_jobs: {
         Row: {
           attempt_count: number
@@ -9216,12 +9304,18 @@ export type Database = {
           box9: number
           client_id: string | null
           created_at: string
+          due_date: string | null
+          finalised_at: string | null
+          finalised_by_user_id: string | null
           hmrc_receipt: string | null
+          hmrc_response_json: Json | null
           id: string
           notes: string | null
           period_end: string
+          period_key: string | null
           period_start: string
           status: string
+          submission_job_id: string | null
           submitted_at: string | null
           tenant_id: string
           updated_at: string
@@ -9238,12 +9332,18 @@ export type Database = {
           box9?: number
           client_id?: string | null
           created_at?: string
+          due_date?: string | null
+          finalised_at?: string | null
+          finalised_by_user_id?: string | null
           hmrc_receipt?: string | null
+          hmrc_response_json?: Json | null
           id?: string
           notes?: string | null
           period_end: string
+          period_key?: string | null
           period_start: string
           status?: string
+          submission_job_id?: string | null
           submitted_at?: string | null
           tenant_id: string
           updated_at?: string
@@ -9260,12 +9360,18 @@ export type Database = {
           box9?: number
           client_id?: string | null
           created_at?: string
+          due_date?: string | null
+          finalised_at?: string | null
+          finalised_by_user_id?: string | null
           hmrc_receipt?: string | null
+          hmrc_response_json?: Json | null
           id?: string
           notes?: string | null
           period_end?: string
+          period_key?: string | null
           period_start?: string
           status?: string
+          submission_job_id?: string | null
           submitted_at?: string | null
           tenant_id?: string
           updated_at?: string
@@ -9298,6 +9404,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_tasks_due_next_14d"
             referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "vat_returns_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "submission_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vat_returns_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_jobs_recent"
+            referencedColumns: ["submission_job_id"]
           },
           {
             foreignKeyName: "vat_returns_tenant_id_fkey"
