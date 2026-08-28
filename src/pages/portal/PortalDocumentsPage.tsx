@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,21 +27,39 @@ const formatBytes = (bytes: number) => {
 };
 
 export default function PortalDocumentsPage() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadType, setUploadType] = useState("receipt");
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
+  const { data: portalUser } = useQuery({
+    queryKey: ["portal-user", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("portal_users")
+        .select("tenant_id, client_id")
+        .eq("user_id", user!.id)
+        .eq("status", "active")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const { data: documents = [], isLoading } = useQuery({
-    queryKey: ["portal-documents"],
+    queryKey: ["portal-documents", portalUser?.client_id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("documents")
         .select("*")
+        .eq("client_id", portalUser!.client_id!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
+    enabled: !!portalUser?.client_id,
   });
 
   const uploadMut = useMutation({
@@ -48,18 +67,18 @@ export default function PortalDocumentsPage() {
       if (!selectedFiles?.length) throw new Error("No files selected");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
-      const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).single();
-      if (!profile) throw new Error("No profile");
+      if (!portalUser?.tenant_id || !portalUser.client_id) throw new Error("No active client portal link");
 
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
-        const path = `${profile.tenant_id}/portal/${Date.now()}_${file.name}`;
+        const path = `${portalUser.tenant_id}/${portalUser.client_id}/portal/${Date.now()}_${file.name}`;
 
         const { error: storageError } = await supabase.storage.from("client-documents").upload(path, file);
         if (storageError) throw storageError;
 
         const { error: dbError } = await supabase.from("documents").insert({
-          tenant_id: profile.tenant_id,
+          tenant_id: portalUser.tenant_id,
+          client_id: portalUser.client_id,
           uploaded_by_user_id: user.id,
           filename: file.name,
           mime_type: file.type || "application/octet-stream",
@@ -74,7 +93,7 @@ export default function PortalDocumentsPage() {
     },
     onSuccess: () => {
       toast({ title: "Uploaded", description: "Your documents have been uploaded successfully." });
-      queryClient.invalidateQueries({ queryKey: ["portal-documents"] });
+      queryClient.invalidateQueries({ queryKey: ["portal-documents", portalUser?.client_id] });
       setUploadOpen(false);
       setSelectedFiles(null);
     },

@@ -11,7 +11,8 @@ PracticeCraft must not describe itself as “HMRC approved”. HMRC uses **recog
 1. **Secure beta and VAT MTD:** deploy migrations/functions, configure server secrets, complete fraud-header and sandbox scenario tests, remove all remaining browser access to credential ciphertext, and complete WCAG/security/incident evidence.
 2. **Accounts and Companies House:** implement FRS 105 and FRS 102 Section 1A rules/disclosures, deterministic final accounts, current-taxonomy iXBRL, visual review and form-by-form Companies House gateway testing.
 3. **PAYE RTI and Corporation Tax:** replace legacy RTI with the current RIM/IRmark/LTS pack and build CT600 with accounts and computation iXBRL.
-4. **Personal tax and wider filings:** implement SA100/SA103 first, then MTD ITSA, CIS and separately scoped specialist returns.
+4. **Personal tax and wider filings:** implement SA100/SA103 and current-year SA800 first, then MTD ITSA, CIS and separately scoped specialist returns.
+5. **Charities and LLPs:** produce SORP accounts and fund disclosures, pass the HMRC Charities Online XML test journey for Gift Aid, retain declarations and claim evidence, prepare Charity Commission annual returns for manual filing, and validate LLP iXBRL/accounts through the Companies House test service.
 
 ## Shared filing controls
 
@@ -28,4 +29,6 @@ AI may extract records, suggest matches, detect duplicates, propose codes/capex 
 - [RTI specifications](https://www.gov.uk/government/publications/real-time-information-internet-submissions-generic-technical-specifications)
 - [Corporation Tax packs](https://www.gov.uk/government/collections/corporation-tax-online-support-for-software-developers)
 - [Self Assessment packs](https://www.gov.uk/government/collections/self-assessment-online-support-for-software-developers)
+- [HMRC Charities Online XML API](https://developer.service.hmrc.gov.uk/api-documentation/docs/api/xml/Charities%20Online)
+- [Charity Commission online services](https://www.gov.uk/guidance/online-services-for-charities)
 - [Companies House filing tests](https://www.gov.uk/government/publications/technical-interface-specifications-for-companies-house-software/important-information-for-software-developers-read-first)

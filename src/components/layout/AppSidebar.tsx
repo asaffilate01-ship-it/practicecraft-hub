@@ -62,6 +62,8 @@ const navGroups: NavGroup[] = [
       { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Accounts Intelligence", url: "/accounts-intelligence", icon: ScanSearch, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Self Assessment", url: "/self-assessment", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "Charities & Gift Aid", url: "/charities", icon: Landmark, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "Partnerships & LLPs", url: "/partnerships", icon: Users, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Corporation Tax", url: "/corporation-tax", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "CIS", url: "/cis", icon: HardHat, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "MTD IT (ITSA)", url: "/itsa", icon: TrendingUp, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },

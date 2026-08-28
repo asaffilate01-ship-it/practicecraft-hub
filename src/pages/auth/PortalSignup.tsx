@@ -25,29 +25,23 @@ export default function PortalSignup() {
   const [inviteLoading, setInviteLoading] = useState(!!inviteToken);
   const [inviteError, setInviteError] = useState<string | null>(null);
 
-  // Self-registration mode (no invite)
-  const [firmCode, setFirmCode] = useState("");
   const isInviteMode = !!inviteToken;
 
   useEffect(() => {
     if (!inviteToken) return;
     (async () => {
       setInviteLoading(true);
-      const { data, error } = await supabase
-        .from("portal_invitations")
-        .select("*, tenants(firm_name), clients(legal_name)")
-        .eq("token", inviteToken)
-        .eq("status", "pending")
-        .gt("expires_at", new Date().toISOString())
-        .single();
+      const { data, error } = await supabase.functions.invoke("portal", {
+        body: { action: "validate-invite", token: inviteToken },
+      });
 
       setInviteLoading(false);
-      if (error || !data) {
+      if (error || !data?.invitation) {
         setInviteError("This invitation is invalid or has expired.");
         return;
       }
-      setInvite(data);
-      setEmail(data.email);
+      setInvite(data.invitation);
+      setEmail(data.invitation.email);
     })();
   }, [inviteToken]);
 
@@ -96,7 +90,9 @@ export default function PortalSignup() {
 
       if (acceptError) {
         console.error("Accept invite error:", acceptError);
-        // Non-fatal — user is created, can be linked later
+        setLoading(false);
+        toast.error("Your account was created but could not be linked. Contact your practice before signing in.");
+        return;
       }
     }
 
@@ -104,6 +100,23 @@ export default function PortalSignup() {
     toast.success("Check your email to confirm your account, then sign in.");
     navigate("/login");
   };
+
+  if (!isInviteMode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center space-y-2">
+            <div className="mx-auto w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-2">
+              <Users className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <CardTitle className="text-2xl">Invitation required</CardTitle>
+            <CardDescription>Client and employee accounts must be created from a secure invitation sent by their accountancy practice.</CardDescription>
+          </CardHeader>
+          <CardFooter><Button className="w-full" variant="outline" onClick={() => navigate("/login")}>Back to sign in</Button></CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   if (inviteLoading) {
     return (
@@ -204,20 +217,6 @@ export default function PortalSignup() {
                 </div>
               </div>
 
-              {!isInviteMode && (
-                <div className="space-y-2">
-                  <Label htmlFor="firmCode">Practice Code (optional)</Label>
-                  <Input
-                    id="firmCode"
-                    placeholder="Your accountant's practice code"
-                    value={firmCode}
-                    onChange={(e) => setFirmCode(e.target.value)}
-                  />
-                  <p className="text-[11px] text-muted-foreground">
-                    If you have a practice code, enter it to link your account. Otherwise your request will need approval.
-                  </p>
-                </div>
-              )}
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
               <Button type="submit" className="w-full" disabled={loading}>

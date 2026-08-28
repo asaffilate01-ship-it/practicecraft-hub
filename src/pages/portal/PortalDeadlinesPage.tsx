@@ -29,7 +29,7 @@ export default function PortalDeadlinesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tasks")
-        .select("id, title, due_date, status, service")
+        .select("id, title, due_date, status, priority")
         .eq("client_id", portalUser!.client_id!)
         .not("due_date", "is", null)
         .in("status", ["todo", "in_progress", "awaiting_client", "awaiting_hmrc"])
@@ -89,7 +89,7 @@ export default function PortalDeadlinesPage() {
             deadlines.map((d: any) => (
               <div key={d.id} className="grid grid-cols-12 px-4 py-3 border-t text-sm items-center">
                 <div className="col-span-5 font-medium">{d.title}</div>
-                <div className="col-span-2 text-muted-foreground text-xs">{d.service || "—"}</div>
+                <div className="col-span-2 text-muted-foreground text-xs capitalize">{d.priority || "normal"}</div>
                 <div className={`col-span-3 ${urgencyColor(d.due_date)}`}>
                   {new Date(d.due_date).toLocaleDateString("en-GB")}
                   <span className="text-xs ml-1.5">
