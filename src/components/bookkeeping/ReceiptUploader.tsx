@@ -82,7 +82,8 @@ export function ReceiptUploader({ clientId, accounts, tenantId }: Props) {
 
   const approveMutation = useMutation({
     mutationFn: async () => {
-      if (!result || !selectedAccountId) throw new Error("Select an account");
+      if (!result || !selectedAccountId) throw new Error("Select an expense account");
+      if (!bankAccountId) throw new Error("Select the bank or cash account used for payment");
       const ext = result.extraction;
 
       // Create journal entry directly
@@ -93,30 +94,34 @@ export function ReceiptUploader({ clientId, accounts, tenantId }: Props) {
           client_id: clientId,
           narration: `Receipt: ${ext.supplier_name} ${ext.receipt_date || ""}`,
           reference: `RCT-${result.document_id.slice(0, 8)}`,
-          is_posted: true,
+          is_posted: false,
         })
         .select()
         .single();
       if (jErr) throw jErr;
 
-      const netPence = ext.subtotal_pence || ext.total_pence;
       const vatPence = ext.vat_pence || 0;
+      const vatAccount = vatPence > 0 ? accounts.find(a => a.code === "1300") : undefined;
+      const netPence = vatAccount ? (ext.subtotal_pence || ext.total_pence - vatPence) : ext.total_pence;
       const lines: any[] = [
         { journal_entry_id: journal.id, account_id: selectedAccountId, debit: netPence / 100, credit: 0, description: `${ext.supplier_name} expense` },
       ];
       if (vatPence > 0) {
         // Find VAT control account
-        const vatAccount = accounts.find(a => a.code === "1300");
         if (vatAccount) {
           lines.push({ journal_entry_id: journal.id, account_id: vatAccount.id, debit: vatPence / 100, credit: 0, description: "Input VAT" });
         }
       }
-      if (bankAccountId) {
-        lines.push({ journal_entry_id: journal.id, account_id: bankAccountId, debit: 0, credit: ext.total_pence / 100, description: "Payment" });
-      }
+      lines.push({ journal_entry_id: journal.id, account_id: bankAccountId, debit: 0, credit: ext.total_pence / 100, description: "Payment" });
 
       const { error: lErr } = await supabase.from("journal_lines").insert(lines);
-      if (lErr) throw lErr;
+      if (lErr) {
+        await supabase.from("journal_entries").delete().eq("id", journal.id);
+        throw lErr;
+      }
+      const { error: postErr } = await supabase.from("journal_entries").update({ is_posted: true }).eq("id", journal.id);
+      if (postErr) throw postErr;
+      await supabase.from("documents").update({ status: "processed" }).eq("id", result.document_id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["journal_entries"] });
@@ -222,7 +227,7 @@ export function ReceiptUploader({ clientId, accounts, tenantId }: Props) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Paid From (Bank Account)</Label>
+                  <Label>Paid From (Bank/Cash Account) *</Label>
                   <Select value={bankAccountId} onValueChange={setBankAccountId}>
                     <SelectTrigger><SelectValue placeholder="Select bank" /></SelectTrigger>
                     <SelectContent>
@@ -239,7 +244,7 @@ export function ReceiptUploader({ clientId, accounts, tenantId }: Props) {
             <Button variant="outline" onClick={() => setShowApproval(false)} className="gap-1">
               <X className="w-3.5 h-3.5" /> Reject
             </Button>
-            <Button onClick={() => approveMutation.mutate()} disabled={!selectedAccountId || approveMutation.isPending} className="gap-1">
+            <Button onClick={() => approveMutation.mutate()} disabled={!selectedAccountId || !bankAccountId || approveMutation.isPending} className="gap-1">
               <Check className="w-3.5 h-3.5" /> {approveMutation.isPending ? "Posting…" : "Approve & Post"}
             </Button>
           </DialogFooter>

@@ -1,274 +1,208 @@
-import { Users, CheckSquare, Receipt, Wallet, Calendar, TrendingUp, AlertTriangle } from "lucide-react";
-import { KPICard } from "@/components/dashboard/KPICard";
-import { StatusCard } from "@/components/dashboard/StatusCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { useDashboardKPIs, useOverdueTasks, useUpcomingTasks, useBillingKPIs } from "@/hooks/useDashboardData";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowRight, BookOpenCheck, Calendar, CheckCircle2, FileSearch,
+  Receipt, Sparkles, TrendingUp, Users, Wallet,
+} from "lucide-react";
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AIIntelligencePanel } from "@/components/intelligence/AIIntelligencePanel";
 import { TaskSuggestionsPanel } from "@/components/intelligence/TaskSuggestionsPanel";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { supabase } from "@/integrations/supabase/client";
+import { useBillingKPIs, useDashboardKPIs, useOverdueTasks, useUpcomingTasks } from "@/hooks/useDashboardData";
+import { cn } from "@/lib/utils";
 
 const entityColors: Record<string, string> = {
-  ltd: "hsl(199, 89%, 48%)",
-  sole_trader: "hsl(142, 71%, 45%)",
-  partnership: "hsl(38, 92%, 50%)",
-  llp: "hsl(280, 65%, 60%)",
-  charity: "hsl(350, 65%, 55%)",
-  trust: "hsl(215, 25%, 65%)",
+  ltd: "#17221f", sole_trader: "#91a91e", partnership: "#d9a441",
+  llp: "#64748b", charity: "#b55c69", trust: "#94a3b8",
 };
 
 const entityLabels: Record<string, string> = {
-  ltd: "Ltd",
-  sole_trader: "Sole Trader",
-  partnership: "Partnership",
-  llp: "LLP",
-  charity: "Charity",
-  trust: "Trust",
+  ltd: "Ltd", sole_trader: "Sole trader", partnership: "Partnership",
+  llp: "LLP", charity: "Charity", trust: "Trust",
 };
 
-const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  submitted: { label: "Submitted", variant: "default" },
-  draft: { label: "Draft", variant: "secondary" },
+const taskStatus: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   overdue: { label: "Overdue", variant: "destructive" },
-  todo: { label: "To Do", variant: "secondary" },
-  in_progress: { label: "In Progress", variant: "outline" },
+  todo: { label: "To do", variant: "secondary" },
+  in_progress: { label: "In progress", variant: "outline" },
   blocked: { label: "Blocked", variant: "destructive" },
-  awaiting_client: { label: "Awaiting Client", variant: "outline" },
+  awaiting_client: { label: "Awaiting client", variant: "outline" },
   awaiting_hmrc: { label: "Awaiting HMRC", variant: "outline" },
 };
 
-const priorityColors: Record<string, string> = {
-  urgent: "destructive",
-  high: "destructive",
-  medium: "secondary",
-  low: "outline",
+type MetricProps = {
+  label: string;
+  value: string | number;
+  helper: string;
+  icon: typeof Users;
+  tone?: "plain" | "lime" | "amber";
+  onClick?: () => void;
 };
 
+function MetricCard({ label, value, helper, icon: Icon, tone = "plain", onClick }: MetricProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "workspace-panel min-h-40 w-full p-5 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(23,34,31,0.08)]",
+        tone === "lime" && "border-[#e1e8c2] bg-[#f0f3e4]",
+        tone === "amber" && "border-[#eee2c7] bg-[#faf5e9]",
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <span className="workspace-eyebrow">{label}</span>
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5 text-muted-foreground"><Icon className="h-4 w-4" /></span>
+      </div>
+      <div className="mt-5 font-serif text-3xl font-semibold tracking-tight text-foreground">{value}</div>
+      <p className="mt-3 text-xs text-muted-foreground">{helper}</p>
+    </button>
+  );
+}
+
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { data: kpis, isLoading: kpisLoading } = useDashboardKPIs();
   const { data: overdueTasks } = useOverdueTasks();
   const { data: upcomingTasks } = useUpcomingTasks();
   const { data: billingKPIs } = useBillingKPIs();
 
-  // Client entity breakdown
-  const { data: entityData } = useQuery({
+  const { data: entityData = [] } = useQuery({
     queryKey: ["client-entity-breakdown"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("clients")
-        .select("entity_type")
-        .eq("status", "active");
+      const { data, error } = await supabase.from("clients").select("entity_type").eq("status", "active");
       if (error) throw error;
-
-      const counts: Record<string, number> = {};
-      for (const c of data || []) {
-        counts[c.entity_type] = (counts[c.entity_type] || 0) + 1;
-      }
-      return Object.entries(counts).map(([name, value]) => ({
-        name: entityLabels[name] || name,
-        value,
-        color: entityColors[name] || "hsl(215, 25%, 65%)",
-      }));
+      const counts = data.reduce<Record<string, number>>((result, client) => {
+        result[client.entity_type] = (result[client.entity_type] ?? 0) + 1;
+        return result;
+      }, {});
+      return Object.entries(counts).map(([name, value]) => ({ name: entityLabels[name] ?? name, value, color: entityColors[name] ?? "#94a3b8" }));
     },
     staleTime: 5 * 60_000,
   });
 
-  // Task status breakdown for status cards
-  const { data: taskStatusCounts } = useQuery({
-    queryKey: ["task-status-breakdown"],
+  const { data: accountsControl } = useQuery({
+    queryKey: ["dashboard-accounts-control"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("status")
-        .not("status", "in", '("done","cancelled")');
+      const [matches, duplicates, judgements, checks] = await Promise.all([
+        supabase.from("evidence_matches").select("status"),
+        supabase.from("duplicate_candidates").select("status"),
+        supabase.from("accounting_judgements").select("status"),
+        supabase.from("year_end_checks").select("status"),
+      ]);
+      const error = matches.error ?? duplicates.error ?? judgements.error ?? checks.error;
       if (error) throw error;
-
-      const counts: Record<string, number> = {};
-      for (const t of data || []) {
-        counts[t.status] = (counts[t.status] || 0) + 1;
-      }
-      return counts;
+      const openMatches = matches.data.filter((item) => item.status === "suggested").length;
+      const openDuplicates = duplicates.data.filter((item) => item.status === "open").length;
+      const openJudgements = judgements.data.filter((item) => item.status === "proposed").length;
+      const completedChecks = checks.data.filter((item) => ["complete", "not_applicable"].includes(item.status)).length;
+      return {
+        decisions: openMatches + openDuplicates + openJudgements,
+        openMatches,
+        openDuplicates,
+        openJudgements,
+        checklistProgress: checks.data.length ? Math.round((completedChecks / checks.data.length) * 100) : 0,
+      };
     },
-    staleTime: 60_000,
   });
 
-  // Combine overdue + upcoming for deadlines table
-  const deadlines = [
-    ...(overdueTasks || []).map((t) => ({
-      date: t.due_date,
-      client: t.client_legal_name || "—",
-      type: t.title,
-      status: "overdue" as const,
-      priority: t.priority,
-      assigned: t.assigned_user_name || "—",
-    })),
-    ...(upcomingTasks || []).map((t) => ({
-      date: t.due_date,
-      client: t.client_legal_name || "—",
-      type: t.title,
-      status: t.status,
-      priority: t.priority,
-      assigned: t.assigned_user_name || "—",
-    })),
-  ].slice(0, 10);
+  const deadlines = useMemo(() => [
+    ...(overdueTasks ?? []).map((task) => ({ date: task.due_date, client: task.client_legal_name ?? "—", title: task.title, status: "overdue", priority: task.priority })),
+    ...(upcomingTasks ?? []).map((task) => ({ date: task.due_date, client: task.client_legal_name ?? "—", title: task.title, status: task.status, priority: task.priority })),
+  ].slice(0, 10), [overdueTasks, upcomingTasks]);
 
-  // Revenue chart from billing KPIs
-  const revenueData = (billingKPIs || []).map((b) => ({
-    month: new Date(b.month + "-01").toLocaleDateString("en-GB", { month: "short" }),
-    revenue: b.invoices_total,
+  const revenueData = (billingKPIs ?? []).map((item) => ({
+    month: new Date(`${item.month}-01`).toLocaleDateString("en-GB", { month: "short" }),
+    revenue: item.invoices_total,
   }));
+
+  const control = accountsControl ?? { decisions: 0, openMatches: 0, openDuplicates: 0, openJudgements: 0, checklistProgress: 0 };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Overview of your practice at a glance</p>
-      </div>
+      <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-[#667914]"><span className="h-2 w-2 rounded-full bg-[#91a91e] shadow-[0_0_0_4px_#eaf1cf]" /> Practice is live</div>
+          <h1 className="max-w-3xl font-serif text-3xl leading-tight tracking-tight text-foreground md:text-4xl">One clear view of the practice, from client work to final accounts.</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Deadlines, evidence decisions, bookkeeping and accounts production—prioritised for action.</p>
+        </div>
+        <Card className="workspace-panel w-full border-border/80 lg:w-[350px]">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between text-xs"><span className="font-medium">Accounts control readiness</span><span className="font-semibold">{control.checklistProgress}%</span></div>
+            <Progress value={control.checklistProgress} className="mt-3 h-2" />
+            <div className="mt-3 flex items-center justify-between"><p className="text-[11px] text-muted-foreground">{control.decisions} evidence or accounting decisions remain.</p><Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => navigate("/accounts-intelligence")}>Review <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button></div>
+          </CardContent>
+        </Card>
+      </section>
 
-      {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpisLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="p-5"><Skeleton className="h-16 w-full" /></Card>
-          ))
-        ) : (
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {kpisLoading ? Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-40 rounded-[1.25rem]" />) : (
           <>
-            <KPICard title="Active Clients" value={kpis?.active_clients ?? 0} change={`${kpis?.open_tasks ?? 0} open tasks`} changeType="neutral" icon={Users} iconColor="bg-accent" />
-            <KPICard title="Tasks Overdue" value={kpis?.overdue_tasks ?? 0} change={kpis?.overdue_tasks ? `${kpis.overdue_tasks} need attention` : "All clear"} changeType={kpis?.overdue_tasks ? "negative" : "positive"} icon={CheckSquare} iconColor="bg-destructive/10" />
-            <KPICard title="VAT Returns Due" value={kpis?.vat_due_14d ?? 0} change="Draft returns" changeType="neutral" icon={Receipt} iconColor="bg-[hsl(var(--warning))]/10" />
-            <KPICard title="Overdue Invoices" value={kpis?.overdue_invoices ?? 0} change={kpis?.overdue_invoices ? "Action required" : "None outstanding"} changeType={kpis?.overdue_invoices ? "negative" : "positive"} icon={Wallet} iconColor="bg-[hsl(var(--success))]/10" />
+            <MetricCard label="Active clients" value={kpis?.active_clients ?? 0} helper={`${kpis?.open_tasks ?? 0} open tasks across the practice`} icon={Users} tone="lime" onClick={() => navigate("/clients")} />
+            <MetricCard label="Overdue work" value={kpis?.overdue_tasks ?? 0} helper={kpis?.overdue_tasks ? "Requires attention today" : "All current deadlines are clear"} icon={Calendar} onClick={() => navigate("/tasks")} />
+            <MetricCard label="VAT returns due" value={kpis?.vat_due_14d ?? 0} helper="Due within the next 14 days" icon={Receipt} tone="amber" onClick={() => navigate("/vat")} />
+            <MetricCard label="Accounts decisions" value={control.decisions} helper={`${control.openMatches} matches · ${control.openDuplicates} duplicates · ${control.openJudgements} judgements`} icon={FileSearch} onClick={() => navigate("/accounts-intelligence")} />
           </>
         )}
-      </div>
+      </section>
 
-      {/* Status cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatusCard label="In Progress" count={taskStatusCounts?.in_progress || 0} color="green" />
-        <StatusCard label="To Do" count={taskStatusCounts?.todo || 0} color="yellow" />
-        <StatusCard label="Blocked" count={taskStatusCounts?.blocked || 0} color="red" />
-        <StatusCard label="Awaiting Client" count={taskStatusCounts?.awaiting_client || 0} color="blue" />
-      </div>
-
-      {/* Charts row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-muted-foreground" />
-              Monthly Revenue
-            </CardTitle>
+      <section className="grid gap-5 xl:grid-cols-[1.45fr_.85fr]">
+        <Card className="workspace-panel overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border/70 pb-4">
+            <div><p className="workspace-eyebrow">Practice workflow</p><CardTitle className="mt-1 text-base">Upcoming deadlines and overdue tasks</CardTitle></div>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/tasks")}>View all <ArrowRight className="ml-1 h-4 w-4" /></Button>
           </CardHeader>
-          <CardContent>
-            {revenueData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(value: number) => [`£${value.toLocaleString()}`, "Revenue"]} />
-                  <Bar dataKey="revenue" fill="hsl(199, 89%, 48%)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[240px] flex items-center justify-center text-muted-foreground text-sm">
-                No invoice data yet — revenue will appear here once invoices are created.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Client Entities</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-center">
-            {(entityData?.length ?? 0) > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <PieChart>
-                  <Pie data={entityData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" stroke="none">
-                    {(entityData || []).map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[240px] flex items-center justify-center text-muted-foreground text-sm">
-                No clients yet
-              </div>
-            )}
-          </CardContent>
-          {(entityData?.length ?? 0) > 0 && (
-            <div className="px-6 pb-4 flex flex-wrap gap-3">
-              {(entityData || []).map((e) => (
-                <div key={e.name} className="flex items-center gap-1.5 text-xs">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: e.color }} />
-                  <span className="text-muted-foreground">{e.name}</span>
+          <CardContent className="p-0">
+            {deadlines.length === 0 ? <div className="flex min-h-56 flex-col items-center justify-center p-6 text-center text-sm text-muted-foreground"><CheckCircle2 className="mb-3 h-8 w-8 text-[#91a91e]" />No upcoming deadlines. Create tasks with due dates to see them here.</div> : (
+              <>
+                <div className="divide-y divide-border/60 md:hidden">
+                  {deadlines.slice(0, 6).map((item, index) => {
+                    const status = taskStatus[item.status] ?? { label: item.status, variant: "secondary" as const };
+                    return <button type="button" key={`${item.title}-${index}`} onClick={() => navigate("/tasks")} className="flex w-full items-start gap-3 p-4 text-left active:bg-muted"><span className={cn("mt-1 h-2.5 w-2.5 shrink-0 rounded-full", item.status === "overdue" ? "bg-destructive" : "bg-[#91a91e]")} /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{item.title}</span><span className="mt-1 block text-xs text-muted-foreground">{item.client} · {new Date(item.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</span></span><Badge variant={status.variant} className="text-[10px]">{status.label}</Badge></button>;
+                  })}
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="hidden md:block">
+                  <Table><TableHeader><TableRow><TableHead>Due</TableHead><TableHead>Client</TableHead><TableHead>Task</TableHead><TableHead>Status</TableHead><TableHead>Priority</TableHead></TableRow></TableHeader><TableBody>{deadlines.map((item, index) => {
+                    const status = taskStatus[item.status] ?? { label: item.status, variant: "secondary" as const };
+                    return <TableRow key={`${item.title}-${index}`} className="cursor-pointer" onClick={() => navigate("/tasks")}><TableCell className="font-medium">{new Date(item.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</TableCell><TableCell>{item.client}</TableCell><TableCell>{item.title}</TableCell><TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell><TableCell className="capitalize text-muted-foreground">{item.priority}</TableCell></TableRow>;
+                  })}</TableBody></Table>
+                </div>
+              </>
+            )}
+          </CardContent>
         </Card>
-      </div>
 
-      {/* Deadlines table */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
-            Upcoming Deadlines & Overdue Tasks
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {deadlines.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Task</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Priority</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {deadlines.map((d, i) => {
-                  const s = statusMap[d.status] || { label: d.status, variant: "secondary" as const };
-                  return (
-                    <TableRow key={i} className="cursor-pointer hover:bg-muted/50">
-                      <TableCell className="font-medium text-sm">{new Date(d.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</TableCell>
-                      <TableCell className="text-sm">{d.client}</TableCell>
-                      <TableCell className="text-sm">{d.type}</TableCell>
-                      <TableCell>
-                        <Badge variant={s.variant} className="text-xs">{s.label}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={(priorityColors[d.priority] || "secondary") as any} className="text-xs capitalize">{d.priority}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="py-8 text-center text-muted-foreground text-sm">
-              <AlertTriangle className="w-5 h-5 mx-auto mb-2 opacity-50" />
-              No upcoming deadlines — create tasks with due dates to see them here.
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        <button type="button" onClick={() => navigate("/accounts-intelligence")} className="group workspace-panel flex min-h-72 flex-col bg-[#17221f] p-6 text-left text-white shadow-[0_16px_40px_rgba(23,34,31,0.18)] transition hover:-translate-y-0.5">
+          <div className="flex items-center justify-between"><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10"><Sparkles className="h-5 w-5 text-[#d7f560]" /></span><ArrowRight className="h-5 w-5 text-white/40 transition group-hover:translate-x-1" /></div>
+          <div className="mt-auto"><p className="text-2xl font-semibold">{control.decisions} decisions need review</p><p className="mt-3 max-w-sm text-sm leading-6 text-white/55">Invoice matches, possible duplicates, capex and year-end judgements are separated into one controlled queue.</p><div className="mt-5 flex flex-wrap gap-2"><span className="rounded-full bg-white/10 px-3 py-1 text-[11px]">{control.openMatches} evidence matches</span><span className="rounded-full bg-white/10 px-3 py-1 text-[11px]">{control.openDuplicates} duplicates</span></div></div>
+        </button>
+      </section>
 
-      {/* AI Intelligence Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <TaskSuggestionsPanel />
-        <AIIntelligencePanel />
-      </div>
+      <section className="grid gap-5 lg:grid-cols-3">
+        <Card className="workspace-panel lg:col-span-2">
+          <CardHeader><CardTitle className="flex items-center gap-2 text-base"><TrendingUp className="h-4 w-4 text-muted-foreground" /> Monthly revenue</CardTitle></CardHeader>
+          <CardContent>{revenueData.length ? <ResponsiveContainer width="100%" height={250}><BarChart data={revenueData}><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" /><XAxis dataKey="month" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} /><YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(value) => `£${(Number(value) / 1000).toFixed(0)}k`} /><Tooltip formatter={(value: number) => [`£${value.toLocaleString()}`, "Revenue"]} /><Bar dataKey="revenue" fill="#91a91e" radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer> : <div className="flex h-[250px] items-center justify-center text-sm text-muted-foreground">Revenue will appear when invoices are created.</div>}</CardContent>
+        </Card>
+        <Card className="workspace-panel">
+          <CardHeader><CardTitle className="text-base">Client entities</CardTitle></CardHeader>
+          <CardContent>{entityData.length ? <><ResponsiveContainer width="100%" height={190}><PieChart><Pie data={entityData} cx="50%" cy="50%" innerRadius={52} outerRadius={78} dataKey="value" stroke="none">{entityData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer><div className="flex flex-wrap justify-center gap-3">{entityData.map((entry) => <span key={entry.name} className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />{entry.name}</span>)}</div></> : <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">No clients yet.</div>}</CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-5 lg:grid-cols-2"><TaskSuggestionsPanel /><AIIntelligencePanel /></section>
+
+      <section className="grid gap-3 sm:grid-cols-3">
+        <Button variant="outline" className="workspace-panel h-auto justify-start p-4" onClick={() => navigate("/accounts")}><BookOpenCheck className="mr-3 h-5 w-5 text-[#667914]" /><span className="text-left"><span className="block font-semibold">Accounts production</span><span className="text-xs font-normal text-muted-foreground">Prepare, review and finalise statements</span></span></Button>
+        <Button variant="outline" className="workspace-panel h-auto justify-start p-4" onClick={() => navigate("/billing")}><Wallet className="mr-3 h-5 w-5 text-[#667914]" /><span className="text-left"><span className="block font-semibold">Billing and payments</span><span className="text-xs font-normal text-muted-foreground">Overdue invoices: {kpis?.overdue_invoices ?? 0}</span></span></Button>
+        <Button variant="outline" className="workspace-panel h-auto justify-start p-4" onClick={() => navigate("/reports")}><TrendingUp className="mr-3 h-5 w-5 text-[#667914]" /><span className="text-left"><span className="block font-semibold">Practice reports</span><span className="text-xs font-normal text-muted-foreground">Workload, billing and client insights</span></span></Button>
+      </section>
     </div>
   );
 }

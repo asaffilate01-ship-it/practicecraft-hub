@@ -22,20 +22,6 @@ const RTI_SUBMISSION_URL = Deno.env.get("HMRC_RTI_URL") || "https://test-transac
 // OAuth2 helpers (MTD VAT)
 // ═══════════════════════════════════════════════
 
-async function getClientCredentialsToken(): Promise<string> {
-  const clientId = Deno.env.get("HMRC_CLIENT_ID");
-  const clientSecret = Deno.env.get("HMRC_CLIENT_SECRET");
-  if (!clientId || !clientSecret) throw new Error("HMRC_CLIENT_ID or HMRC_CLIENT_SECRET not configured");
-
-  const res = await fetch(`${HMRC_AUTH_URL}/oauth/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ grant_type: "client_credentials", client_id: clientId, client_secret: clientSecret }),
-  });
-  if (!res.ok) throw new Error(`HMRC OAuth error ${res.status}: ${await res.text()}`);
-  return (await res.json()).access_token;
-}
-
 function buildAuthorizeUrl(redirectUri: string, state: string, scopes: string[]): string {
   const params = new URLSearchParams({
     response_type: "code",
@@ -76,6 +62,72 @@ async function refreshToken(refresh_token: string) {
   });
   if (!res.ok) throw new Error(`HMRC token refresh error ${res.status}: ${await res.text()}`);
   return await res.json();
+}
+
+function bytesToBase64(bytes: Uint8Array): string { let binary = ""; for (const byte of bytes) binary += String.fromCharCode(byte); return btoa(binary); }
+function base64ToBytes(value: string): Uint8Array { const binary = atob(value); return Uint8Array.from(binary, char => char.charCodeAt(0)); }
+async function sha256(value: string): Promise<string> { const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)); return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2,"0")).join(""); }
+
+async function tokenEncryptionKey(): Promise<CryptoKey> {
+  const secret = Deno.env.get("HMRC_TOKEN_ENCRYPTION_KEY");
+  if (!secret || secret.length < 32) throw new Error("HMRC_TOKEN_ENCRYPTION_KEY must be configured with at least 32 characters");
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  return crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["encrypt","decrypt"]);
+}
+
+async function encryptTokens(tokens: Record<string, unknown>): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await tokenEncryptionKey(), new TextEncoder().encode(JSON.stringify(tokens)));
+  return `v1:${bytesToBase64(iv)}:${bytesToBase64(new Uint8Array(encrypted))}`;
+}
+
+async function decryptTokens(ciphertext: string): Promise<Record<string, any>> {
+  if (!ciphertext.startsWith("v1:")) return JSON.parse(ciphertext);
+  const [,ivValue,encryptedValue] = ciphertext.split(":");
+  const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: base64ToBytes(ivValue) }, await tokenEncryptionKey(), base64ToBytes(encryptedValue));
+  return JSON.parse(new TextDecoder().decode(decrypted));
+}
+
+function hmrcError(data: any, fallback: string): string { return data?.message || data?.errors?.[0]?.message || data?.code || fallback; }
+function isProductionHmrc(): boolean { return HMRC_BASE_URL.includes("api.service.hmrc.gov.uk") && !HMRC_BASE_URL.includes("test-api"); }
+
+function buildFraudPreventionHeaders(req: Request, context: Record<string, any> = {}): Record<string,string> {
+  const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const forwardedPort = req.headers.get("x-forwarded-port");
+  const vendorPublicIp = Deno.env.get("HMRC_VENDOR_PUBLIC_IP");
+  const productName = Deno.env.get("HMRC_PRODUCT_NAME") || "PracticeCraft";
+  const productVersion = Deno.env.get("HMRC_PRODUCT_VERSION") || "development";
+  const headers: Record<string,string> = {
+    "Gov-Client-Connection-Method":"WEB_APP_VIA_SERVER",
+    "Gov-Client-User-IDs":`practicecraft=${encodeURIComponent(String(context.userId || "unknown"))}`,
+    "Gov-Vendor-Product-Name":encodeURIComponent(productName),
+    "Gov-Vendor-Version":`practicecraft=${encodeURIComponent(productVersion)}`,
+  };
+  if (context.deviceId) headers["Gov-Client-Device-ID"] = String(context.deviceId);
+  if (context.userAgent) headers["Gov-Client-Browser-JS-User-Agent"] = encodeURIComponent(String(context.userAgent));
+  if (context.screens) headers["Gov-Client-Screens"] = String(context.screens);
+  if (context.timezone) headers["Gov-Client-Timezone"] = String(context.timezone);
+  if (context.windowSize) headers["Gov-Client-Window-Size"] = String(context.windowSize);
+  if (forwardedFor) { headers["Gov-Client-Public-IP"] = forwardedFor; headers["Gov-Client-Public-IP-Timestamp"] = new Date().toISOString(); }
+  if (forwardedPort) headers["Gov-Client-Public-Port"] = forwardedPort;
+  if (vendorPublicIp) headers["Gov-Vendor-Public-IP"] = vendorPublicIp;
+  return headers;
+}
+
+async function loadVatAccessToken(supabase: any, tenantId: string, clientId: string) {
+  const { data: credential, error } = await supabase.from("client_credentials").select("id,ciphertext,expires_at,metadata_json").eq("tenant_id",tenantId).eq("client_id",clientId).eq("provider","hmrc_vat").eq("credential_type","oauth2").maybeSingle();
+  if (error || !credential) throw new Error("HMRC VAT is not connected for this client");
+  let tokens = await decryptTokens(credential.ciphertext);
+  const expiresAt = credential.expires_at ? new Date(credential.expires_at).getTime() : 0;
+  if (expiresAt && expiresAt <= Date.now()+60_000) {
+    if (!tokens.refresh_token) throw new Error("HMRC VAT authorisation has expired; reconnect the client");
+    const refreshed = await refreshToken(tokens.refresh_token);
+    tokens = { access_token: refreshed.access_token, refresh_token: refreshed.refresh_token || tokens.refresh_token, token_type: refreshed.token_type || tokens.token_type };
+    const nextExpiry = refreshed.expires_in ? new Date(Date.now()+refreshed.expires_in*1000).toISOString() : null;
+    await supabase.from("client_credentials").update({ ciphertext: await encryptTokens(tokens), expires_at: nextExpiry, metadata_json: { ...(credential.metadata_json||{}), refreshed_at:new Date().toISOString() } }).eq("id",credential.id);
+  }
+  if (!tokens.access_token) throw new Error("Stored HMRC VAT authorisation is invalid; reconnect the client");
+  return String(tokens.access_token);
 }
 
 // ═══════════════════════════════════════════════
@@ -413,40 +465,59 @@ Deno.serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const url = new URL(req.url);
-    const path = url.pathname.replace(/^\/hmrc\/?/, "");
     const body = req.method !== "GET" ? await req.json() : {};
+    const routePath = url.pathname.replace(/^\/hmrc\/?/, "");
+    const path = routePath || String(body?.action || "");
+
+    const authHeader = req.headers.get("Authorization");
+    const jwt = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!jwt) return new Response(JSON.stringify({ error:"Authentication required" }), { status:401, headers:{...corsHeaders,"Content-Type":"application/json"} });
+    const { data: authData, error: authError } = await supabase.auth.getUser(jwt);
+    if (authError || !authData.user) return new Response(JSON.stringify({ error:"Invalid session" }), { status:401, headers:{...corsHeaders,"Content-Type":"application/json"} });
+    const { data: callerProfile } = await supabase.from("profiles").select("tenant_id").eq("id",authData.user.id).single();
+    const callerTenantId = callerProfile?.tenant_id;
+    if (!callerTenantId) return new Response(JSON.stringify({ error:"No practice tenant is associated with this user" }), { status:403, headers:{...corsHeaders,"Content-Type":"application/json"} });
+    if (body?.tenantId && body.tenantId !== callerTenantId) return new Response(JSON.stringify({ error:"Tenant access denied" }), { status:403, headers:{...corsHeaders,"Content-Type":"application/json"} });
+    if (body?.clientId) {
+      const { data: allowedClient } = await supabase.from("clients").select("id").eq("id",body.clientId).eq("tenant_id",callerTenantId).maybeSingle();
+      if (!allowedClient) return new Response(JSON.stringify({ error:"Client access denied" }), { status:403, headers:{...corsHeaders,"Content-Type":"application/json"} });
+    }
 
     // ── OAuth2: Get authorize URL ────────────────────
     if (path === "oauth/authorize-url" && req.method === "POST") {
-      const { redirectUri, state, scopes } = body;
-      const authorizeUrl = buildAuthorizeUrl(
-        redirectUri || `${supabaseUrl}/functions/v1/hmrc/oauth/callback`,
-        state || crypto.randomUUID(),
-        scopes || ["read:vat", "write:vat"]
-      );
-      return new Response(JSON.stringify({ authorizeUrl }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // ── OAuth2: Exchange code ────────────────────────
-    if (path === "oauth/token" && req.method === "POST") {
-      const tokens = await exchangeCode(body.code, body.redirectUri);
-      return new Response(JSON.stringify(tokens), {
+      const clientId = String(body.clientId || "");
+      const requestedScopes = Array.isArray(body.scopes) ? body.scopes.map(String) : ["read:vat","write:vat"];
+      const allowedScopes = new Set(["read:vat","write:vat","read:self-assessment","write:self-assessment"]);
+      if (!clientId || requestedScopes.some((scope:string)=>!allowedScopes.has(scope))) return new Response(JSON.stringify({ error:"A client and supported HMRC scopes are required" }), { status:400, headers:{...corsHeaders,"Content-Type":"application/json"} });
+      const redirectUri = Deno.env.get("HMRC_REDIRECT_URI");
+      if (!redirectUri) return new Response(JSON.stringify({ error:"HMRC_REDIRECT_URI is not configured" }), { status:503, headers:{...corsHeaders,"Content-Type":"application/json"} });
+      const state = `${crypto.randomUUID()}-${crypto.randomUUID()}`;
+      const { error: stateError } = await supabase.from("oauth_states").insert({ state_hash:await sha256(state), tenant_id:callerTenantId, client_id:clientId, provider:"hmrc", scopes:requestedScopes, redirect_uri:redirectUri, expires_at:new Date(Date.now()+600000).toISOString(), created_by_user_id:authData.user.id });
+      if (stateError) throw new Error(`Unable to start HMRC authorisation: ${stateError.message}`);
+      const authorizeUrl = buildAuthorizeUrl(redirectUri,state,requestedScopes);
+      return new Response(JSON.stringify({ authorizeUrl, expiresIn:600 }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // ── OAuth2: Exchange code AND store in client_credentials ──
     if (path === "oauth/exchange-and-store" && req.method === "POST") {
-      const { code, redirectUri, clientId, tenantId, scopes } = body;
-      if (!code || !clientId || !tenantId) {
-        return new Response(JSON.stringify({ error: "code, clientId, and tenantId required" }), {
+      const { code, state } = body;
+      const tenantId = callerTenantId;
+      if (!code || !state) {
+        return new Response(JSON.stringify({ error: "code and state required" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      const tokens = await exchangeCode(code, redirectUri || "https://www.iqadvisory.co.uk/auth-redirect");
+      const stateHash = await sha256(String(state));
+      const { data: oauthState } = await supabase.from("oauth_states").select("id,tenant_id,client_id,scopes,redirect_uri,expires_at,consumed_at,created_by_user_id").eq("state_hash",stateHash).maybeSingle();
+      if (!oauthState || oauthState.tenant_id !== tenantId || oauthState.created_by_user_id !== authData.user.id || oauthState.consumed_at || new Date(oauthState.expires_at).getTime() <= Date.now()) return new Response(JSON.stringify({ error:"HMRC authorisation state is invalid or expired" }), { status:400, headers:{...corsHeaders,"Content-Type":"application/json"} });
+      const { data: consumed } = await supabase.from("oauth_states").update({ consumed_at:new Date().toISOString() }).eq("id",oauthState.id).is("consumed_at",null).select("id").maybeSingle();
+      if (!consumed) return new Response(JSON.stringify({ error:"HMRC authorisation state has already been used" }), { status:409, headers:{...corsHeaders,"Content-Type":"application/json"} });
+      const clientId = oauthState.client_id;
+      const scopes = oauthState.scopes;
+      const tokens = await exchangeCode(String(code),oauthState.redirect_uri);
 
       // Store tokens in client_credentials (encrypted at rest by Supabase)
       const now = new Date().toISOString();
@@ -455,7 +526,7 @@ Deno.serve(async (req: Request) => {
         : null;
 
       // Determine provider based on scopes
-      const scopeStr = scopes || tokens.scope || "";
+      const scopeStr = tokens.scope || scopes.join(" ");
       const providers: string[] = [];
       if (scopeStr.includes("vat")) providers.push("hmrc_vat");
       if (scopeStr.includes("self-assessment")) providers.push("hmrc_sa");
@@ -472,7 +543,7 @@ Deno.serve(async (req: Request) => {
               client_id: clientId,
               provider,
               credential_type: "oauth2",
-              ciphertext: JSON.stringify({
+              ciphertext: await encryptTokens({
                 access_token: tokens.access_token,
                 refresh_token: tokens.refresh_token,
                 token_type: tokens.token_type,
@@ -483,7 +554,7 @@ Deno.serve(async (req: Request) => {
                 connected_at: now,
               },
             },
-            { onConflict: "tenant_id,client_id,provider" }
+            { onConflict: "tenant_id,client_id,provider,credential_type" }
           );
 
         if (upsertErr) {
@@ -494,7 +565,7 @@ Deno.serve(async (req: Request) => {
             client_id: clientId,
             provider,
             credential_type: "oauth2",
-            ciphertext: JSON.stringify({
+            ciphertext: await encryptTokens({
               access_token: tokens.access_token,
               refresh_token: tokens.refresh_token,
               token_type: tokens.token_type,
@@ -519,64 +590,79 @@ Deno.serve(async (req: Request) => {
 
       return new Response(JSON.stringify({
         success: true,
+        clientId,
         providers,
         scope: tokens.scope || scopeStr,
         expiresAt,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // ── OAuth2: Refresh ──────────────────────────────
-    if (path === "oauth/refresh" && req.method === "POST") {
-      const tokens = await refreshToken(body.refresh_token);
-      return new Response(JSON.stringify(tokens), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (path === "vat/status" && req.method === "POST") {
+      const { count } = await supabase.from("client_credentials").select("id",{count:"exact",head:true}).eq("tenant_id",callerTenantId).eq("client_id",body.clientId).eq("provider","hmrc_vat").eq("credential_type","oauth2");
+      return new Response(JSON.stringify({ connected:(count||0)>0, mode:isProductionHmrc()?"production":"sandbox" }), { headers:{...corsHeaders,"Content-Type":"application/json"} });
     }
 
-    // ── OAuth2: Test credentials ─────────────────────
-    if (path === "oauth/test" && req.method === "POST") {
-      const token = await getClientCredentialsToken();
-      return new Response(JSON.stringify({ ok: true, token_prefix: token.substring(0, 8) + "..." }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // ── MTD VAT: Pull Obligations ────────────────────
-    if (path === "vat/obligations" && req.method === "POST") {
-      const { vrn, accessToken, from, to } = body;
-      if (!accessToken) {
-        return new Response(JSON.stringify({ error: "accessToken required (from per-client OAuth)" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    // ── MTD VAT: Pull and persist obligations ────────
+    if ((path === "vat/obligations" || path === "vat/sync-obligations") && req.method === "POST") {
+      if (isProductionHmrc() && Deno.env.get("HMRC_PRODUCTION_VALIDATED") !== "true") return new Response(JSON.stringify({ error:"HMRC production access is blocked until HMRC_PRODUCTION_VALIDATED=true after recognition testing" }), { status:503, headers:{...corsHeaders,"Content-Type":"application/json"} });
+      const { clientId, from, to, fraudContext } = body;
+      const { data: client } = await supabase.from("clients").select("id,vat_number").eq("id",clientId).eq("tenant_id",callerTenantId).maybeSingle();
+      const vrn = client?.vat_number?.replace(/\s/g,"");
+      if (!vrn) throw new Error("The client does not have a VAT registration number");
+      const accessToken = await loadVatAccessToken(supabase,callerTenantId,clientId);
       const params = new URLSearchParams();
       if (from) params.set("from", from);
       if (to) params.set("to", to);
       const hmrcRes = await fetch(`${HMRC_BASE_URL}/organisations/vat/${vrn}/obligations?${params}`, {
-        headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/vnd.hmrc.1.0+json" },
+        headers: { Authorization:`Bearer ${accessToken}`, Accept:"application/vnd.hmrc.1.0+json", ...buildFraudPreventionHeaders(req,{...(fraudContext||{}),userId:authData.user.id}) },
       });
-      return new Response(JSON.stringify({ status: hmrcRes.status, data: await hmrcRes.json() }), {
+      const data = await hmrcRes.json().catch(()=>({}));
+      if (!hmrcRes.ok) return new Response(JSON.stringify({ error:hmrcError(data,`HMRC returned ${hmrcRes.status}`), status:hmrcRes.status }), { status:502, headers:{...corsHeaders,"Content-Type":"application/json"} });
+      for (const obligation of data.obligations || []) {
+        const { data: existing } = await supabase.from("vat_returns").select("id,status").eq("tenant_id",callerTenantId).eq("client_id",clientId).eq("period_key",obligation.periodKey).maybeSingle();
+        const values = { period_start:obligation.start, period_end:obligation.end, due_date:obligation.due, hmrc_response_json:obligation, ...(obligation.status === "F" ? { status:"submitted", submitted_at:obligation.received || null } : {}) };
+        if (existing) await supabase.from("vat_returns").update(values).eq("id",existing.id);
+        else await supabase.from("vat_returns").insert({ tenant_id:callerTenantId, client_id:clientId, period_key:obligation.periodKey, ...values });
+      }
+      return new Response(JSON.stringify({ status:hmrcRes.status, obligations:data.obligations||[], mode:isProductionHmrc()?"production":"sandbox" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // ── MTD VAT: Submit Return ───────────────────────
-    if (path === "vat/submit" && req.method === "POST") {
-      const { vrn, accessToken, periodKey, returnData } = body;
-      if (!accessToken) {
-        return new Response(JSON.stringify({ error: "accessToken required" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    // ── MTD VAT: Submit a reviewed local return ──────
+    if ((path === "vat/submit" || path === "vat/submit-return") && req.method === "POST") {
+      if (isProductionHmrc() && Deno.env.get("HMRC_PRODUCTION_VALIDATED") !== "true") return new Response(JSON.stringify({ error:"HMRC production filing is blocked until HMRC_PRODUCTION_VALIDATED=true after recognition testing" }), { status:503, headers:{...corsHeaders,"Content-Type":"application/json"} });
+      const { vatReturnId, declarationAccepted, fraudContext } = body;
+      if (!vatReturnId || declarationAccepted !== true) return new Response(JSON.stringify({ error:"A VAT return and finalisation declaration are required" }), { status:400, headers:{...corsHeaders,"Content-Type":"application/json"} });
+      const { data: vatReturn } = await supabase.from("vat_returns").select("*,clients(vat_number)").eq("id",vatReturnId).eq("tenant_id",callerTenantId).maybeSingle();
+      if (!vatReturn) throw new Error("VAT return not found");
+      if (!vatReturn.client_id || !vatReturn.period_key) throw new Error("Sync HMRC obligations before filing this return");
+      if (vatReturn.status !== "ready") throw new Error("Only a reviewed return marked ready can be filed");
+      const vrn = vatReturn.clients?.vat_number?.replace(/\s/g,"");
+      if (!vrn) throw new Error("The client does not have a VAT registration number");
+      const accessToken = await loadVatAccessToken(supabase,callerTenantId,vatReturn.client_id);
+      const returnData = { box1:Number(vatReturn.box1),box2:Number(vatReturn.box2),box3:Number(vatReturn.box3),box4:Number(vatReturn.box4),box5:Number(vatReturn.box5),box6:Number(vatReturn.box6),box7:Number(vatReturn.box7),box8:Number(vatReturn.box8),box9:Number(vatReturn.box9) };
+      const idempotencyKey = `vat:${vatReturn.id}:${vatReturn.updated_at}`;
+      const { data: existingJob } = await supabase.from("submission_jobs").select("id,status,response_json,correlation_id,attempt_count").eq("tenant_id",callerTenantId).eq("idempotency_key",idempotencyKey).maybeSingle();
+      if (existingJob?.status === "accepted") return new Response(JSON.stringify({ success:true,duplicate:true,job:existingJob }), { headers:{...corsHeaders,"Content-Type":"application/json"} });
+      if (existingJob?.status === "sent" || existingJob?.status === "queued") return new Response(JSON.stringify({ error:"This VAT return already has a submission in progress",jobId:existingJob.id }), { status:409,headers:{...corsHeaders,"Content-Type":"application/json"} });
+      const attemptNo = existingJob ? Number(existingJob.attempt_count||0)+1 : 1;
+      const { data: job, error: jobError } = existingJob
+        ? await supabase.from("submission_jobs").update({status:"sent",attempt_count:attemptNo,last_error:null}).eq("id",existingJob.id).select("id,status,response_json,correlation_id,attempt_count").single()
+        : await supabase.from("submission_jobs").insert({tenant_id:callerTenantId,client_id:vatReturn.client_id,provider:"hmrc",submission_type:"VAT_RETURN",idempotency_key:idempotencyKey,status:"sent",request_json:{vat_return_id:vatReturn.id,period_key:vatReturn.period_key,return_data:returnData},attempt_count:attemptNo}).select("id,status,response_json,correlation_id,attempt_count").single();
+      if (jobError || !job) throw new Error(jobError?.message || "Unable to create submission record");
+      const startedAt = Date.now();
+      const { data: attempt } = await supabase.from("submission_attempts").insert({job_id:job.id,attempt_no:attemptNo,status:"started",request_meta_redacted:{vat_return_id:vatReturn.id,period_key:vatReturn.period_key}}).select("id").single();
       const hmrcRes = await fetch(`${HMRC_BASE_URL}/organisations/vat/${vrn}/returns`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
           Accept: "application/vnd.hmrc.1.0+json",
+          ...buildFraudPreventionHeaders(req,{...(fraudContext||{}),userId:authData.user.id}),
         },
         body: JSON.stringify({
-          periodKey,
+          periodKey: vatReturn.period_key,
           vatDueSales: returnData?.box1 ?? 0,
           vatDueAcquisitions: returnData?.box2 ?? 0,
           totalVatDue: returnData?.box3 ?? 0,
@@ -589,10 +675,20 @@ Deno.serve(async (req: Request) => {
           finalised: true,
         }),
       });
-      return new Response(JSON.stringify({ status: hmrcRes.status, data: await hmrcRes.json() }), {
+      const data = await hmrcRes.json().catch(()=>({}));
+      const accepted = hmrcRes.ok;
+      const receipt = data.formBundleNumber || data.receiptID || null;
+      await supabase.from("submission_jobs").update({status:accepted?"accepted":"rejected",response_json:data,correlation_id:receipt,last_error:accepted?null:hmrcError(data,`HMRC returned ${hmrcRes.status}`)}).eq("id",job.id);
+      if (attempt?.id) await supabase.from("submission_attempts").update({status:accepted?"succeeded":"failed",finished_at:new Date().toISOString(),duration_ms:Date.now()-startedAt,http_status:hmrcRes.status,response_meta_redacted:{receipt,code:data.code||null},provider_code:data.code||null,provider_message:accepted?"Accepted":hmrcError(data,"Rejected")}).eq("id",attempt.id);
+      await supabase.from("vat_returns").update({status:accepted?"submitted":"rejected",submitted_at:accepted?new Date().toISOString():null,hmrc_receipt:receipt,hmrc_response_json:data,submission_job_id:job.id,finalised_at:new Date().toISOString(),finalised_by_user_id:authData.user.id}).eq("id",vatReturn.id);
+      await supabase.from("audit_log").insert({tenant_id:callerTenantId,user_id:authData.user.id,action:accepted?"vat.return.accepted":"vat.return.rejected",entity_name:"vat_returns",entity_id:vatReturn.id,after_json:{submission_job_id:job.id,http_status:hmrcRes.status,receipt}});
+      return new Response(JSON.stringify({ success:accepted,status:hmrcRes.status,receipt,data,jobId:job.id }), {
+        status: accepted ? 200 : 422,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    if (path.startsWith("rti/")) return new Response(JSON.stringify({ error:"RTI filing is not available: current-year HMRC schema and recognition testing are incomplete",recognitionReady:false }), { status:501,headers:{...corsHeaders,"Content-Type":"application/json"} });
 
     // ── RTI: Build FPS XML ───────────────────────────
     if (path === "rti/fps/build" && req.method === "POST") {
@@ -729,14 +825,15 @@ Deno.serve(async (req: Request) => {
     // ═══════════════════════════════════════════════════════════
 
     if ((path === "reset-credentials" || body?.action === "reset-credentials") && req.method === "POST") {
-      const { tenantId, clientId } = body;
+      const tenantId = callerTenantId;
+      const { clientId } = body;
 
       if (tenantId) {
         const q = supabase
           .from("client_credentials")
           .delete()
           .eq("tenant_id", tenantId)
-          .eq("provider", "hmrc");
+          .in("provider", ["hmrc", "hmrc_vat", "hmrc_sa", "hmrc_paye"]);
         if (clientId) q.eq("client_id", clientId);
         await q;
       }

@@ -8,11 +8,11 @@ import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 /**
  * HMRC OAuth callback handler.
  * 
- * URL: /auth-redirect?code=...&state=clientId:tenantId:scopes
+ * URL: /auth-redirect?code=...&state=<opaque single-use value>
  * 
  * 1. Captures the authorization code from HMRC
  * 2. Calls the HMRC edge function to exchange it for tokens
- * 3. Stores the tokens encrypted in client_credentials
+ * 3. Stores application-encrypted tokens in server-only integration storage
  * 4. Redirects back to the relevant client page
  */
 export default function HmrcCallback() {
@@ -40,51 +40,26 @@ export default function HmrcCallback() {
       return;
     }
 
-    // Parse state: clientId:tenantId:scopes
-    const [parsedClientId, parsedTenantId, scopeStr] = state.split(":");
-    setClientId(parsedClientId);
+    exchangeAndStore(code, state);
+  }, [params]);
 
-    exchangeAndStore(code, parsedClientId, parsedTenantId, scopeStr);
-  }, []);
-
-  async function exchangeAndStore(code: string, clientId: string, tenantId: string, scopeStr: string) {
+  async function exchangeAndStore(code: string, state: string) {
     try {
       setMessage("Exchanging authorization code with HMRC...");
 
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
+      const { data, error } = await supabase.functions.invoke("hmrc", {
+        body: { action: "oauth/exchange-and-store", code, state },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "HMRC token exchange failed");
 
-      const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/hmrc/oauth/exchange-and-store`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify({
-            code,
-            redirectUri: "https://www.iqadvisory.co.uk/auth-redirect",
-            clientId,
-            tenantId,
-            scopes: scopeStr || "read:vat write:vat",
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || `Exchange failed with status ${res.status}`);
-      }
-
+      setClientId(data.clientId || null);
       setStatus("success");
-      setMessage("HMRC connected successfully! Tokens stored securely.");
-    } catch (err: any) {
+      setMessage("HMRC connected successfully. The authorisation is stored securely.");
+    } catch (err: unknown) {
       console.error("HMRC OAuth error:", err);
       setStatus("error");
-      setMessage(err.message || "Failed to connect to HMRC.");
+      setMessage(err instanceof Error ? err.message : "Failed to connect to HMRC.");
     }
   }
 

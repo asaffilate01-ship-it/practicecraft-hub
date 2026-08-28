@@ -7,7 +7,8 @@ import { toast } from "sonner";
 
 interface HmrcConnectButtonProps {
   clientId: string;
-  tenantId: string;
+  /** @deprecated Tenant identity is derived from the authenticated session. */
+  tenantId?: string;
   /** Space-separated HMRC scopes e.g. "read:vat write:vat" */
   scopes?: string;
   /** Label for the button */
@@ -20,7 +21,6 @@ interface HmrcConnectButtonProps {
 
 export function HmrcConnectButton({
   clientId,
-  tenantId,
   scopes = "read:vat write:vat",
   label = "Connect to HMRC",
   connected = false,
@@ -30,39 +30,21 @@ export function HmrcConnectButton({
   const [loading, setLoading] = useState(false);
 
   async function handleConnect() {
+    if (!clientId) {
+      toast.error("Select a client before connecting HMRC");
+      return;
+    }
     setLoading(true);
     try {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-
-      const state = `${clientId}:${tenantId}:${scopes.replace(/\s/g, ",")}`;
-
-      const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/hmrc/oauth/authorize-url`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify({
-            redirectUri: "https://www.iqadvisory.co.uk/auth-redirect",
-            state,
-            scopes: scopes.split(" "),
-          }),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to get HMRC authorize URL");
-
-      const { authorizeUrl } = await res.json();
-      // Redirect user to HMRC login
-      window.location.href = authorizeUrl;
-    } catch (err: any) {
+      const { data, error } = await supabase.functions.invoke("hmrc", {
+        body: { action: "oauth/authorize-url", clientId, scopes: scopes.split(" ") },
+      });
+      if (error) throw error;
+      if (!data?.authorizeUrl) throw new Error(data?.error || "Failed to get HMRC authorize URL");
+      window.location.href = data.authorizeUrl;
+    } catch (err: unknown) {
       console.error("HMRC connect error:", err);
-      toast.error(err.message || "Failed to start HMRC connection");
+      toast.error(err instanceof Error ? err.message : "Failed to start HMRC connection");
       setLoading(false);
     }
   }

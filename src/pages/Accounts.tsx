@@ -141,7 +141,7 @@ export default function AccountsPage() {
   }
 
   const PeriodTable = ({ data, showCt = true, showSa = true }: { data: any[]; showCt?: boolean; showSa?: boolean }) => (
-    <Table>
+    <Table className="min-w-[920px]">
       <TableHeader>
         <TableRow>
           <TableHead>Client</TableHead>
@@ -191,17 +191,17 @@ export default function AccountsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Accounts Production</h1>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">Accounts Production</h1>
           <p className="text-sm text-muted-foreground">IRIS/Taxfiler-style accounts prep, CT600, SA100 & SA800 — full wizard workflow</p>
         </div>
-        <Button className="gap-1.5" onClick={() => setShowNewPeriod(true)}>
+        <Button className="min-h-11 gap-1.5 sm:min-h-9" onClick={() => setShowNewPeriod(true)}>
           <Plus className="w-3.5 h-3.5" /> New Period
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <KPICard title="Open Periods" value={openPeriods} change="In progress" changeType={openPeriods ? "negative" : "positive"} icon={BookOpen} iconColor="bg-primary/10" />
         <KPICard title="Overdue" value={overduePeriods} change="Past filing deadline" changeType={overduePeriods ? "negative" : "positive"} icon={AlertTriangle} iconColor="bg-destructive/10" />
         <KPICard title="CT600 In Progress" value={ct600Pending} change="Corporation tax" changeType="neutral" icon={Calculator} iconColor="bg-[hsl(var(--warning))]/10" />
@@ -210,7 +210,7 @@ export default function AccountsPage() {
       </div>
 
       <Tabs defaultValue="all">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto rounded-xl bg-card p-1 sm:w-auto">
           <TabsTrigger value="all">All Periods ({periods.length})</TabsTrigger>
           <TabsTrigger value="ct600">Corporation Tax ({ctPeriods.length})</TabsTrigger>
           <TabsTrigger value="sa">Self Assessment ({saPeriods.length})</TabsTrigger>
@@ -233,8 +233,8 @@ export default function AccountsPage() {
               </SelectContent>
             </Select>
           </div>
-          <Card>
-            <CardContent className="pt-4">
+          <Card className="workspace-panel overflow-hidden">
+            <CardContent className="overflow-x-auto pt-4">
               {isLoading ? (
                 <div className="space-y-3 py-6">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-10 rounded bg-muted animate-pulse" />)}</div>
               ) : filtered.length === 0 ? (
@@ -250,8 +250,8 @@ export default function AccountsPage() {
         </TabsContent>
 
         <TabsContent value="ct600" className="mt-4">
-          <Card>
-            <CardContent className="pt-4">
+          <Card className="workspace-panel overflow-hidden">
+            <CardContent className="overflow-x-auto pt-4">
               {ctPeriods.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
                   <Calculator className="w-8 h-8 mx-auto mb-2 opacity-40" />
@@ -265,8 +265,8 @@ export default function AccountsPage() {
         </TabsContent>
 
         <TabsContent value="sa" className="mt-4">
-          <Card>
-            <CardContent className="pt-4">
+          <Card className="workspace-panel overflow-hidden">
+            <CardContent className="overflow-x-auto pt-4">
               {saPeriods.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
                   <Calculator className="w-8 h-8 mx-auto mb-2 opacity-40" />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { HmrcConnectButton } from "@/components/HmrcConnectButton";
+import { collectHmrcFraudContext } from "@/lib/hmrcFraudHeaders";
 
 interface Obligation {
   periodKey: string;
@@ -20,70 +22,73 @@ interface Obligation {
 interface Props {
   clientId: string;
   vrn: string;
-  tenantId: string;
 }
 
-export function HmrcObligations({ clientId, vrn, tenantId }: Props) {
+export function HmrcObligations({ clientId, vrn }: Props) {
   const [obligations, setObligations] = useState<Obligation[]>([]);
+  const queryClient = useQueryClient();
+
+  const { data: connection } = useQuery({
+    queryKey: ["hmrc-vat-status", clientId],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("hmrc", { body: { action: "vat/status", clientId } });
+      if (error) throw error;
+      return data as { connected: boolean; mode: "sandbox" | "production" };
+    },
+    enabled: !!clientId,
+  });
 
   const pullMut = useMutation({
     mutationFn: async () => {
-      // Get stored access token for this client
-      const { data: cred } = await supabase
-        .from("client_credentials")
-        .select("ciphertext")
-        .eq("client_id", clientId)
-        .eq("provider", "hmrc_vat")
-        .single();
-
-      if (!cred) throw new Error("No HMRC VAT credentials found. Connect HMRC first.");
-
-      const tokens = JSON.parse(cred.ciphertext);
       const from = new Date();
       from.setFullYear(from.getFullYear() - 1);
 
       const { data, error } = await supabase.functions.invoke("hmrc", {
         body: {
-          action: "vat/obligations",
-          vrn,
-          accessToken: tokens.access_token,
+          action: "vat/sync-obligations",
+          clientId,
           from: from.toISOString().slice(0, 10),
           to: new Date().toISOString().slice(0, 10),
+          fraudContext: collectHmrcFraudContext(),
         },
       });
 
       if (error) throw error;
-      if (data?.data?.obligations) {
-        return data.data.obligations as Obligation[];
+      if (data?.obligations) {
+        return data.obligations as Obligation[];
       }
-      throw new Error(data?.data?.message || "Failed to pull obligations");
+      throw new Error(data?.error || "Failed to pull obligations");
     },
     onSuccess: (obs) => {
       setObligations(obs);
+      queryClient.invalidateQueries({ queryKey: ["vat_returns"] });
       toast.success(`Pulled ${obs.length} VAT obligations from HMRC`);
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (error: unknown) => toast.error(error instanceof Error ? error.message : "Failed to sync HMRC obligations"),
   });
 
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <CardTitle className="text-base font-semibold">HMRC VAT Obligations</CardTitle>
+        <div><CardTitle className="text-base font-semibold">HMRC VAT Obligations</CardTitle>{connection?.mode && <p className="text-xs text-muted-foreground mt-1">{connection.mode === "production" ? "HMRC production" : "HMRC sandbox"}</p>}</div>
+        <div className="flex gap-2">
+        {clientId && !connection?.connected && <HmrcConnectButton clientId={clientId} scopes="read:vat write:vat" label="Connect HMRC" />}
         <Button
           variant="outline"
           size="sm"
           onClick={() => pullMut.mutate()}
-          disabled={pullMut.isPending}
+          disabled={!clientId || !connection?.connected || pullMut.isPending}
           className="gap-1.5"
         >
           {pullMut.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-          Pull from HMRC
+          Sync obligations
         </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {obligations.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            Click "Pull from HMRC" to fetch live VAT obligations for VRN {vrn}.
+            {!clientId ? "Select a VAT-registered client to manage its HMRC obligations." : !connection?.connected ? "Connect this client to HMRC before syncing obligations." : `Sync HMRC obligations for VRN ${vrn}.`}
           </p>
         ) : (
           <Table>
