@@ -6340,6 +6340,7 @@ export type Database = {
           tenant_id: string
           title: string | null
           updated_at: string
+          user_id: string | null
           week1_month1: boolean | null
         }
         Insert: {
@@ -6393,6 +6394,7 @@ export type Database = {
           tenant_id: string
           title?: string | null
           updated_at?: string
+          user_id?: string | null
           week1_month1?: boolean | null
         }
         Update: {
@@ -6446,6 +6448,7 @@ export type Database = {
           tenant_id?: string
           title?: string | null
           updated_at?: string
+          user_id?: string | null
           week1_month1?: boolean | null
         }
         Relationships: [
@@ -10043,6 +10046,17 @@ export type Database = {
       }
     }
     Functions: {
+      can_portal_view_pay_run: {
+        Args: { _run_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_portal_view_payslip: {
+        Args: { _payslip_id: string; _user_id: string }
+        Returns: boolean
+      }
+      get_portal_client_id: { Args: { _user_id: string }; Returns: string }
+      get_portal_role: { Args: { _user_id: string }; Returns: string }
+      get_portal_tenant_id: { Args: { _user_id: string }; Returns: string }
       get_tenant_allowed_modules: {
         Args: { p_tenant_id: string }
         Returns: string[]
