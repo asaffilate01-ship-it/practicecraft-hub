@@ -18,7 +18,7 @@ const countQuery = async (
   table: "documents" | "bank_transactions" | "evidence_matches" | "duplicate_candidates" | "year_end_checks",
   filters: Array<[string, string]>,
 ) => {
-  let query = supabase.from(table).select("id", { count: "exact", head: true });
+  let query = (supabase.from(table) as any).select("id", { count: "exact", head: true });
   for (const [column, value] of filters) query = query.eq(column, value);
   const { count, error } = await query;
   if (error) throw error;
