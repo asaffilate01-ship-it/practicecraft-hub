@@ -36,13 +36,17 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   };
 
   return (
-    <header className="h-14 border-b bg-card flex items-center justify-between px-4 md:px-6 shrink-0 sticky top-0 z-10">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border/80 bg-background/95 px-3 backdrop-blur-xl sm:px-4 md:px-7">
       <div className="flex items-center gap-3">
         {onMenuClick && (
           <Button variant="ghost" size="icon" onClick={onMenuClick} className="md:hidden">
             <Menu className="w-5 h-5" />
           </Button>
         )}
+        <div className="flex items-center gap-2 sm:hidden">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary font-serif text-base font-bold text-primary-foreground">P</span>
+          <div><div className="text-xs font-semibold leading-none">PracticeCraft</div><div className="mt-1 text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Practice & accounts</div></div>
+        </div>
         <div className="relative w-48 md:w-80 hidden sm:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Search clients, tasks..." className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1" />
@@ -50,15 +54,15 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       </div>
 
       <div className="flex items-center gap-2 md:gap-3">
-        <ClientSelector />
-        <Button variant="ghost" size="icon" className="relative">
+        <div className="hidden sm:block"><ClientSelector /></div>
+        <Button variant="ghost" size="icon" className="relative rounded-xl">
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="gap-2 pl-2 pr-3">
+            <Button variant="ghost" className="gap-2 rounded-xl pl-2 pr-2 sm:pr-3">
               <Avatar className="w-7 h-7">
                 <AvatarFallback className="text-xs bg-primary text-primary-foreground">{initials}</AvatarFallback>
               </Avatar>

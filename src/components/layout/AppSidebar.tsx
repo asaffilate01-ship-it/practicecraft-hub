@@ -1,10 +1,11 @@
 import {
   LayoutDashboard, Users, CheckSquare, BookOpen, Receipt, Wallet,
   FileText, Building2, ShieldCheck, CreditCard, FolderOpen, BarChart3,
-  Settings, ChevronLeft, CloudCog, FilePlus2, Send, Briefcase,
+  Settings, ChevronLeft, FilePlus2, Send, Briefcase,
   Landmark, Zap, UserPlus, ClipboardList, FileQuestion, PenTool,
   Eye, Crown, ChevronDown, HardHat, TrendingUp, Code2, PiggyBank,
   Globe, CalendarDays, Upload, FileSpreadsheet,
+  ScanSearch,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
@@ -59,6 +60,7 @@ const navGroups: NavGroup[] = [
       { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
       { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
       { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "Accounts Intelligence", url: "/accounts-intelligence", icon: ScanSearch, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Self Assessment", url: "/self-assessment", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Corporation Tax", url: "/corporation-tax", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "CIS", url: "/cis", icon: HardHat, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
@@ -72,6 +74,7 @@ const navGroups: NavGroup[] = [
   {
     label: "Risk & Submissions",
     items: [
+      { title: "Regulatory Readiness", url: "/regulatory-readiness", icon: ShieldCheck, permission: ["submissions", "view"], featureKey: "submissions", moduleKey: "submissions" },
       { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
       { title: "AML Monitoring", url: "/aml/monitoring", icon: Eye, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
       { title: "Submissions", url: "/submissions", icon: Send, permission: ["submissions", "view"], featureKey: "submissions", moduleKey: "submissions" },
@@ -158,15 +161,16 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
         {branding?.logoUrl ? (
           <img src={branding.logoUrl} alt={branding.practiceName} className="h-8 object-contain shrink-0" />
         ) : (
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
-            <CloudCog className="w-4 h-4 text-sidebar-primary-foreground" />
+          <div className="w-9 h-9 rounded-xl bg-sidebar-primary flex items-center justify-center shrink-0 font-bold text-lg text-sidebar-primary-foreground" style={{ fontFamily: "Georgia, serif" }}>
+            P
           </div>
         )}
         {!collapsed && !branding?.logoUrl && (
           <div className="overflow-hidden">
             <h1 className="text-sm font-bold text-sidebar-accent-foreground tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-              {branding?.practiceName ?? "IQ Practice Cloud"}
+              {branding?.practiceName ?? "PracticeCraft"}
             </h1>
+            <p className="mt-0.5 text-[9px] uppercase tracking-[0.18em] text-sidebar-foreground/45">Practice & accounts</p>
           </div>
         )}
         {!onNavigate && (
@@ -212,7 +216,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                   end={item.url === "/"}
                   onClick={handleNavClick}
                   className="flex items-center justify-center p-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-                  activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                  activeClassName="bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm"
                   title={item.title}
                 >
                   <item.icon className="w-4 h-4 shrink-0" />
@@ -238,7 +242,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
                         end={item.url === "/"}
                         onClick={handleNavClick}
                         className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        activeClassName="bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm"
                       >
                         <item.icon className="w-4 h-4 shrink-0" />
                         <span>{item.title}</span>
@@ -271,7 +275,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
               "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors",
               collapsed && "justify-center"
             )}
-            activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+            activeClassName="bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm"
           >
             <item.icon className="w-4 h-4 shrink-0" />
             {!collapsed && <span>{item.title}</span>}

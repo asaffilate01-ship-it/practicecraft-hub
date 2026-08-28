@@ -37,6 +37,22 @@ serve(async (req) => {
       .single();
     if (!profile) throw new Error("Profile not found");
 
+    const arrayBuffer = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest("SHA-256", arrayBuffer);
+    const sha256 = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    const { data: duplicate } = await supabase
+      .from("document_fingerprints")
+      .select("document_id")
+      .eq("tenant_id", profile.tenant_id)
+      .eq("client_id", clientId)
+      .eq("sha256", sha256)
+      .maybeSingle();
+    if (duplicate) {
+      return new Response(JSON.stringify({ error: "This receipt is an exact duplicate of a document already uploaded for this client." }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Upload file to storage
     const filePath = `${profile.tenant_id}/${clientId}/receipts/${Date.now()}_${file.name}`;
     const { error: uploadErr } = await supabase.storage
@@ -62,9 +78,26 @@ serve(async (req) => {
       .single();
     if (docErr) throw docErr;
 
+    const { error: fingerprintErr } = await supabase.from("document_fingerprints").insert({
+      tenant_id: profile.tenant_id,
+      client_id: clientId,
+      document_id: doc.id,
+      sha256,
+      size_bytes: file.size,
+    });
+    if (fingerprintErr) {
+      await supabase.from("documents").delete().eq("id", doc.id);
+      await supabase.storage.from("client-documents").remove([filePath]);
+      throw fingerprintErr;
+    }
+
     // Convert file to base64 for AI vision
-    const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = "";
+    for (let offset = 0; offset < bytes.length; offset += 32768) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + 32768));
+    }
+    const base64 = btoa(binary);
     const mediaType = file.type || "image/jpeg";
 
     // Get chart of accounts for mapping
@@ -117,6 +150,7 @@ serve(async (req) => {
               type: "object",
               properties: {
                 supplier_name: { type: "string" },
+                invoice_number: { type: "string" },
                 receipt_date: { type: "string", description: "ISO date YYYY-MM-DD" },
                 currency: { type: "string", description: "e.g. GBP" },
                 subtotal_pence: { type: "number" },
@@ -173,8 +207,38 @@ serve(async (req) => {
     // Find suggested account
     const suggestedAccount = (accounts || []).find(a => a.code === extraction.suggested_account_code);
 
+    const confidence = extraction.confidence === "high" ? 95 : extraction.confidence === "medium" ? 75 : 45;
+    const totalGrossPence = Math.round(Number(extraction.total_pence) || 0);
+    const totalVatPence = Math.round(Number(extraction.vat_pence) || 0);
+    const totalNetPence = Math.round(Number(extraction.subtotal_pence) || (totalGrossPence - totalVatPence));
+    const { data: savedExtraction, error: extractionErr } = await supabase
+      .from("receipt_extractions")
+      .upsert({
+        tenant_id: profile.tenant_id,
+        client_id: clientId,
+        document_id: doc.id,
+        supplier_name: extraction.supplier_name || null,
+        invoice_number: extraction.invoice_number || null,
+        receipt_date: extraction.receipt_date || null,
+        currency: extraction.currency || "GBP",
+        total_gross_pence: totalGrossPence,
+        total_vat_pence: totalVatPence,
+        total_net_pence: totalNetPence,
+        confidence,
+        raw_json: extraction,
+      }, { onConflict: "tenant_id,document_id" })
+      .select("id")
+      .single();
+    if (extractionErr) throw extractionErr;
+
+    await supabase.from("documents").update({
+      status: "processed",
+      ocr_text: JSON.stringify(extraction),
+    }).eq("id", doc.id);
+
     return new Response(JSON.stringify({
       document_id: doc.id,
+      extraction_id: savedExtraction.id,
       extraction,
       suggested_account: suggestedAccount || null,
     }), {

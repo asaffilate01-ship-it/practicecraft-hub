@@ -27,6 +27,7 @@ export default function FilingHistory() {
   const statusBadge = (s: string) => {
     const map: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
       accepted: { label: "Accepted", variant: "default" },
+      test_accepted: { label: "Test accepted", variant: "secondary" },
       rejected: { label: "Rejected", variant: "destructive" },
       pending: { label: "Pending", variant: "secondary" },
       draft: { label: "Draft", variant: "outline" },
@@ -57,6 +58,7 @@ export default function FilingHistory() {
                   <TableHead>Client</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Description</TableHead>
+                  <TableHead>Environment</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Submitted</TableHead>
                   <TableHead>CH Ref</TableHead>
@@ -68,7 +70,8 @@ export default function FilingHistory() {
                     <TableCell className="font-medium">{f.clients?.legal_name || "—"}</TableCell>
                     <TableCell>{f.filing_type}</TableCell>
                     <TableCell className="max-w-[200px] truncate">{f.filing_description || "—"}</TableCell>
-                    <TableCell>{statusBadge(f.status)}</TableCell>
+                    <TableCell><Badge variant="outline" className="capitalize">{f.environment || "test"}</Badge></TableCell>
+                    <TableCell>{statusBadge(f.status === "accepted" && f.environment !== "production" ? "test_accepted" : f.status)}</TableCell>
                     <TableCell>{f.submitted_at ? new Date(f.submitted_at).toLocaleDateString("en-GB") : "—"}</TableCell>
                     <TableCell className="font-mono text-xs">{f.ch_transaction_id || f.ch_barcode || "—"}</TableCell>
                   </TableRow>

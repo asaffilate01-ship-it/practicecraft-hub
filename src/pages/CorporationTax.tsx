@@ -106,11 +106,13 @@ export default function CorporationTax() {
         </Button>
       </div>
 
+      <Card className="border-warning/30 bg-warning/5"><CardContent className="flex items-start gap-2 pt-4 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><p>Preparation only: PracticeCraft does not yet generate or file a valid CT600 with accounts and computation iXBRL. Any existing “filed” status is a legacy workflow record and must be checked against an HMRC receipt.</p></CardContent></Card>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Total Periods" value={periods.length} change="All CT600 periods" changeType="neutral" icon={FileText} iconColor="bg-muted" />
         <KPICard title="In Progress" value={inProgress} change="Being prepared" changeType={inProgress > 0 ? "negative" : "positive"} icon={Calculator} iconColor="bg-warning/10" />
         <KPICard title="Awaiting Filing" value={awaitingFiling} change="Approved, ready to submit" changeType="neutral" icon={Send} iconColor="bg-[hsl(var(--info))]/10" />
-        <KPICard title="Filed" value={filed} change="Submitted to HMRC" changeType="positive" icon={CheckCircle2} iconColor="bg-[hsl(var(--success))]/10" />
+        <KPICard title="Legacy filed status" value={filed} change="Verify against HMRC receipt" changeType="neutral" icon={CheckCircle2} iconColor="bg-[hsl(var(--success))]/10" />
       </div>
 
       <Tabs defaultValue="active">

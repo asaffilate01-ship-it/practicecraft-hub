@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Send, FileText } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -53,7 +53,7 @@ export default function VatReturnDetail() {
           { label: "Box 8 – Total EC supplies", value: vatReturn?.box8 },
           { label: "Box 9 – Total EC acquisitions", value: vatReturn?.box9 },
         ].map((box) => (
-          <Card key={box.label}><CardContent className="pt-4"><p className="text-xs text-muted-foreground">{box.label}</p><p className="text-lg font-semibold">£{((box.value || 0) / 100).toFixed(2)}</p></CardContent></Card>
+          <Card key={box.label}><CardContent className="pt-4"><p className="text-xs text-muted-foreground">{box.label}</p><p className="text-lg font-semibold">£{Number(box.value || 0).toFixed(2)}</p></CardContent></Card>
         ))}
       </div>
 
@@ -67,7 +67,7 @@ export default function VatReturnDetail() {
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate("/vat")}><ArrowLeft className="w-4 h-4 mr-2" /> Back to VAT</Button>
-        {vatReturn?.status !== "submitted" && <Button><Send className="w-4 h-4 mr-2" /> Submit to HMRC</Button>}
+        {vatReturn?.status !== "submitted" && <Button onClick={() => navigate("/vat")}>Review and file in VAT workspace</Button>}
       </div>
     </div>
   );

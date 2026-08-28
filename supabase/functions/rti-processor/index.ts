@@ -159,105 +159,31 @@ serve(async (req) => {
       .single();
     if (jobErr || !job) throw new Error("Submission job not found");
 
+    const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id",userData.user.id).single();
+    if (!profile?.tenant_id || profile.tenant_id !== job.tenant_id) return new Response(JSON.stringify({error:"Submission job access denied"}),{status:403,headers:jsonHeaders});
+
     if (job.status !== "queued") {
       return new Response(JSON.stringify({ error: "Job is not in queued status" }), { status: 400, headers: jsonHeaders });
     }
 
-    // Mark as processing
-    await supabase.from("submission_jobs").update({ status: "processing" }).eq("id", job_id);
-
-    const draft = job.request_json as any;
-    const submissionType = job.submission_type;
-
-    // Get employer details
-    const { data: employer } = await supabase
-      .from("payroll_employers")
-      .select("*")
-      .eq("id", draft.employerId)
-      .single();
-    if (!employer) throw new Error("Employer not found");
-
-    // Get HMRC credentials from client_credentials
-    const { data: creds } = await supabase
-      .from("client_credentials")
-      .select("ciphertext, credential_type")
-      .eq("client_id", job.client_id)
-      .eq("provider", "hmrc")
-      .limit(2);
-
-    const gatewayId = creds?.find((c: any) => c.credential_type === "gateway_id")?.ciphertext || "";
-    const gatewayPassword = creds?.find((c: any) => c.credential_type === "gateway_password")?.ciphertext || "";
-
-    // Build XML
-    let xml: string;
-    if (submissionType === "FPS") {
-      xml = buildFpsXml(draft, employer, { gatewayId, gatewayPassword });
-    } else if (submissionType === "EPS") {
-      xml = buildEpsXml(draft, employer, { gatewayId, gatewayPassword });
-    } else {
-      throw new Error(`Unsupported submission type: ${submissionType}`);
-    }
-
-    // Record attempt
     const attemptNo = (job.attempt_count || 0) + 1;
+    const reason = "RTI live filing is blocked: the current-year HMRC schema and recognition test pack have not been validated";
     await supabase.from("submission_attempts").insert({
       job_id,
       attempt_no: attemptNo,
-      status: "started",
-      request_meta_redacted: {
-        submission_type: submissionType,
-        employer: employer.employer_name,
-        paye_ref: employer.paye_reference,
-        period: draft.period,
-        employee_count: draft.lines?.length || 0,
-      },
+      status: "failed",
+      finished_at: new Date().toISOString(),
+      request_meta_redacted: { submission_type:job.submission_type },
+      response_meta_redacted: { mode:"blocked",recognition_ready:false },
+      error_class:"regulatory_readiness",
+      error_message:reason,
     });
-
-    // Submit to HMRC (via hmrc edge function)
-    const hmrcClientId = Deno.env.get("HMRC_CLIENT_ID");
-    const hmrcClientSecret = Deno.env.get("HMRC_CLIENT_SECRET");
-
-    if (!hmrcClientId || !hmrcClientSecret) {
-      // HMRC not configured - simulate acceptance for dev
-      await supabase.from("submission_jobs").update({
-        status: "accepted",
-        submitted_at: new Date().toISOString(),
-        response_json: { mode: "sandbox", message: "HMRC credentials not configured - simulated acceptance", xml_length: xml.length },
-        external_reference: `SIM-${submissionType}-${Date.now()}`,
-      }).eq("id", job_id);
-
-      await supabase.from("submission_attempts").update({
-        status: "accepted",
-        response_meta_redacted: { mode: "sandbox", simulated: true },
-        completed_at: new Date().toISOString(),
-      }).eq("job_id", job_id).eq("attempt_no", attemptNo);
-
-      return new Response(JSON.stringify({
-        status: "accepted",
-        mode: "sandbox",
-        message: "Simulated acceptance - configure HMRC credentials for live submission",
-        xml_preview: xml.slice(0, 500) + "...",
-      }), { headers: jsonHeaders });
-    }
-
-    // Real HMRC submission would go here via the GOV.UK Test/Live API
-    // For now, mark as submitted and await polling
     await supabase.from("submission_jobs").update({
-      status: "submitted",
-      submitted_at: new Date().toISOString(),
-      response_json: { xml_generated: true, xml_length: xml.length },
+      status:"rejected",attempt_count:attemptNo,last_error:reason,response_json:{mode:"blocked",recognition_ready:false},
     }).eq("id", job_id);
-
-    await supabase.from("submission_attempts").update({
-      status: "submitted",
-      completed_at: new Date().toISOString(),
-    }).eq("job_id", job_id).eq("attempt_no", attemptNo);
-
     return new Response(JSON.stringify({
-      status: "submitted",
-      message: `${submissionType} submitted to HMRC`,
-      xml_preview: xml.slice(0, 500) + "...",
-    }), { headers: jsonHeaders });
+      status:"rejected",mode:"blocked",message:reason,
+    }), { status:422,headers:jsonHeaders });
 
   } catch (e) {
     console.error("rti-processor error:", e);

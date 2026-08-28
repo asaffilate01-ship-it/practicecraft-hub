@@ -8,31 +8,31 @@
   :root {
     --brand-primary: #111111;
     --brand-accent: #111111;
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --background: 80 13% 96%;
+    --foreground: 164 19% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 164 19% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 164 19% 11%;
 
-    --primary: 199 89% 48%;
+    --primary: 164 19% 11%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 95%;
-    --secondary-foreground: 215 25% 27%;
+    --secondary: 80 11% 93%;
+    --secondary-foreground: 164 15% 20%;
 
-    --muted: 210 18% 95%;
-    --muted-foreground: 215 14% 47%;
+    --muted: 150 10% 95%;
+    --muted-foreground: 150 6% 45%;
 
-    --accent: 199 89% 95%;
-    --accent-foreground: 199 89% 32%;
+    --accent: 73 47% 92%;
+    --accent-foreground: 70 70% 28%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;
+    --success: 70 70% 35%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
@@ -41,20 +41,20 @@
     --info: 217 91% 60%;
     --info-foreground: 0 0% 100%;
 
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 199 89% 48%;
+    --border: 140 9% 89%;
+    --input: 140 9% 86%;
+    --ring: 70 70% 39%;
 
-    --radius: 0.625rem;
+    --radius: 0.9rem;
 
-    --sidebar-background: 215 28% 12%;
-    --sidebar-foreground: 210 20% 82%;
-    --sidebar-primary: 199 89% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 18%;
-    --sidebar-accent-foreground: 210 20% 92%;
-    --sidebar-border: 215 20% 20%;
-    --sidebar-ring: 199 89% 48%;
+    --sidebar-background: 164 19% 11%;
+    --sidebar-foreground: 150 10% 78%;
+    --sidebar-primary: 72 88% 67%;
+    --sidebar-primary-foreground: 164 19% 11%;
+    --sidebar-accent: 160 19% 18%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 100% / 0.1;
+    --sidebar-ring: 72 88% 67%;
 
     --font-heading: 'Plus Jakarta Sans', sans-serif;
     --font-body: 'Inter', sans-serif;
@@ -116,8 +116,40 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    min-width: 320px;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+  }
+}
+
+@layer components {
+  .workspace-panel {
+    @apply border border-border/90 bg-card shadow-[0_12px_32px_rgba(23,34,31,0.045)];
+    border-radius: 1.25rem;
+  }
+
+  .workspace-eyebrow {
+    @apply text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground;
+  }
+
+  .mobile-safe-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 640px) {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  [role="button"],
+  [role="tab"] {
+    touch-action: manipulation;
+  }
+
+  .workspace-panel {
+    border-radius: 1rem;
   }
 }

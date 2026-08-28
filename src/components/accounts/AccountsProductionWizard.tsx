@@ -15,6 +15,7 @@ import { DisclosureChecklistStep } from "./DisclosureChecklistStep";
 import { FixedAssetScheduleStep, defaultFixedAssetScheduleData, type FixedAssetScheduleData } from "./FixedAssetScheduleStep";
 import { NotesToAccountsStep, defaultNotesData, type NotesData } from "./NotesToAccountsStep";
 import { DirectorsReportStep, defaultDirectorsReportData, type DirectorsReportData } from "./DirectorsReportStep";
+import { EvidenceControlStep } from "./EvidenceControlStep";
 
 type Props = {
   period: any;
@@ -43,6 +44,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
 
   // Build steps dynamically based on entity type
   const STEPS = [
+    { key: "evidence", label: "Evidence" },
     { key: "tb", label: "Trial Balance" },
     { key: "adj", label: "Adjustments" },
     { key: "fixed_assets", label: "Fixed Assets" },
@@ -265,6 +267,14 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
       </Card>
 
       {/* Step content */}
+      {currentStep.key === "evidence" && (
+        <EvidenceControlStep
+          clientId={period.client_id}
+          periodId={period.id}
+          periodStart={period.period_start}
+          periodEnd={period.period_end}
+        />
+      )}
       {currentStep.key === "tb" && (
         <TrialBalanceStep entries={tbEntries} onChange={setTbEntries} entityType={entityType} clientId={period.client_id} periodId={period.id} showComparatives />
       )}
@@ -325,7 +335,11 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         </Button>
         <span className="text-xs text-muted-foreground">Step {step + 1} of {STEPS.length}</span>
         {step < STEPS.length - 1 ? (
-          <Button onClick={() => { if (step <= 1) saveTB(); if (step >= 5) saveTaxComp(); setStep(step + 1); }}>
+          <Button onClick={() => {
+            if (["tb", "adj"].includes(currentStep.key)) saveTB();
+            if (["tax_comp", "tax_form", "checklist"].includes(currentStep.key)) saveTaxComp();
+            setStep(step + 1);
+          }}>
             Next <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         ) : (

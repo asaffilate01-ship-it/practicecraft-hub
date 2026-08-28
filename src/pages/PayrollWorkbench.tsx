@@ -22,7 +22,6 @@ import {
   Calculator, Palmtree, Car,
 } from "lucide-react";
 import { toast } from "sonner";
-import { HmrcConnectButton } from "@/components/HmrcConnectButton";
 import { AbsencesTab } from "@/components/payroll/AbsencesTab";
 import { BenefitsTab } from "@/components/payroll/BenefitsTab";
 import { FormsTab } from "@/components/payroll/FormsTab";
@@ -498,9 +497,7 @@ export default function PayrollWorkbench() {
           </p>
         </div>
         <div className="flex gap-2">
-          {profile?.tenant_id && (
-            <HmrcConnectButton clientId="" tenantId={profile.tenant_id} scopes="read:employment-paye write:employment-paye" label="Connect HMRC (PAYE)" />
-          )}
+          <Badge variant="outline">RTI test mode</Badge>
           <Button variant="outline" className="gap-1.5" disabled={!selectedClientId} onClick={() => { setNewEmployerClientId(selectedClientId || ""); setShowNewEmployer(true); }}>
             <Users className="w-3.5 h-3.5" /> Add Employer
           </Button>
@@ -518,7 +515,7 @@ export default function PayrollWorkbench() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Draft Runs" value={draftRuns} change="Awaiting finalisation" changeType={draftRuns ? "negative" : "positive"} icon={FileText} iconColor="bg-warning/10" />
         <KPICard title="Finalised" value={finalisedRuns} change="Ready for FPS" changeType="neutral" icon={CheckCircle2} iconColor="bg-[hsl(var(--success))]/10" />
-        <KPICard title="Submitted" value={submittedRuns} change="FPS sent to HMRC" changeType="positive" icon={Send} iconColor="bg-[hsl(var(--info))]/10" />
+        <KPICard title="Recorded as submitted" value={submittedRuns} change="Verify receipt in Submissions" changeType="neutral" icon={Send} iconColor="bg-[hsl(var(--info))]/10" />
         <KPICard title="Total Net Pay" value={fmt(totalNet)} change="All runs" changeType="neutral" icon={Banknote} iconColor="bg-primary/10" />
       </div>
 
