@@ -8,50 +8,40 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress";
 import { Brain, AlertTriangle, Users, TrendingUp, Loader2, RefreshCw } from "lucide-react";
 
-function useIntelligenceQuery(action: string) {
-  return useQuery({
-    queryKey: ["ai-intelligence", action],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("ai-intelligence", {
-        body: { action },
-      });
-      if (error) throw error;
-      return data;
-    },
-    staleTime: 5 * 60_000,
-    enabled: false, // manual trigger
-  });
-}
+type ChurnRisk = { clientId: string; clientName: string; riskLevel: "low" | "medium" | "high"; riskScore: number; signals: string[] };
+type StaffUtilisation = { userId: string; name: string; totalHours: number; billableHours: number; utilisation: number; capacity: number };
+type RevenueClient = { clientId: string; clientName: string; totalRevenue: number };
+type RevenueForecast = { month: string; projected: number };
 
 export function AIIntelligencePanel() {
   const [activeTab, setActiveTab] = useState<"churn" | "staff" | "revenue">("churn");
 
-  const churnQ = useQuery({
+  const churnQ = useQuery<{ risks: ChurnRisk[] }>({
     queryKey: ["ai-intelligence", "churn_risk"],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "churn_risk" } });
       if (error) throw error;
-      return data;
+      return data as { risks: ChurnRisk[] };
     },
     staleTime: 5 * 60_000,
   });
 
-  const staffQ = useQuery({
+  const staffQ = useQuery<{ utilisation: StaffUtilisation[] }>({
     queryKey: ["ai-intelligence", "staff_utilisation"],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "staff_utilisation" } });
       if (error) throw error;
-      return data;
+      return data as { utilisation: StaffUtilisation[] };
     },
     staleTime: 5 * 60_000,
   });
 
-  const revenueQ = useQuery({
+  const revenueQ = useQuery<{ topClients: RevenueClient[]; forecast: RevenueForecast[] }>({
     queryKey: ["ai-intelligence", "revenue_insights"],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "revenue_insights" } });
       if (error) throw error;
-      return data;
+      return data as { topClients: RevenueClient[]; forecast: RevenueForecast[] };
     },
     staleTime: 5 * 60_000,
   });
@@ -97,6 +87,10 @@ export function AIIntelligencePanel() {
           ))}
         </div>
 
+        <p className="text-xs text-muted-foreground">
+          Decision support only. Review the underlying client, invoice and time records before acting.
+        </p>
+
         {/* Churn Risk */}
         {activeTab === "churn" && (
           churnQ.isLoading ? (
@@ -114,7 +108,7 @@ export function AIIntelligencePanel() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(churnQ.data?.risks || []).map((r: any) => (
+                {(churnQ.data?.risks || []).map((r) => (
                   <TableRow key={r.clientId}>
                     <TableCell className="font-medium text-sm">{r.clientName}</TableCell>
                     <TableCell>
@@ -154,7 +148,7 @@ export function AIIntelligencePanel() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(staffQ.data?.utilisation || []).map((s: any) => (
+                {(staffQ.data?.utilisation || []).map((s) => (
                   <TableRow key={s.userId}>
                     <TableCell className="font-medium text-sm">{s.name}</TableCell>
                     <TableCell className="text-right font-mono text-sm">{s.totalHours}</TableCell>
@@ -187,7 +181,7 @@ export function AIIntelligencePanel() {
                 <div>
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">3-Month Forecast</h4>
                   <div className="grid grid-cols-3 gap-3">
-                    {(revenueQ.data?.forecast || []).map((f: any) => (
+                    {(revenueQ.data?.forecast || []).map((f) => (
                       <Card key={f.month} className="p-3">
                         <p className="text-xs text-muted-foreground">{f.month}</p>
                         <p className="text-lg font-semibold">£{Number(f.projected).toLocaleString()}</p>
@@ -207,7 +201,7 @@ export function AIIntelligencePanel() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(revenueQ.data?.topClients || []).slice(0, 5).map((c: any) => (
+                      {(revenueQ.data?.topClients || []).slice(0, 5).map((c) => (
                         <TableRow key={c.clientId}>
                           <TableCell className="font-medium text-sm">{c.clientName}</TableCell>
                           <TableCell className="text-right font-mono text-sm">£{Number(c.totalRevenue).toLocaleString()}</TableCell>

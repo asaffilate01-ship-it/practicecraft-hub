@@ -40,18 +40,26 @@ After deployment, run the four-account test matrix and retain screenshots plus q
 | Charity Commission return | Prepared return, external reference and evidence fields | Manual online-service submission checklist and evidence capture; do not imply the public register API files returns |
 | Partnerships | Profile, partners, allocations and SA800 workspace | Current 2026 SA800 pack, partner statements, validation/test service and amendment flow |
 | LLP accounts/returns | LLP profile and accounts review controls | LLP SORP/FRS treatment, members' report, current iXBRL and Companies House test acceptance |
-| AI import/automation | OCR/intelligence endpoints and human-review workflow | Measured extraction accuracy, prompt/model versioning, PII controls, no-autopost thresholds and regression corpus |
+| AI import/automation | Tenant-bound OCR/categorisation/intelligence endpoints, stable-model configuration, validated outputs, metadata-only operation audit and human-review workflow | Deploy the AI safety migration/functions; complete DPIA/provider terms, measured extraction accuracy, labelled regression corpus, prompt-injection/red-team tests, retention controls and monitored quality thresholds |
 
 ## Deployment gate
 
-1. Apply both 28 August 2026 migrations to a staging Supabase branch and refresh generated TypeScript database types.
-2. Deploy the updated `portal` Edge Function and verify every configured function with authenticated positive and negative tests.
+1. Apply all 28 August 2026 migrations, including `20260828160000_ai_operation_safety.sql`, to a staging Supabase branch and refresh generated TypeScript database types.
+2. Deploy the updated `portal`, `ai-categorise`, `receipt-ocr` and `ai-intelligence` Edge Functions and verify each with authenticated positive, negative and cross-tenant tests.
 3. Re-run all four dashboards on desktop and mobile, including cross-client denial tests and persistence after sign-out/sign-in.
 4. Delete or disable demo identities for production; keep credentials outside the frontend bundle and repository.
 5. Configure a UK production environment with backups, restore test, retention/deletion policy, audit export, alerting, incident response and support ownership.
 6. Complete DPIA, privacy/cookie terms, processor agreements, ICO/PECR assessment, penetration test and vulnerability/dependency process.
 7. Complete each regulator's sandbox/test/recognition or presenter journey before enabling its production switch.
 8. Pilot with synthetic data, then internal practice data, then a tightly limited client beta with filing-by-filing human approval.
+
+## AI deployment configuration
+
+- Set `AI_API_KEY` (or the legacy `LOVABLE_API_KEY`) only as an Edge Function secret.
+- Set `AI_GATEWAY_URL` and restrict `AI_GATEWAY_ALLOWED_HOSTS` to the contracted HTTPS provider host.
+- Set stable `AI_TEXT_MODEL` and `AI_VISION_MODEL` identifiers; the runtime rejects model names containing `preview`.
+- Set `ALLOWED_ORIGINS` to the exact production and staging application origins.
+- Keep categorisation, OCR and anomaly results as suggestions requiring a staff decision; these functions do not post journals or submit filings.
 
 ## Evidence required for a go decision
 

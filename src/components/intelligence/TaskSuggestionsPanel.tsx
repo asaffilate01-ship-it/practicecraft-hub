@@ -7,24 +7,40 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, RefreshCw, Plus, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
 
+type TaskSuggestion = {
+  title: string;
+  description?: string;
+  priority: "low" | "medium" | "high" | "urgent";
+  client_id?: string | null;
+  client_name?: string | null;
+  service?: string | null;
+  suggested_due_date?: string | null;
+  reason: string;
+};
+
+type TaskSuggestionsResponse = {
+  suggestions: TaskSuggestion[];
+  human_review_required?: boolean;
+};
+
 export function TaskSuggestionsPanel() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery<TaskSuggestionsResponse>({
     queryKey: ["ai-task-suggestions"],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", {
         body: { action: "suggest_tasks" },
       });
       if (error) throw error;
-      return data;
+      return data as TaskSuggestionsResponse;
     },
     staleTime: 10 * 60_000,
   });
 
   const createTask = useMutation({
-    mutationFn: async (suggestion: any) => {
+    mutationFn: async (suggestion: TaskSuggestion) => {
       const { data: profile } = await supabase
         .from("profiles")
         .select("tenant_id")
@@ -38,7 +54,7 @@ export function TaskSuggestionsPanel() {
         description: suggestion.description || suggestion.reason,
         priority: suggestion.priority || "medium",
         status: "todo",
-        service: suggestion.service || null,
+        client_id: suggestion.client_id || null,
         due_date: suggestion.suggested_due_date || null,
         assigned_to_user_id: user!.id,
       });
@@ -48,7 +64,7 @@ export function TaskSuggestionsPanel() {
       toast.success("Task created from suggestion");
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const suggestions = data?.suggestions || [];
@@ -75,6 +91,7 @@ export function TaskSuggestionsPanel() {
         </div>
       </CardHeader>
       <CardContent>
+        <p className="mb-3 text-xs text-muted-foreground">Suggestions require staff review and are not created until you approve them.</p>
         {isLoading ? (
           <div className="flex flex-col items-center py-8 gap-2">
             <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -84,7 +101,7 @@ export function TaskSuggestionsPanel() {
           <p className="text-sm text-muted-foreground py-4 text-center">No suggestions right now — you're on top of things!</p>
         ) : (
           <div className="space-y-2">
-            {suggestions.map((s: any, i: number) => (
+            {suggestions.map((s, i) => (
               <div key={i} className="border rounded-lg p-3 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">

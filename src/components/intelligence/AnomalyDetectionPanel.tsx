@@ -9,18 +9,32 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertTriangle, Search, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
+type Anomaly = {
+  transaction_id: string;
+  description: string;
+  anomaly_type: string;
+  severity: "low" | "medium" | "high";
+  explanation: string;
+};
+
+type AnomalyResponse = {
+  anomalies: Anomaly[];
+  summary: string;
+  human_review_required?: boolean;
+};
+
 export function AnomalyDetectionPanel() {
   const { selectedClientId } = useClientContext();
   const [scanning, setScanning] = useState(false);
 
-  const { data, refetch, isLoading } = useQuery({
+  const { data, refetch, isLoading } = useQuery<AnomalyResponse>({
     queryKey: ["anomaly-detection", selectedClientId],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", {
         body: { action: "detect_anomalies", context: { client_id: selectedClientId } },
       });
       if (error) throw error;
-      return data;
+      return data as AnomalyResponse;
     },
     enabled: false,
   });
@@ -33,8 +47,8 @@ export function AnomalyDetectionPanel() {
     setScanning(true);
     try {
       await refetch();
-    } catch (e: any) {
-      toast.error(e.message || "Scan failed");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Scan failed");
     } finally {
       setScanning(false);
     }
@@ -97,7 +111,7 @@ export function AnomalyDetectionPanel() {
             {anomalies.length === 0 ? (
               <div className="text-center py-4">
                 <ShieldCheck className="w-6 h-6 mx-auto mb-2 text-[hsl(var(--success))]" />
-                <p className="text-sm text-muted-foreground">No anomalies detected — transactions look clean.</p>
+                <p className="text-sm text-muted-foreground">No anomalies were flagged in this scan. Continue the normal bookkeeping review.</p>
               </div>
             ) : (
               <Table>
@@ -110,21 +124,21 @@ export function AnomalyDetectionPanel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {anomalies.map((a: any, i: number) => (
-                    <TableRow key={i}>
-                      <TableCell className="text-sm font-medium">{a.description}</TableCell>
+                  {anomalies.map((anomaly) => (
+                    <TableRow key={anomaly.transaction_id}>
+                      <TableCell className="text-sm font-medium">{anomaly.description}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs capitalize">
-                          {a.anomaly_type?.replace(/_/g, " ")}
+                          {anomaly.anomaly_type.replace(/_/g, " ")}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={severityVariant(a.severity)} className="text-xs capitalize">
-                          {a.severity}
+                        <Badge variant={severityVariant(anomaly.severity)} className="text-xs capitalize">
+                          {anomaly.severity}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground max-w-[300px]">
-                        {a.explanation}
+                        {anomaly.explanation}
                       </TableCell>
                     </TableRow>
                   ))}
