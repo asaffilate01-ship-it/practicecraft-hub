@@ -1106,6 +1106,316 @@ export type Database = {
           },
         ]
       }
+      charity_annual_returns: {
+        Row: {
+          charity_profile_id: string
+          client_id: string
+          created_at: string
+          evidence_document_id: string | null
+          external_reference: string | null
+          financial_year_end: string
+          gross_expenditure_pence: number
+          gross_income_pence: number
+          id: string
+          return_json: Json
+          status: string
+          submission_method: string
+          submitted_at: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          charity_profile_id: string
+          client_id: string
+          created_at?: string
+          evidence_document_id?: string | null
+          external_reference?: string | null
+          financial_year_end: string
+          gross_expenditure_pence?: number
+          gross_income_pence?: number
+          id?: string
+          return_json?: Json
+          status?: string
+          submission_method?: string
+          submitted_at?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          charity_profile_id?: string
+          client_id?: string
+          created_at?: string
+          evidence_document_id?: string | null
+          external_reference?: string | null
+          financial_year_end?: string
+          gross_expenditure_pence?: number
+          gross_income_pence?: number
+          id?: string
+          return_json?: Json
+          status?: string
+          submission_method?: string
+          submitted_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charity_annual_returns_charity_profile_id_fkey"
+            columns: ["charity_profile_id"]
+            isOneToOne: false
+            referencedRelation: "charity_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_annual_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_annual_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_annual_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_annual_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_annual_returns_evidence_document_id_fkey"
+            columns: ["evidence_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_annual_returns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_annual_returns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      charity_applications: {
+        Row: {
+          application_json: Json
+          application_type: string
+          charity_profile_id: string
+          client_id: string
+          created_at: string
+          evidence_document_id: string | null
+          external_reference: string | null
+          id: string
+          status: string
+          submitted_at: string | null
+          tenant_id: string
+          trustee_declaration_at: string | null
+          trustee_declaration_by_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_json?: Json
+          application_type?: string
+          charity_profile_id: string
+          client_id: string
+          created_at?: string
+          evidence_document_id?: string | null
+          external_reference?: string | null
+          id?: string
+          status?: string
+          submitted_at?: string | null
+          tenant_id: string
+          trustee_declaration_at?: string | null
+          trustee_declaration_by_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_json?: Json
+          application_type?: string
+          charity_profile_id?: string
+          client_id?: string
+          created_at?: string
+          evidence_document_id?: string | null
+          external_reference?: string | null
+          id?: string
+          status?: string
+          submitted_at?: string | null
+          tenant_id?: string
+          trustee_declaration_at?: string | null
+          trustee_declaration_by_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charity_applications_charity_profile_id_fkey"
+            columns: ["charity_profile_id"]
+            isOneToOne: false
+            referencedRelation: "charity_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_applications_evidence_document_id_fkey"
+            columns: ["evidence_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_applications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_applications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      charity_profiles: {
+        Row: {
+          charity_number: string | null
+          client_id: string
+          commission_last_synced_at: string | null
+          created_at: string
+          governing_document_type: string | null
+          hmrc_charities_reference: string | null
+          id: string
+          legal_structure: string
+          metadata_json: Json
+          public_benefit_summary: string | null
+          registration_status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          charity_number?: string | null
+          client_id: string
+          commission_last_synced_at?: string | null
+          created_at?: string
+          governing_document_type?: string | null
+          hmrc_charities_reference?: string | null
+          id?: string
+          legal_structure?: string
+          metadata_json?: Json
+          public_benefit_summary?: string | null
+          registration_status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          charity_number?: string | null
+          client_id?: string
+          commission_last_synced_at?: string | null
+          created_at?: string
+          governing_document_type?: string | null
+          hmrc_charities_reference?: string | null
+          id?: string
+          legal_structure?: string
+          metadata_json?: Json
+          public_benefit_summary?: string | null
+          registration_status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charity_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "charity_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       chart_of_accounts: {
         Row: {
           account_type: string
@@ -3416,6 +3726,241 @@ export type Database = {
           },
         ]
       }
+      gift_aid_claims: {
+        Row: {
+          charity_profile_id: string
+          claim_reference: string
+          client_id: string
+          created_at: string
+          donation_count: number
+          donation_total_pence: number
+          finalised_at: string | null
+          finalised_by_user_id: string | null
+          hmrc_response_json: Json | null
+          id: string
+          period_end: string
+          period_start: string
+          status: string
+          submission_job_id: string | null
+          tax_reclaim_pence: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          charity_profile_id: string
+          claim_reference: string
+          client_id: string
+          created_at?: string
+          donation_count?: number
+          donation_total_pence?: number
+          finalised_at?: string | null
+          finalised_by_user_id?: string | null
+          hmrc_response_json?: Json | null
+          id?: string
+          period_end: string
+          period_start: string
+          status?: string
+          submission_job_id?: string | null
+          tax_reclaim_pence?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          charity_profile_id?: string
+          claim_reference?: string
+          client_id?: string
+          created_at?: string
+          donation_count?: number
+          donation_total_pence?: number
+          finalised_at?: string | null
+          finalised_by_user_id?: string | null
+          hmrc_response_json?: Json | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          status?: string
+          submission_job_id?: string | null
+          tax_reclaim_pence?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_aid_claims_charity_profile_id_fkey"
+            columns: ["charity_profile_id"]
+            isOneToOne: false
+            referencedRelation: "charity_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_aid_claims_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_aid_claims_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "gift_aid_claims_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "gift_aid_claims_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "gift_aid_claims_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "submission_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_aid_claims_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_jobs_recent"
+            referencedColumns: ["submission_job_id"]
+          },
+          {
+            foreignKeyName: "gift_aid_claims_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_aid_claims_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      gift_aid_donations: {
+        Row: {
+          claim_id: string
+          client_id: string
+          created_at: string
+          declaration_confirmed: boolean
+          declaration_document_id: string | null
+          donation_date: string
+          donation_pence: number
+          donor_house: string | null
+          donor_name: string
+          donor_postcode: string | null
+          id: string
+          metadata_json: Json
+          sponsored_event: boolean
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          claim_id: string
+          client_id: string
+          created_at?: string
+          declaration_confirmed?: boolean
+          declaration_document_id?: string | null
+          donation_date: string
+          donation_pence: number
+          donor_house?: string | null
+          donor_name: string
+          donor_postcode?: string | null
+          id?: string
+          metadata_json?: Json
+          sponsored_event?: boolean
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          claim_id?: string
+          client_id?: string
+          created_at?: string
+          declaration_confirmed?: boolean
+          declaration_document_id?: string | null
+          donation_date?: string
+          donation_pence?: number
+          donor_house?: string | null
+          donor_name?: string
+          donor_postcode?: string | null
+          id?: string
+          metadata_json?: Json
+          sponsored_event?: boolean
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_aid_donations_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "gift_aid_claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_aid_donations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_aid_donations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "gift_aid_donations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "gift_aid_donations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "gift_aid_donations_declaration_document_id_fkey"
+            columns: ["declaration_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_aid_donations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_aid_donations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       incorp_documents: {
         Row: {
           application_id: string
@@ -5040,6 +5585,109 @@ export type Database = {
           },
         ]
       }
+      llp_accounts_reviews: {
+        Row: {
+          accounts_period_id: string
+          client_id: string
+          created_at: string
+          filing_checklist_json: Json
+          id: string
+          members_approval_json: Json
+          status: string
+          submission_job_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accounts_period_id: string
+          client_id: string
+          created_at?: string
+          filing_checklist_json?: Json
+          id?: string
+          members_approval_json?: Json
+          status?: string
+          submission_job_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accounts_period_id?: string
+          client_id?: string
+          created_at?: string
+          filing_checklist_json?: Json
+          id?: string
+          members_approval_json?: Json
+          status?: string
+          submission_job_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "llp_accounts_reviews_accounts_period_id_fkey"
+            columns: ["accounts_period_id"]
+            isOneToOne: true
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "llp_accounts_reviews_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "llp_accounts_reviews_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "llp_accounts_reviews_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "llp_accounts_reviews_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "llp_accounts_reviews_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "submission_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "llp_accounts_reviews_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_jobs_recent"
+            referencedColumns: ["submission_job_id"]
+          },
+          {
+            foreignKeyName: "llp_accounts_reviews_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "llp_accounts_reviews_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       message_attachments: {
         Row: {
           created_at: string
@@ -6012,6 +6660,327 @@ export type Database = {
           },
           {
             foreignKeyName: "onboarding_steps_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          client_id: string
+          created_at: string
+          display_name: string
+          id: string
+          joined_at: string | null
+          left_at: string | null
+          loss_share_percent: number | null
+          metadata_json: Json
+          ni_number: string | null
+          partner_type: string
+          partnership_profile_id: string
+          profit_share_percent: number | null
+          tenant_id: string
+          updated_at: string
+          utr: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          display_name: string
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          loss_share_percent?: number | null
+          metadata_json?: Json
+          ni_number?: string | null
+          partner_type?: string
+          partnership_profile_id: string
+          profit_share_percent?: number | null
+          tenant_id: string
+          updated_at?: string
+          utr?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          loss_share_percent?: number | null
+          metadata_json?: Json
+          ni_number?: string | null
+          partner_type?: string
+          partnership_profile_id?: string
+          profit_share_percent?: number | null
+          tenant_id?: string
+          updated_at?: string
+          utr?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partners_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partners_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partners_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partners_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partners_partnership_profile_id_fkey"
+            columns: ["partnership_profile_id"]
+            isOneToOne: false
+            referencedRelation: "partnership_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partners_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partners_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      partnership_profiles: {
+        Row: {
+          accounting_date: string | null
+          client_id: string
+          companies_house_number: string | null
+          created_at: string
+          id: string
+          metadata_json: Json
+          nominated_partner_id: string | null
+          partnership_type: string
+          partnership_utr: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accounting_date?: string | null
+          client_id: string
+          companies_house_number?: string | null
+          created_at?: string
+          id?: string
+          metadata_json?: Json
+          nominated_partner_id?: string | null
+          partnership_type: string
+          partnership_utr?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accounting_date?: string | null
+          client_id?: string
+          companies_house_number?: string | null
+          created_at?: string
+          id?: string
+          metadata_json?: Json
+          nominated_partner_id?: string | null
+          partnership_type?: string
+          partnership_utr?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partnership_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partnership_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partnership_profiles_nominated_partner_id_fkey"
+            columns: ["nominated_partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      partnership_returns: {
+        Row: {
+          accounts_period_id: string | null
+          allocations_json: Json
+          approved_at: string | null
+          approved_by_user_id: string | null
+          client_id: string
+          created_at: string
+          hmrc_response_json: Json | null
+          id: string
+          partnership_profile_id: string
+          return_json: Json
+          status: string
+          submission_job_id: string | null
+          tax_year: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accounts_period_id?: string | null
+          allocations_json?: Json
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          client_id: string
+          created_at?: string
+          hmrc_response_json?: Json | null
+          id?: string
+          partnership_profile_id: string
+          return_json?: Json
+          status?: string
+          submission_job_id?: string | null
+          tax_year: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accounts_period_id?: string | null
+          allocations_json?: Json
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          client_id?: string
+          created_at?: string
+          hmrc_response_json?: Json | null
+          id?: string
+          partnership_profile_id?: string
+          return_json?: Json
+          status?: string
+          submission_job_id?: string | null
+          tax_year?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_returns_accounts_period_id_fkey"
+            columns: ["accounts_period_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_overdue_tasks"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_secretarial_due"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_tasks_due_next_14d"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_partnership_profile_id_fkey"
+            columns: ["partnership_profile_id"]
+            isOneToOne: false
+            referencedRelation: "partnership_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "submission_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_submission_job_id_fkey"
+            columns: ["submission_job_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_jobs_recent"
+            referencedColumns: ["submission_job_id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_returns_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "v_practice_dashboard_kpis"
