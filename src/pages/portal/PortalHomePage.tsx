@@ -43,7 +43,7 @@ export default function PortalHomePage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tasks")
-        .select("id, title, due_date, status, service")
+        .select("id, title, due_date, status, priority")
         .eq("client_id", clientId!)
         .in("status", ["todo", "in_progress", "awaiting_client"])
         .not("due_date", "is", null)
@@ -61,9 +61,9 @@ export default function PortalHomePage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("invoices")
-        .select("id, invoice_number, total_pence, status, due_date, issued_at")
+        .select("id, invoice_number, total, status, due_date, issue_date")
         .eq("client_id", clientId!)
-        .order("issued_at", { ascending: false })
+        .order("issue_date", { ascending: false })
         .limit(5);
       if (error) throw error;
       return data;
@@ -212,7 +212,7 @@ export default function PortalHomePage() {
                   <div key={d.id} className="flex items-center justify-between px-4 py-3 border-t text-sm">
                     <div>
                       <div className="font-medium">{d.title}</div>
-                      <div className="text-xs text-muted-foreground capitalize">{d.service?.replace(/_/g, " ") || "General"}</div>
+                      <div className="text-xs text-muted-foreground capitalize">{d.priority || "normal"} priority</div>
                     </div>
                     {d.due_date && <DueDatePill dueDate={d.due_date} />}
                   </div>
@@ -241,11 +241,11 @@ export default function PortalHomePage() {
                     <div>
                       <div className="font-medium">{inv.invoice_number}</div>
                       <div className="text-xs text-muted-foreground">
-                        {inv.issued_at ? new Date(inv.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                        {inv.issue_date ? new Date(inv.issue_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-sm">£{((inv.total_pence || 0) / 100).toFixed(2)}</span>
+                      <span className="font-mono text-sm">£{Number(inv.total || 0).toFixed(2)}</span>
                       <Badge variant={inv.status === "paid" ? "default" : inv.status === "overdue" ? "destructive" : "secondary"} className="text-xs capitalize">
                         {inv.status}
                       </Badge>

@@ -29,7 +29,7 @@ export default function PortalSubmissionsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("submission_jobs")
-        .select("id, channel, filing_type, status, submitted_at, created_at")
+        .select("id, provider, submission_type, status, created_at, updated_at")
         .eq("client_id", portalUser!.client_id!)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -73,13 +73,13 @@ export default function PortalSubmissionsPage() {
           ) : (
             submissions.map((r: any) => (
               <div key={r.id} className="grid grid-cols-12 px-4 py-3 border-t text-sm items-center">
-                <div className="col-span-3 text-muted-foreground">{r.channel || "—"}</div>
-                <div className="col-span-4 font-medium">{r.filing_type}</div>
+                <div className="col-span-3 text-muted-foreground uppercase">{r.provider || "—"}</div>
+                <div className="col-span-4 font-medium">{r.submission_type}</div>
                 <div className="col-span-2">
                   <Badge variant={statusVariant(r.status)}>{r.status}</Badge>
                 </div>
                 <div className="col-span-3 text-xs text-muted-foreground">
-                  {new Date(r.submitted_at || r.created_at).toLocaleString()}
+                  {new Date(r.updated_at || r.created_at).toLocaleString()}
                 </div>
               </div>
             ))

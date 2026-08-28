@@ -57,10 +57,11 @@ function PortalNavLink({ to, label, icon: Icon }: { to: string; label: string; i
 }
 
 export function PortalShell() {
+  const location = useLocation();
   const branding = useBranding();
   const features = useFeatures();
   const { role } = usePermissions();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const session = buildPortalSession(role, user?.user_metadata?.full_name, user?.email);
 
   function isEnabled(feature: string) {
@@ -114,7 +115,7 @@ export function PortalShell() {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
         <header className="h-14 border-b bg-card flex items-center justify-between px-6 shrink-0 sticky top-0 z-10">
           <div className="text-sm text-muted-foreground hidden md:block">
@@ -132,13 +133,38 @@ export function PortalShell() {
               </Avatar>
               <span className="hidden sm:inline text-sm">{session.userName}</span>
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Sign out"
+              title="Sign out"
+              onClick={async () => {
+                await signOut();
+                window.location.assign("/login");
+              }}
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 max-w-6xl mx-auto w-full">
+        <main className="flex-1 max-w-6xl mx-auto w-full pb-20 md:pb-0">
           <Outlet />
         </main>
+
+        <nav className="fixed inset-x-0 bottom-0 z-30 flex items-center overflow-x-auto border-t bg-card px-1 py-1.5 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] md:hidden">
+          {nav.filter((item) => isEnabled(item.feature)).slice(0, 5).map((item) => {
+            const active = location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+            const Icon = item.icon;
+            return (
+              <Link key={item.to} to={item.to} className={cn("flex min-w-[72px] flex-1 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[10px]", active ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground")}>
+                <Icon className="h-4 w-4" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
         {/* Footer */}
         <footer className="border-t bg-card px-6 py-3">

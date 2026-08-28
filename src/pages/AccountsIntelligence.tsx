@@ -450,8 +450,8 @@ export default function AccountsIntelligence() {
                                 <div className="font-medium">{transaction?.description ?? "Bank transaction"}</div>
                                 <div className="text-xs text-muted-foreground">{shortDate(transaction?.transaction_date)} · {money(transaction?.amount_pence)}</div>
                               </TableCell>
-                              <TableCell><div className="font-medium">{document?.filename ?? "Document"}</div><div className="text-xs capitalize text-muted-foreground">{document?.document_type?.split("_").join(" ")}</div></TableCell>
-                              <TableCell className="min-w-40"><div className="mb-1 flex justify-between text-xs"><span className="capitalize">{match.match_type.split("_").join(" ")}</span><span className="font-semibold">{match.confidence}%</span></div><Progress value={match.confidence} className="h-1.5" /></TableCell>
+                              <TableCell><div className="font-medium">{document?.filename ?? "Document"}</div><div className="text-xs capitalize text-muted-foreground">{document?.document_type?.replaceAll("_", " ")}</div></TableCell>
+                              <TableCell className="min-w-40"><div className="mb-1 flex justify-between text-xs"><span className="capitalize">{match.match_type.replaceAll("_", " ")}</span><span className="font-semibold">{match.confidence}%</span></div><Progress value={match.confidence} className="h-1.5" /></TableCell>
                               <TableCell><Badge variant={statusBadge(match.status)} className="capitalize">{match.status}</Badge></TableCell>
                               <TableCell className="text-right">
                                 {match.status === "suggested" ? <div className="flex justify-end gap-1"><Button size="sm" variant="outline" onClick={() => reviewMatch.mutate({ id: match.id, status: "rejected" })}><X className="mr-1 h-3.5 w-3.5" /> Reject</Button><Button size="sm" onClick={() => reviewMatch.mutate({ id: match.id, status: "confirmed" })}><Check className="mr-1 h-3.5 w-3.5" /> Confirm</Button></div> : <span className="text-xs text-muted-foreground">Reviewed</span>}
@@ -478,8 +478,8 @@ export default function AccountsIntelligence() {
                           <TableCell className="font-medium">{documentMap.get(candidate.primary_document_id)?.filename ?? "Document"}</TableCell>
                           <TableCell><ArrowRight className="h-4 w-4 text-muted-foreground" /></TableCell>
                           <TableCell className="font-medium">{documentMap.get(candidate.candidate_document_id)?.filename ?? "Document"}</TableCell>
-                          <TableCell><div className="font-medium">{candidate.confidence}% likely</div><div className="text-xs capitalize text-muted-foreground">{candidate.detection_method.split("_").join(" ")}</div></TableCell>
-                          <TableCell><Badge variant={statusBadge(candidate.status)} className="capitalize">{candidate.status.split("_").join(" ")}</Badge></TableCell>
+                          <TableCell><div className="font-medium">{candidate.confidence}% likely</div><div className="text-xs capitalize text-muted-foreground">{candidate.detection_method.replaceAll("_", " ")}</div></TableCell>
+                          <TableCell><Badge variant={statusBadge(candidate.status)} className="capitalize">{candidate.status.replaceAll("_", " ")}</Badge></TableCell>
                           <TableCell className="text-right">{candidate.status === "open" ? <div className="flex justify-end gap-1"><Button size="sm" variant="outline" onClick={() => reviewDuplicate.mutate({ id: candidate.id, status: "not_duplicate" })}>Keep both</Button><Button size="sm" variant="destructive" onClick={() => reviewDuplicate.mutate({ id: candidate.id, status: "confirmed_duplicate" })}>Mark duplicate</Button></div> : <span className="text-xs text-muted-foreground">Reviewed</span>}</TableCell>
                         </TableRow>
                       ))}</TableBody>
@@ -497,7 +497,7 @@ export default function AccountsIntelligence() {
                   {judgements.length === 0 ? <div className="py-14 text-center text-sm text-muted-foreground">No proposed adjustments or judgements.</div> : (
                     <Table className="min-w-[820px]"><TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Judgement</TableHead><TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Review</TableHead></TableRow></TableHeader>
                       <TableBody>{judgements.map((item) => <TableRow key={item.id}>
-                        <TableCell><Badge variant="outline" className="capitalize">{item.judgement_type.split("_").join(" ")}</Badge></TableCell>
+                        <TableCell><Badge variant="outline" className="capitalize">{item.judgement_type.replaceAll("_", " ")}</Badge></TableCell>
                         <TableCell><div className="font-medium">{item.title}</div>{item.description && <div className="max-w-xl text-xs text-muted-foreground">{item.description}</div>}</TableCell>
                         <TableCell className="text-right font-medium">{item.amount_pence == null ? "—" : money(item.amount_pence)}</TableCell>
                         <TableCell><Badge variant={statusBadge(item.status)} className="capitalize">{item.status}</Badge></TableCell>

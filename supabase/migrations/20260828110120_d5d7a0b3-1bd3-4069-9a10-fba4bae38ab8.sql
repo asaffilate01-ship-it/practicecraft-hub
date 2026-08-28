@@ -1,0 +1,1 @@
+-- see repo file 20260828133000_portal_role_and_persistence_safety.sql

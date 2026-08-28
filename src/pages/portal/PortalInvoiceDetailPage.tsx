@@ -30,7 +30,7 @@ export default function PortalInvoiceDetailPage() {
         .from("invoice_lines")
         .select("*")
         .eq("invoice_id", invoiceId)
-        .order("sort_order", { ascending: true });
+        .order("created_at", { ascending: true });
       if (error) throw error;
       return data;
     },
@@ -74,7 +74,7 @@ export default function PortalInvoiceDetailPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><span className="text-muted-foreground">Issued:</span> {new Date(inv.issue_date).toLocaleDateString()}</div>
-            <div><span className="text-muted-foreground">Due:</span> {new Date(inv.due_date).toLocaleDateString()}</div>
+            <div><span className="text-muted-foreground">Due:</span> {inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}</div>
             <div><span className="text-muted-foreground">Subtotal:</span> £{Number(inv.subtotal).toFixed(2)}</div>
             <div><span className="text-muted-foreground">VAT:</span> £{Number(inv.vat_amount).toFixed(2)}</div>
             <div className="font-semibold"><span className="text-muted-foreground">Total:</span> £{Number(inv.total).toFixed(2)}</div>
@@ -93,8 +93,8 @@ export default function PortalInvoiceDetailPage() {
                 <div key={line.id} className="grid grid-cols-12 px-4 py-2 border-t text-sm">
                   <div className="col-span-6">{line.description}</div>
                   <div className="col-span-2 text-right">{line.quantity}</div>
-                  <div className="col-span-2 text-right">£{Number(line.unit_price_pence || 0).toFixed(2)}</div>
-                  <div className="col-span-2 text-right">£{Number(line.line_total_pence || 0).toFixed(2)}</div>
+                  <div className="col-span-2 text-right">£{Number(line.unit_price || 0).toFixed(2)}</div>
+                  <div className="col-span-2 text-right">£{Number(line.line_total || 0).toFixed(2)}</div>
                 </div>
               ))}
             </div>

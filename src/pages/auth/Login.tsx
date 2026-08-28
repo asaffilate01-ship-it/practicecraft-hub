@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CloudCog, Eye, EyeOff, Building2, Users, ShieldCheck, Receipt, Wallet, FileText, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import heroDashboard from "@/assets/hero-dashboard.png";
+import { resolveLoginDestination } from "@/lib/authRouting";
 
 const features = [
   { icon: Receipt, label: "MTD VAT & RTI Payroll" },
@@ -59,15 +60,7 @@ export default function Login() {
 
       const info = userType as any;
 
-      if (info.is_staff && info.is_portal) {
-        navigate(loginType === "staff" ? "/" : "/portal");
-      } else if (info.is_staff) {
-        navigate("/");
-      } else if (info.is_portal) {
-        navigate("/portal");
-      } else {
-        navigate("/");
-      }
+      navigate(resolveLoginDestination(info, loginType));
     } catch {
       setLoading(false);
       navigate("/");
@@ -117,7 +110,7 @@ export default function Login() {
           </div>
           <div className="flex items-center gap-2 text-xs text-[hsl(210,20%,55%)] pt-2 border-t border-white/10">
             <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(142,71%,45%)]" />
-            <span>HMRC recognised · GDPR compliant · UK data residency</span>
+            <span>HMRC sandbox integration · controlled filing audit trail</span>
           </div>
         </div>
       </div>
