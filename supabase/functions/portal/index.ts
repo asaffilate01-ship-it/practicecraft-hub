@@ -11,10 +11,70 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return json({ error: "Unauthorized" }, 401);
+  const url = new URL(req.url);
+  const body = req.method !== "GET" ? await req.json().catch(() => ({})) : {};
+  const serviceClient = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  // Invitation lookup returns only the fields required to render signup.
+  if (body?.action === "validate-invite") {
+    const { data: invitation, error } = await serviceClient
+      .from("portal_invitations")
+      .select("id,email,portal_role,expires_at,tenants(firm_name),clients(legal_name)")
+      .eq("token", body.token)
+      .eq("status", "pending")
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (error || !invitation) return json({ error: "Invalid or expired invitation" }, 404);
+    return json({ invitation });
   }
+
+  // Accepting an invitation is permitted immediately after signup, including
+  // when email confirmation means there is not yet a user session. Possession
+  // of the invitation token is not enough: the created auth user's email must
+  // also match the invited address.
+  if (body?.action === "accept-invite") {
+    const { data: inv, error: invErr } = await serviceClient
+      .from("portal_invitations")
+      .select("*")
+      .eq("token", body.token)
+      .eq("status", "pending")
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+    if (invErr || !inv || !body.userId) return json({ error: "Invalid or expired invitation" }, 400);
+
+    const { data: authUser, error: authUserError } = await serviceClient.auth.admin.getUserById(body.userId);
+    if (authUserError || !authUser.user || authUser.user.email?.toLowerCase() !== inv.email.toLowerCase()) {
+      return json({ error: "Invitation identity does not match" }, 403);
+    }
+    if (authUser.user.user_metadata?.user_type !== "portal") {
+      return json({ error: "Invitation can only link a portal signup" }, 403);
+    }
+
+    const { error: linkError } = await serviceClient.from("portal_users").upsert({
+      user_id: authUser.user.id,
+      tenant_id: inv.tenant_id,
+      client_id: inv.client_id,
+      portal_role: inv.portal_role,
+      display_name: body.displayName || "",
+      status: "active",
+    }, { onConflict: "user_id,tenant_id" });
+    if (linkError) throw linkError;
+
+    // Repair identities created before the portal-aware signup trigger.
+    await serviceClient.from("user_roles").delete().eq("user_id", authUser.user.id);
+    await serviceClient.from("profiles").delete().eq("id", authUser.user.id);
+    await serviceClient
+      .from("portal_invitations")
+      .update({ status: "accepted", accepted_at: new Date().toISOString() })
+      .eq("id", inv.id);
+    return json({ ok: true });
+  }
+
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -29,75 +89,21 @@ Deno.serve(async (req) => {
   }
 
   const userId = claimsData.claims.sub;
+  const [{ data: portalUser }, { data: profile }] = await Promise.all([
+    supabase.from("portal_users").select("tenant_id,client_id,portal_role").eq("user_id", userId).eq("status", "active").maybeSingle(),
+    supabase.from("profiles").select("tenant_id").eq("id", userId).maybeSingle(),
+  ]);
+  if (!portalUser && !profile) return json({ error: "No active staff or portal identity" }, 403);
 
-  // Get user's profile to find tenant
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("tenant_id")
-    .eq("id", userId)
-    .single();
-
-  if (!profile) return json({ error: "Profile not found" }, 404);
-
-  const tenantId = profile.tenant_id;
-
-  // Determine client_id: for client_user role, find their linked client
-  // For staff, they can pass clientId as query param
-  const url = new URL(req.url);
+  const tenantId = portalUser?.tenant_id || profile!.tenant_id;
   const pathParts = url.pathname.split("/").filter(Boolean);
   // /portal/me/summary, /portal/me/deadlines, etc.
   const endpoint = pathParts.slice(2).join("/"); // after "portal/me"
 
-  // Get user role to determine if client_user
-  const { data: userRole } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .single();
-
-  const isClientUser = userRole?.role === "client_user";
-
-  // For client users, find their client_id from metadata or a mapping
-  // For now, staff can pass clientId query param
-  let clientId = url.searchParams.get("clientId");
-
-  const body = req.method !== "GET" ? await req.json().catch(() => ({})) : {};
-
-  // ── Accept Invite (can be called right after signup) ────
-  if (body?.action === "accept-invite") {
-    const serviceClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const { data: inv, error: invErr } = await serviceClient
-      .from("portal_invitations")
-      .select("*")
-      .eq("token", body.token)
-      .eq("status", "pending")
-      .gt("expires_at", new Date().toISOString())
-      .single();
-
-    if (invErr || !inv) return json({ error: "Invalid or expired invitation" }, 400);
-
-    // Create portal_users record
-    await serviceClient.from("portal_users").upsert({
-      user_id: body.userId,
-      tenant_id: inv.tenant_id,
-      client_id: inv.client_id,
-      portal_role: inv.portal_role,
-      display_name: body.displayName || "",
-      status: "active",
-    }, { onConflict: "user_id,tenant_id" });
-
-    // Mark invitation as accepted
-    await serviceClient
-      .from("portal_invitations")
-      .update({ status: "accepted", accepted_at: new Date().toISOString() })
-      .eq("id", inv.id);
-
-    return json({ ok: true });
-  }
+  const isClientUser = Boolean(portalUser);
+  // Portal identities are always pinned to their linked client; only staff can
+  // request a client context explicitly.
+  const clientId = portalUser?.client_id || url.searchParams.get("clientId");
 
   try {
     switch (endpoint) {
@@ -238,7 +244,6 @@ Deno.serve(async (req) => {
 
       case "documents/signed-url": {
         if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-        const body = await req.json();
 
         const filename = body.filename || `upload_${Date.now()}`;
         const storagePath = `${tenantId}/${clientId || "general"}/${Date.now()}_${filename}`;
@@ -264,7 +269,7 @@ Deno.serve(async (req) => {
 
         // Create signed upload URL
         const { data: signedUrl, error: urlError } = await supabase.storage
-          .from("tenant-assets")
+          .from("client-documents")
           .createSignedUploadUrl(storagePath);
 
         if (urlError) throw urlError;

@@ -58,6 +58,8 @@ import TenantAdmin from "@/pages/TenantAdmin";
 import FpsBuilderPage from "@/pages/rti/FpsBuilderPage";
 import EpsBuilderPage from "@/pages/rti/EpsBuilderPage";
 import SelfAssessment from "@/pages/SelfAssessment";
+import CharitiesWorkbench from "@/pages/CharitiesWorkbench";
+import PartnershipsWorkbench from "@/pages/PartnershipsWorkbench";
 import CorporationTax from "@/pages/CorporationTax";
 import CisWorkbench from "@/pages/CisWorkbench";
 import ItsaWorkbench from "@/pages/ItsaWorkbench";
@@ -142,7 +144,7 @@ function PortalRoute({ children }: { children: React.ReactNode }) {
 }
 
 function PortalRouteGuard({ children }: { children: React.ReactNode }) {
-  const { userKind, loading } = usePermissions();
+  const { userKind, role, loading } = usePermissions();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -152,6 +154,23 @@ function PortalRouteGuard({ children }: { children: React.ReactNode }) {
   }
   // Staff users should not access portal routes
   if (userKind === "staff") return <Navigate to="/" replace />;
+  if (role === "employee") return <Navigate to="/employee" replace />;
+  return <>{children}</>;
+}
+
+/** Prevent portal identities from opening the unscoped practice dashboard. */
+function StaffRoute({ children }: { children: React.ReactNode }) {
+  const { userKind, role, loading } = usePermissions();
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+  if (userKind === "portal") {
+    return <Navigate to={role === "employee" ? "/employee" : "/portal"} replace />;
+  }
   return <>{children}</>;
 }
 
@@ -167,11 +186,13 @@ function Guarded({
 }) {
   return (
     <ProtectedRoute>
-      <AppLayout>
-        <PermissionGuard module={module} action={action}>
-          {children}
-        </PermissionGuard>
-      </AppLayout>
+      <StaffRoute>
+        <AppLayout>
+          <PermissionGuard module={module} action={action}>
+            {children}
+          </PermissionGuard>
+        </AppLayout>
+      </StaffRoute>
     </ProtectedRoute>
   );
 }
@@ -180,7 +201,9 @@ function Guarded({
 function Protected({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute>
-      <AppLayout>{children}</AppLayout>
+      <StaffRoute>
+        <AppLayout>{children}</AppLayout>
+      </StaffRoute>
     </ProtectedRoute>
   );
 }
@@ -236,6 +259,8 @@ const AppRoutes = () => (
 
     {/* ── Self Assessment ──────────────────────────────── */}
     <Route path="/self-assessment" element={<Guarded module="accounts" action="view"><SelfAssessment /></Guarded>} />
+    <Route path="/charities" element={<Guarded module="accounts" action="view"><CharitiesWorkbench /></Guarded>} />
+    <Route path="/partnerships" element={<Guarded module="accounts" action="view"><PartnershipsWorkbench /></Guarded>} />
 
     {/* ── Corporation Tax ──────────────────────────────── */}
     <Route path="/corporation-tax" element={<Guarded module="accounts" action="view"><CorporationTax /></Guarded>} />

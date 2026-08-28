@@ -28,18 +28,34 @@ export default function PortalPayslipsPage() {
   });
 
   const { data: payslips = [], isLoading } = useQuery({
-    queryKey: ["portal-payslips", portalUser?.tenant_id],
+    queryKey: ["portal-payslips", portalUser?.client_id],
     queryFn: async () => {
+      const { data: employers, error: employerError } = await supabase
+        .from("payroll_employers")
+        .select("id")
+        .eq("client_id", portalUser!.client_id!);
+      if (employerError) throw employerError;
+      const employerIds = (employers || []).map((employer) => employer.id);
+      if (!employerIds.length) return [];
+
+      const { data: payRuns, error: payRunError } = await supabase
+        .from("pay_runs")
+        .select("id")
+        .in("employer_id", employerIds);
+      if (payRunError) throw payRunError;
+      const payRunIds = (payRuns || []).map((payRun) => payRun.id);
+      if (!payRunIds.length) return [];
+
       const { data, error } = await supabase
         .from("payslips")
         .select("id, employee_name, gross_pence, tax_pence, ni_employee_pence, net_pence, pension_employee_pence, created_at")
-        .eq("tenant_id", portalUser!.tenant_id)
+        .in("pay_run_id", payRunIds)
         .order("created_at", { ascending: false })
         .limit(24);
       if (error) throw error;
       return data;
     },
-    enabled: !!portalUser?.tenant_id,
+    enabled: !!portalUser?.client_id,
   });
 
   return (

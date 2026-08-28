@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, FileText, Mail, Wallet, Loader2 } from "lucide-react";
+import { Download, FileText, Mail, Wallet, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 const fmt = (pence: number) => `£${(pence / 100).toFixed(2)}`;
 
 export default function EmployeePayslips() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [selected, setSelected] = useState<any>(null);
   const [yearFilter, setYearFilter] = useState("all");
   const [downloading, setDownloading] = useState(false);
@@ -73,23 +73,29 @@ export default function EmployeePayslips() {
         return ty === yearFilter;
       });
 
-  const totalNet = filtered.reduce((s: number, p: any) => s + (p.net_pay_pence || 0), 0);
+  const totalNet = filtered.reduce((s: number, p: any) => s + (p.net_pence || 0), 0);
   const totalTax = filtered.reduce((s: number, p: any) => s + (p.tax_pence || 0), 0);
-  const totalNi = filtered.reduce((s: number, p: any) => s + (p.ni_pence || 0), 0);
+  const totalNi = filtered.reduce((s: number, p: any) => s + (p.ni_employee_pence || 0), 0);
 
   const employerName = (employee?.payroll_employers as any)?.employer_name ?? "—";
   const employeeName = employee ? `${employee.first_name} ${employee.last_name}` : "—";
 
   const handleDownloadPdf = async (payslip: any) => {
-    if (!payslip.pdf_storage_path) {
+    if (!payslip.document_id) {
       toast.info("PDF not yet available for this payslip.");
       return;
     }
     setDownloading(true);
     try {
+      const { data: document, error: documentError } = await supabase
+        .from("documents")
+        .select("storage_path")
+        .eq("id", payslip.document_id)
+        .single();
+      if (documentError) throw documentError;
       const { data, error } = await supabase.storage
         .from("client-documents")
-        .createSignedUrl(payslip.pdf_storage_path, 300); // 5 min expiry
+        .createSignedUrl(document.storage_path, 300); // 5 min expiry
       if (error) throw error;
       if (data?.signedUrl) {
         window.open(data.signedUrl, "_blank");
@@ -110,15 +116,20 @@ export default function EmployeePayslips() {
             <h1 className="text-2xl font-bold tracking-tight">My Payslips</h1>
             <p className="text-sm text-muted-foreground">{employeeName} — {employerName}</p>
           </div>
-          <Select value={yearFilter} onValueChange={setYearFilter}>
-            <SelectTrigger className="w-[150px]"><SelectValue placeholder="All years" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All years</SelectItem>
-              {taxYears.map((y) => (
-                <SelectItem key={y} value={y!}>{y}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Select value={yearFilter} onValueChange={setYearFilter}>
+              <SelectTrigger className="w-[150px]"><SelectValue placeholder="All years" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All years</SelectItem>
+                {taxYears.map((y) => (
+                  <SelectItem key={y} value={y!}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon" aria-label="Sign out" title="Sign out" onClick={async () => { await signOut(); window.location.assign("/login"); }}>
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* KPIs */}
@@ -195,10 +206,10 @@ export default function EmployeePayslips() {
                           ? new Date(p.pay_runs.pay_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
                           : "—"}
                       </TableCell>
-                      <TableCell className="text-right font-mono">{fmt(p.gross_pay_pence || 0)}</TableCell>
+                      <TableCell className="text-right font-mono">{fmt(p.gross_pence || 0)}</TableCell>
                       <TableCell className="text-right font-mono">{fmt(p.tax_pence || 0)}</TableCell>
-                      <TableCell className="text-right font-mono">{fmt(p.ni_pence || 0)}</TableCell>
-                      <TableCell className="text-right font-mono font-semibold">{fmt(p.net_pay_pence || 0)}</TableCell>
+                      <TableCell className="text-right font-mono">{fmt(p.ni_employee_pence || 0)}</TableCell>
+                      <TableCell className="text-right font-mono font-semibold">{fmt(p.net_pence || 0)}</TableCell>
                       <TableCell>
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); setSelected(p); }}>
                           <FileText className="w-3.5 h-3.5" />
@@ -231,7 +242,7 @@ export default function EmployeePayslips() {
                     <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Earnings</div>
                     <div className="flex justify-between text-sm">
                       <span>Gross Pay</span>
-                      <span className="font-mono">{fmt(selected.gross_pay_pence || 0)}</span>
+                      <span className="font-mono">{fmt(selected.gross_pence || 0)}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -245,7 +256,7 @@ export default function EmployeePayslips() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>National Insurance</span>
-                      <span className="font-mono text-destructive">{fmt(selected.ni_pence || 0)}</span>
+                      <span className="font-mono text-destructive">{fmt(selected.ni_employee_pence || 0)}</span>
                     </div>
                     {(selected.pension_employee_pence || 0) > 0 && (
                       <div className="flex justify-between text-sm">
@@ -266,7 +277,7 @@ export default function EmployeePayslips() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-semibold">Net Pay</span>
-                      <span className="text-2xl font-bold">{fmt(selected.net_pay_pence || 0)}</span>
+                      <span className="text-2xl font-bold">{fmt(selected.net_pence || 0)}</span>
                     </div>
                   </CardContent>
                 </Card>
