@@ -124,11 +124,13 @@ export default function SelfAssessment() {
         </div>
       </div>
 
+      <Card className="border-warning/30 bg-warning/5"><CardContent className="flex items-start gap-2 pt-4 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><p>Preparation only: PracticeCraft does not yet generate or file current-year Self Assessment returns. Any existing “submitted” status is a legacy workflow record and must be checked against an HMRC receipt.</p></CardContent></Card>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Total Returns" value={filtered.length} change="All SA returns" changeType="neutral" icon={FileText} iconColor="bg-muted" />
         <KPICard title="In Progress" value={inProgress} change="Being prepared" changeType={inProgress > 0 ? "negative" : "positive"} icon={Calculator} iconColor="bg-warning/10" />
         <KPICard title="Paper Deadline" value="31 Oct" change="Online: 31 Jan" changeType="neutral" icon={Clock} iconColor="bg-[hsl(var(--info))]/10" />
-        <KPICard title="Submitted" value={submitted} change="Filed with HMRC" changeType="positive" icon={CheckCircle2} iconColor="bg-[hsl(var(--success))]/10" />
+        <KPICard title="Legacy submitted status" value={submitted} change="Verify against HMRC receipt" changeType="neutral" icon={CheckCircle2} iconColor="bg-[hsl(var(--success))]/10" />
       </div>
 
       <Tabs defaultValue="active">

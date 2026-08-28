@@ -11,12 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, FileText, Send, Eye, Upload, Download, Pencil, Trash2, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useRef, useCallback } from "react";
-import { HmrcConnectButton } from "@/components/HmrcConnectButton";
 import { HmrcObligations } from "@/components/vat/HmrcObligations";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { collectHmrcFraudContext } from "@/lib/hmrcFraudHeaders";
 
 function parseCsvToBoxes(csvText: string): Partial<Record<string, string>> | null {
   const lines = csvText.trim().split(/\r?\n/).filter(l => l.trim());
@@ -72,6 +73,8 @@ export default function VatReturns() {
   const [editReturn, setEditReturn] = useState<any>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [hmrcClientId, setHmrcClientId] = useState("");
+  const [declarationAccepted, setDeclarationAccepted] = useState(false);
   const [form, setForm] = useState({
     client_id: "", period_start: "", period_end: "", notes: "",
     box1: "0", box2: "0", box4: "0", box6: "0", box7: "0", box8: "0", box9: "0",
@@ -177,57 +180,27 @@ export default function VatReturns() {
   // Live HMRC submission
   const submitToHmrc = async (vatReturn: any) => {
     if (!vatReturn?.client_id) { toast.error("Client is required for HMRC submission"); return; }
-    const vrn = vatReturn.clients?.vat_number;
-    if (!vrn) { toast.error("Client has no VAT number. Update the client record first."); return; }
+    if (!declarationAccepted) { toast.error("Confirm the finalisation declaration before filing"); return; }
 
     setSubmitting(true);
     try {
-      // Get stored OAuth token for this client
-      const { data: cred } = await supabase
-        .from("client_credentials")
-        .select("ciphertext")
-        .eq("client_id", vatReturn.client_id)
-        .eq("provider", "hmrc_vat")
-        .single();
-
-      if (!cred) throw new Error("No HMRC VAT credentials found for this client. Connect HMRC first via the client's Credentials tab.");
-
-      const tokens = JSON.parse(cred.ciphertext);
-
-      // Build period key from dates (HMRC format: #001 etc — use period_end YYYY-MM-DD hash)
-      const periodKey = `${vatReturn.period_start}=${vatReturn.period_end}`;
-
       const { data, error } = await supabase.functions.invoke("hmrc", {
         body: {
-          action: "vat/submit",
-          vrn,
-          accessToken: tokens.access_token,
-          periodKey,
-          returnData: {
-            box1: vatReturn.box1, box2: vatReturn.box2, box3: vatReturn.box3,
-            box4: vatReturn.box4, box5: vatReturn.box5, box6: vatReturn.box6,
-            box7: vatReturn.box7, box8: vatReturn.box8, box9: vatReturn.box9,
-          },
+          action: "vat/submit-return", vatReturnId: vatReturn.id, declarationAccepted: true,
+          fraudContext: collectHmrcFraudContext(),
         },
       });
 
       if (error) throw error;
 
-      if (data?.status === 200 || data?.status === 201) {
-        // Success — update return status
-        const hmrcReceipt = data.data?.formBundleNumber || data.data?.receiptID || JSON.stringify(data.data).substring(0, 100);
-        await supabase.from("vat_returns").update({
-          status: "submitted",
-          submitted_at: new Date().toISOString(),
-          hmrc_receipt: hmrcReceipt,
-        }).eq("id", vatReturn.id);
-
+      if (data?.success) {
         queryClient.invalidateQueries({ queryKey: ["vat_returns"] });
         setViewReturn(null);
+        setDeclarationAccepted(false);
         toast.success("VAT return submitted to HMRC successfully");
       } else {
         // HMRC returned an error
-        const errMsg = data?.data?.message || data?.data?.errors?.[0]?.message || `HMRC returned status ${data?.status}`;
+        const errMsg = data?.error || data?.data?.message || data?.data?.errors?.[0]?.message || `HMRC returned status ${data?.status}`;
         toast.error(`HMRC submission failed: ${errMsg}`);
       }
     } catch (err: any) {
@@ -240,7 +213,6 @@ export default function VatReturns() {
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const updates: any = { status };
-      if (status === "submitted") updates.submitted_at = new Date().toISOString();
       const { error } = await supabase.from("vat_returns").update(updates).eq("id", id);
       if (error) throw error;
     },
@@ -305,12 +277,12 @@ export default function VatReturns() {
           <p className="text-sm text-muted-foreground">Making Tax Digital VAT returns & HMRC submission</p>
         </div>
         <div className="flex gap-2">
-          {profile?.tenant_id && <HmrcConnectButton clientId="" tenantId={profile.tenant_id} scopes="read:vat write:vat" label="Connect HMRC (VAT)" />}
           <Button className="gap-2" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4" /> New VAT Return</Button>
         </div>
       </div>
 
-      {profile?.tenant_id && <HmrcObligations clientId="" vrn="" tenantId={profile.tenant_id} />}
+      <Card><CardContent className="pt-6"><div className="max-w-md space-y-2"><Label>Client for HMRC VAT</Label><Select value={hmrcClientId} onValueChange={setHmrcClientId}><SelectTrigger><SelectValue placeholder="Select a VAT-registered client" /></SelectTrigger><SelectContent>{clients.filter((c: any) => c.vat_number).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.legal_name} · {c.vat_number}</SelectItem>)}</SelectContent></Select></div></CardContent></Card>
+      <HmrcObligations clientId={hmrcClientId} vrn={(clients.find((c: any) => c.id === hmrcClientId) as any)?.vat_number || ""} />
 
       <Card>
         <CardContent className="pt-6">
@@ -392,7 +364,7 @@ export default function VatReturns() {
       </Dialog>
 
       {/* View Dialog with live submission */}
-      <Dialog open={!!viewReturn} onOpenChange={(open) => { if (!open) setViewReturn(null); }}>
+      <Dialog open={!!viewReturn} onOpenChange={(open) => { if (!open) { setViewReturn(null); setDeclarationAccepted(false); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>VAT Return Details</DialogTitle></DialogHeader>
           {viewReturn && (
@@ -422,13 +394,12 @@ export default function VatReturns() {
                   <Button variant="outline" onClick={() => updateStatus.mutate({ id: viewReturn.id, status: "ready" })}>Mark Ready</Button>
                 </>}
                 {viewReturn.status === "ready" && <>
-                  <Button variant="outline" onClick={() => updateStatus.mutate({ id: viewReturn.id, status: "submitted" })}>
-                    Mark Submitted (Manual)
-                  </Button>
-                  <Button className="gap-1.5" onClick={() => submitToHmrc(viewReturn)} disabled={submitting}>
+                  <div className="w-full rounded-md border p-3 flex items-start gap-2"><Checkbox id="vat-finalised" checked={declarationAccepted} onCheckedChange={(checked) => setDeclarationAccepted(checked === true)} /><Label htmlFor="vat-finalised" className="text-xs leading-5 font-normal">I confirm the figures are complete and correct and authorise PracticeCraft to finalise and file this VAT return.</Label></div>
+                  <Button className="gap-1.5" onClick={() => submitToHmrc(viewReturn)} disabled={submitting || !declarationAccepted || !viewReturn.period_key}>
                     {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                     {submitting ? "Submitting…" : "Submit to HMRC"}
                   </Button>
+                  {!viewReturn.period_key && <p className="w-full text-xs text-warning">Sync HMRC obligations first; the HMRC period key is required.</p>}
                 </>}
                 {viewReturn.status === "submitted" && (
                   <div className="flex items-center gap-2 text-sm text-[hsl(var(--success))]">

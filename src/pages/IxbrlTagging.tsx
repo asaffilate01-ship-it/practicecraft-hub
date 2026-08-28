@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code2, Database, FileCheck, FileCode, Plus, Search, Tag } from "lucide-react";
+import { AlertTriangle, Code2, Database, FileCheck, FileCode, Plus, Search, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const statusColors: Record<string, string> = {
@@ -81,6 +81,8 @@ export default function IxbrlTagging() {
           Map chart of accounts to iXBRL taxonomy tags for statutory accounts and CT600 filings
         </p>
       </div>
+
+      <Card className="border-warning/30 bg-warning/5"><CardContent className="flex items-start gap-2 pt-4 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><p>Tag mappings are preparation data only. PracticeCraft does not yet generate or validate a standards-conformant accounts or computation iXBRL document.</p></CardContent></Card>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card><CardContent className="pt-4">

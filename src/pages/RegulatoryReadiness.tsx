@@ -1,0 +1,23 @@
+import { Link } from "react-router-dom";
+import { AlertTriangle, ArrowRight, CheckCircle2, ExternalLink, FlaskConical, Hammer, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { readinessCounts, readinessLabels, regulatoryReadiness, type ReadinessStatus } from "@/lib/regulatoryReadiness";
+
+const styles: Record<ReadinessStatus, string> = {
+  beta: "bg-success/10 text-success border-success/20", sandbox: "bg-info/10 text-info border-info/20",
+  build: "bg-muted text-muted-foreground border-border", blocked: "bg-destructive/10 text-destructive border-destructive/20",
+};
+const icons: Record<ReadinessStatus, typeof ShieldCheck> = { beta: CheckCircle2, sandbox: FlaskConical, build: Hammer, blocked: AlertTriangle };
+
+export default function RegulatoryReadiness() {
+  const counts = readinessCounts();
+  return <div className="space-y-6">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><div className="flex items-center gap-2"><ShieldCheck className="h-6 w-6 text-primary" /><h1 className="text-2xl font-bold tracking-tight">Regulatory readiness</h1></div><p className="mt-1 text-sm text-muted-foreground">What works now, what is test-only, and what must be built before a filing claim is made.</p></div><Badge variant="outline" className="w-fit">Product truth dashboard</Badge></div>
+    <Card className="border-warning/30 bg-warning/5"><CardContent className="pt-6 text-sm leading-6">HMRC describes compatible products as <strong>recognised software</strong>, not “approved”. A module remains test-only until its full journey, security, accessibility, fraud-prevention headers and provider test pack have passed. Companies House production filing additionally needs accepted XML gateway testing and presenter credentials.</CardContent></Card>
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{(Object.keys(counts) as ReadinessStatus[]).map(status => { const Icon = icons[status]; return <Card key={status}><CardContent className="flex items-center gap-3 pt-5"><div className={`rounded-lg border p-2 ${styles[status]}`}><Icon className="h-4 w-4" /></div><div><p className="text-2xl font-semibold">{counts[status]}</p><p className="text-xs text-muted-foreground">{readinessLabels[status]}</p></div></CardContent></Card>; })}</div>
+    <div className="space-y-6">{[1,2,3,4].map(phase => <section key={phase} className="space-y-3"><div><h2 className="text-lg font-semibold">Phase {phase}</h2><p className="text-xs text-muted-foreground">{phase===1?"Secure beta and complete VAT sandbox journey":phase===2?"Accounts production and Companies House test filing":phase===3?"PAYE RTI and Corporation Tax recognition packs":"Self Assessment, MTD ITSA, CIS and wider filings"}</p></div><div className="grid gap-3 xl:grid-cols-2">{regulatoryReadiness.filter(item=>item.phase===phase).map(item=><Card key={item.name}><CardHeader className="pb-3"><div className="flex items-start justify-between gap-3"><div><CardTitle className="text-base">{item.name}</CardTitle><p className="mt-1 text-xs text-muted-foreground">{item.authority}</p></div><Badge variant="outline" className={styles[item.status]}>{readinessLabels[item.status]}</Badge></div></CardHeader><CardContent className="space-y-3 text-sm"><div><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Current</p><p className="mt-1 leading-5">{item.current}</p></div><div><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Next acceptance gate</p><p className="mt-1 leading-5">{item.next}</p></div>{item.route&&<Button asChild variant="outline" size="sm"><Link to={item.route}>Open module <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link></Button>}</CardContent></Card>)}</div></section>)}</div>
+    <Card><CardHeader><CardTitle className="text-base">Official test and recognition routes</CardTitle></CardHeader><CardContent className="flex flex-wrap gap-2"><Button asChild variant="outline" size="sm"><a href="https://developer.service.hmrc.gov.uk/guides/vat-mtd-end-to-end-service-guide/" target="_blank" rel="noreferrer">VAT MTD guide <ExternalLink className="ml-1.5 h-3.5 w-3.5" /></a></Button><Button asChild variant="outline" size="sm"><a href="https://www.gov.uk/government/publications/technical-interface-specifications-for-companies-house-software/important-information-for-software-developers-read-first" target="_blank" rel="noreferrer">Companies House testing <ExternalLink className="ml-1.5 h-3.5 w-3.5" /></a></Button></CardContent></Card>
+  </div>;
+}

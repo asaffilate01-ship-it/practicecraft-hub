@@ -74,6 +74,7 @@ const navGroups: NavGroup[] = [
   {
     label: "Risk & Submissions",
     items: [
+      { title: "Regulatory Readiness", url: "/regulatory-readiness", icon: ShieldCheck, permission: ["submissions", "view"], featureKey: "submissions", moduleKey: "submissions" },
       { title: "AML / KYC", url: "/aml", icon: ShieldCheck, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
       { title: "AML Monitoring", url: "/aml/monitoring", icon: Eye, permission: ["aml", "view"], featureKey: "kyc_aml", moduleKey: "kyc_aml" },
       { title: "Submissions", url: "/submissions", icon: Send, permission: ["submissions", "view"], featureKey: "submissions", moduleKey: "submissions" },

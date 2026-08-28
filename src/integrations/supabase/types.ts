@@ -1,9863 +1,1 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
-export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.1"
-  }
-  public: {
-    Tables: {
-      accounting_judgements: {
-        Row: {
-          amount_pence: number | null
-          bank_transaction_id: string | null
-          client_id: string
-          created_at: string
-          created_by_user_id: string | null
-          data_json: Json
-          description: string | null
-          document_id: string | null
-          effective_from: string | null
-          effective_to: string | null
-          id: string
-          judgement_type: string
-          period_id: string
-          posted_journal_id: string | null
-          proposed_account_id: string | null
-          reviewed_at: string | null
-          reviewed_by_user_id: string | null
-          status: string
-          tenant_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          amount_pence?: number | null
-          bank_transaction_id?: string | null
-          client_id: string
-          created_at?: string
-          created_by_user_id?: string | null
-          data_json?: Json
-          description?: string | null
-          document_id?: string | null
-          effective_from?: string | null
-          effective_to?: string | null
-          id?: string
-          judgement_type: string
-          period_id: string
-          posted_journal_id?: string | null
-          proposed_account_id?: string | null
-          reviewed_at?: string | null
-          reviewed_by_user_id?: string | null
-          status?: string
-          tenant_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          amount_pence?: number | null
-          bank_transaction_id?: string | null
-          client_id?: string
-          created_at?: string
-          created_by_user_id?: string | null
-          data_json?: Json
-          description?: string | null
-          document_id?: string | null
-          effective_from?: string | null
-          effective_to?: string | null
-          id?: string
-          judgement_type?: string
-          period_id?: string
-          posted_journal_id?: string | null
-          proposed_account_id?: string | null
-          reviewed_at?: string | null
-          reviewed_by_user_id?: string | null
-          status?: string
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      accounts_periods: {
-        Row: {
-          accounts_standard: string
-          client_id: string
-          created_at: string
-          ct600_status: string
-          filing_deadline: string | null
-          id: string
-          notes: string | null
-          period_end: string
-          period_start: string
-          period_type: string
-          sa_status: string
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          accounts_standard?: string
-          client_id: string
-          created_at?: string
-          ct600_status?: string
-          filing_deadline?: string | null
-          id?: string
-          notes?: string | null
-          period_end: string
-          period_start: string
-          period_type?: string
-          sa_status?: string
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          accounts_standard?: string
-          client_id?: string
-          created_at?: string
-          ct600_status?: string
-          filing_deadline?: string | null
-          id?: string
-          notes?: string | null
-          period_end?: string
-          period_start?: string
-          period_type?: string
-          sa_status?: string
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "accounts_periods_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "accounts_periods_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "accounts_periods_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "accounts_periods_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "accounts_periods_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "accounts_periods_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      document_fingerprints: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          document_id: string
-          id: string
-          sha256: string
-          size_bytes: number
-          tenant_id: string
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          document_id: string
-          id?: string
-          sha256: string
-          size_bytes?: number
-          tenant_id: string
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          document_id?: string
-          id?: string
-          sha256?: string
-          size_bytes?: number
-          tenant_id?: string
-        }
-        Relationships: []
-      }
-      duplicate_candidates: {
-        Row: {
-          candidate_document_id: string
-          client_id: string
-          confidence: number
-          created_at: string
-          detection_method: string
-          id: string
-          period_id: string | null
-          primary_document_id: string
-          reasons_json: Json
-          review_notes: string | null
-          reviewed_at: string | null
-          reviewed_by_user_id: string | null
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          candidate_document_id: string
-          client_id: string
-          confidence?: number
-          created_at?: string
-          detection_method: string
-          id?: string
-          period_id?: string | null
-          primary_document_id: string
-          reasons_json?: Json
-          review_notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by_user_id?: string | null
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          candidate_document_id?: string
-          client_id?: string
-          confidence?: number
-          created_at?: string
-          detection_method?: string
-          id?: string
-          period_id?: string | null
-          primary_document_id?: string
-          reasons_json?: Json
-          review_notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by_user_id?: string | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      evidence_matches: {
-        Row: {
-          bank_transaction_id: string
-          client_id: string
-          confidence: number
-          created_at: string
-          document_id: string
-          extraction_id: string | null
-          factors_json: Json
-          id: string
-          match_type: string
-          period_id: string
-          review_notes: string | null
-          reviewed_at: string | null
-          reviewed_by_user_id: string | null
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          bank_transaction_id: string
-          client_id: string
-          confidence?: number
-          created_at?: string
-          document_id: string
-          extraction_id?: string | null
-          factors_json?: Json
-          id?: string
-          match_type?: string
-          period_id: string
-          review_notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by_user_id?: string | null
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          bank_transaction_id?: string
-          client_id?: string
-          confidence?: number
-          created_at?: string
-          document_id?: string
-          extraction_id?: string | null
-          factors_json?: Json
-          id?: string
-          match_type?: string
-          period_id?: string
-          review_notes?: string | null
-          reviewed_at?: string | null
-          reviewed_by_user_id?: string | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      year_end_checks: {
-        Row: {
-          category: string
-          check_key: string
-          client_id: string
-          completed_at: string | null
-          completed_by_user_id: string | null
-          created_at: string
-          id: string
-          notes: string | null
-          period_id: string
-          status: string
-          tenant_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          check_key: string
-          client_id: string
-          completed_at?: string | null
-          completed_by_user_id?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          period_id: string
-          status?: string
-          tenant_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          check_key?: string
-          client_id?: string
-          completed_at?: string | null
-          completed_by_user_id?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          period_id?: string
-          status?: string
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      aml_monitoring_alerts: {
-        Row: {
-          alert_type: string
-          case_id: string
-          client_id: string
-          created_at: string
-          description: string | null
-          id: string
-          metadata_json: Json
-          resolution_notes: string | null
-          resolved_at: string | null
-          resolved_by_user_id: string | null
-          severity: string
-          source: string
-          status: string
-          tenant_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          alert_type: string
-          case_id: string
-          client_id: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata_json?: Json
-          resolution_notes?: string | null
-          resolved_at?: string | null
-          resolved_by_user_id?: string | null
-          severity?: string
-          source?: string
-          status?: string
-          tenant_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          alert_type?: string
-          case_id?: string
-          client_id?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata_json?: Json
-          resolution_notes?: string | null
-          resolved_at?: string | null
-          resolved_by_user_id?: string | null
-          severity?: string
-          source?: string
-          status?: string
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "aml_monitoring_alerts_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: false
-            referencedRelation: "kyc_cases"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "aml_monitoring_alerts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "aml_monitoring_alerts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "aml_monitoring_alerts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "aml_monitoring_alerts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "aml_monitoring_alerts_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "aml_monitoring_alerts_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      audit_log: {
-        Row: {
-          action: string
-          after_json: Json | null
-          before_json: Json | null
-          created_at: string
-          entity_id: string | null
-          entity_name: string
-          id: string
-          ip_address: string | null
-          tenant_id: string
-          user_id: string | null
-        }
-        Insert: {
-          action: string
-          after_json?: Json | null
-          before_json?: Json | null
-          created_at?: string
-          entity_id?: string | null
-          entity_name: string
-          id?: string
-          ip_address?: string | null
-          tenant_id: string
-          user_id?: string | null
-        }
-        Update: {
-          action?: string
-          after_json?: Json | null
-          before_json?: Json | null
-          created_at?: string
-          entity_id?: string | null
-          entity_name?: string
-          id?: string
-          ip_address?: string | null
-          tenant_id?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "audit_log_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "audit_log_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      automation_execution_log: {
-        Row: {
-          executed_at: string
-          id: string
-          result_message: string | null
-          rule_id: string | null
-          status: string
-          tenant_id: string
-          trigger_data_json: Json | null
-        }
-        Insert: {
-          executed_at?: string
-          id?: string
-          result_message?: string | null
-          rule_id?: string | null
-          status?: string
-          tenant_id: string
-          trigger_data_json?: Json | null
-        }
-        Update: {
-          executed_at?: string
-          id?: string
-          result_message?: string | null
-          rule_id?: string | null
-          status?: string
-          tenant_id?: string
-          trigger_data_json?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "automation_execution_log_rule_id_fkey"
-            columns: ["rule_id"]
-            isOneToOne: false
-            referencedRelation: "automation_rules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "automation_execution_log_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "automation_execution_log_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      automation_rules: {
-        Row: {
-          action_payload_json: Json
-          action_type: string
-          created_at: string
-          id: string
-          is_enabled: boolean | null
-          name: string
-          tenant_id: string
-          trigger_filter_json: Json
-          trigger_type: string
-          updated_at: string
-        }
-        Insert: {
-          action_payload_json?: Json
-          action_type: string
-          created_at?: string
-          id?: string
-          is_enabled?: boolean | null
-          name: string
-          tenant_id: string
-          trigger_filter_json?: Json
-          trigger_type: string
-          updated_at?: string
-        }
-        Update: {
-          action_payload_json?: Json
-          action_type?: string
-          created_at?: string
-          id?: string
-          is_enabled?: boolean | null
-          name?: string
-          tenant_id?: string
-          trigger_filter_json?: Json
-          trigger_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "automation_rules_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "automation_rules_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      bank_connections: {
-        Row: {
-          account_name: string
-          account_number_masked: string | null
-          balance_pence: number | null
-          balance_updated_at: string | null
-          client_id: string
-          consent_expires_at: string | null
-          created_at: string
-          currency: string
-          id: string
-          ledger_account_id: string | null
-          metadata_json: Json
-          provider: string
-          provider_connection_id: string | null
-          sort_code: string | null
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          account_name: string
-          account_number_masked?: string | null
-          balance_pence?: number | null
-          balance_updated_at?: string | null
-          client_id: string
-          consent_expires_at?: string | null
-          created_at?: string
-          currency?: string
-          id?: string
-          ledger_account_id?: string | null
-          metadata_json?: Json
-          provider?: string
-          provider_connection_id?: string | null
-          sort_code?: string | null
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          account_name?: string
-          account_number_masked?: string | null
-          balance_pence?: number | null
-          balance_updated_at?: string | null
-          client_id?: string
-          consent_expires_at?: string | null
-          created_at?: string
-          currency?: string
-          id?: string
-          ledger_account_id?: string | null
-          metadata_json?: Json
-          provider?: string
-          provider_connection_id?: string | null
-          sort_code?: string | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bank_connections_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bank_connections_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "bank_connections_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "bank_connections_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "bank_connections_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bank_connections_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      bank_transactions: {
-        Row: {
-          amount_pence: number
-          bank_connection_id: string
-          categorisation_status: string
-          client_id: string
-          confirmed_account_id: string | null
-          created_at: string
-          description: string
-          id: string
-          journal_entry_id: string | null
-          matched_rule_id: string | null
-          metadata_json: Json
-          provider_transaction_id: string | null
-          reference: string | null
-          running_balance_pence: number | null
-          suggested_account_id: string | null
-          tenant_id: string
-          transaction_date: string
-          transaction_type: string | null
-          updated_at: string
-        }
-        Insert: {
-          amount_pence: number
-          bank_connection_id: string
-          categorisation_status?: string
-          client_id: string
-          confirmed_account_id?: string | null
-          created_at?: string
-          description: string
-          id?: string
-          journal_entry_id?: string | null
-          matched_rule_id?: string | null
-          metadata_json?: Json
-          provider_transaction_id?: string | null
-          reference?: string | null
-          running_balance_pence?: number | null
-          suggested_account_id?: string | null
-          tenant_id: string
-          transaction_date: string
-          transaction_type?: string | null
-          updated_at?: string
-        }
-        Update: {
-          amount_pence?: number
-          bank_connection_id?: string
-          categorisation_status?: string
-          client_id?: string
-          confirmed_account_id?: string | null
-          created_at?: string
-          description?: string
-          id?: string
-          journal_entry_id?: string | null
-          matched_rule_id?: string | null
-          metadata_json?: Json
-          provider_transaction_id?: string | null
-          reference?: string | null
-          running_balance_pence?: number | null
-          suggested_account_id?: string | null
-          tenant_id?: string
-          transaction_date?: string
-          transaction_type?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bank_transactions_bank_connection_id_fkey"
-            columns: ["bank_connection_id"]
-            isOneToOne: false
-            referencedRelation: "bank_connections"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_confirmed_account_id_fkey"
-            columns: ["confirmed_account_id"]
-            isOneToOne: false
-            referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_journal_entry_id_fkey"
-            columns: ["journal_entry_id"]
-            isOneToOne: false
-            referencedRelation: "journal_entries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_suggested_account_id_fkey"
-            columns: ["suggested_account_id"]
-            isOneToOne: false
-            referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bank_transactions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      calendar_events: {
-        Row: {
-          all_day: boolean
-          assigned_user_id: string | null
-          client_id: string | null
-          color: string | null
-          created_at: string
-          created_by: string | null
-          description: string | null
-          end_at: string
-          event_type: string
-          id: string
-          metadata_json: Json
-          recurrence_rule: string | null
-          start_at: string
-          task_id: string | null
-          tenant_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          all_day?: boolean
-          assigned_user_id?: string | null
-          client_id?: string | null
-          color?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          end_at: string
-          event_type?: string
-          id?: string
-          metadata_json?: Json
-          recurrence_rule?: string | null
-          start_at: string
-          task_id?: string | null
-          tenant_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          all_day?: boolean
-          assigned_user_id?: string | null
-          client_id?: string | null
-          color?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          end_at?: string
-          event_type?: string
-          id?: string
-          metadata_json?: Json
-          recurrence_rule?: string | null
-          start_at?: string
-          task_id?: string | null
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "calendar_events_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["task_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["task_id"]
-          },
-          {
-            foreignKeyName: "calendar_events_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      categorisation_rules: {
-        Row: {
-          auto_post: boolean
-          client_id: string | null
-          created_at: string
-          created_by: string | null
-          hit_count: number
-          id: string
-          is_active: boolean
-          last_matched_at: string | null
-          match_field: string
-          match_type: string
-          match_value: string
-          name: string
-          priority: number
-          target_account_id: string
-          tenant_id: string
-          updated_at: string
-          vat_code: string | null
-        }
-        Insert: {
-          auto_post?: boolean
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          hit_count?: number
-          id?: string
-          is_active?: boolean
-          last_matched_at?: string | null
-          match_field?: string
-          match_type?: string
-          match_value: string
-          name: string
-          priority?: number
-          target_account_id: string
-          tenant_id: string
-          updated_at?: string
-          vat_code?: string | null
-        }
-        Update: {
-          auto_post?: boolean
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          hit_count?: number
-          id?: string
-          is_active?: boolean
-          last_matched_at?: string | null
-          match_field?: string
-          match_type?: string
-          match_value?: string
-          name?: string
-          priority?: number
-          target_account_id?: string
-          tenant_id?: string
-          updated_at?: string
-          vat_code?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "categorisation_rules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "categorisation_rules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "categorisation_rules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "categorisation_rules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "categorisation_rules_target_account_id_fkey"
-            columns: ["target_account_id"]
-            isOneToOne: false
-            referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "categorisation_rules_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "categorisation_rules_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      ch_filings: {
-        Row: {
-          accepted_at: string | null
-          ch_barcode: string | null
-          ch_transaction_id: string | null
-          client_id: string
-          created_at: string
-          filing_description: string | null
-          filing_type: string
-          id: string
-          rejected_reason: string | null
-          request_json: Json
-          response_json: Json
-          status: string
-          submitted_at: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          accepted_at?: string | null
-          ch_barcode?: string | null
-          ch_transaction_id?: string | null
-          client_id: string
-          created_at?: string
-          filing_description?: string | null
-          filing_type: string
-          id?: string
-          rejected_reason?: string | null
-          request_json?: Json
-          response_json?: Json
-          status?: string
-          submitted_at?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          accepted_at?: string | null
-          ch_barcode?: string | null
-          ch_transaction_id?: string | null
-          client_id?: string
-          created_at?: string
-          filing_description?: string | null
-          filing_type?: string
-          id?: string
-          rejected_reason?: string | null
-          request_json?: Json
-          response_json?: Json
-          status?: string
-          submitted_at?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ch_filings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ch_filings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ch_filings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ch_filings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ch_filings_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ch_filings_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      chart_of_accounts: {
-        Row: {
-          account_type: string
-          code: string
-          created_at: string
-          id: string
-          is_active: boolean
-          name: string
-          parent_id: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          account_type?: string
-          code: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name: string
-          parent_id?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          account_type?: string
-          code?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          parent_id?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chart_of_accounts_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chart_of_accounts_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chart_of_accounts_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      cis_contractors: {
-        Row: {
-          accounts_office_ref: string | null
-          client_id: string
-          created_at: string
-          id: string
-          paye_reference: string | null
-          status: string
-          tenant_id: string
-          updated_at: string
-          utr: string
-          verification_date: string | null
-        }
-        Insert: {
-          accounts_office_ref?: string | null
-          client_id: string
-          created_at?: string
-          id?: string
-          paye_reference?: string | null
-          status?: string
-          tenant_id: string
-          updated_at?: string
-          utr: string
-          verification_date?: string | null
-        }
-        Update: {
-          accounts_office_ref?: string | null
-          client_id?: string
-          created_at?: string
-          id?: string
-          paye_reference?: string | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-          utr?: string
-          verification_date?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cis_contractors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_contractors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "cis_contractors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "cis_contractors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "cis_contractors_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_contractors_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      cis_deductions: {
-        Row: {
-          contractor_id: string
-          created_at: string
-          deduction_amount_pence: number
-          deduction_rate: number
-          description: string | null
-          gross_amount_pence: number
-          id: string
-          materials_amount_pence: number
-          net_amount_pence: number
-          payment_date: string | null
-          subcontractor_id: string
-          tax_month: number
-          tax_year: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          contractor_id: string
-          created_at?: string
-          deduction_amount_pence?: number
-          deduction_rate: number
-          description?: string | null
-          gross_amount_pence?: number
-          id?: string
-          materials_amount_pence?: number
-          net_amount_pence?: number
-          payment_date?: string | null
-          subcontractor_id: string
-          tax_month: number
-          tax_year: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          contractor_id?: string
-          created_at?: string
-          deduction_amount_pence?: number
-          deduction_rate?: number
-          description?: string | null
-          gross_amount_pence?: number
-          id?: string
-          materials_amount_pence?: number
-          net_amount_pence?: number
-          payment_date?: string | null
-          subcontractor_id?: string
-          tax_month?: number
-          tax_year?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cis_deductions_contractor_id_fkey"
-            columns: ["contractor_id"]
-            isOneToOne: false
-            referencedRelation: "cis_contractors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_deductions_subcontractor_id_fkey"
-            columns: ["subcontractor_id"]
-            isOneToOne: false
-            referencedRelation: "cis_subcontractors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_deductions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_deductions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      cis_monthly_returns: {
-        Row: {
-          contractor_id: string
-          created_at: string
-          employment_status_declaration: boolean
-          hmrc_receipt_id: string | null
-          id: string
-          nil_return: boolean
-          status: string
-          submission_job_id: string | null
-          submitted_at: string | null
-          tax_month: number
-          tax_year: string
-          tenant_id: string
-          total_deductions_pence: number
-          total_gross_pence: number
-          total_materials_pence: number
-          updated_at: string
-        }
-        Insert: {
-          contractor_id: string
-          created_at?: string
-          employment_status_declaration?: boolean
-          hmrc_receipt_id?: string | null
-          id?: string
-          nil_return?: boolean
-          status?: string
-          submission_job_id?: string | null
-          submitted_at?: string | null
-          tax_month: number
-          tax_year: string
-          tenant_id: string
-          total_deductions_pence?: number
-          total_gross_pence?: number
-          total_materials_pence?: number
-          updated_at?: string
-        }
-        Update: {
-          contractor_id?: string
-          created_at?: string
-          employment_status_declaration?: boolean
-          hmrc_receipt_id?: string | null
-          id?: string
-          nil_return?: boolean
-          status?: string
-          submission_job_id?: string | null
-          submitted_at?: string | null
-          tax_month?: number
-          tax_year?: string
-          tenant_id?: string
-          total_deductions_pence?: number
-          total_gross_pence?: number
-          total_materials_pence?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cis_monthly_returns_contractor_id_fkey"
-            columns: ["contractor_id"]
-            isOneToOne: false
-            referencedRelation: "cis_contractors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_monthly_returns_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_monthly_returns_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      cis_subcontractors: {
-        Row: {
-          address_json: Json
-          client_id: string | null
-          company_number: string | null
-          contractor_id: string
-          created_at: string
-          deduction_rate: number
-          hmrc_verification_ref: string | null
-          id: string
-          last_verified_at: string | null
-          name: string
-          nino: string | null
-          tenant_id: string
-          trading_name: string | null
-          updated_at: string
-          utr: string | null
-          verification_status: string
-        }
-        Insert: {
-          address_json?: Json
-          client_id?: string | null
-          company_number?: string | null
-          contractor_id: string
-          created_at?: string
-          deduction_rate?: number
-          hmrc_verification_ref?: string | null
-          id?: string
-          last_verified_at?: string | null
-          name: string
-          nino?: string | null
-          tenant_id: string
-          trading_name?: string | null
-          updated_at?: string
-          utr?: string | null
-          verification_status?: string
-        }
-        Update: {
-          address_json?: Json
-          client_id?: string | null
-          company_number?: string | null
-          contractor_id?: string
-          created_at?: string
-          deduction_rate?: number
-          hmrc_verification_ref?: string | null
-          id?: string
-          last_verified_at?: string | null
-          name?: string
-          nino?: string | null
-          tenant_id?: string
-          trading_name?: string | null
-          updated_at?: string
-          utr?: string | null
-          verification_status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cis_subcontractors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_subcontractors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "cis_subcontractors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "cis_subcontractors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "cis_subcontractors_contractor_id_fkey"
-            columns: ["contractor_id"]
-            isOneToOne: false
-            referencedRelation: "cis_contractors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_subcontractors_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cis_subcontractors_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      client_credentials: {
-        Row: {
-          ciphertext: string
-          client_id: string
-          created_at: string
-          credential_type: string
-          expires_at: string | null
-          id: string
-          metadata_json: Json
-          provider: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          ciphertext: string
-          client_id: string
-          created_at?: string
-          credential_type: string
-          expires_at?: string | null
-          id?: string
-          metadata_json?: Json
-          provider: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          ciphertext?: string
-          client_id?: string
-          created_at?: string
-          credential_type?: string
-          expires_at?: string | null
-          id?: string
-          metadata_json?: Json
-          provider?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_credentials_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_credentials_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "client_credentials_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "client_credentials_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "client_credentials_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_credentials_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      client_onboarding: {
-        Row: {
-          aml_case_id: string | null
-          client_id: string
-          coa_template_id: string | null
-          completed_at: string | null
-          created_at: string
-          current_step: string
-          engagement_document_id: string | null
-          engagement_signed: boolean
-          id: string
-          notes: string | null
-          selected_services: string[]
-          started_by: string | null
-          status: string
-          steps_json: Json
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          aml_case_id?: string | null
-          client_id: string
-          coa_template_id?: string | null
-          completed_at?: string | null
-          created_at?: string
-          current_step?: string
-          engagement_document_id?: string | null
-          engagement_signed?: boolean
-          id?: string
-          notes?: string | null
-          selected_services?: string[]
-          started_by?: string | null
-          status?: string
-          steps_json?: Json
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          aml_case_id?: string | null
-          client_id?: string
-          coa_template_id?: string | null
-          completed_at?: string | null
-          created_at?: string
-          current_step?: string
-          engagement_document_id?: string | null
-          engagement_signed?: boolean
-          id?: string
-          notes?: string | null
-          selected_services?: string[]
-          started_by?: string | null
-          status?: string
-          steps_json?: Json
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_onboarding_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_onboarding_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "client_onboarding_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "client_onboarding_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "client_onboarding_coa_template_id_fkey"
-            columns: ["coa_template_id"]
-            isOneToOne: false
-            referencedRelation: "coa_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_onboarding_engagement_document_id_fkey"
-            columns: ["engagement_document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_onboarding_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_onboarding_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      clients: {
-        Row: {
-          address_json: Json | null
-          archived_at: string | null
-          assigned_manager_user_id: string | null
-          charity_number: string | null
-          company_number: string | null
-          created_at: string
-          email: string | null
-          entity_type: Database["public"]["Enums"]["entity_type"]
-          id: string
-          legal_name: string
-          nino: string | null
-          paye_reference: string | null
-          phone: string | null
-          status: Database["public"]["Enums"]["client_status"]
-          tenant_id: string
-          trading_name: string | null
-          updated_at: string
-          utr: string | null
-          vat_number: string | null
-        }
-        Insert: {
-          address_json?: Json | null
-          archived_at?: string | null
-          assigned_manager_user_id?: string | null
-          charity_number?: string | null
-          company_number?: string | null
-          created_at?: string
-          email?: string | null
-          entity_type?: Database["public"]["Enums"]["entity_type"]
-          id?: string
-          legal_name: string
-          nino?: string | null
-          paye_reference?: string | null
-          phone?: string | null
-          status?: Database["public"]["Enums"]["client_status"]
-          tenant_id: string
-          trading_name?: string | null
-          updated_at?: string
-          utr?: string | null
-          vat_number?: string | null
-        }
-        Update: {
-          address_json?: Json | null
-          archived_at?: string | null
-          assigned_manager_user_id?: string | null
-          charity_number?: string | null
-          company_number?: string | null
-          created_at?: string
-          email?: string | null
-          entity_type?: Database["public"]["Enums"]["entity_type"]
-          id?: string
-          legal_name?: string
-          nino?: string | null
-          paye_reference?: string | null
-          phone?: string | null
-          status?: Database["public"]["Enums"]["client_status"]
-          tenant_id?: string
-          trading_name?: string | null
-          updated_at?: string
-          utr?: string | null
-          vat_number?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "clients_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "clients_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      coa_template_accounts: {
-        Row: {
-          coa_template_id: string
-          code: string
-          created_at: string
-          id: string
-          is_active: boolean | null
-          is_control: boolean | null
-          name: string
-          sort_order: number | null
-          subtype: string | null
-          tenant_id: string
-          type: string
-        }
-        Insert: {
-          coa_template_id: string
-          code: string
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          is_control?: boolean | null
-          name: string
-          sort_order?: number | null
-          subtype?: string | null
-          tenant_id: string
-          type: string
-        }
-        Update: {
-          coa_template_id?: string
-          code?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          is_control?: boolean | null
-          name?: string
-          sort_order?: number | null
-          subtype?: string | null
-          tenant_id?: string
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "coa_template_accounts_coa_template_id_fkey"
-            columns: ["coa_template_id"]
-            isOneToOne: false
-            referencedRelation: "coa_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "coa_template_accounts_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "coa_template_accounts_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      coa_templates: {
-        Row: {
-          created_at: string
-          description: string | null
-          entity_type: Database["public"]["Enums"]["entity_type"]
-          id: string
-          is_default: boolean | null
-          name: string
-          tenant_id: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          entity_type: Database["public"]["Enums"]["entity_type"]
-          id?: string
-          is_default?: boolean | null
-          name: string
-          tenant_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          entity_type?: Database["public"]["Enums"]["entity_type"]
-          id?: string
-          is_default?: boolean | null
-          name?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "coa_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "coa_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      company_profiles: {
-        Row: {
-          client_id: string
-          company_name: string
-          company_number: string
-          company_status: string
-          created_at: string
-          id: string
-          incorporation_date: string | null
-          last_accounts_due: string | null
-          last_confirmation_statement_date: string | null
-          last_synced_at: string | null
-          next_accounts_due: string | null
-          next_confirmation_statement_due: string | null
-          officers_snapshot_json: Json
-          psc_snapshot_json: Json
-          registered_office_json: Json
-          sic_codes: string[]
-          sync_error: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          company_name: string
-          company_number: string
-          company_status?: string
-          created_at?: string
-          id?: string
-          incorporation_date?: string | null
-          last_accounts_due?: string | null
-          last_confirmation_statement_date?: string | null
-          last_synced_at?: string | null
-          next_accounts_due?: string | null
-          next_confirmation_statement_due?: string | null
-          officers_snapshot_json?: Json
-          psc_snapshot_json?: Json
-          registered_office_json?: Json
-          sic_codes?: string[]
-          sync_error?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          company_name?: string
-          company_number?: string
-          company_status?: string
-          created_at?: string
-          id?: string
-          incorporation_date?: string | null
-          last_accounts_due?: string | null
-          last_confirmation_statement_date?: string | null
-          last_synced_at?: string | null
-          next_accounts_due?: string | null
-          next_confirmation_statement_due?: string | null
-          officers_snapshot_json?: Json
-          psc_snapshot_json?: Json
-          registered_office_json?: Json
-          sic_codes?: string[]
-          sync_error?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_profiles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_profiles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      company_register_directors: {
-        Row: {
-          appointed_on: string | null
-          ch_officer_id: string | null
-          client_id: string
-          created_at: string
-          date_of_birth: string | null
-          full_name: string
-          id: string
-          is_active: boolean
-          nationality: string | null
-          occupation: string | null
-          residential_address_json: Json
-          resigned_on: string | null
-          service_address_json: Json
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          appointed_on?: string | null
-          ch_officer_id?: string | null
-          client_id: string
-          created_at?: string
-          date_of_birth?: string | null
-          full_name: string
-          id?: string
-          is_active?: boolean
-          nationality?: string | null
-          occupation?: string | null
-          residential_address_json?: Json
-          resigned_on?: string | null
-          service_address_json?: Json
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          appointed_on?: string | null
-          ch_officer_id?: string | null
-          client_id?: string
-          created_at?: string
-          date_of_birth?: string | null
-          full_name?: string
-          id?: string
-          is_active?: boolean
-          nationality?: string | null
-          occupation?: string | null
-          residential_address_json?: Json
-          resigned_on?: string | null
-          service_address_json?: Json
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_register_directors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_register_directors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_directors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_directors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_directors_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_register_directors_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      company_register_members: {
-        Row: {
-          address_json: Json
-          client_id: string
-          created_at: string
-          date_became_member: string | null
-          date_ceased_member: string | null
-          full_name: string
-          id: string
-          is_active: boolean
-          share_class_id: string | null
-          shares_held: number
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          address_json?: Json
-          client_id: string
-          created_at?: string
-          date_became_member?: string | null
-          date_ceased_member?: string | null
-          full_name: string
-          id?: string
-          is_active?: boolean
-          share_class_id?: string | null
-          shares_held?: number
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          address_json?: Json
-          client_id?: string
-          created_at?: string
-          date_became_member?: string | null
-          date_ceased_member?: string | null
-          full_name?: string
-          id?: string
-          is_active?: boolean
-          share_class_id?: string | null
-          shares_held?: number
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_register_members_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_register_members_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_members_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_members_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_members_share_class_id_fkey"
-            columns: ["share_class_id"]
-            isOneToOne: false
-            referencedRelation: "share_classes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_register_members_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_register_members_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      company_register_psc: {
-        Row: {
-          ceased_on: string | null
-          ch_psc_id: string | null
-          client_id: string
-          country_of_residence: string | null
-          created_at: string
-          date_of_birth: string | null
-          full_name: string
-          id: string
-          is_active: boolean
-          nationality: string | null
-          natures_of_control: string[]
-          notified_on: string | null
-          service_address_json: Json
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          ceased_on?: string | null
-          ch_psc_id?: string | null
-          client_id: string
-          country_of_residence?: string | null
-          created_at?: string
-          date_of_birth?: string | null
-          full_name: string
-          id?: string
-          is_active?: boolean
-          nationality?: string | null
-          natures_of_control?: string[]
-          notified_on?: string | null
-          service_address_json?: Json
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          ceased_on?: string | null
-          ch_psc_id?: string | null
-          client_id?: string
-          country_of_residence?: string | null
-          created_at?: string
-          date_of_birth?: string | null
-          full_name?: string
-          id?: string
-          is_active?: boolean
-          nationality?: string | null
-          natures_of_control?: string[]
-          notified_on?: string | null
-          service_address_json?: Json
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_register_psc_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_register_psc_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_psc_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_psc_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_register_psc_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_register_psc_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      confirmation_statement_cycles: {
-        Row: {
-          ch_filing_id: string | null
-          client_id: string
-          created_at: string
-          due_date: string
-          filed_at: string | null
-          id: string
-          review_period_end: string
-          review_period_start: string
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          ch_filing_id?: string | null
-          client_id: string
-          created_at?: string
-          due_date: string
-          filed_at?: string | null
-          id?: string
-          review_period_end: string
-          review_period_start: string
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          ch_filing_id?: string | null
-          client_id?: string
-          created_at?: string
-          due_date?: string
-          filed_at?: string | null
-          id?: string
-          review_period_end?: string
-          review_period_start?: string
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "confirmation_statement_cycles_ch_filing_id_fkey"
-            columns: ["ch_filing_id"]
-            isOneToOne: false
-            referencedRelation: "ch_filings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "confirmation_statement_cycles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "confirmation_statement_cycles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "confirmation_statement_cycles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "confirmation_statement_cycles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "confirmation_statement_cycles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "confirmation_statement_cycles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      currencies: {
-        Row: {
-          code: string
-          created_at: string
-          exchange_rate: number
-          id: string
-          is_active: boolean
-          is_base: boolean
-          name: string
-          rate_updated_at: string | null
-          symbol: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          exchange_rate?: number
-          id?: string
-          is_active?: boolean
-          is_base?: boolean
-          name: string
-          rate_updated_at?: string | null
-          symbol?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          exchange_rate?: number
-          id?: string
-          is_active?: boolean
-          is_base?: boolean
-          name?: string
-          rate_updated_at?: string | null
-          symbol?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "currencies_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "currencies_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      document_requests: {
-        Row: {
-          client_id: string
-          completed_at: string | null
-          created_at: string
-          description: string | null
-          document_types: string[]
-          due_date: string | null
-          id: string
-          requested_by_user_id: string | null
-          status: string
-          tenant_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          document_types?: string[]
-          due_date?: string | null
-          id?: string
-          requested_by_user_id?: string | null
-          status?: string
-          tenant_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          document_types?: string[]
-          due_date?: string | null
-          id?: string
-          requested_by_user_id?: string | null
-          status?: string
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "document_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "document_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "document_requests_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_requests_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      document_tags: {
-        Row: {
-          color: string | null
-          created_at: string
-          id: string
-          name: string
-          tenant_id: string
-        }
-        Insert: {
-          color?: string | null
-          created_at?: string
-          id?: string
-          name: string
-          tenant_id: string
-        }
-        Update: {
-          color?: string | null
-          created_at?: string
-          id?: string
-          name?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_tags_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_tags_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      document_versions: {
-        Row: {
-          created_at: string
-          document_id: string
-          id: string
-          notes: string | null
-          size_bytes: number
-          storage_path: string
-          uploaded_by_user_id: string | null
-          version_number: number
-        }
-        Insert: {
-          created_at?: string
-          document_id: string
-          id?: string
-          notes?: string | null
-          size_bytes?: number
-          storage_path: string
-          uploaded_by_user_id?: string | null
-          version_number?: number
-        }
-        Update: {
-          created_at?: string
-          document_id?: string
-          id?: string
-          notes?: string | null
-          size_bytes?: number
-          storage_path?: string
-          uploaded_by_user_id?: string | null
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_versions_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      documents: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          document_type: string
-          filename: string
-          folder_path: string
-          id: string
-          metadata_json: Json
-          mime_type: string
-          ocr_text: string | null
-          request_id: string | null
-          size_bytes: number
-          status: string
-          storage_path: string
-          tags: string[] | null
-          tenant_id: string
-          updated_at: string
-          uploaded_by_user_id: string | null
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          document_type?: string
-          filename: string
-          folder_path?: string
-          id?: string
-          metadata_json?: Json
-          mime_type: string
-          ocr_text?: string | null
-          request_id?: string | null
-          size_bytes?: number
-          status?: string
-          storage_path: string
-          tags?: string[] | null
-          tenant_id: string
-          updated_at?: string
-          uploaded_by_user_id?: string | null
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          document_type?: string
-          filename?: string
-          folder_path?: string
-          id?: string
-          metadata_json?: Json
-          mime_type?: string
-          ocr_text?: string | null
-          request_id?: string | null
-          size_bytes?: number
-          status?: string
-          storage_path?: string
-          tags?: string[] | null
-          tenant_id?: string
-          updated_at?: string
-          uploaded_by_user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "documents_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "document_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "documents_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "documents_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      domain_events: {
-        Row: {
-          created_at: string
-          id: string
-          payload: Json
-          processed: boolean
-          tenant_id: string
-          trigger: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          payload?: Json
-          processed?: boolean
-          tenant_id: string
-          trigger: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          payload?: Json
-          processed?: boolean
-          tenant_id?: string
-          trigger?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "domain_events_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domain_events_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      ec_sales_entries: {
-        Row: {
-          client_id: string
-          country_code: string
-          created_at: string
-          customer_name: string
-          customer_vat_number: string
-          id: string
-          period_end: string
-          period_start: string
-          status: string
-          supply_type: string
-          tenant_id: string
-          updated_at: string
-          value_gbp_pence: number
-          vat_return_id: string | null
-        }
-        Insert: {
-          client_id: string
-          country_code: string
-          created_at?: string
-          customer_name: string
-          customer_vat_number: string
-          id?: string
-          period_end: string
-          period_start: string
-          status?: string
-          supply_type?: string
-          tenant_id: string
-          updated_at?: string
-          value_gbp_pence?: number
-          vat_return_id?: string | null
-        }
-        Update: {
-          client_id?: string
-          country_code?: string
-          created_at?: string
-          customer_name?: string
-          customer_vat_number?: string
-          id?: string
-          period_end?: string
-          period_start?: string
-          status?: string
-          supply_type?: string
-          tenant_id?: string
-          updated_at?: string
-          value_gbp_pence?: number
-          vat_return_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ec_sales_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ec_sales_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ec_sales_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ec_sales_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ec_sales_entries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ec_sales_entries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-          {
-            foreignKeyName: "ec_sales_entries_vat_return_id_fkey"
-            columns: ["vat_return_id"]
-            isOneToOne: false
-            referencedRelation: "v_vat_due"
-            referencedColumns: ["vat_return_id"]
-          },
-          {
-            foreignKeyName: "ec_sales_entries_vat_return_id_fkey"
-            columns: ["vat_return_id"]
-            isOneToOne: false
-            referencedRelation: "vat_returns"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      email_templates: {
-        Row: {
-          body_html: string
-          body_text: string | null
-          created_at: string
-          id: string
-          is_active: boolean | null
-          key: string
-          name: string
-          subject: string
-          tenant_id: string
-          updated_at: string
-          variables_json: Json
-        }
-        Insert: {
-          body_html: string
-          body_text?: string | null
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          key: string
-          name: string
-          subject: string
-          tenant_id: string
-          updated_at?: string
-          variables_json?: Json
-        }
-        Update: {
-          body_html?: string
-          body_text?: string | null
-          created_at?: string
-          id?: string
-          is_active?: boolean | null
-          key?: string
-          name?: string
-          subject?: string
-          tenant_id?: string
-          updated_at?: string
-          variables_json?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "email_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "email_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      engagement_services: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "engagement_services_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "engagement_services_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      event_dedupe: {
-        Row: {
-          created_at: string
-          id: string
-          key: string
-          tenant_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          key: string
-          tenant_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          key?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_dedupe_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_dedupe_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      event_logs: {
-        Row: {
-          actor_user_id: string | null
-          client_id: string | null
-          correlation_id: string | null
-          created_at: string
-          event_type: string
-          id: string
-          payload_json: Json
-          source: string
-          tenant_id: string
-        }
-        Insert: {
-          actor_user_id?: string | null
-          client_id?: string | null
-          correlation_id?: string | null
-          created_at?: string
-          event_type: string
-          id?: string
-          payload_json?: Json
-          source?: string
-          tenant_id: string
-        }
-        Update: {
-          actor_user_id?: string | null
-          client_id?: string | null
-          correlation_id?: string | null
-          created_at?: string
-          event_type?: string
-          id?: string
-          payload_json?: Json
-          source?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "event_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "event_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "event_logs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_logs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      incorp_documents: {
-        Row: {
-          application_id: string
-          created_at: string
-          document_id: string | null
-          document_type: string
-          id: string
-          person_id: string | null
-          status: string
-          tenant_id: string
-        }
-        Insert: {
-          application_id: string
-          created_at?: string
-          document_id?: string | null
-          document_type: string
-          id?: string
-          person_id?: string | null
-          status?: string
-          tenant_id: string
-        }
-        Update: {
-          application_id?: string
-          created_at?: string
-          document_id?: string | null
-          document_type?: string
-          id?: string
-          person_id?: string | null
-          status?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "incorp_documents_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "incorporation_applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_documents_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_documents_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "incorp_people"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_documents_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_documents_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      incorp_people: {
-        Row: {
-          application_id: string
-          consent_to_act: boolean
-          country_of_residence: string | null
-          created_at: string
-          date_of_birth: string | null
-          first_name: string
-          id: string
-          kyc_status: string
-          last_name: string
-          middle_names: string | null
-          nationality: string | null
-          natures_of_control: string[] | null
-          occupation: string | null
-          residential_address_json: Json
-          role: string
-          service_address_json: Json
-          tenant_id: string
-          title: string | null
-          updated_at: string
-        }
-        Insert: {
-          application_id: string
-          consent_to_act?: boolean
-          country_of_residence?: string | null
-          created_at?: string
-          date_of_birth?: string | null
-          first_name: string
-          id?: string
-          kyc_status?: string
-          last_name: string
-          middle_names?: string | null
-          nationality?: string | null
-          natures_of_control?: string[] | null
-          occupation?: string | null
-          residential_address_json?: Json
-          role: string
-          service_address_json?: Json
-          tenant_id: string
-          title?: string | null
-          updated_at?: string
-        }
-        Update: {
-          application_id?: string
-          consent_to_act?: boolean
-          country_of_residence?: string | null
-          created_at?: string
-          date_of_birth?: string | null
-          first_name?: string
-          id?: string
-          kyc_status?: string
-          last_name?: string
-          middle_names?: string | null
-          nationality?: string | null
-          natures_of_control?: string[] | null
-          occupation?: string | null
-          residential_address_json?: Json
-          role?: string
-          service_address_json?: Json
-          tenant_id?: string
-          title?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "incorp_people_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "incorporation_applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_people_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_people_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      incorp_share_structure: {
-        Row: {
-          amount_paid_pence: number
-          amount_unpaid_pence: number
-          application_id: string
-          class_name: string
-          created_at: string
-          currency: string
-          id: string
-          nominal_value_pence: number
-          shares_subscribed: number
-          subscriber_person_id: string | null
-          tenant_id: string
-          total_shares: number
-        }
-        Insert: {
-          amount_paid_pence?: number
-          amount_unpaid_pence?: number
-          application_id: string
-          class_name?: string
-          created_at?: string
-          currency?: string
-          id?: string
-          nominal_value_pence?: number
-          shares_subscribed?: number
-          subscriber_person_id?: string | null
-          tenant_id: string
-          total_shares?: number
-        }
-        Update: {
-          amount_paid_pence?: number
-          amount_unpaid_pence?: number
-          application_id?: string
-          class_name?: string
-          created_at?: string
-          currency?: string
-          id?: string
-          nominal_value_pence?: number
-          shares_subscribed?: number
-          subscriber_person_id?: string | null
-          tenant_id?: string
-          total_shares?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "incorp_share_structure_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "incorporation_applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_share_structure_subscriber_person_id_fkey"
-            columns: ["subscriber_person_id"]
-            isOneToOne: false
-            referencedRelation: "incorp_people"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_share_structure_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_share_structure_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      incorp_status_history: {
-        Row: {
-          application_id: string
-          changed_by_user_id: string | null
-          created_at: string
-          from_status: string | null
-          id: string
-          notes: string | null
-          tenant_id: string
-          to_status: string
-        }
-        Insert: {
-          application_id: string
-          changed_by_user_id?: string | null
-          created_at?: string
-          from_status?: string | null
-          id?: string
-          notes?: string | null
-          tenant_id: string
-          to_status: string
-        }
-        Update: {
-          application_id?: string
-          changed_by_user_id?: string | null
-          created_at?: string
-          from_status?: string | null
-          id?: string
-          notes?: string | null
-          tenant_id?: string
-          to_status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "incorp_status_history_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "incorporation_applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_status_history_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorp_status_history_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      incorporation_applications: {
-        Row: {
-          articles_type: string
-          ch_company_number: string | null
-          ch_incorporation_date: string | null
-          ch_submission_id: string | null
-          client_id: string | null
-          created_at: string
-          created_by_user_id: string | null
-          data_json: Json
-          entity_type: string
-          id: string
-          payment_amount_pence: number | null
-          payment_reference: string | null
-          payment_status: string
-          proposed_name: string | null
-          registered_office_json: Json
-          sail_address_json: Json | null
-          sic_codes: string[]
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          articles_type?: string
-          ch_company_number?: string | null
-          ch_incorporation_date?: string | null
-          ch_submission_id?: string | null
-          client_id?: string | null
-          created_at?: string
-          created_by_user_id?: string | null
-          data_json?: Json
-          entity_type?: string
-          id?: string
-          payment_amount_pence?: number | null
-          payment_reference?: string | null
-          payment_status?: string
-          proposed_name?: string | null
-          registered_office_json?: Json
-          sail_address_json?: Json | null
-          sic_codes?: string[]
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          articles_type?: string
-          ch_company_number?: string | null
-          ch_incorporation_date?: string | null
-          ch_submission_id?: string | null
-          client_id?: string | null
-          created_at?: string
-          created_by_user_id?: string | null
-          data_json?: Json
-          entity_type?: string
-          id?: string
-          payment_amount_pence?: number | null
-          payment_reference?: string | null
-          payment_status?: string
-          proposed_name?: string | null
-          registered_office_json?: Json
-          sail_address_json?: Json | null
-          sic_codes?: string[]
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "incorporation_applications_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorporation_applications_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "incorporation_applications_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "incorporation_applications_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "incorporation_applications_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incorporation_applications_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      integration_health: {
-        Row: {
-          checked_at: string
-          client_id: string
-          id: string
-          last_error: string | null
-          provider: string
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          checked_at?: string
-          client_id: string
-          id?: string
-          last_error?: string | null
-          provider: string
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          checked_at?: string
-          client_id?: string
-          id?: string
-          last_error?: string | null
-          provider?: string
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "integration_health_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "integration_health_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "integration_health_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "integration_health_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "integration_health_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "integration_health_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      invoice_lines: {
-        Row: {
-          created_at: string
-          description: string
-          id: string
-          invoice_id: string
-          line_total: number
-          quantity: number
-          unit_price: number
-          vat_rate: number
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          id?: string
-          invoice_id: string
-          line_total?: number
-          quantity?: number
-          unit_price?: number
-          vat_rate?: number
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: string
-          invoice_id?: string
-          line_total?: number
-          quantity?: number
-          unit_price?: number
-          vat_rate?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invoice_lines_invoice_id_fkey"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      invoice_templates: {
-        Row: {
-          created_at: string
-          footer_text: string | null
-          id: string
-          is_default: boolean | null
-          key: string
-          layout_json: Json
-          name: string
-          tenant_id: string
-          terms_text: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          footer_text?: string | null
-          id?: string
-          is_default?: boolean | null
-          key: string
-          layout_json?: Json
-          name: string
-          tenant_id: string
-          terms_text?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          footer_text?: string | null
-          id?: string
-          is_default?: boolean | null
-          key?: string
-          layout_json?: Json
-          name?: string
-          tenant_id?: string
-          terms_text?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invoice_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoice_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      invoices: {
-        Row: {
-          amount_paid: number
-          client_id: string | null
-          created_at: string
-          due_date: string | null
-          dunning_count: number | null
-          id: string
-          invoice_number: string
-          issue_date: string
-          last_dunning_at: string | null
-          notes: string | null
-          status: string
-          stripe_checkout_url: string | null
-          stripe_invoice_id: string | null
-          stripe_payment_intent_id: string | null
-          stripe_session_id: string | null
-          subtotal: number
-          tenant_id: string
-          total: number
-          updated_at: string
-          vat_amount: number
-        }
-        Insert: {
-          amount_paid?: number
-          client_id?: string | null
-          created_at?: string
-          due_date?: string | null
-          dunning_count?: number | null
-          id?: string
-          invoice_number: string
-          issue_date?: string
-          last_dunning_at?: string | null
-          notes?: string | null
-          status?: string
-          stripe_checkout_url?: string | null
-          stripe_invoice_id?: string | null
-          stripe_payment_intent_id?: string | null
-          stripe_session_id?: string | null
-          subtotal?: number
-          tenant_id: string
-          total?: number
-          updated_at?: string
-          vat_amount?: number
-        }
-        Update: {
-          amount_paid?: number
-          client_id?: string | null
-          created_at?: string
-          due_date?: string | null
-          dunning_count?: number | null
-          id?: string
-          invoice_number?: string
-          issue_date?: string
-          last_dunning_at?: string | null
-          notes?: string | null
-          status?: string
-          stripe_checkout_url?: string | null
-          stripe_invoice_id?: string | null
-          stripe_payment_intent_id?: string | null
-          stripe_session_id?: string | null
-          subtotal?: number
-          tenant_id?: string
-          total?: number
-          updated_at?: string
-          vat_amount?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invoices_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "invoices_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "invoices_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "invoices_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      itsa_final_declarations: {
-        Row: {
-          calculation_json: Json
-          client_id: string
-          created_at: string
-          declaration_accepted: boolean
-          hmrc_receipt_id: string | null
-          id: string
-          status: string
-          submission_job_id: string | null
-          submitted_at: string | null
-          tax_year: string
-          tenant_id: string
-          total_deductions_pence: number
-          total_income_pence: number
-          total_tax_due_pence: number
-          updated_at: string
-        }
-        Insert: {
-          calculation_json?: Json
-          client_id: string
-          created_at?: string
-          declaration_accepted?: boolean
-          hmrc_receipt_id?: string | null
-          id?: string
-          status?: string
-          submission_job_id?: string | null
-          submitted_at?: string | null
-          tax_year: string
-          tenant_id: string
-          total_deductions_pence?: number
-          total_income_pence?: number
-          total_tax_due_pence?: number
-          updated_at?: string
-        }
-        Update: {
-          calculation_json?: Json
-          client_id?: string
-          created_at?: string
-          declaration_accepted?: boolean
-          hmrc_receipt_id?: string | null
-          id?: string
-          status?: string
-          submission_job_id?: string | null
-          submitted_at?: string | null
-          tax_year?: string
-          tenant_id?: string
-          total_deductions_pence?: number
-          total_income_pence?: number
-          total_tax_due_pence?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "itsa_final_declarations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "itsa_final_declarations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_final_declarations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_final_declarations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_final_declarations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "itsa_final_declarations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      itsa_obligations: {
-        Row: {
-          business_id: string | null
-          client_id: string
-          created_at: string
-          due_date: string
-          hmrc_receipt_id: string | null
-          id: string
-          nino: string
-          obligation_type: string
-          period_end: string
-          period_start: string
-          status: string
-          submission_job_id: string | null
-          submitted_at: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          business_id?: string | null
-          client_id: string
-          created_at?: string
-          due_date: string
-          hmrc_receipt_id?: string | null
-          id?: string
-          nino: string
-          obligation_type?: string
-          period_end: string
-          period_start: string
-          status?: string
-          submission_job_id?: string | null
-          submitted_at?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          business_id?: string | null
-          client_id?: string
-          created_at?: string
-          due_date?: string
-          hmrc_receipt_id?: string | null
-          id?: string
-          nino?: string
-          obligation_type?: string
-          period_end?: string
-          period_start?: string
-          status?: string
-          submission_job_id?: string | null
-          submitted_at?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "itsa_obligations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "itsa_obligations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_obligations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_obligations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_obligations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "itsa_obligations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      itsa_updates: {
-        Row: {
-          adjustments_json: Json
-          client_id: string
-          created_at: string
-          expenses_json: Json
-          hmrc_receipt_id: string | null
-          id: string
-          income_json: Json
-          net_profit_pence: number
-          obligation_id: string
-          status: string
-          submitted_at: string | null
-          tenant_id: string
-          total_expenses_pence: number
-          total_income_pence: number
-          update_type: string
-          updated_at: string
-        }
-        Insert: {
-          adjustments_json?: Json
-          client_id: string
-          created_at?: string
-          expenses_json?: Json
-          hmrc_receipt_id?: string | null
-          id?: string
-          income_json?: Json
-          net_profit_pence?: number
-          obligation_id: string
-          status?: string
-          submitted_at?: string | null
-          tenant_id: string
-          total_expenses_pence?: number
-          total_income_pence?: number
-          update_type?: string
-          updated_at?: string
-        }
-        Update: {
-          adjustments_json?: Json
-          client_id?: string
-          created_at?: string
-          expenses_json?: Json
-          hmrc_receipt_id?: string | null
-          id?: string
-          income_json?: Json
-          net_profit_pence?: number
-          obligation_id?: string
-          status?: string
-          submitted_at?: string | null
-          tenant_id?: string
-          total_expenses_pence?: number
-          total_income_pence?: number
-          update_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "itsa_updates_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "itsa_updates_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_updates_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_updates_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "itsa_updates_obligation_id_fkey"
-            columns: ["obligation_id"]
-            isOneToOne: false
-            referencedRelation: "itsa_obligations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "itsa_updates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "itsa_updates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      ixbrl_filing_instances: {
-        Row: {
-          accounts_period_id: string | null
-          client_id: string
-          created_at: string
-          generated_at: string | null
-          generated_xbrl: string | null
-          id: string
-          status: string
-          submission_job_id: string | null
-          submitted_at: string | null
-          taxonomy_id: string
-          tenant_id: string
-          updated_at: string
-          validation_errors_json: Json
-        }
-        Insert: {
-          accounts_period_id?: string | null
-          client_id: string
-          created_at?: string
-          generated_at?: string | null
-          generated_xbrl?: string | null
-          id?: string
-          status?: string
-          submission_job_id?: string | null
-          submitted_at?: string | null
-          taxonomy_id: string
-          tenant_id: string
-          updated_at?: string
-          validation_errors_json?: Json
-        }
-        Update: {
-          accounts_period_id?: string | null
-          client_id?: string
-          created_at?: string
-          generated_at?: string | null
-          generated_xbrl?: string | null
-          id?: string
-          status?: string
-          submission_job_id?: string | null
-          submitted_at?: string | null
-          taxonomy_id?: string
-          tenant_id?: string
-          updated_at?: string
-          validation_errors_json?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ixbrl_filing_instances_accounts_period_id_fkey"
-            columns: ["accounts_period_id"]
-            isOneToOne: false
-            referencedRelation: "accounts_periods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ixbrl_filing_instances_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ixbrl_filing_instances_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ixbrl_filing_instances_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ixbrl_filing_instances_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ixbrl_filing_instances_taxonomy_id_fkey"
-            columns: ["taxonomy_id"]
-            isOneToOne: false
-            referencedRelation: "ixbrl_taxonomies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ixbrl_filing_instances_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ixbrl_filing_instances_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      ixbrl_tag_mappings: {
-        Row: {
-          account_code: string
-          context_ref: string | null
-          created_at: string
-          decimals: number | null
-          id: string
-          is_custom: boolean
-          notes: string | null
-          tag_name: string
-          tag_namespace: string
-          taxonomy_id: string
-          tenant_id: string
-          unit_ref: string | null
-          updated_at: string
-        }
-        Insert: {
-          account_code: string
-          context_ref?: string | null
-          created_at?: string
-          decimals?: number | null
-          id?: string
-          is_custom?: boolean
-          notes?: string | null
-          tag_name: string
-          tag_namespace?: string
-          taxonomy_id: string
-          tenant_id: string
-          unit_ref?: string | null
-          updated_at?: string
-        }
-        Update: {
-          account_code?: string
-          context_ref?: string | null
-          created_at?: string
-          decimals?: number | null
-          id?: string
-          is_custom?: boolean
-          notes?: string | null
-          tag_name?: string
-          tag_namespace?: string
-          taxonomy_id?: string
-          tenant_id?: string
-          unit_ref?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ixbrl_tag_mappings_taxonomy_id_fkey"
-            columns: ["taxonomy_id"]
-            isOneToOne: false
-            referencedRelation: "ixbrl_taxonomies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ixbrl_tag_mappings_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ixbrl_tag_mappings_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      ixbrl_taxonomies: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          name: string
-          schema_url: string | null
-          taxonomy_type: string
-          version: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name: string
-          schema_url?: string | null
-          taxonomy_type?: string
-          version: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          schema_url?: string | null
-          taxonomy_type?: string
-          version?: string
-        }
-        Relationships: []
-      }
-      journal_entries: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          created_by: string | null
-          entry_date: string
-          id: string
-          is_posted: boolean
-          narration: string | null
-          reference: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          entry_date?: string
-          id?: string
-          is_posted?: boolean
-          narration?: string | null
-          reference?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          entry_date?: string
-          id?: string
-          is_posted?: boolean
-          narration?: string | null
-          reference?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "journal_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "journal_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "journal_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "journal_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "journal_entries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "journal_entries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      journal_lines: {
-        Row: {
-          account_id: string
-          created_at: string
-          credit: number
-          debit: number
-          description: string | null
-          id: string
-          journal_entry_id: string
-        }
-        Insert: {
-          account_id: string
-          created_at?: string
-          credit?: number
-          debit?: number
-          description?: string | null
-          id?: string
-          journal_entry_id: string
-        }
-        Update: {
-          account_id?: string
-          created_at?: string
-          credit?: number
-          debit?: number
-          description?: string | null
-          id?: string
-          journal_entry_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "journal_lines_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "journal_lines_journal_entry_id_fkey"
-            columns: ["journal_entry_id"]
-            isOneToOne: false
-            referencedRelation: "journal_entries"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      kyc_cases: {
-        Row: {
-          adverse_media_check: boolean | null
-          approved_at: string | null
-          approved_by_user_id: string | null
-          assigned_to_user_id: string | null
-          client_id: string
-          created_at: string
-          expires_at: string | null
-          id: string
-          id_verification_provider: string | null
-          id_verification_reference: string | null
-          id_verification_result_json: Json
-          id_verification_status: string | null
-          last_monitored_at: string | null
-          monitoring_enabled: boolean
-          next_review_date: string | null
-          pep_check: boolean | null
-          risk_level: string
-          risk_notes: string | null
-          risk_score: number | null
-          sanctions_check: boolean | null
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          adverse_media_check?: boolean | null
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          assigned_to_user_id?: string | null
-          client_id: string
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          id_verification_provider?: string | null
-          id_verification_reference?: string | null
-          id_verification_result_json?: Json
-          id_verification_status?: string | null
-          last_monitored_at?: string | null
-          monitoring_enabled?: boolean
-          next_review_date?: string | null
-          pep_check?: boolean | null
-          risk_level?: string
-          risk_notes?: string | null
-          risk_score?: number | null
-          sanctions_check?: boolean | null
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          adverse_media_check?: boolean | null
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          assigned_to_user_id?: string | null
-          client_id?: string
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          id_verification_provider?: string | null
-          id_verification_reference?: string | null
-          id_verification_result_json?: Json
-          id_verification_status?: string | null
-          last_monitored_at?: string | null
-          monitoring_enabled?: boolean
-          next_review_date?: string | null
-          pep_check?: boolean | null
-          risk_level?: string
-          risk_notes?: string | null
-          risk_score?: number | null
-          sanctions_check?: boolean | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "kyc_cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kyc_cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "kyc_cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "kyc_cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "kyc_cases_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kyc_cases_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      kyc_checks: {
-        Row: {
-          case_id: string
-          check_type: string
-          checked_at: string | null
-          checked_by_user_id: string | null
-          created_at: string
-          document_id: string | null
-          id: string
-          notes: string | null
-          result_json: Json
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          case_id: string
-          check_type: string
-          checked_at?: string | null
-          checked_by_user_id?: string | null
-          created_at?: string
-          document_id?: string | null
-          id?: string
-          notes?: string | null
-          result_json?: Json
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          case_id?: string
-          check_type?: string
-          checked_at?: string | null
-          checked_by_user_id?: string | null
-          created_at?: string
-          document_id?: string | null
-          id?: string
-          notes?: string | null
-          result_json?: Json
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "kyc_checks_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: false
-            referencedRelation: "kyc_cases"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kyc_checks_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kyc_checks_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kyc_checks_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      ledger_suggestions: {
-        Row: {
-          approved_at: string | null
-          approved_by_user_id: string | null
-          client_id: string
-          created_at: string
-          document_id: string
-          extraction_id: string | null
-          id: string
-          lines_json: Json
-          posted_journal_id: string | null
-          reason: string | null
-          status: string
-          suggested_by: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          client_id: string
-          created_at?: string
-          document_id: string
-          extraction_id?: string | null
-          id?: string
-          lines_json?: Json
-          posted_journal_id?: string | null
-          reason?: string | null
-          status?: string
-          suggested_by?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          client_id?: string
-          created_at?: string
-          document_id?: string
-          extraction_id?: string | null
-          id?: string
-          lines_json?: Json
-          posted_journal_id?: string | null
-          reason?: string | null
-          status?: string
-          suggested_by?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ledger_suggestions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ledger_suggestions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ledger_suggestions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ledger_suggestions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ledger_suggestions_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ledger_suggestions_extraction_id_fkey"
-            columns: ["extraction_id"]
-            isOneToOne: false
-            referencedRelation: "receipt_extractions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ledger_suggestions_posted_journal_id_fkey"
-            columns: ["posted_journal_id"]
-            isOneToOne: false
-            referencedRelation: "journal_entries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ledger_suggestions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ledger_suggestions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      message_attachments: {
-        Row: {
-          created_at: string
-          document_id: string
-          id: string
-          message_id: string
-          tenant_id: string
-        }
-        Insert: {
-          created_at?: string
-          document_id: string
-          id?: string
-          message_id: string
-          tenant_id: string
-        }
-        Update: {
-          created_at?: string
-          document_id?: string
-          id?: string
-          message_id?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "message_attachments_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_attachments_message_id_fkey"
-            columns: ["message_id"]
-            isOneToOne: false
-            referencedRelation: "messages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_attachments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_attachments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      message_thread_assignments: {
-        Row: {
-          assigned_at: string
-          assigned_by_user_id: string | null
-          assigned_to_user_id: string | null
-          id: string
-          tenant_id: string
-          thread_id: string
-        }
-        Insert: {
-          assigned_at?: string
-          assigned_by_user_id?: string | null
-          assigned_to_user_id?: string | null
-          id?: string
-          tenant_id: string
-          thread_id: string
-        }
-        Update: {
-          assigned_at?: string
-          assigned_by_user_id?: string | null
-          assigned_to_user_id?: string | null
-          id?: string
-          tenant_id?: string
-          thread_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "message_thread_assignments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_thread_assignments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-          {
-            foreignKeyName: "message_thread_assignments_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: true
-            referencedRelation: "message_threads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_thread_assignments_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: true
-            referencedRelation: "v_threads_needing_attention"
-            referencedColumns: ["thread_id"]
-          },
-        ]
-      }
-      message_thread_participants: {
-        Row: {
-          created_at: string
-          id: string
-          role: string
-          tenant_id: string
-          thread_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role?: string
-          tenant_id: string
-          thread_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: string
-          tenant_id?: string
-          thread_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "message_thread_participants_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_thread_participants_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-          {
-            foreignKeyName: "message_thread_participants_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: false
-            referencedRelation: "message_threads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_thread_participants_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: false
-            referencedRelation: "v_threads_needing_attention"
-            referencedColumns: ["thread_id"]
-          },
-        ]
-      }
-      message_threads: {
-        Row: {
-          client_id: string
-          created_at: string
-          created_by_user_id: string | null
-          id: string
-          last_message_at: string
-          last_message_id: string | null
-          priority: string
-          status: string
-          subject: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          created_by_user_id?: string | null
-          id?: string
-          last_message_at?: string
-          last_message_id?: string | null
-          priority?: string
-          status?: string
-          subject: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          created_by_user_id?: string | null
-          id?: string
-          last_message_at?: string
-          last_message_id?: string | null
-          priority?: string
-          status?: string
-          subject?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "message_threads_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_threads_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "message_threads_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "message_threads_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "message_threads_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_threads_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      messages: {
-        Row: {
-          body: string
-          body_html: string | null
-          created_at: string
-          id: string
-          is_internal: boolean
-          sender_type: string
-          sender_user_id: string | null
-          tenant_id: string
-          thread_id: string
-        }
-        Insert: {
-          body: string
-          body_html?: string | null
-          created_at?: string
-          id?: string
-          is_internal?: boolean
-          sender_type?: string
-          sender_user_id?: string | null
-          tenant_id: string
-          thread_id: string
-        }
-        Update: {
-          body?: string
-          body_html?: string | null
-          created_at?: string
-          id?: string
-          is_internal?: boolean
-          sender_type?: string
-          sender_user_id?: string | null
-          tenant_id?: string
-          thread_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-          {
-            foreignKeyName: "messages_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: false
-            referencedRelation: "message_threads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: false
-            referencedRelation: "v_threads_needing_attention"
-            referencedColumns: ["thread_id"]
-          },
-        ]
-      }
-      minutes_documents: {
-        Row: {
-          client_id: string
-          content_html: string | null
-          created_at: string
-          created_by_user_id: string | null
-          document_id: string | null
-          document_type: string
-          id: string
-          secretarial_event_id: string | null
-          signed_at: string | null
-          template_key: string | null
-          tenant_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          content_html?: string | null
-          created_at?: string
-          created_by_user_id?: string | null
-          document_id?: string | null
-          document_type?: string
-          id?: string
-          secretarial_event_id?: string | null
-          signed_at?: string | null
-          template_key?: string | null
-          tenant_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          content_html?: string | null
-          created_at?: string
-          created_by_user_id?: string | null
-          document_id?: string | null
-          document_type?: string
-          id?: string
-          secretarial_event_id?: string | null
-          signed_at?: string | null
-          template_key?: string | null
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "minutes_documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "minutes_documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "minutes_documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "minutes_documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "minutes_documents_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "minutes_documents_secretarial_event_id_fkey"
-            columns: ["secretarial_event_id"]
-            isOneToOne: false
-            referencedRelation: "secretarial_events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "minutes_documents_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "minutes_documents_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      notification_logs: {
-        Row: {
-          body_preview: string | null
-          channel: string
-          client_id: string | null
-          created_at: string
-          error_message: string | null
-          id: string
-          meta_json: Json
-          provider: string | null
-          provider_message_id: string | null
-          sent_at: string | null
-          status: string
-          subject: string | null
-          template_key: string | null
-          tenant_id: string
-          to_address: string | null
-          user_id: string | null
-        }
-        Insert: {
-          body_preview?: string | null
-          channel: string
-          client_id?: string | null
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          meta_json?: Json
-          provider?: string | null
-          provider_message_id?: string | null
-          sent_at?: string | null
-          status?: string
-          subject?: string | null
-          template_key?: string | null
-          tenant_id: string
-          to_address?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          body_preview?: string | null
-          channel?: string
-          client_id?: string | null
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          meta_json?: Json
-          provider?: string | null
-          provider_message_id?: string | null
-          sent_at?: string | null
-          status?: string
-          subject?: string | null
-          template_key?: string | null
-          tenant_id?: string
-          to_address?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "notification_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "notification_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "notification_logs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_logs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      notification_queue: {
-        Row: {
-          attempt_count: number
-          channel: string
-          client_id: string | null
-          created_at: string
-          id: string
-          last_error: string | null
-          next_retry_at: string | null
-          payload_json: Json
-          status: string
-          template_key: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          attempt_count?: number
-          channel: string
-          client_id?: string | null
-          created_at?: string
-          id?: string
-          last_error?: string | null
-          next_retry_at?: string | null
-          payload_json?: Json
-          status?: string
-          template_key?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          attempt_count?: number
-          channel?: string
-          client_id?: string | null
-          created_at?: string
-          id?: string
-          last_error?: string | null
-          next_retry_at?: string | null
-          payload_json?: Json
-          status?: string
-          template_key?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_queue_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_queue_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "notification_queue_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "notification_queue_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "notification_queue_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_queue_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      notification_rules: {
-        Row: {
-          applies_to_json: Json
-          channel: string
-          created_at: string
-          days_before_due: number
-          id: string
-          is_enabled: boolean | null
-          name: string
-          template_key: string | null
-          tenant_id: string
-        }
-        Insert: {
-          applies_to_json?: Json
-          channel: string
-          created_at?: string
-          days_before_due?: number
-          id?: string
-          is_enabled?: boolean | null
-          name: string
-          template_key?: string | null
-          tenant_id: string
-        }
-        Update: {
-          applies_to_json?: Json
-          channel?: string
-          created_at?: string
-          days_before_due?: number
-          id?: string
-          is_enabled?: boolean | null
-          name?: string
-          template_key?: string | null
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_rules_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notification_rules_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      ocr_jobs: {
-        Row: {
-          attempt_count: number
-          client_id: string | null
-          created_at: string
-          document_id: string
-          id: string
-          last_error: string | null
-          provider: string
-          request_json: Json
-          result_json: Json | null
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          attempt_count?: number
-          client_id?: string | null
-          created_at?: string
-          document_id: string
-          id?: string
-          last_error?: string | null
-          provider?: string
-          request_json?: Json
-          result_json?: Json | null
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          attempt_count?: number
-          client_id?: string | null
-          created_at?: string
-          document_id?: string
-          id?: string
-          last_error?: string | null
-          provider?: string
-          request_json?: Json
-          result_json?: Json | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ocr_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ocr_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ocr_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ocr_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "ocr_jobs_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ocr_jobs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ocr_jobs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      onboarding_cases: {
-        Row: {
-          checklist_json: Json
-          client_id: string | null
-          created_at: string
-          created_by_user_id: string | null
-          data_json: Json
-          entity_type: string
-          id: string
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          checklist_json?: Json
-          client_id?: string | null
-          created_at?: string
-          created_by_user_id?: string | null
-          data_json?: Json
-          entity_type: string
-          id?: string
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          checklist_json?: Json
-          client_id?: string | null
-          created_at?: string
-          created_by_user_id?: string | null
-          data_json?: Json
-          entity_type?: string
-          id?: string
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "onboarding_cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "onboarding_cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "onboarding_cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "onboarding_cases_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "onboarding_cases_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "onboarding_cases_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      onboarding_steps: {
-        Row: {
-          created_at: string
-          data_json: Json
-          id: string
-          onboarding_case_id: string
-          required: boolean
-          step_key: string
-          step_status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          data_json?: Json
-          id?: string
-          onboarding_case_id: string
-          required?: boolean
-          step_key: string
-          step_status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          data_json?: Json
-          id?: string
-          onboarding_case_id?: string
-          required?: boolean
-          step_key?: string
-          step_status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "onboarding_steps_onboarding_case_id_fkey"
-            columns: ["onboarding_case_id"]
-            isOneToOne: false
-            referencedRelation: "onboarding_cases"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "onboarding_steps_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "onboarding_steps_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      pay_runs: {
-        Row: {
-          created_at: string
-          employer_id: string
-          eps_submission_job_id: string | null
-          fps_submission_job_id: string | null
-          id: string
-          notes: string | null
-          pay_date: string
-          pay_frequency: string
-          period_end: string
-          period_start: string
-          status: string
-          tax_period: number
-          tax_year: string
-          tenant_id: string
-          total_gross_pence: number
-          total_net_pence: number
-          total_ni_employee_pence: number
-          total_ni_employer_pence: number
-          total_pension_employee_pence: number | null
-          total_pension_employer_pence: number | null
-          total_student_loan_pence: number | null
-          total_tax_pence: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          employer_id: string
-          eps_submission_job_id?: string | null
-          fps_submission_job_id?: string | null
-          id?: string
-          notes?: string | null
-          pay_date: string
-          pay_frequency?: string
-          period_end: string
-          period_start: string
-          status?: string
-          tax_period: number
-          tax_year?: string
-          tenant_id: string
-          total_gross_pence?: number
-          total_net_pence?: number
-          total_ni_employee_pence?: number
-          total_ni_employer_pence?: number
-          total_pension_employee_pence?: number | null
-          total_pension_employer_pence?: number | null
-          total_student_loan_pence?: number | null
-          total_tax_pence?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          employer_id?: string
-          eps_submission_job_id?: string | null
-          fps_submission_job_id?: string | null
-          id?: string
-          notes?: string | null
-          pay_date?: string
-          pay_frequency?: string
-          period_end?: string
-          period_start?: string
-          status?: string
-          tax_period?: number
-          tax_year?: string
-          tenant_id?: string
-          total_gross_pence?: number
-          total_net_pence?: number
-          total_ni_employee_pence?: number
-          total_ni_employer_pence?: number
-          total_pension_employee_pence?: number | null
-          total_pension_employer_pence?: number | null
-          total_student_loan_pence?: number | null
-          total_tax_pence?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pay_runs_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pay_runs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pay_runs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      payroll_absences: {
-        Row: {
-          absence_type: string
-          created_at: string
-          days: number
-          employee_id: string
-          employer_id: string
-          end_date: string | null
-          hours: number | null
-          id: string
-          is_paid: boolean
-          notes: string | null
-          start_date: string
-          status: string
-          statutory_pay_type: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          absence_type: string
-          created_at?: string
-          days?: number
-          employee_id: string
-          employer_id: string
-          end_date?: string | null
-          hours?: number | null
-          id?: string
-          is_paid?: boolean
-          notes?: string | null
-          start_date: string
-          status?: string
-          statutory_pay_type?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          absence_type?: string
-          created_at?: string
-          days?: number
-          employee_id?: string
-          employer_id?: string
-          end_date?: string | null
-          hours?: number | null
-          id?: string
-          is_paid?: boolean
-          notes?: string | null
-          start_date?: string
-          status?: string
-          statutory_pay_type?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payroll_absences_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_absences_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_absences_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_absences_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      payroll_benefits: {
-        Row: {
-          amount_made_good_pence: number | null
-          benefit_type: string
-          cash_equivalent_pence: number
-          created_at: string
-          description: string
-          employee_id: string
-          employer_id: string
-          end_date: string | null
-          id: string
-          metadata_json: Json
-          payrolled: boolean
-          section: string | null
-          start_date: string | null
-          tax_year: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          amount_made_good_pence?: number | null
-          benefit_type: string
-          cash_equivalent_pence?: number
-          created_at?: string
-          description: string
-          employee_id: string
-          employer_id: string
-          end_date?: string | null
-          id?: string
-          metadata_json?: Json
-          payrolled?: boolean
-          section?: string | null
-          start_date?: string | null
-          tax_year?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          amount_made_good_pence?: number | null
-          benefit_type?: string
-          cash_equivalent_pence?: number
-          created_at?: string
-          description?: string
-          employee_id?: string
-          employer_id?: string
-          end_date?: string | null
-          id?: string
-          metadata_json?: Json
-          payrolled?: boolean
-          section?: string | null
-          start_date?: string | null
-          tax_year?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payroll_benefits_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_benefits_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_benefits_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_benefits_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      payroll_employees: {
-        Row: {
-          account_name: string | null
-          account_number: string | null
-          address_json: Json
-          address_line1: string | null
-          address_line2: string | null
-          annual_salary_pence: number | null
-          bank_account_json: Json
-          city: string | null
-          country: string | null
-          county: string | null
-          created_at: string
-          date_of_birth: string | null
-          directors_nic_method: string | null
-          email: string | null
-          employer_id: string
-          first_name: string
-          gender: string | null
-          holiday_carried_forward: number | null
-          holiday_entitlement_days: number | null
-          holiday_taken_days: number | null
-          hourly_rate_pence: number | null
-          id: string
-          is_active: boolean
-          is_director: boolean
-          is_irregular_employment: boolean | null
-          last_name: string
-          leave_date: string | null
-          ni_category: string | null
-          ni_number: string | null
-          notes: string | null
-          p45_issue_date: string | null
-          p45_previous_pay_pence: number | null
-          p45_previous_tax_pence: number | null
-          pay_method: string
-          payment_method: string | null
-          payroll_id: string | null
-          pension_employee_pct: number | null
-          pension_employer_pct: number | null
-          pension_opt_out: boolean
-          phone: string | null
-          postcode: string | null
-          postgrad_loan: boolean
-          sort_code: string | null
-          start_date: string | null
-          starter_declaration: string | null
-          student_loan_plan: string | null
-          tax_code: string | null
-          tenant_id: string
-          title: string | null
-          updated_at: string
-          week1_month1: boolean | null
-        }
-        Insert: {
-          account_name?: string | null
-          account_number?: string | null
-          address_json?: Json
-          address_line1?: string | null
-          address_line2?: string | null
-          annual_salary_pence?: number | null
-          bank_account_json?: Json
-          city?: string | null
-          country?: string | null
-          county?: string | null
-          created_at?: string
-          date_of_birth?: string | null
-          directors_nic_method?: string | null
-          email?: string | null
-          employer_id: string
-          first_name: string
-          gender?: string | null
-          holiday_carried_forward?: number | null
-          holiday_entitlement_days?: number | null
-          holiday_taken_days?: number | null
-          hourly_rate_pence?: number | null
-          id?: string
-          is_active?: boolean
-          is_director?: boolean
-          is_irregular_employment?: boolean | null
-          last_name: string
-          leave_date?: string | null
-          ni_category?: string | null
-          ni_number?: string | null
-          notes?: string | null
-          p45_issue_date?: string | null
-          p45_previous_pay_pence?: number | null
-          p45_previous_tax_pence?: number | null
-          pay_method?: string
-          payment_method?: string | null
-          payroll_id?: string | null
-          pension_employee_pct?: number | null
-          pension_employer_pct?: number | null
-          pension_opt_out?: boolean
-          phone?: string | null
-          postcode?: string | null
-          postgrad_loan?: boolean
-          sort_code?: string | null
-          start_date?: string | null
-          starter_declaration?: string | null
-          student_loan_plan?: string | null
-          tax_code?: string | null
-          tenant_id: string
-          title?: string | null
-          updated_at?: string
-          week1_month1?: boolean | null
-        }
-        Update: {
-          account_name?: string | null
-          account_number?: string | null
-          address_json?: Json
-          address_line1?: string | null
-          address_line2?: string | null
-          annual_salary_pence?: number | null
-          bank_account_json?: Json
-          city?: string | null
-          country?: string | null
-          county?: string | null
-          created_at?: string
-          date_of_birth?: string | null
-          directors_nic_method?: string | null
-          email?: string | null
-          employer_id?: string
-          first_name?: string
-          gender?: string | null
-          holiday_carried_forward?: number | null
-          holiday_entitlement_days?: number | null
-          holiday_taken_days?: number | null
-          hourly_rate_pence?: number | null
-          id?: string
-          is_active?: boolean
-          is_director?: boolean
-          is_irregular_employment?: boolean | null
-          last_name?: string
-          leave_date?: string | null
-          ni_category?: string | null
-          ni_number?: string | null
-          notes?: string | null
-          p45_issue_date?: string | null
-          p45_previous_pay_pence?: number | null
-          p45_previous_tax_pence?: number | null
-          pay_method?: string
-          payment_method?: string | null
-          payroll_id?: string | null
-          pension_employee_pct?: number | null
-          pension_employer_pct?: number | null
-          pension_opt_out?: boolean
-          phone?: string | null
-          postcode?: string | null
-          postgrad_loan?: boolean
-          sort_code?: string | null
-          start_date?: string | null
-          starter_declaration?: string | null
-          student_loan_plan?: string | null
-          tax_code?: string | null
-          tenant_id?: string
-          title?: string | null
-          updated_at?: string
-          week1_month1?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payroll_employees_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_employees_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_employees_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      payroll_employers: {
-        Row: {
-          accounts_office_ref: string | null
-          apprenticeship_levy: boolean | null
-          apprenticeship_levy_allowance_pence: number | null
-          cis_registered: boolean | null
-          client_id: string
-          created_at: string
-          employer_name: string
-          employment_allowance: boolean | null
-          hmrc_gateway_id: string | null
-          id: string
-          is_active: boolean
-          pay_frequency: string
-          paye_reference: string | null
-          pension_provider: string | null
-          pension_scheme_ref: string | null
-          small_employer: boolean | null
-          staging_date: string | null
-          tax_year: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          accounts_office_ref?: string | null
-          apprenticeship_levy?: boolean | null
-          apprenticeship_levy_allowance_pence?: number | null
-          cis_registered?: boolean | null
-          client_id: string
-          created_at?: string
-          employer_name: string
-          employment_allowance?: boolean | null
-          hmrc_gateway_id?: string | null
-          id?: string
-          is_active?: boolean
-          pay_frequency?: string
-          paye_reference?: string | null
-          pension_provider?: string | null
-          pension_scheme_ref?: string | null
-          small_employer?: boolean | null
-          staging_date?: string | null
-          tax_year?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          accounts_office_ref?: string | null
-          apprenticeship_levy?: boolean | null
-          apprenticeship_levy_allowance_pence?: number | null
-          cis_registered?: boolean | null
-          client_id?: string
-          created_at?: string
-          employer_name?: string
-          employment_allowance?: boolean | null
-          hmrc_gateway_id?: string | null
-          id?: string
-          is_active?: boolean
-          pay_frequency?: string
-          paye_reference?: string | null
-          pension_provider?: string | null
-          pension_scheme_ref?: string | null
-          small_employer?: boolean | null
-          staging_date?: string | null
-          tax_year?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payroll_employers_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_employers_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "payroll_employers_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "payroll_employers_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "payroll_employers_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_employers_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      payroll_forms: {
-        Row: {
-          created_at: string
-          document_id: string | null
-          employee_id: string | null
-          employer_id: string
-          form_data_json: Json
-          form_type: string
-          generated_at: string | null
-          hmrc_response_json: Json | null
-          id: string
-          notes: string | null
-          sent_at: string | null
-          status: string
-          submitted_at: string | null
-          tax_year: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          document_id?: string | null
-          employee_id?: string | null
-          employer_id: string
-          form_data_json?: Json
-          form_type: string
-          generated_at?: string | null
-          hmrc_response_json?: Json | null
-          id?: string
-          notes?: string | null
-          sent_at?: string | null
-          status?: string
-          submitted_at?: string | null
-          tax_year?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          document_id?: string | null
-          employee_id?: string | null
-          employer_id?: string
-          form_data_json?: Json
-          form_type?: string
-          generated_at?: string | null
-          hmrc_response_json?: Json | null
-          id?: string
-          notes?: string | null
-          sent_at?: string | null
-          status?: string
-          submitted_at?: string | null
-          tax_year?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payroll_forms_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_forms_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_forms_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_forms_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payroll_forms_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      payslips: {
-        Row: {
-          additions_json: Json
-          attachment_of_earnings_pence: number | null
-          created_at: string
-          deductions_json: Json
-          document_id: string | null
-          employee_id: string | null
-          employee_name: string
-          gross_pence: number
-          holiday_pay_pence: number | null
-          hours_worked: number | null
-          id: string
-          net_pence: number
-          ni_employee_pence: number
-          ni_employer_pence: number
-          ni_number: string | null
-          overtime_hours: number | null
-          overtime_pence: number | null
-          pay_run_id: string
-          pension_employee_pence: number
-          pension_employer_pence: number
-          sap_pence: number | null
-          shpp_pence: number | null
-          sick_pay_pence: number | null
-          smp_pence: number | null
-          spp_pence: number | null
-          student_loan_pence: number
-          tax_code: string | null
-          tax_pence: number
-          tenant_id: string
-          updated_at: string
-          ytd_gross_pence: number
-          ytd_ni_pence: number
-          ytd_tax_pence: number
-        }
-        Insert: {
-          additions_json?: Json
-          attachment_of_earnings_pence?: number | null
-          created_at?: string
-          deductions_json?: Json
-          document_id?: string | null
-          employee_id?: string | null
-          employee_name: string
-          gross_pence?: number
-          holiday_pay_pence?: number | null
-          hours_worked?: number | null
-          id?: string
-          net_pence?: number
-          ni_employee_pence?: number
-          ni_employer_pence?: number
-          ni_number?: string | null
-          overtime_hours?: number | null
-          overtime_pence?: number | null
-          pay_run_id: string
-          pension_employee_pence?: number
-          pension_employer_pence?: number
-          sap_pence?: number | null
-          shpp_pence?: number | null
-          sick_pay_pence?: number | null
-          smp_pence?: number | null
-          spp_pence?: number | null
-          student_loan_pence?: number
-          tax_code?: string | null
-          tax_pence?: number
-          tenant_id: string
-          updated_at?: string
-          ytd_gross_pence?: number
-          ytd_ni_pence?: number
-          ytd_tax_pence?: number
-        }
-        Update: {
-          additions_json?: Json
-          attachment_of_earnings_pence?: number | null
-          created_at?: string
-          deductions_json?: Json
-          document_id?: string | null
-          employee_id?: string | null
-          employee_name?: string
-          gross_pence?: number
-          holiday_pay_pence?: number | null
-          hours_worked?: number | null
-          id?: string
-          net_pence?: number
-          ni_employee_pence?: number
-          ni_employer_pence?: number
-          ni_number?: string | null
-          overtime_hours?: number | null
-          overtime_pence?: number | null
-          pay_run_id?: string
-          pension_employee_pence?: number
-          pension_employer_pence?: number
-          sap_pence?: number | null
-          shpp_pence?: number | null
-          sick_pay_pence?: number | null
-          smp_pence?: number | null
-          spp_pence?: number | null
-          student_loan_pence?: number
-          tax_code?: string | null
-          tax_pence?: number
-          tenant_id?: string
-          updated_at?: string
-          ytd_gross_pence?: number
-          ytd_ni_pence?: number
-          ytd_tax_pence?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payslips_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "payroll_employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payslips_pay_run_id_fkey"
-            columns: ["pay_run_id"]
-            isOneToOne: false
-            referencedRelation: "pay_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payslips_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payslips_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      pension_contributions: {
-        Row: {
-          created_at: string
-          employee_contribution_pence: number
-          employer_contribution_pence: number
-          enrolment_id: string
-          id: string
-          payrun_id: string | null
-          period: string
-          qualifying_earnings_pence: number
-          scheme_id: string
-          status: string
-          submitted_to_provider_at: string | null
-          tenant_id: string
-          total_contribution_pence: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          employee_contribution_pence?: number
-          employer_contribution_pence?: number
-          enrolment_id: string
-          id?: string
-          payrun_id?: string | null
-          period: string
-          qualifying_earnings_pence?: number
-          scheme_id: string
-          status?: string
-          submitted_to_provider_at?: string | null
-          tenant_id: string
-          total_contribution_pence?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          employee_contribution_pence?: number
-          employer_contribution_pence?: number
-          enrolment_id?: string
-          id?: string
-          payrun_id?: string | null
-          period?: string
-          qualifying_earnings_pence?: number
-          scheme_id?: string
-          status?: string
-          submitted_to_provider_at?: string | null
-          tenant_id?: string
-          total_contribution_pence?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pension_contributions_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "pension_enrolments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pension_contributions_scheme_id_fkey"
-            columns: ["scheme_id"]
-            isOneToOne: false
-            referencedRelation: "pension_schemes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pension_contributions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pension_contributions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      pension_enrolments: {
-        Row: {
-          created_at: string
-          employee_contribution_pct: number | null
-          employee_id: string
-          employer_contribution_pct: number | null
-          enrolled_at: string
-          enrolment_type: string
-          id: string
-          opt_out_window_end: string | null
-          opted_out_at: string | null
-          postponement_end: string | null
-          scheme_id: string
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          employee_contribution_pct?: number | null
-          employee_id: string
-          employer_contribution_pct?: number | null
-          enrolled_at?: string
-          enrolment_type?: string
-          id?: string
-          opt_out_window_end?: string | null
-          opted_out_at?: string | null
-          postponement_end?: string | null
-          scheme_id: string
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          employee_contribution_pct?: number | null
-          employee_id?: string
-          employer_contribution_pct?: number | null
-          enrolled_at?: string
-          enrolment_type?: string
-          id?: string
-          opt_out_window_end?: string | null
-          opted_out_at?: string | null
-          postponement_end?: string | null
-          scheme_id?: string
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pension_enrolments_scheme_id_fkey"
-            columns: ["scheme_id"]
-            isOneToOne: false
-            referencedRelation: "pension_schemes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pension_enrolments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pension_enrolments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      pension_schemes: {
-        Row: {
-          client_id: string
-          contribution_employee_pct: number
-          contribution_employer_pct: number
-          created_at: string
-          employer_reference: string | null
-          id: string
-          metadata_json: Json
-          provider: string
-          qualifying_earnings_lower_pence: number
-          qualifying_earnings_upper_pence: number
-          re_enrolment_date: string | null
-          scheme_reference: string | null
-          staging_date: string | null
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          contribution_employee_pct?: number
-          contribution_employer_pct?: number
-          created_at?: string
-          employer_reference?: string | null
-          id?: string
-          metadata_json?: Json
-          provider?: string
-          qualifying_earnings_lower_pence?: number
-          qualifying_earnings_upper_pence?: number
-          re_enrolment_date?: string | null
-          scheme_reference?: string | null
-          staging_date?: string | null
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          contribution_employee_pct?: number
-          contribution_employer_pct?: number
-          created_at?: string
-          employer_reference?: string | null
-          id?: string
-          metadata_json?: Json
-          provider?: string
-          qualifying_earnings_lower_pence?: number
-          qualifying_earnings_upper_pence?: number
-          re_enrolment_date?: string | null
-          scheme_reference?: string | null
-          staging_date?: string | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pension_schemes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pension_schemes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "pension_schemes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "pension_schemes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "pension_schemes_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pension_schemes_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      permission_presets: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          permissions_json: Json
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          permissions_json?: Json
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          permissions_json?: Json
-        }
-        Relationships: []
-      }
-      portal_invitations: {
-        Row: {
-          accepted_at: string | null
-          client_id: string | null
-          created_at: string
-          email: string
-          expires_at: string
-          id: string
-          invited_by: string | null
-          portal_role: string
-          status: string
-          tenant_id: string
-          token: string
-        }
-        Insert: {
-          accepted_at?: string | null
-          client_id?: string | null
-          created_at?: string
-          email: string
-          expires_at?: string
-          id?: string
-          invited_by?: string | null
-          portal_role?: string
-          status?: string
-          tenant_id: string
-          token?: string
-        }
-        Update: {
-          accepted_at?: string | null
-          client_id?: string | null
-          created_at?: string
-          email?: string
-          expires_at?: string
-          id?: string
-          invited_by?: string | null
-          portal_role?: string
-          status?: string
-          tenant_id?: string
-          token?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_invitations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_invitations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "portal_invitations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "portal_invitations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "portal_invitations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_invitations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      portal_users: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          display_name: string
-          id: string
-          last_login_at: string | null
-          phone: string | null
-          portal_role: string
-          status: string
-          tenant_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          display_name?: string
-          id?: string
-          last_login_at?: string | null
-          phone?: string | null
-          portal_role?: string
-          status?: string
-          tenant_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          display_name?: string
-          id?: string
-          last_login_at?: string | null
-          phone?: string | null
-          portal_role?: string
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_users_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_users_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "portal_users_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "portal_users_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "portal_users_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_users_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
-          email: string | null
-          full_name: string
-          id: string
-          tenant_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string
-          id: string
-          tenant_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string
-          id?: string
-          tenant_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      proposals: {
-        Row: {
-          accepted_at: string | null
-          client_id: string | null
-          created_at: string
-          created_by: string | null
-          declined_at: string | null
-          engagement_letter_doc_id: string | null
-          fee_breakdown_json: Json
-          fee_frequency: string
-          id: string
-          prospect_email: string | null
-          prospect_name: string | null
-          sent_at: string | null
-          services_json: Json
-          status: string
-          tenant_id: string
-          terms_text: string | null
-          title: string
-          total_fee_pence: number
-          updated_at: string
-          valid_until: string | null
-        }
-        Insert: {
-          accepted_at?: string | null
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          declined_at?: string | null
-          engagement_letter_doc_id?: string | null
-          fee_breakdown_json?: Json
-          fee_frequency?: string
-          id?: string
-          prospect_email?: string | null
-          prospect_name?: string | null
-          sent_at?: string | null
-          services_json?: Json
-          status?: string
-          tenant_id: string
-          terms_text?: string | null
-          title: string
-          total_fee_pence?: number
-          updated_at?: string
-          valid_until?: string | null
-        }
-        Update: {
-          accepted_at?: string | null
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          declined_at?: string | null
-          engagement_letter_doc_id?: string | null
-          fee_breakdown_json?: Json
-          fee_frequency?: string
-          id?: string
-          prospect_email?: string | null
-          prospect_name?: string | null
-          sent_at?: string | null
-          services_json?: Json
-          status?: string
-          tenant_id?: string
-          terms_text?: string | null
-          title?: string
-          total_fee_pence?: number
-          updated_at?: string
-          valid_until?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "proposals_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proposals_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "proposals_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "proposals_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "proposals_engagement_letter_doc_id_fkey"
-            columns: ["engagement_letter_doc_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proposals_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proposals_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      push_tokens: {
-        Row: {
-          created_at: string
-          id: string
-          platform: string
-          tenant_id: string
-          token: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          platform: string
-          tenant_id: string
-          token: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          platform?: string
-          tenant_id?: string
-          token?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "push_tokens_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "push_tokens_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      receipt_extractions: {
-        Row: {
-          client_id: string | null
-          confidence: number | null
-          created_at: string
-          currency: string | null
-          document_id: string
-          id: string
-          invoice_number: string | null
-          raw_json: Json
-          receipt_date: string | null
-          supplier_name: string | null
-          supplier_vat_number: string | null
-          tenant_id: string
-          total_gross_pence: number | null
-          total_net_pence: number | null
-          total_vat_pence: number | null
-          updated_at: string
-        }
-        Insert: {
-          client_id?: string | null
-          confidence?: number | null
-          created_at?: string
-          currency?: string | null
-          document_id: string
-          id?: string
-          invoice_number?: string | null
-          raw_json?: Json
-          receipt_date?: string | null
-          supplier_name?: string | null
-          supplier_vat_number?: string | null
-          tenant_id: string
-          total_gross_pence?: number | null
-          total_net_pence?: number | null
-          total_vat_pence?: number | null
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string | null
-          confidence?: number | null
-          created_at?: string
-          currency?: string | null
-          document_id?: string
-          id?: string
-          invoice_number?: string | null
-          raw_json?: Json
-          receipt_date?: string | null
-          supplier_name?: string | null
-          supplier_vat_number?: string | null
-          tenant_id?: string
-          total_gross_pence?: number | null
-          total_net_pence?: number | null
-          total_vat_pence?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "receipt_extractions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_extractions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "receipt_extractions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "receipt_extractions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "receipt_extractions_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_extractions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_extractions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      recurring_invoice_templates: {
-        Row: {
-          client_id: string
-          created_at: string
-          description: string
-          frequency: string
-          id: string
-          is_active: boolean
-          last_issued_at: string | null
-          net_amount_pence: number
-          next_issue_date: string | null
-          tenant_id: string
-          total_pence: number
-          updated_at: string
-          vat_rate: number
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          description?: string
-          frequency?: string
-          id?: string
-          is_active?: boolean
-          last_issued_at?: string | null
-          net_amount_pence?: number
-          next_issue_date?: string | null
-          tenant_id: string
-          total_pence?: number
-          updated_at?: string
-          vat_rate?: number
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          description?: string
-          frequency?: string
-          id?: string
-          is_active?: boolean
-          last_issued_at?: string | null
-          net_amount_pence?: number
-          next_issue_date?: string | null
-          tenant_id?: string
-          total_pence?: number
-          updated_at?: string
-          vat_rate?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "recurring_invoice_templates_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recurring_invoice_templates_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "recurring_invoice_templates_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "recurring_invoice_templates_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "recurring_invoice_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recurring_invoice_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      roles: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          is_system_role: boolean | null
-          name: string
-          permissions_json: Json
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_system_role?: boolean | null
-          name: string
-          permissions_json?: Json
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_system_role?: boolean | null
-          name?: string
-          permissions_json?: Json
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "roles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "roles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      secretarial_changes: {
-        Row: {
-          approved_at: string | null
-          approved_by_user_id: string | null
-          assigned_user_id: string | null
-          change_type: string
-          client_id: string
-          created_at: string
-          created_by_user_id: string | null
-          description: string | null
-          id: string
-          payload_json: Json
-          requires_auth_code: boolean
-          status: string
-          submission_job_id: string | null
-          tenant_id: string
-          title: string
-          updated_at: string
-          validation_json: Json
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          assigned_user_id?: string | null
-          change_type: string
-          client_id: string
-          created_at?: string
-          created_by_user_id?: string | null
-          description?: string | null
-          id?: string
-          payload_json?: Json
-          requires_auth_code?: boolean
-          status?: string
-          submission_job_id?: string | null
-          tenant_id: string
-          title: string
-          updated_at?: string
-          validation_json?: Json
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          assigned_user_id?: string | null
-          change_type?: string
-          client_id?: string
-          created_at?: string
-          created_by_user_id?: string | null
-          description?: string | null
-          id?: string
-          payload_json?: Json
-          requires_auth_code?: boolean
-          status?: string
-          submission_job_id?: string | null
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-          validation_json?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "secretarial_changes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_submission_job_id_fkey"
-            columns: ["submission_job_id"]
-            isOneToOne: false
-            referencedRelation: "submission_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_submission_job_id_fkey"
-            columns: ["submission_job_id"]
-            isOneToOne: false
-            referencedRelation: "v_submission_jobs_recent"
-            referencedColumns: ["submission_job_id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      secretarial_events: {
-        Row: {
-          client_id: string
-          created_at: string
-          created_by_user_id: string | null
-          description: string | null
-          effective_date: string | null
-          event_type: string
-          filed_at: string | null
-          filing_id: string | null
-          id: string
-          payload_json: Json
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          created_by_user_id?: string | null
-          description?: string | null
-          effective_date?: string | null
-          event_type: string
-          filed_at?: string | null
-          filing_id?: string | null
-          id?: string
-          payload_json?: Json
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          created_by_user_id?: string | null
-          description?: string | null
-          effective_date?: string | null
-          event_type?: string
-          filed_at?: string | null
-          filing_id?: string | null
-          id?: string
-          payload_json?: Json
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "secretarial_events_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secretarial_events_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_events_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_events_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_events_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secretarial_events_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      share_classes: {
-        Row: {
-          class_name: string
-          client_id: string
-          created_at: string
-          currency: string
-          dividend_rights: boolean
-          id: string
-          nominal_value_pence: number
-          tenant_id: string
-          total_issued: number
-          updated_at: string
-          voting_rights: boolean
-        }
-        Insert: {
-          class_name?: string
-          client_id: string
-          created_at?: string
-          currency?: string
-          dividend_rights?: boolean
-          id?: string
-          nominal_value_pence?: number
-          tenant_id: string
-          total_issued?: number
-          updated_at?: string
-          voting_rights?: boolean
-        }
-        Update: {
-          class_name?: string
-          client_id?: string
-          created_at?: string
-          currency?: string
-          dividend_rights?: boolean
-          id?: string
-          nominal_value_pence?: number
-          tenant_id?: string
-          total_issued?: number
-          updated_at?: string
-          voting_rights?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "share_classes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_classes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "share_classes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "share_classes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "share_classes_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_classes_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      share_transactions: {
-        Row: {
-          client_id: string
-          consideration_text: string | null
-          created_at: string
-          effective_date: string
-          from_member_id: string | null
-          id: string
-          num_shares: number
-          price_per_share_pence: number | null
-          resolution_document_id: string | null
-          share_class_id: string | null
-          tenant_id: string
-          to_member_id: string | null
-          transaction_type: string
-        }
-        Insert: {
-          client_id: string
-          consideration_text?: string | null
-          created_at?: string
-          effective_date?: string
-          from_member_id?: string | null
-          id?: string
-          num_shares: number
-          price_per_share_pence?: number | null
-          resolution_document_id?: string | null
-          share_class_id?: string | null
-          tenant_id: string
-          to_member_id?: string | null
-          transaction_type?: string
-        }
-        Update: {
-          client_id?: string
-          consideration_text?: string | null
-          created_at?: string
-          effective_date?: string
-          from_member_id?: string | null
-          id?: string
-          num_shares?: number
-          price_per_share_pence?: number | null
-          resolution_document_id?: string | null
-          share_class_id?: string | null
-          tenant_id?: string
-          to_member_id?: string | null
-          transaction_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "share_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "share_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "share_transactions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "share_transactions_from_member_id_fkey"
-            columns: ["from_member_id"]
-            isOneToOne: false
-            referencedRelation: "company_register_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_transactions_resolution_document_id_fkey"
-            columns: ["resolution_document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_transactions_share_class_id_fkey"
-            columns: ["share_class_id"]
-            isOneToOne: false
-            referencedRelation: "share_classes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_transactions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "share_transactions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-          {
-            foreignKeyName: "share_transactions_to_member_id_fkey"
-            columns: ["to_member_id"]
-            isOneToOne: false
-            referencedRelation: "company_register_members"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      signature_requests: {
-        Row: {
-          client_id: string
-          created_at: string
-          created_by_user_id: string | null
-          decline_reason: string | null
-          declined_at: string | null
-          document_id: string | null
-          expires_at: string | null
-          id: string
-          last_reminder_at: string | null
-          reminder_count: number
-          sent_at: string | null
-          signed_at: string | null
-          signed_document_path: string | null
-          signer_email: string
-          signer_name: string
-          status: string
-          tenant_id: string
-          title: string
-          updated_at: string
-          viewed_at: string | null
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          created_by_user_id?: string | null
-          decline_reason?: string | null
-          declined_at?: string | null
-          document_id?: string | null
-          expires_at?: string | null
-          id?: string
-          last_reminder_at?: string | null
-          reminder_count?: number
-          sent_at?: string | null
-          signed_at?: string | null
-          signed_document_path?: string | null
-          signer_email: string
-          signer_name: string
-          status?: string
-          tenant_id: string
-          title: string
-          updated_at?: string
-          viewed_at?: string | null
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          created_by_user_id?: string | null
-          decline_reason?: string | null
-          declined_at?: string | null
-          document_id?: string | null
-          expires_at?: string | null
-          id?: string
-          last_reminder_at?: string | null
-          reminder_count?: number
-          sent_at?: string | null
-          signed_at?: string | null
-          signed_document_path?: string | null
-          signer_email?: string
-          signer_name?: string
-          status?: string
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-          viewed_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "signature_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signature_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "signature_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "signature_requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "signature_requests_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signature_requests_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signature_requests_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      staff_availability: {
-        Row: {
-          created_at: string
-          date: string
-          hours_available: number | null
-          id: string
-          notes: string | null
-          status: string
-          tenant_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          date: string
-          hours_available?: number | null
-          id?: string
-          notes?: string | null
-          status?: string
-          tenant_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          date?: string
-          hours_available?: number | null
-          id?: string
-          notes?: string | null
-          status?: string
-          tenant_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_availability_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_availability_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      submission_attempts: {
-        Row: {
-          attempt_no: number
-          duration_ms: number | null
-          error_class: string | null
-          error_detail: string | null
-          error_message: string | null
-          finished_at: string | null
-          http_status: number | null
-          id: string
-          job_id: string
-          provider_code: string | null
-          provider_message: string | null
-          request_meta_redacted: Json | null
-          response_meta_redacted: Json | null
-          started_at: string
-          status: string
-        }
-        Insert: {
-          attempt_no: number
-          duration_ms?: number | null
-          error_class?: string | null
-          error_detail?: string | null
-          error_message?: string | null
-          finished_at?: string | null
-          http_status?: number | null
-          id?: string
-          job_id: string
-          provider_code?: string | null
-          provider_message?: string | null
-          request_meta_redacted?: Json | null
-          response_meta_redacted?: Json | null
-          started_at?: string
-          status?: string
-        }
-        Update: {
-          attempt_no?: number
-          duration_ms?: number | null
-          error_class?: string | null
-          error_detail?: string | null
-          error_message?: string | null
-          finished_at?: string | null
-          http_status?: number | null
-          id?: string
-          job_id?: string
-          provider_code?: string | null
-          provider_message?: string | null
-          request_meta_redacted?: Json | null
-          response_meta_redacted?: Json | null
-          started_at?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "submission_attempts_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "submission_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submission_attempts_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "v_submission_jobs_recent"
-            referencedColumns: ["submission_job_id"]
-          },
-        ]
-      }
-      submission_jobs: {
-        Row: {
-          attempt_count: number
-          client_id: string
-          correlation_id: string | null
-          created_at: string
-          id: string
-          idempotency_key: string
-          last_error: string | null
-          next_retry_at: string | null
-          provider: Database["public"]["Enums"]["integration_provider"]
-          request_json: Json
-          response_json: Json | null
-          status: Database["public"]["Enums"]["submission_status"]
-          submission_type: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          attempt_count?: number
-          client_id: string
-          correlation_id?: string | null
-          created_at?: string
-          id?: string
-          idempotency_key: string
-          last_error?: string | null
-          next_retry_at?: string | null
-          provider: Database["public"]["Enums"]["integration_provider"]
-          request_json?: Json
-          response_json?: Json | null
-          status?: Database["public"]["Enums"]["submission_status"]
-          submission_type: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          attempt_count?: number
-          client_id?: string
-          correlation_id?: string | null
-          created_at?: string
-          id?: string
-          idempotency_key?: string
-          last_error?: string | null
-          next_retry_at?: string | null
-          provider?: Database["public"]["Enums"]["integration_provider"]
-          request_json?: Json
-          response_json?: Json | null
-          status?: Database["public"]["Enums"]["submission_status"]
-          submission_type?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "submission_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      subscription_plans: {
-        Row: {
-          allowed_modules: string[]
-          code: string
-          created_at: string
-          description: string | null
-          id: string
-          is_active: boolean
-          max_clients: number
-          max_users: number
-          name: string
-          price_annual_pence: number
-          price_monthly_pence: number
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          allowed_modules?: string[]
-          code: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          max_clients?: number
-          max_users?: number
-          name: string
-          price_annual_pence?: number
-          price_monthly_pence?: number
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          allowed_modules?: string[]
-          code?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          max_clients?: number
-          max_users?: number
-          name?: string
-          price_annual_pence?: number
-          price_monthly_pence?: number
-          sort_order?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      task_templates: {
-        Row: {
-          checklist_json: Json | null
-          created_at: string
-          default_days_before_due: number | null
-          default_priority: Database["public"]["Enums"]["priority"]
-          description: string | null
-          entity_types: Database["public"]["Enums"]["entity_type"][] | null
-          id: string
-          name: string
-          service_id: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          checklist_json?: Json | null
-          created_at?: string
-          default_days_before_due?: number | null
-          default_priority?: Database["public"]["Enums"]["priority"]
-          description?: string | null
-          entity_types?: Database["public"]["Enums"]["entity_type"][] | null
-          id?: string
-          name: string
-          service_id?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          checklist_json?: Json | null
-          created_at?: string
-          default_days_before_due?: number | null
-          default_priority?: Database["public"]["Enums"]["priority"]
-          description?: string | null
-          entity_types?: Database["public"]["Enums"]["entity_type"][] | null
-          id?: string
-          name?: string
-          service_id?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "task_templates_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "engagement_services"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_templates_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      tasks: {
-        Row: {
-          assigned_to_user_id: string | null
-          checklist_json: Json | null
-          client_id: string | null
-          color_tag: string | null
-          completed_at: string | null
-          created_at: string
-          description: string | null
-          due_date: string | null
-          id: string
-          priority: Database["public"]["Enums"]["priority"]
-          status: Database["public"]["Enums"]["task_status"]
-          tenant_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to_user_id?: string | null
-          checklist_json?: Json | null
-          client_id?: string | null
-          color_tag?: string | null
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          id?: string
-          priority?: Database["public"]["Enums"]["priority"]
-          status?: Database["public"]["Enums"]["task_status"]
-          tenant_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to_user_id?: string | null
-          checklist_json?: Json | null
-          client_id?: string | null
-          color_tag?: string | null
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          id?: string
-          priority?: Database["public"]["Enums"]["priority"]
-          status?: Database["public"]["Enums"]["task_status"]
-          tenant_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tasks_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "tasks_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "tasks_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "tasks_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      tax_computations: {
-        Row: {
-          computation_type: string
-          computed_values: Json
-          created_at: string
-          form_data: Json
-          id: string
-          notes: string | null
-          period_id: string
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          computation_type?: string
-          computed_values?: Json
-          created_at?: string
-          form_data?: Json
-          id?: string
-          notes?: string | null
-          period_id: string
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          computation_type?: string
-          computed_values?: Json
-          created_at?: string
-          form_data?: Json
-          id?: string
-          notes?: string | null
-          period_id?: string
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tax_computations_period_id_fkey"
-            columns: ["period_id"]
-            isOneToOne: false
-            referencedRelation: "accounts_periods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tax_computations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tax_computations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      tb_imports: {
-        Row: {
-          client_id: string
-          created_at: string
-          error_log_json: Json
-          file_name: string | null
-          id: string
-          imported_by: string | null
-          mapping_json: Json
-          rows_mapped: number | null
-          rows_posted: number | null
-          rows_total: number | null
-          source: string
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          error_log_json?: Json
-          file_name?: string | null
-          id?: string
-          imported_by?: string | null
-          mapping_json?: Json
-          rows_mapped?: number | null
-          rows_posted?: number | null
-          rows_total?: number | null
-          source?: string
-          status?: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          error_log_json?: Json
-          file_name?: string | null
-          id?: string
-          imported_by?: string | null
-          mapping_json?: Json
-          rows_mapped?: number | null
-          rows_posted?: number | null
-          rows_total?: number | null
-          source?: string
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tb_imports_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tb_imports_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "tb_imports_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "tb_imports_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "tb_imports_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tb_imports_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      template_variable_whitelist: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          key: string
-          template_type: string
-          tenant_id: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          key: string
-          template_type?: string
-          tenant_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          key?: string
-          template_type?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "template_variable_whitelist_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "template_variable_whitelist_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      template_versions: {
-        Row: {
-          body_html: string | null
-          body_text: string | null
-          created_at: string
-          created_by_user_id: string | null
-          id: string
-          subject: string | null
-          template_key: string
-          template_type: string
-          tenant_id: string
-          variables_json: Json
-          version: number
-        }
-        Insert: {
-          body_html?: string | null
-          body_text?: string | null
-          created_at?: string
-          created_by_user_id?: string | null
-          id?: string
-          subject?: string | null
-          template_key: string
-          template_type?: string
-          tenant_id: string
-          variables_json?: Json
-          version: number
-        }
-        Update: {
-          body_html?: string | null
-          body_text?: string | null
-          created_at?: string
-          created_by_user_id?: string | null
-          id?: string
-          subject?: string | null
-          template_key?: string
-          template_type?: string
-          tenant_id?: string
-          variables_json?: Json
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "template_versions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "template_versions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      tenant_subscriptions: {
-        Row: {
-          billing_cycle: string
-          cancelled_at: string | null
-          created_at: string
-          current_period_end: string
-          current_period_start: string
-          id: string
-          plan_id: string
-          status: string
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          tenant_id: string
-          trial_ends_at: string | null
-          updated_at: string
-        }
-        Insert: {
-          billing_cycle?: string
-          cancelled_at?: string | null
-          created_at?: string
-          current_period_end?: string
-          current_period_start?: string
-          id?: string
-          plan_id: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          tenant_id: string
-          trial_ends_at?: string | null
-          updated_at?: string
-        }
-        Update: {
-          billing_cycle?: string
-          cancelled_at?: string | null
-          created_at?: string
-          current_period_end?: string
-          current_period_start?: string
-          id?: string
-          plan_id?: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          tenant_id?: string
-          trial_ends_at?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tenant_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: true
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: true
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      tenants: {
-        Row: {
-          address_json: Json | null
-          brand_primary_color: string | null
-          brand_secondary_color: string | null
-          created_at: string
-          firm_name: string
-          id: string
-          is_white_label_enabled: boolean | null
-          logo_url: string | null
-          phone: string | null
-          plan_code: string | null
-          primary_domain: string | null
-          stripe_customer_id: string | null
-          support_email: string | null
-          timezone: string | null
-          trading_name: string | null
-          updated_at: string
-        }
-        Insert: {
-          address_json?: Json | null
-          brand_primary_color?: string | null
-          brand_secondary_color?: string | null
-          created_at?: string
-          firm_name: string
-          id?: string
-          is_white_label_enabled?: boolean | null
-          logo_url?: string | null
-          phone?: string | null
-          plan_code?: string | null
-          primary_domain?: string | null
-          stripe_customer_id?: string | null
-          support_email?: string | null
-          timezone?: string | null
-          trading_name?: string | null
-          updated_at?: string
-        }
-        Update: {
-          address_json?: Json | null
-          brand_primary_color?: string | null
-          brand_secondary_color?: string | null
-          created_at?: string
-          firm_name?: string
-          id?: string
-          is_white_label_enabled?: boolean | null
-          logo_url?: string | null
-          phone?: string | null
-          plan_code?: string | null
-          primary_domain?: string | null
-          stripe_customer_id?: string | null
-          support_email?: string | null
-          timezone?: string | null
-          trading_name?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      time_entries: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          date: string
-          description: string
-          duration_minutes: number
-          id: string
-          is_billable: boolean
-          rate_pence: number | null
-          status: string
-          task_id: string | null
-          tenant_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          date?: string
-          description?: string
-          duration_minutes?: number
-          id?: string
-          is_billable?: boolean
-          rate_pence?: number | null
-          status?: string
-          task_id?: string | null
-          tenant_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          date?: string
-          description?: string
-          duration_minutes?: number
-          id?: string
-          is_billable?: boolean
-          rate_pence?: number | null
-          status?: string
-          task_id?: string | null
-          tenant_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "time_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "time_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "time_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "time_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "time_entries_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "time_entries_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["task_id"]
-          },
-          {
-            foreignKeyName: "time_entries_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["task_id"]
-          },
-          {
-            foreignKeyName: "time_entries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "time_entries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      trial_balance_entries: {
-        Row: {
-          account_code: string
-          account_name: string
-          account_type: string
-          adjustment_credit_pence: number
-          adjustment_debit_pence: number
-          adjustment_notes: string | null
-          brought_forward: boolean
-          comparative_credit_pence: number
-          comparative_debit_pence: number
-          created_at: string
-          credit_pence: number
-          debit_pence: number
-          id: string
-          period_id: string
-          sort_order: number
-          source_period_id: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          account_code: string
-          account_name: string
-          account_type?: string
-          adjustment_credit_pence?: number
-          adjustment_debit_pence?: number
-          adjustment_notes?: string | null
-          brought_forward?: boolean
-          comparative_credit_pence?: number
-          comparative_debit_pence?: number
-          created_at?: string
-          credit_pence?: number
-          debit_pence?: number
-          id?: string
-          period_id: string
-          sort_order?: number
-          source_period_id?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          account_code?: string
-          account_name?: string
-          account_type?: string
-          adjustment_credit_pence?: number
-          adjustment_debit_pence?: number
-          adjustment_notes?: string | null
-          brought_forward?: boolean
-          comparative_credit_pence?: number
-          comparative_debit_pence?: number
-          created_at?: string
-          credit_pence?: number
-          debit_pence?: number
-          id?: string
-          period_id?: string
-          sort_order?: number
-          source_period_id?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trial_balance_entries_period_id_fkey"
-            columns: ["period_id"]
-            isOneToOne: false
-            referencedRelation: "accounts_periods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trial_balance_entries_source_period_id_fkey"
-            columns: ["source_period_id"]
-            isOneToOne: false
-            referencedRelation: "accounts_periods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trial_balance_entries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trial_balance_entries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          tenant_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          tenant_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          tenant_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_roles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      vat_returns: {
-        Row: {
-          box1: number
-          box2: number
-          box3: number
-          box4: number
-          box5: number
-          box6: number
-          box7: number
-          box8: number
-          box9: number
-          client_id: string | null
-          created_at: string
-          hmrc_receipt: string | null
-          id: string
-          notes: string | null
-          period_end: string
-          period_start: string
-          status: string
-          submitted_at: string | null
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          box1?: number
-          box2?: number
-          box3?: number
-          box4?: number
-          box5?: number
-          box6?: number
-          box7?: number
-          box8?: number
-          box9?: number
-          client_id?: string | null
-          created_at?: string
-          hmrc_receipt?: string | null
-          id?: string
-          notes?: string | null
-          period_end: string
-          period_start: string
-          status?: string
-          submitted_at?: string | null
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          box1?: number
-          box2?: number
-          box3?: number
-          box4?: number
-          box5?: number
-          box6?: number
-          box7?: number
-          box8?: number
-          box9?: number
-          client_id?: string | null
-          created_at?: string
-          hmrc_receipt?: string | null
-          id?: string
-          notes?: string | null
-          period_end?: string
-          period_start?: string
-          status?: string
-          submitted_at?: string | null
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vat_returns_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vat_returns_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "vat_returns_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "vat_returns_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "vat_returns_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vat_returns_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      webhook_endpoints: {
-        Row: {
-          created_at: string
-          events: string[]
-          id: string
-          is_enabled: boolean | null
-          name: string
-          secret: string
-          tenant_id: string
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          events?: string[]
-          id?: string
-          is_enabled?: boolean | null
-          name: string
-          secret: string
-          tenant_id: string
-          url: string
-        }
-        Update: {
-          created_at?: string
-          events?: string[]
-          id?: string
-          is_enabled?: boolean | null
-          name?: string
-          secret?: string
-          tenant_id?: string
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "webhook_endpoints_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "webhook_endpoints_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      v_billing_kpis: {
-        Row: {
-          invoices_count: number | null
-          invoices_total: number | null
-          month: string | null
-          overdue_count: number | null
-          overdue_total: number | null
-          paid_total: number | null
-          tenant_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invoices_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_company_register_health: {
-        Row: {
-          active_directors: number | null
-          active_members: number | null
-          active_pscs: number | null
-          client_id: string | null
-          client_legal_name: string | null
-          company_number: string | null
-          has_auth_code: boolean | null
-          tenant_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "company_profiles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_profiles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_overdue_tasks: {
-        Row: {
-          assigned_to_user_id: string | null
-          assigned_user_name: string | null
-          client_id: string | null
-          client_legal_name: string | null
-          days_overdue: number | null
-          due_date: string | null
-          entity_type: Database["public"]["Enums"]["entity_type"] | null
-          priority: Database["public"]["Enums"]["priority"] | null
-          status: Database["public"]["Enums"]["task_status"] | null
-          task_id: string | null
-          tenant_id: string | null
-          title: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tasks_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_practice_dashboard_kpis: {
-        Row: {
-          active_clients: number | null
-          open_tasks: number | null
-          overdue_invoices: number | null
-          overdue_tasks: number | null
-          tenant_id: string | null
-          vat_due_14d: number | null
-        }
-        Insert: {
-          active_clients?: never
-          open_tasks?: never
-          overdue_invoices?: never
-          overdue_tasks?: never
-          tenant_id?: string | null
-          vat_due_14d?: never
-        }
-        Update: {
-          active_clients?: never
-          open_tasks?: never
-          overdue_invoices?: never
-          overdue_tasks?: never
-          tenant_id?: string | null
-          vat_due_14d?: never
-        }
-        Relationships: []
-      }
-      v_secretarial_changes_pending: {
-        Row: {
-          change_id: string | null
-          change_type: string | null
-          client_id: string | null
-          client_legal_name: string | null
-          requires_auth_code: boolean | null
-          status: string | null
-          tenant_id: string | null
-          title: string | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "secretarial_changes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secretarial_changes_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_secretarial_due: {
-        Row: {
-          ch_last_synced_at: string | null
-          client_id: string | null
-          client_legal_name: string | null
-          company_number: string | null
-          company_status: string | null
-          next_confirmation_statement_due: string | null
-          open_secretarial_changes: number | null
-          tenant_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "clients_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "clients_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_submission_jobs_recent: {
-        Row: {
-          attempt_count: number | null
-          client_id: string | null
-          client_legal_name: string | null
-          correlation_id: string | null
-          created_at: string | null
-          last_error: string | null
-          provider: string | null
-          status: string | null
-          submission_job_id: string | null
-          submission_type: string | null
-          tenant_id: string | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "submission_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_submission_success_30d: {
-        Row: {
-          accepted_30d: number | null
-          provider: string | null
-          rejected_30d: number | null
-          submission_type: string | null
-          success_pct_30d: number | null
-          tenant_id: string | null
-          total_30d: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "submission_jobs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submission_jobs_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_tasks_due_next_14d: {
-        Row: {
-          assigned_user_name: string | null
-          client_id: string | null
-          client_legal_name: string | null
-          days_until_due: number | null
-          due_date: string | null
-          priority: Database["public"]["Enums"]["priority"] | null
-          status: Database["public"]["Enums"]["task_status"] | null
-          task_id: string | null
-          tenant_id: string | null
-          title: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tasks_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_threads_needing_attention: {
-        Row: {
-          client_id: string | null
-          client_legal_name: string | null
-          last_message_at: string | null
-          last_sender_type: string | null
-          priority: string | null
-          status: string | null
-          subject: string | null
-          tenant_id: string | null
-          thread_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "message_threads_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_threads_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "message_threads_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "message_threads_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "message_threads_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "message_threads_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-      v_vat_due: {
-        Row: {
-          client_id: string | null
-          client_legal_name: string | null
-          net_vat_due: number | null
-          period_end: string | null
-          period_start: string | null
-          status: string | null
-          submitted_at: string | null
-          tenant_id: string | null
-          vat_return_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vat_returns_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vat_returns_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_overdue_tasks"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "vat_returns_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_secretarial_due"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "vat_returns_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "v_tasks_due_next_14d"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "vat_returns_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vat_returns_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "v_practice_dashboard_kpis"
-            referencedColumns: ["tenant_id"]
-          },
-        ]
-      }
-    }
-    Functions: {
-      post_bank_transaction: {
-        Args: { p_transaction_id: string }
-        Returns: string
-      }
-      run_accounts_intelligence: {
-        Args: { p_client_id: string; p_period_id: string }
-        Returns: Json
-      }
-      seed_year_end_checks: {
-        Args: { p_period_id: string }
-        Returns: number
-      }
-      get_tenant_allowed_modules: {
-        Args: { p_tenant_id: string }
-        Returns: string[]
-      }
-      get_tenant_plan_limits: {
-        Args: { p_tenant_id: string }
-        Returns: {
-          max_clients: number
-          max_users: number
-          plan_code: string
-          plan_name: string
-        }[]
-      }
-      get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
-      get_user_type: { Args: { _user_id: string }; Returns: Json }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      seed_template_whitelist: {
-        Args: { p_tenant_id: string }
-        Returns: undefined
-      }
-      seed_templates_and_automations: {
-        Args: { p_tenant_id: string }
-        Returns: undefined
-      }
-      seed_tenant: { Args: { p_tenant_id: string }; Returns: undefined }
-    }
-    Enums: {
-      app_role:
-        | "super_admin"
-        | "firm_owner"
-        | "manager"
-        | "staff"
-        | "payroll_officer"
-        | "client_user"
-        | "employee"
-      client_status: "prospect" | "active" | "dormant" | "ceased"
-      entity_type:
-        | "ltd"
-        | "sole_trader"
-        | "partnership"
-        | "llp"
-        | "charity"
-        | "trust"
-      integration_provider:
-        | "hmrc"
-        | "companies_house"
-        | "charity_commission"
-        | "open_banking"
-        | "stripe"
-        | "gocardless"
-      priority: "low" | "medium" | "high" | "urgent"
-      submission_status:
-        | "draft"
-        | "queued"
-        | "sent"
-        | "accepted"
-        | "rejected"
-        | "cancelled"
-      task_status:
-        | "todo"
-        | "in_progress"
-        | "blocked"
-        | "awaiting_client"
-        | "awaiting_hmrc"
-        | "done"
-        | "cancelled"
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      app_role: [
-        "super_admin",
-        "firm_owner",
-        "manager",
-        "staff",
-        "payroll_officer",
-        "client_user",
-        "employee",
-      ],
-      client_status: ["prospect", "active", "dormant", "ceased"],
-      entity_type: [
-        "ltd",
-        "sole_trader",
-        "partnership",
-        "llp",
-        "charity",
-        "trust",
-      ],
-      integration_provider: [
-        "hmrc",
-        "companies_house",
-        "charity_commission",
-        "open_banking",
-        "stripe",
-        "gocardless",
-      ],
-      priority: ["low", "medium", "high", "urgent"],
-      submission_status: [
-        "draft",
-        "queued",
-        "sent",
-        "accepted",
-        "rejected",
-        "cancelled",
-      ],
-      task_status: [
-        "todo",
-        "in_progress",
-        "blocked",
-        "awaiting_client",
-        "awaiting_hmrc",
-        "done",
-        "cancelled",
-      ],
-    },
-  },
-} as const
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí×MúãDèµ©hºÚn¶X§zÍY^Ü\HœÛÛˆBˆİš[™Âˆ[X™\‚ˆ›ÛÛX[‚ˆ[ˆÈÚÙ^Nˆİš[™×NˆœÛÛˆ[™Yš[™YBˆœÛÛ–×B‚™^Ü\H]X˜\ÙHHÂˆËÈ[İÜÈÈ]]ÛX]XØ[H[œİ[X]HÜ™X]PÛY[Ú]šYÚÜ[ÛœÂˆËÈ[œİXYÙˆÜ™X]PÛY[]X˜\ÙKÈÜİÜ™\İ™\œÚ[Ûˆ	Ö	ÈOŠT“ÑVJBˆ×Ò[\›˜[İ\X˜\ÙNˆÂˆÜİÜ™\İ™\œÚ[ÛˆŒMŒH‚ˆBˆX›XÎˆÂˆX›\ÎˆÂˆXØÛİ[[™×ÚYÙ[Y[ÎˆÂˆ›İÎˆÂˆ[[İ[Ü[˜ÙNˆ[X™\ˆ[ˆ˜[š×İ˜[œØXİ[Û—ÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆÜ™X]YØWİ\Ù\—ÚYˆİš[™È[ˆ]WÚœÛÛˆœÛÛ‚ˆ\ØÜš\[Ûˆİš[™È[ˆØİ[Y[ÚYˆİš[™È[ˆY™™Xİ]™WÙœ›ÛNˆİš[™È[ˆY™™Xİ]™WİÎˆİš[™È[ˆYˆİš[™ÂˆYÙ[Y[İ\Nˆİš[™Âˆ\š[ÙÚYˆİš[™ÂˆÜİYÚ›İ\›˜[ÚYˆİš[™È[ˆ›ÜÜÙYØXØÛİ[ÚYˆİš[™È[ˆ™]šY]ÙYØ]ˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYˆİš[™È[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ[[İ[Ü[˜ÙOÎˆ[X™\ˆ[ˆ˜[š×İ˜[œØXİ[Û—ÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØWİ\Ù\—ÚYÎˆİš[™È[ˆ]WÚœÛÛÎˆœÛÛ‚ˆ\ØÜš\[ÛÎˆİš[™È[ˆØİ[Y[ÚYÎˆİš[™È[ˆY™™Xİ]™WÙœ›ÛOÎˆİš[™È[ˆY™™Xİ]™WİÏÎˆİš[™È[ˆYÎˆİš[™ÂˆYÙ[Y[İ\Nˆİš[™Âˆ\š[ÙÚYˆİš[™ÂˆÜİYÚ›İ\›˜[ÚYÎˆİš[™È[ˆ›ÜÜÙYØXØÛİ[ÚYÎˆİš[™È[ˆ™]šY]ÙYØ]Îˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ[[İ[Ü[˜ÙOÎˆ[X™\ˆ[ˆ˜[š×İ˜[œØXİ[Û—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØWİ\Ù\—ÚYÎˆİš[™È[ˆ]WÚœÛÛÎˆœÛÛ‚ˆ\ØÜš\[ÛÎˆİš[™È[ˆØİ[Y[ÚYÎˆİš[™È[ˆY™™Xİ]™WÙœ›ÛOÎˆİš[™È[ˆY™™Xİ]™WİÏÎˆİš[™È[ˆYÎˆİš[™ÂˆYÙ[Y[İ\OÎˆİš[™Âˆ\š[ÙÚYÎˆİš[™ÂˆÜİYÚ›İ\›˜[ÚYÎˆİš[™È[ˆ›ÜÜÙYØXØÛİ[ÚYÎˆİš[™È[ˆ™]šY]ÙYØ]Îˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ]OÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\Îˆ×BˆBˆXØÛİ[×Ü\š[ÙÎˆÂˆ›İÎˆÂˆXØÛİ[×Üİ[™\™ˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆİŒÜİ]\Îˆİš[™Âˆš[[™×ÙXY[™Nˆİš[™È[ˆYˆİš[™Âˆ›İ\Îˆİš[™È[ˆ\š[ÙÙ[™ˆİš[™Âˆ\š[ÙÜİ\ˆİš[™Âˆ\š[Ùİ\Nˆİš[™ÂˆØWÜİ]\Îˆİš[™Âˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆXØÛİ[×Üİ[™\™Îˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆİŒÜİ]\ÏÎˆİš[™Âˆš[[™×ÙXY[™OÎˆİš[™È[ˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆ\š[ÙÙ[™ˆİš[™Âˆ\š[ÙÜİ\ˆİš[™Âˆ\š[Ùİ\OÎˆİš[™ÂˆØWÜİ]\ÏÎˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆXØÛİ[×Üİ[™\™Îˆİš[™ÂˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆİŒÜİ]\ÏÎˆİš[™Âˆš[[™×ÙXY[™OÎˆİš[™È[ˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆ\š[ÙÙ[™Îˆİš[™Âˆ\š[ÙÜİ\Îˆİš[™Âˆ\š[Ùİ\OÎˆİš[™ÂˆØWÜİ]\ÏÎˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜XØÛİ[×Ü\š[Ù×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜XØÛİ[×Ü\š[Ù×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜XØÛİ[×Ü\š[Ù×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜XØÛİ[×Ü\š[Ù×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜XØÛİ[×Ü\š[Ù×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜XØÛİ[×Ü\š[Ù×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆØİ[Y[Ùš[™Ù\œš[ÎˆÂˆ›İÎˆÂˆÛY[ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆØİ[Y[ÚYˆİš[™ÂˆYˆİš[™ÂˆÚLMˆİš[™ÂˆÚ^™WØ]\Îˆ[X™\‚ˆ[˜[ÚYˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYˆİš[™ÂˆYÎˆİš[™ÂˆÚLMˆİš[™ÂˆÚ^™WØ]\ÏÎˆ[X™\‚ˆ[˜[ÚYˆİš[™ÂˆBˆ\]NˆÂˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYÎˆİš[™ÂˆYÎˆİš[™ÂˆÚLMÎˆİš[™ÂˆÚ^™WØ]\ÏÎˆ[X™\‚ˆ[˜[ÚYÎˆİš[™ÂˆBˆ™[][ÛœÚ\Îˆ×BˆBˆ\XØ]WØØ[™Y]\ÎˆÂˆ›İÎˆÂˆØ[™Y]WÙØİ[Y[ÚYˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÛÛ™šY[˜ÙNˆ[X™\‚ˆÜ™X]YØ]ˆİš[™Âˆ]Xİ[Û—ÛY]Ùˆİš[™ÂˆYˆİš[™Âˆ\š[ÙÚYˆİš[™È[ˆš[X\WÙØİ[Y[ÚYˆİš[™Âˆ™X\ÛÛœ×ÚœÛÛˆœÛÛ‚ˆ™]šY]×Û›İ\Îˆİš[™È[ˆ™]šY]ÙYØ]ˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYˆİš[™È[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆØ[™Y]WÙØİ[Y[ÚYˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÛÛ™šY[˜ÙOÎˆ[X™\‚ˆÜ™X]YØ]Îˆİš[™Âˆ]Xİ[Û—ÛY]Ùˆİš[™ÂˆYÎˆİš[™Âˆ\š[ÙÚYÎˆİš[™È[ˆš[X\WÙØİ[Y[ÚYˆİš[™Âˆ™X\ÛÛœ×ÚœÛÛÎˆœÛÛ‚ˆ™]šY]×Û›İ\ÏÎˆİš[™È[ˆ™]šY]ÙYØ]Îˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆØ[™Y]WÙØİ[Y[ÚYÎˆİš[™ÂˆÛY[ÚYÎˆİš[™ÂˆÛÛ™šY[˜ÙOÎˆ[X™\‚ˆÜ™X]YØ]Îˆİš[™Âˆ]Xİ[Û—ÛY]ÙÎˆİš[™ÂˆYÎˆİš[™Âˆ\š[ÙÚYÎˆİš[™È[ˆš[X\WÙØİ[Y[ÚYÎˆİš[™Âˆ™X\ÛÛœ×ÚœÛÛÎˆœÛÛ‚ˆ™]šY]×Û›İ\ÏÎˆİš[™È[ˆ™]šY]ÙYØ]Îˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\Îˆ×BˆBˆ]šY[˜ÙWÛX]Ú\ÎˆÂˆ›İÎˆÂˆ˜[š×İ˜[œØXİ[Û—ÚYˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÛÛ™šY[˜ÙNˆ[X™\‚ˆÜ™X]YØ]ˆİš[™ÂˆØİ[Y[ÚYˆİš[™Âˆ^˜Xİ[Û—ÚYˆİš[™È[ˆ˜XİÜœ×ÚœÛÛˆœÛÛ‚ˆYˆİš[™ÂˆX]Úİ\Nˆİš[™Âˆ\š[ÙÚYˆİš[™Âˆ™]šY]×Û›İ\Îˆİš[™È[ˆ™]šY]ÙYØ]ˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYˆİš[™È[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ˜[š×İ˜[œØXİ[Û—ÚYˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÛÛ™šY[˜ÙOÎˆ[X™\‚ˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYˆİš[™Âˆ^˜Xİ[Û—ÚYÎˆİš[™È[ˆ˜XİÜœ×ÚœÛÛÎˆœÛÛ‚ˆYÎˆİš[™ÂˆX]Úİ\OÎˆİš[™Âˆ\š[ÙÚYˆİš[™Âˆ™]šY]×Û›İ\ÏÎˆİš[™È[ˆ™]šY]ÙYØ]Îˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ˜[š×İ˜[œØXİ[Û—ÚYÎˆİš[™ÂˆÛY[ÚYÎˆİš[™ÂˆÛÛ™šY[˜ÙOÎˆ[X™\‚ˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYÎˆİš[™Âˆ^˜Xİ[Û—ÚYÎˆİš[™È[ˆ˜XİÜœ×ÚœÛÛÎˆœÛÛ‚ˆYÎˆİš[™ÂˆX]Úİ\OÎˆİš[™Âˆ\š[ÙÚYÎˆİš[™Âˆ™]šY]×Û›İ\ÏÎˆİš[™È[ˆ™]šY]ÙYØ]Îˆİš[™È[ˆ™]šY]ÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\Îˆ×BˆBˆYX\—Ù[™ØÚXÚÜÎˆÂˆ›İÎˆÂˆØ]YÛÜNˆİš[™ÂˆÚXÚ×ÚÙ^Nˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÛÛ\]YØ]ˆİš[™È[ˆÛÛ\]YØWİ\Ù\—ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ›İ\Îˆİš[™È[ˆ\š[ÙÚYˆİš[™Âˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆØ]YÛÜNˆİš[™ÂˆÚXÚ×ÚÙ^Nˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÛÛ\]YØ]Îˆİš[™È[ˆÛÛ\]YØWİ\Ù\—ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆ\š[ÙÚYˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆØ]YÛÜOÎˆİš[™ÂˆÚXÚ×ÚÙ^OÎˆİš[™ÂˆÛY[ÚYÎˆİš[™ÂˆÛÛ\]YØ]Îˆİš[™È[ˆÛÛ\]YØWİ\Ù\—ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆ\š[ÙÚYÎˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ]OÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\Îˆ×BˆBˆ[[Û[Ûš]Üš[™×Ø[\ÎˆÂˆ›İÎˆÂˆ[\İ\Nˆİš[™ÂˆØ\ÙWÚYˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆ\ØÜš\[Ûˆİš[™È[ˆYˆİš[™ÂˆY]Y]WÚœÛÛˆœÛÛ‚ˆ™\ÛÛ][Û—Û›İ\Îˆİš[™È[ˆ™\ÛÛ™YØ]ˆİš[™È[ˆ™\ÛÛ™YØWİ\Ù\—ÚYˆİš[™È[ˆÙ]™\š]Nˆİš[™ÂˆÛİ\˜ÙNˆİš[™Âˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ[\İ\Nˆİš[™ÂˆØ\ÙWÚYˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™È[ˆYÎˆİš[™ÂˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ™\ÛÛ][Û—Û›İ\ÏÎˆİš[™È[ˆ™\ÛÛ™YØ]Îˆİš[™È[ˆ™\ÛÛ™YØWİ\Ù\—ÚYÎˆİš[™È[ˆÙ]™\š]OÎˆİš[™ÂˆÛİ\˜ÙOÎˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ[\İ\OÎˆİš[™ÂˆØ\ÙWÚYÎˆİš[™ÂˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™È[ˆYÎˆİš[™ÂˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ™\ÛÛ][Û—Û›İ\ÏÎˆİš[™È[ˆ™\ÛÛ™YØ]Îˆİš[™È[ˆ™\ÛÛ™YØWİ\Ù\—ÚYÎˆİš[™È[ˆÙ]™\š]OÎˆİš[™ÂˆÛİ\˜ÙOÎˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ]OÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜[[Û[Ûš]Üš[™×Ø[\×ØØ\ÙWÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜Ø\ÙWÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][ÛˆšŞX×ØØ\Ù\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜[[Û[Ûš]Üš[™×Ø[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜[[Û[Ûš]Üš[™×Ø[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜[[Û[Ûš]Üš[™×Ø[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜[[Û[Ûš]Üš[™×Ø[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜[[Û[Ûš]Üš[™×Ø[\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜[[Û[Ûš]Üš[™×Ø[\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ]Y]ÛÙÎˆÂˆ›İÎˆÂˆXİ[Ûˆİš[™ÂˆY\—ÚœÛÛˆœÛÛˆ[ˆ™Y›Ü™WÚœÛÛˆœÛÛˆ[ˆÜ™X]YØ]ˆİš[™Âˆ[]WÚYˆİš[™È[ˆ[]WÛ˜[YNˆİš[™ÂˆYˆİš[™Âˆ\ØY™\ÜÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\Ù\—ÚYˆİš[™È[ˆBˆ[œÙ\ˆÂˆXİ[Ûˆİš[™ÂˆY\—ÚœÛÛÎˆœÛÛˆ[ˆ™Y›Ü™WÚœÛÛÎˆœÛÛˆ[ˆÜ™X]YØ]Îˆİš[™Âˆ[]WÚYÎˆİš[™È[ˆ[]WÛ˜[YNˆİš[™ÂˆYÎˆİš[™Âˆ\ØY™\ÜÏÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\Ù\—ÚYÎˆİš[™È[ˆBˆ\]NˆÂˆXİ[ÛÎˆİš[™ÂˆY\—ÚœÛÛÎˆœÛÛˆ[ˆ™Y›Ü™WÚœÛÛÎˆœÛÛˆ[ˆÜ™X]YØ]Îˆİš[™Âˆ[]WÚYÎˆİš[™È[ˆ[]WÛ˜[YOÎˆİš[™ÂˆYÎˆİš[™Âˆ\ØY™\ÜÏÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ\Ù\—ÚYÎˆİš[™È[ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜]Y]ÛÙ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜]Y]ÛÙ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ]]ÛX][Û—Ù^Xİ][Û—ÛÙÎˆÂˆ›İÎˆÂˆ^Xİ]YØ]ˆİš[™ÂˆYˆİš[™Âˆ™\İ[ÛY\ÜØYÙNˆİš[™È[ˆ[WÚYˆİš[™È[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆšYÙÙ\—Ù]WÚœÛÛˆœÛÛˆ[ˆBˆ[œÙ\ˆÂˆ^Xİ]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ™\İ[ÛY\ÜØYÙOÎˆİš[™È[ˆ[WÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆšYÙÙ\—Ù]WÚœÛÛÎˆœÛÛˆ[ˆBˆ\]NˆÂˆ^Xİ]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ™\İ[ÛY\ÜØYÙOÎˆİš[™È[ˆ[WÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™ÂˆšYÙÙ\—Ù]WÚœÛÛÎˆœÛÛˆ[ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜]]ÛX][Û—Ù^Xİ][Û—ÛÙ×Ü[WÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈœ[WÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜]]ÛX][Û—Ü[\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜]]ÛX][Û—Ù^Xİ][Û—ÛÙ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜]]ÛX][Û—Ù^Xİ][Û—ÛÙ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ]]ÛX][Û—Ü[\ÎˆÂˆ›İÎˆÂˆXİ[Û—Ü^[ØYÚœÛÛˆœÛÛ‚ˆXİ[Û—İ\Nˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ\×Ù[˜X›Yˆ›ÛÛX[ˆ[ˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆšYÙÙ\—Ùš[\—ÚœÛÛˆœÛÛ‚ˆšYÙÙ\—İ\Nˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆXİ[Û—Ü^[ØYÚœÛÛÎˆœÛÛ‚ˆXİ[Û—İ\Nˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×Ù[˜X›YÎˆ›ÛÛX[ˆ[ˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆšYÙÙ\—Ùš[\—ÚœÛÛÎˆœÛÛ‚ˆšYÙÙ\—İ\Nˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆXİ[Û—Ü^[ØYÚœÛÛÎˆœÛÛ‚ˆXİ[Û—İ\OÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×Ù[˜X›YÎˆ›ÛÛX[ˆ[ˆ˜[YOÎˆİš[™Âˆ[˜[ÚYÎˆİš[™ÂˆšYÙÙ\—Ùš[\—ÚœÛÛÎˆœÛÛ‚ˆšYÙÙ\—İ\OÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜]]ÛX][Û—Ü[\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜]]ÛX][Û—Ü[\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ˜[š×ØÛÛ›™Xİ[ÛœÎˆÂˆ›İÎˆÂˆXØÛİ[Û˜[YNˆİš[™ÂˆXØÛİ[Û[X™\—ÛX\ÚÙYˆİš[™È[ˆ˜[[˜ÙWÜ[˜ÙNˆ[X™\ˆ[ˆ˜[[˜ÙWİ\]YØ]ˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÛÛœÙ[Ù^\™\×Ø]ˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆİ\œ™[˜ŞNˆİš[™ÂˆYˆİš[™ÂˆYÙ\—ØXØÛİ[ÚYˆİš[™È[ˆY]Y]WÚœÛÛˆœÛÛ‚ˆ›İšY\ˆİš[™Âˆ›İšY\—ØÛÛ›™Xİ[Û—ÚYˆİš[™È[ˆÛÜØÛÙNˆİš[™È[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆXØÛİ[Û˜[YNˆİš[™ÂˆXØÛİ[Û[X™\—ÛX\ÚÙYÎˆİš[™È[ˆ˜[[˜ÙWÜ[˜ÙOÎˆ[X™\ˆ[ˆ˜[[˜ÙWİ\]YØ]Îˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÛÛœÙ[Ù^\™\×Ø]Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆİ\œ™[˜ŞOÎˆİš[™ÂˆYÎˆİš[™ÂˆYÙ\—ØXØÛİ[ÚYÎˆİš[™È[ˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ›İšY\Îˆİš[™Âˆ›İšY\—ØÛÛ›™Xİ[Û—ÚYÎˆİš[™È[ˆÛÜØÛÙOÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆXØÛİ[Û˜[YOÎˆİš[™ÂˆXØÛİ[Û[X™\—ÛX\ÚÙYÎˆİš[™È[ˆ˜[[˜ÙWÜ[˜ÙOÎˆ[X™\ˆ[ˆ˜[[˜ÙWİ\]YØ]Îˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÛÛœÙ[Ù^\™\×Ø]Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆİ\œ™[˜ŞOÎˆİš[™ÂˆYÎˆİš[™ÂˆYÙ\—ØXØÛİ[ÚYÎˆİš[™È[ˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ›İšY\Îˆİš[™Âˆ›İšY\—ØÛÛ›™Xİ[Û—ÚYÎˆİš[™È[ˆÛÜØÛÙOÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×ØÛÛ›™Xİ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×ØÛÛ›™Xİ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×ØÛÛ›™Xİ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×ØÛÛ›™Xİ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×ØÛÛ›™Xİ[Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×ØÛÛ›™Xİ[Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ˜[š×İ˜[œØXİ[ÛœÎˆÂˆ›İÎˆÂˆ[[İ[Ü[˜ÙNˆ[X™\‚ˆ˜[š×ØÛÛ›™Xİ[Û—ÚYˆİš[™ÂˆØ]YÛÜš\Ø][Û—Üİ]\Îˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÛÛ™š\›YYØXØÛİ[ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆ\ØÜš\[Ûˆİš[™ÂˆYˆİš[™Âˆ›İ\›˜[Ù[WÚYˆİš[™È[ˆX]ÚYÜ[WÚYˆİš[™È[ˆY]Y]WÚœÛÛˆœÛÛ‚ˆ›İšY\—İ˜[œØXİ[Û—ÚYˆİš[™È[ˆ™Y™\™[˜ÙNˆİš[™È[ˆ[›š[™×Ø˜[[˜ÙWÜ[˜ÙNˆ[X™\ˆ[ˆİYÙÙ\İYØXØÛİ[ÚYˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ˜[œØXİ[Û—Ù]Nˆİš[™Âˆ˜[œØXİ[Û—İ\Nˆİš[™È[ˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ[[İ[Ü[˜ÙNˆ[X™\‚ˆ˜[š×ØÛÛ›™Xİ[Û—ÚYˆİš[™ÂˆØ]YÛÜš\Ø][Û—Üİ]\ÏÎˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÛÛ™š\›YYØXØÛİ[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[Ûˆİš[™ÂˆYÎˆİš[™Âˆ›İ\›˜[Ù[WÚYÎˆİš[™È[ˆX]ÚYÜ[WÚYÎˆİš[™È[ˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ›İšY\—İ˜[œØXİ[Û—ÚYÎˆİš[™È[ˆ™Y™\™[˜ÙOÎˆİš[™È[ˆ[›š[™×Ø˜[[˜ÙWÜ[˜ÙOÎˆ[X™\ˆ[ˆİYÙÙ\İYØXØÛİ[ÚYÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ˜[œØXİ[Û—Ù]Nˆİš[™Âˆ˜[œØXİ[Û—İ\OÎˆİš[™È[ˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ[[İ[Ü[˜ÙOÎˆ[X™\‚ˆ˜[š×ØÛÛ›™Xİ[Û—ÚYÎˆİš[™ÂˆØ]YÛÜš\Ø][Û—Üİ]\ÏÎˆİš[™ÂˆÛY[ÚYÎˆİš[™ÂˆÛÛ™š\›YYØXØÛİ[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™ÂˆYÎˆİš[™Âˆ›İ\›˜[Ù[WÚYÎˆİš[™È[ˆX]ÚYÜ[WÚYÎˆİš[™È[ˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ›İšY\—İ˜[œØXİ[Û—ÚYÎˆİš[™È[ˆ™Y™\™[˜ÙOÎˆİš[™È[ˆ[›š[™×Ø˜[[˜ÙWÜ[˜ÙOÎˆ[X™\ˆ[ˆİYÙÙ\İYØXØÛİ[ÚYÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ˜[œØXİ[Û—Ù]OÎˆİš[™Âˆ˜[œØXİ[Û—İ\OÎˆİš[™È[ˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×Ø˜[š×ØÛÛ›™Xİ[Û—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜˜[š×ØÛÛ›™Xİ[Û—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜˜[š×ØÛÛ›™Xİ[ÛœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×ØÛÛ™š\›YYØXØÛİ[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛÛ™š\›YYØXØÛİ[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\ÛÙ—ØXØÛİ[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×Ú›İ\›˜[Ù[WÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈš›İ\›˜[Ù[WÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš›İ\›˜[Ù[šY\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×ÜİYÙÙ\İYØXØÛİ[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈœİYÙÙ\İYØXØÛİ[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\ÛÙ—ØXØÛİ[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜˜[š×İ˜[œØXİ[Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆØ[[™\—Ù]™[ÎˆÂˆ›İÎˆÂˆ[Ù^Nˆ›ÛÛX[‚ˆ\ÜÚYÛ™Yİ\Ù\—ÚYˆİš[™È[ˆÛY[ÚYˆİš[™È[ˆÛÛÜˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆÜ™X]YØNˆİš[™È[ˆ\ØÜš\[Ûˆİš[™È[ˆ[™Ø]ˆİš[™Âˆ]™[İ\Nˆİš[™ÂˆYˆİš[™ÂˆY]Y]WÚœÛÛˆœÛÛ‚ˆ™Xİ\œ™[˜ÙWÜ[Nˆİš[™È[ˆİ\Ø]ˆİš[™Âˆ\Ú×ÚYˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ[Ù^OÎˆ›ÛÛX[‚ˆ\ÜÚYÛ™Yİ\Ù\—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™È[ˆÛÛÜÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØOÎˆİš[™È[ˆ\ØÜš\[ÛÎˆİš[™È[ˆ[™Ø]ˆİš[™Âˆ]™[İ\OÎˆİš[™ÂˆYÎˆİš[™ÂˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ™Xİ\œ™[˜ÙWÜ[OÎˆİš[™È[ˆİ\Ø]ˆİš[™Âˆ\Ú×ÚYÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ[Ù^OÎˆ›ÛÛX[‚ˆ\ÜÚYÛ™Yİ\Ù\—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™È[ˆÛÛÜÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØOÎˆİš[™È[ˆ\ØÜš\[ÛÎˆİš[™È[ˆ[™Ø]Îˆİš[™Âˆ]™[İ\OÎˆİš[™ÂˆYÎˆİš[™ÂˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ™Xİ\œ™[˜ÙWÜ[OÎˆİš[™È[ˆİ\Ø]Îˆİš[™Âˆ\Ú×ÚYÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ]OÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×İ\Ú×ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ\Ú×ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×İ\Ú×ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ\Ú×ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ\Ú×ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×İ\Ú×ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ\Ú×ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ\Ú×ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø[[™\—Ù]™[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆØ]YÛÜš\Ø][Û—Ü[\ÎˆÂˆ›İÎˆÂˆ]]×ÜÜİˆ›ÛÛX[‚ˆÛY[ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆÜ™X]YØNˆİš[™È[ˆ]ØÛİ[ˆ[X™\‚ˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[‚ˆ\İÛX]ÚYØ]ˆİš[™È[ˆX]ÚÙšY[ˆİš[™ÂˆX]Úİ\Nˆİš[™ÂˆX]Úİ˜[YNˆİš[™Âˆ˜[YNˆİš[™Âˆš[Üš]Nˆ[X™\‚ˆ\™Ù]ØXØÛİ[ÚYˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™Âˆ˜]ØÛÙNˆİš[™È[ˆBˆ[œÙ\ˆÂˆ]]×ÜÜİÎˆ›ÛÛX[‚ˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØOÎˆİš[™È[ˆ]ØÛİ[Îˆ[X™\‚ˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ\İÛX]ÚYØ]Îˆİš[™È[ˆX]ÚÙšY[Îˆİš[™ÂˆX]Úİ\OÎˆİš[™ÂˆX]Úİ˜[YNˆİš[™Âˆ˜[YNˆİš[™Âˆš[Üš]OÎˆ[X™\‚ˆ\™Ù]ØXØÛİ[ÚYˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ˜]ØÛÙOÎˆİš[™È[ˆBˆ\]NˆÂˆ]]×ÜÜİÎˆ›ÛÛX[‚ˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØOÎˆİš[™È[ˆ]ØÛİ[Îˆ[X™\‚ˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ\İÛX]ÚYØ]Îˆİš[™È[ˆX]ÚÙšY[Îˆİš[™ÂˆX]Úİ\OÎˆİš[™ÂˆX]Úİ˜[YOÎˆİš[™Âˆ˜[YOÎˆİš[™Âˆš[Üš]OÎˆ[X™\‚ˆ\™Ù]ØXØÛİ[ÚYÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ˜]ØÛÙOÎˆİš[™È[ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø]YÛÜš\Ø][Û—Ü[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø]YÛÜš\Ø][Û—Ü[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø]YÛÜš\Ø][Û—Ü[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø]YÛÜš\Ø][Û—Ü[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø]YÛÜš\Ø][Û—Ü[\×İ\™Ù]ØXØÛİ[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ\™Ù]ØXØÛİ[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\ÛÙ—ØXØÛİ[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø]YÛÜš\Ø][Û—Ü[\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ø]YÛÜš\Ø][Û—Ü[\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÚÙš[[™ÜÎˆÂˆ›İÎˆÂˆXØÙ\YØ]ˆİš[™È[ˆÚØ˜\˜ÛÙNˆİš[™È[ˆÚİ˜[œØXİ[Û—ÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆ[š\›Û›Y[ˆİš[™Âˆš[[™×Ù\ØÜš\[Ûˆİš[™È[ˆš[[™×İ\Nˆİš[™ÂˆYˆİš[™Âˆ™Z™XİYÜ™X\ÛÛˆİš[™È[ˆ™\]Y\İÚœÛÛˆœÛÛ‚ˆ™\ÜÛœÙWÚœÛÛˆœÛÛ‚ˆİ]\Îˆİš[™ÂˆİX›Z]YØ]ˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆXØÙ\YØ]Îˆİš[™È[ˆÚØ˜\˜ÛÙOÎˆİš[™È[ˆÚİ˜[œØXİ[Û—ÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ[š\›Û›Y[Îˆİš[™Âˆš[[™×Ù\ØÜš\[ÛÎˆİš[™È[ˆš[[™×İ\Nˆİš[™ÂˆYÎˆİš[™Âˆ™Z™XİYÜ™X\ÛÛÎˆİš[™È[ˆ™\]Y\İÚœÛÛÎˆœÛÛ‚ˆ™\ÜÛœÙWÚœÛÛÎˆœÛÛ‚ˆİ]\ÏÎˆİš[™ÂˆİX›Z]YØ]Îˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆXØÙ\YØ]Îˆİš[™È[ˆÚØ˜\˜ÛÙOÎˆİš[™È[ˆÚİ˜[œØXİ[Û—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ[š\›Û›Y[Îˆİš[™Âˆš[[™×Ù\ØÜš\[ÛÎˆİš[™È[ˆš[[™×İ\OÎˆİš[™ÂˆYÎˆİš[™Âˆ™Z™XİYÜ™X\ÛÛÎˆİš[™È[ˆ™\]Y\İÚœÛÛÎˆœÛÛ‚ˆ™\ÜÛœÙWÚœÛÛÎˆœÛÛ‚ˆİ]\ÏÎˆİš[™ÂˆİX›Z]YØ]Îˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÚÙš[[™Ü×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÚÙš[[™Ü×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÚÙš[[™Ü×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÚÙš[[™Ü×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÚÙš[[™Ü×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÚÙš[[™Ü×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÚ\ÛÙ—ØXØÛİ[ÎˆÂˆ›İÎˆÂˆXØÛİ[İ\Nˆİš[™ÂˆÛÙNˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[‚ˆ˜[YNˆİš[™Âˆ\™[ÚYˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆXØÛİ[İ\OÎˆİš[™ÂˆÛÙNˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ˜[YNˆİš[™Âˆ\™[ÚYÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆXØÛİ[İ\OÎˆİš[™ÂˆÛÙOÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ˜[YOÎˆİš[™Âˆ\™[ÚYÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\ÛÙ—ØXØÛİ[×Ü\™[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈœ\™[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\ÛÙ—ØXØÛİ[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\ÛÙ—ØXØÛİ[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\ÛÙ—ØXØÛİ[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÚ\×ØÛÛ˜XİÜœÎˆÂˆ›İÎˆÂˆXØÛİ[×ÛÙ™šXÙWÜ™Yˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ^YWÜ™Y™\™[˜ÙNˆİš[™È[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™Âˆ]ˆİš[™Âˆ™\šYšXØ][Û—Ù]Nˆİš[™È[ˆBˆ[œÙ\ˆÂˆXØÛİ[×ÛÙ™šXÙWÜ™YÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ^YWÜ™Y™\™[˜ÙOÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ]ˆİš[™Âˆ™\šYšXØ][Û—Ù]OÎˆİš[™È[ˆBˆ\]NˆÂˆXØÛİ[×ÛÙ™šXÙWÜ™YÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ^YWÜ™Y™\™[˜ÙOÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ]Îˆİš[™Âˆ™\šYšXØ][Û—Ù]OÎˆİš[™È[ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ØÛÛ˜XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ØÛÛ˜XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ØÛÛ˜XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ØÛÛ˜XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ØÛÛ˜XİÜœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ØÛÛ˜XİÜœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÚ\×ÙYXİ[ÛœÎˆÂˆ›İÎˆÂˆÛÛ˜XİÜ—ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYXİ[Û—Ø[[İ[Ü[˜ÙNˆ[X™\‚ˆYXİ[Û—Ü˜]Nˆ[X™\‚ˆ\ØÜš\[Ûˆİš[™È[ˆÜ›ÜÜ×Ø[[İ[Ü[˜ÙNˆ[X™\‚ˆYˆİš[™ÂˆX]\šX[×Ø[[İ[Ü[˜ÙNˆ[X™\‚ˆ™]Ø[[İ[Ü[˜ÙNˆ[X™\‚ˆ^[Y[Ù]Nˆİš[™È[ˆİX˜ÛÛ˜XİÜ—ÚYˆİš[™Âˆ^Û[Ûˆ[X™\‚ˆ^ŞYX\ˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛÛ˜XİÜ—ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYXİ[Û—Ø[[İ[Ü[˜ÙOÎˆ[X™\‚ˆYXİ[Û—Ü˜]Nˆ[X™\‚ˆ\ØÜš\[ÛÎˆİš[™È[ˆÜ›ÜÜ×Ø[[İ[Ü[˜ÙOÎˆ[X™\‚ˆYÎˆİš[™ÂˆX]\šX[×Ø[[İ[Ü[˜ÙOÎˆ[X™\‚ˆ™]Ø[[İ[Ü[˜ÙOÎˆ[X™\‚ˆ^[Y[Ù]OÎˆİš[™È[ˆİX˜ÛÛ˜XİÜ—ÚYˆİš[™Âˆ^Û[Ûˆ[X™\‚ˆ^ŞYX\ˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÛÛ˜XİÜ—ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYXİ[Û—Ø[[İ[Ü[˜ÙOÎˆ[X™\‚ˆYXİ[Û—Ü˜]OÎˆ[X™\‚ˆ\ØÜš\[ÛÎˆİš[™È[ˆÜ›ÜÜ×Ø[[İ[Ü[˜ÙOÎˆ[X™\‚ˆYÎˆİš[™ÂˆX]\šX[×Ø[[İ[Ü[˜ÙOÎˆ[X™\‚ˆ™]Ø[[İ[Ü[˜ÙOÎˆ[X™\‚ˆ^[Y[Ù]OÎˆİš[™È[ˆİX˜ÛÛ˜XİÜ—ÚYÎˆİš[™Âˆ^Û[ÛÎˆ[X™\‚ˆ^ŞYX\Îˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÙYXİ[Ûœ×ØÛÛ˜XİÜ—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛÛ˜XİÜ—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\×ØÛÛ˜XİÜœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÙYXİ[Ûœ×ÜİX˜ÛÛ˜XİÜ—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈœİX˜ÛÛ˜XİÜ—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\×ÜİX˜ÛÛ˜XİÜœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÙYXİ[Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÙYXİ[Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÚ\×Û[ÛWÜ™]\›œÎˆÂˆ›İÎˆÂˆÛÛ˜XİÜ—ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆ[\Ş[Y[Üİ]\×ÙXÛ\˜][Ûˆ›ÛÛX[‚ˆ\˜×Ü™XÙZ\ÚYˆİš[™È[ˆYˆİš[™Âˆš[Ü™]\›ˆ›ÛÛX[‚ˆİ]\Îˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYˆİš[™È[ˆİX›Z]YØ]ˆİš[™È[ˆ^Û[Ûˆ[X™\‚ˆ^ŞYX\ˆİš[™Âˆ[˜[ÚYˆİš[™Âˆİ[ÙYXİ[Ûœ×Ü[˜ÙNˆ[X™\‚ˆİ[ÙÜ›ÜÜ×Ü[˜ÙNˆ[X™\‚ˆİ[ÛX]\šX[×Ü[˜ÙNˆ[X™\‚ˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛÛ˜XİÜ—ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ[\Ş[Y[Üİ]\×ÙXÛ\˜][ÛÎˆ›ÛÛX[‚ˆ\˜×Ü™XÙZ\ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆš[Ü™]\›Îˆ›ÛÛX[‚ˆİ]\ÏÎˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYÎˆİš[™È[ˆİX›Z]YØ]Îˆİš[™È[ˆ^Û[Ûˆ[X™\‚ˆ^ŞYX\ˆİš[™Âˆ[˜[ÚYˆİš[™Âˆİ[ÙYXİ[Ûœ×Ü[˜ÙOÎˆ[X™\‚ˆİ[ÙÜ›ÜÜ×Ü[˜ÙOÎˆ[X™\‚ˆİ[ÛX]\šX[×Ü[˜ÙOÎˆ[X™\‚ˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÛÛ˜XİÜ—ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ[\Ş[Y[Üİ]\×ÙXÛ\˜][ÛÎˆ›ÛÛX[‚ˆ\˜×Ü™XÙZ\ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆš[Ü™]\›Îˆ›ÛÛX[‚ˆİ]\ÏÎˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYÎˆİš[™È[ˆİX›Z]YØ]Îˆİš[™È[ˆ^Û[ÛÎˆ[X™\‚ˆ^ŞYX\Îˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆİ[ÙYXİ[Ûœ×Ü[˜ÙOÎˆ[X™\‚ˆİ[ÙÜ›ÜÜ×Ü[˜ÙOÎˆ[X™\‚ˆİ[ÛX]\šX[×Ü[˜ÙOÎˆ[X™\‚ˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×Û[ÛWÜ™]\›œ×ØÛÛ˜XİÜ—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛÛ˜XİÜ—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\×ØÛÛ˜XİÜœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×Û[ÛWÜ™]\›œ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×Û[ÛWÜ™]\›œ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÚ\×ÜİX˜ÛÛ˜XİÜœÎˆÂˆ›İÎˆÂˆY™\Ü×ÚœÛÛˆœÛÛ‚ˆÛY[ÚYˆİš[™È[ˆÛÛ\[WÛ[X™\ˆİš[™È[ˆÛÛ˜XİÜ—ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYXİ[Û—Ü˜]Nˆ[X™\‚ˆ\˜×İ™\šYšXØ][Û—Ü™Yˆİš[™È[ˆYˆİš[™Âˆ\İİ™\šYšYYØ]ˆİš[™È[ˆ˜[YNˆİš[™Âˆš[›Îˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ˜Y[™×Û˜[YNˆİš[™È[ˆ\]YØ]ˆİš[™Âˆ]ˆİš[™È[ˆ™\šYšXØ][Û—Üİ]\Îˆİš[™ÂˆBˆ[œÙ\ˆÂˆY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆÛY[ÚYÎˆİš[™È[ˆÛÛ\[WÛ[X™\Îˆİš[™È[ˆÛÛ˜XİÜ—ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYXİ[Û—Ü˜]OÎˆ[X™\‚ˆ\˜×İ™\šYšXØ][Û—Ü™YÎˆİš[™È[ˆYÎˆİš[™Âˆ\İİ™\šYšYYØ]Îˆİš[™È[ˆ˜[YNˆİš[™Âˆš[›ÏÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ˜Y[™×Û˜[YOÎˆİš[™È[ˆ\]YØ]Îˆİš[™Âˆ]Îˆİš[™È[ˆ™\šYšXØ][Û—Üİ]\ÏÎˆİš[™ÂˆBˆ\]NˆÂˆY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆÛY[ÚYÎˆİš[™È[ˆÛÛ\[WÛ[X™\Îˆİš[™È[ˆÛÛ˜XİÜ—ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYXİ[Û—Ü˜]OÎˆ[X™\‚ˆ\˜×İ™\šYšXØ][Û—Ü™YÎˆİš[™È[ˆYÎˆİš[™Âˆ\İİ™\šYšYYØ]Îˆİš[™È[ˆ˜[YOÎˆİš[™Âˆš[›ÏÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ˜Y[™×Û˜[YOÎˆİš[™È[ˆ\]YØ]Îˆİš[™Âˆ]Îˆİš[™È[ˆ™\šYšXØ][Û—Üİ]\ÏÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÜİX˜ÛÛ˜XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÜİX˜ÛÛ˜XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÜİX˜ÛÛ˜XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÜİX˜ÛÛ˜XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÜİX˜ÛÛ˜XİÜœ×ØÛÛ˜XİÜ—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛÛ˜XİÜ—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\×ØÛÛ˜XİÜœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÜİX˜ÛÛ˜XİÜœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜Ú\×ÜİX˜ÛÛ˜XİÜœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛY[ØÜ™Y[X[ÎˆÂˆ›İÎˆÂˆÚ\\^ˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆÜ™Y[X[İ\Nˆİš[™Âˆ^\™\×Ø]ˆİš[™È[ˆYˆİš[™ÂˆY]Y]WÚœÛÛˆœÛÛ‚ˆ›İšY\ˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÚ\\^ˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆÜ™Y[X[İ\Nˆİš[™Âˆ^\™\×Ø]Îˆİš[™È[ˆYÎˆİš[™ÂˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ›İšY\ˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÚ\\^Îˆİš[™ÂˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆÜ™Y[X[İ\OÎˆİš[™Âˆ^\™\×Ø]Îˆİš[™È[ˆYÎˆİš[™ÂˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆ›İšY\Îˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ØÜ™Y[X[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ØÜ™Y[X[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ØÜ™Y[X[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ØÜ™Y[X[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ØÜ™Y[X[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ØÜ™Y[X[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛY[ÛÛ˜›Ø\™[™ÎˆÂˆ›İÎˆÂˆ[[ØØ\ÙWÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÛØWİ[\]WÚYˆİš[™È[ˆÛÛ\]YØ]ˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆİ\œ™[Üİ\ˆİš[™Âˆ[™ØYÙ[Y[ÙØİ[Y[ÚYˆİš[™È[ˆ[™ØYÙ[Y[ÜÚYÛ™Yˆ›ÛÛX[‚ˆYˆİš[™Âˆ›İ\Îˆİš[™È[ˆÙ[XİYÜÙ\šXÙ\Îˆİš[™Ö×Bˆİ\YØNˆİš[™È[ˆİ]\Îˆİš[™Âˆİ\×ÚœÛÛˆœÛÛ‚ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ[[ØØ\ÙWÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÛØWİ[\]WÚYÎˆİš[™È[ˆÛÛ\]YØ]Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆİ\œ™[Üİ\Îˆİš[™Âˆ[™ØYÙ[Y[ÙØİ[Y[ÚYÎˆİš[™È[ˆ[™ØYÙ[Y[ÜÚYÛ™YÎˆ›ÛÛX[‚ˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆÙ[XİYÜÙ\šXÙ\ÏÎˆİš[™Ö×Bˆİ\YØOÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆİ\×ÚœÛÛÎˆœÛÛ‚ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ[[ØØ\ÙWÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÛØWİ[\]WÚYÎˆİš[™È[ˆÛÛ\]YØ]Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆİ\œ™[Üİ\Îˆİš[™Âˆ[™ØYÙ[Y[ÙØİ[Y[ÚYÎˆİš[™È[ˆ[™ØYÙ[Y[ÜÚYÛ™YÎˆ›ÛÛX[‚ˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆÙ[XİYÜÙ\šXÙ\ÏÎˆİš[™Ö×Bˆİ\YØOÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆİ\×ÚœÛÛÎˆœÛÛ‚ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ÛÛ˜›Ø\™[™×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ÛÛ˜›Ø\™[™×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ÛÛ˜›Ø\™[™×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ÛÛ˜›Ø\™[™×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ÛÛ˜›Ø\™[™×ØÛØWİ[\]WÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛØWİ[\]WÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛØWİ[\]\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ÛÛ˜›Ø\™[™×Ù[™ØYÙ[Y[ÙØİ[Y[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ™[™ØYÙ[Y[ÙØİ[Y[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ™Øİ[Y[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ÛÛ˜›Ø\™[™×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[ÛÛ˜›Ø\™[™×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛY[ÎˆÂˆ›İÎˆÂˆY™\Ü×ÚœÛÛˆœÛÛˆ[ˆ\˜Ú]™YØ]ˆİš[™È[ˆ\ÜÚYÛ™YÛX[˜YÙ\—İ\Ù\—ÚYˆİš[™È[ˆÚ\š]WÛ[X™\ˆİš[™È[ˆÛÛ\[WÛ[X™\ˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆ[XZ[ˆİš[™È[ˆ[]Wİ\Nˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ™[]Wİ\H—BˆYˆİš[™ÂˆYØ[Û˜[YNˆİš[™Âˆš[›Îˆİš[™È[ˆ^YWÜ™Y™\™[˜ÙNˆİš[™È[ˆÛ™Nˆİš[™È[ˆİ]\Îˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ˜ÛY[Üİ]\È—Bˆ[˜[ÚYˆİš[™Âˆ˜Y[™×Û˜[YNˆİš[™È[ˆ\]YØ]ˆİš[™Âˆ]ˆİš[™È[ˆ˜]Û[X™\ˆİš[™È[ˆBˆ[œÙ\ˆÂˆY™\Ü×ÚœÛÛÎˆœÛÛˆ[ˆ\˜Ú]™YØ]Îˆİš[™È[ˆ\ÜÚYÛ™YÛX[˜YÙ\—İ\Ù\—ÚYÎˆİš[™È[ˆÚ\š]WÛ[X™\Îˆİš[™È[ˆÛÛ\[WÛ[X™\Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ[XZ[Îˆİš[™È[ˆ[]Wİ\OÎˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ™[]Wİ\H—BˆYÎˆİš[™ÂˆYØ[Û˜[YNˆİš[™Âˆš[›ÏÎˆİš[™È[ˆ^YWÜ™Y™\™[˜ÙOÎˆİš[™È[ˆÛ™OÎˆİš[™È[ˆİ]\ÏÎˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ˜ÛY[Üİ]\È—Bˆ[˜[ÚYˆİš[™Âˆ˜Y[™×Û˜[YOÎˆİš[™È[ˆ\]YØ]Îˆİš[™Âˆ]Îˆİš[™È[ˆ˜]Û[X™\Îˆİš[™È[ˆBˆ\]NˆÂˆY™\Ü×ÚœÛÛÎˆœÛÛˆ[ˆ\˜Ú]™YØ]Îˆİš[™È[ˆ\ÜÚYÛ™YÛX[˜YÙ\—İ\Ù\—ÚYÎˆİš[™È[ˆÚ\š]WÛ[X™\Îˆİš[™È[ˆÛÛ\[WÛ[X™\Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ[XZ[Îˆİš[™È[ˆ[]Wİ\OÎˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ™[]Wİ\H—BˆYÎˆİš[™ÂˆYØ[Û˜[YOÎˆİš[™Âˆš[›ÏÎˆİš[™È[ˆ^YWÜ™Y™\™[˜ÙOÎˆİš[™È[ˆÛ™OÎˆİš[™È[ˆİ]\ÏÎˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ˜ÛY[Üİ]\È—Bˆ[˜[ÚYÎˆİš[™Âˆ˜Y[™×Û˜[YOÎˆİš[™È[ˆ\]YØ]Îˆİš[™Âˆ]Îˆİš[™È[ˆ˜]Û[X™\Îˆİš[™È[ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛY[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛØWİ[\]WØXØÛİ[ÎˆÂˆ›İÎˆÂˆÛØWİ[\]WÚYˆİš[™ÂˆÛÙNˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[ˆ[ˆ\×ØÛÛ›Ûˆ›ÛÛX[ˆ[ˆ˜[YNˆİš[™ÂˆÛÜÛÜ™\ˆ[X™\ˆ[ˆİX\Nˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\Nˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛØWİ[\]WÚYˆİš[™ÂˆÛÙNˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[ˆ[ˆ\×ØÛÛ›ÛÎˆ›ÛÛX[ˆ[ˆ˜[YNˆİš[™ÂˆÛÜÛÜ™\Îˆ[X™\ˆ[ˆİX\OÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\Nˆİš[™ÂˆBˆ\]NˆÂˆÛØWİ[\]WÚYÎˆİš[™ÂˆÛÙOÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[ˆ[ˆ\×ØÛÛ›ÛÎˆ›ÛÛX[ˆ[ˆ˜[YOÎˆİš[™ÂˆÛÜÛÜ™\Îˆ[X™\ˆ[ˆİX\OÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ\OÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛØWİ[\]WØXØÛİ[×ØÛØWİ[\]WÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛØWİ[\]WÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛØWİ[\]\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛØWİ[\]WØXØÛİ[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛØWİ[\]WØXØÛİ[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛØWİ[\]\ÎˆÂˆ›İÎˆÂˆÜ™X]YØ]ˆİš[™Âˆ\ØÜš\[Ûˆİš[™È[ˆ[]Wİ\Nˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ™[]Wİ\H—BˆYˆİš[™Âˆ\×ÙY˜][ˆ›ÛÛX[ˆ[ˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ[œÙ\ˆÂˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™È[ˆ[]Wİ\Nˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ™[]Wİ\H—BˆYÎˆİš[™Âˆ\×ÙY˜][Îˆ›ÛÛX[ˆ[ˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ\]NˆÂˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™È[ˆ[]Wİ\OÎˆ]X˜\ÙVÈœX›XÈ—VÈ‘[[\È—VÈ™[]Wİ\H—BˆYÎˆİš[™Âˆ\×ÙY˜][Îˆ›ÛÛX[ˆ[ˆ˜[YOÎˆİš[™Âˆ[˜[ÚYÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛØWİ[\]\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛØWİ[\]\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛÛ\[WÜ›Ùš[\ÎˆÂˆ›İÎˆÂˆÛY[ÚYˆİš[™ÂˆÛÛ\[WÛ˜[YNˆİš[™ÂˆÛÛ\[WÛ[X™\ˆİš[™ÂˆÛÛ\[WÜİ]\Îˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ[˜ÛÜœÜ˜][Û—Ù]Nˆİš[™È[ˆ\İØXØÛİ[×ÙYNˆİš[™È[ˆ\İØÛÛ™š\›X][Û—Üİ][Y[Ù]Nˆİš[™È[ˆ\İÜŞ[˜ÙYØ]ˆİš[™È[ˆ™^ØXØÛİ[×ÙYNˆİš[™È[ˆ™^ØÛÛ™š\›X][Û—Üİ][Y[ÙYNˆİš[™È[ˆÙ™šXÙ\œ×ÜÛ˜\ÚİÚœÛÛˆœÛÛ‚ˆØ×ÜÛ˜\ÚİÚœÛÛˆœÛÛ‚ˆ™YÚ\İ\™YÛÙ™šXÙWÚœÛÛˆœÛÛ‚ˆÚX×ØÛÙ\Îˆİš[™Ö×BˆŞ[˜×Ù\œ›Üˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛY[ÚYˆİš[™ÂˆÛÛ\[WÛ˜[YNˆİš[™ÂˆÛÛ\[WÛ[X™\ˆİš[™ÂˆÛÛ\[WÜİ]\ÏÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ[˜ÛÜœÜ˜][Û—Ù]OÎˆİš[™È[ˆ\İØXØÛİ[×ÙYOÎˆİš[™È[ˆ\İØÛÛ™š\›X][Û—Üİ][Y[Ù]OÎˆİš[™È[ˆ\İÜŞ[˜ÙYØ]Îˆİš[™È[ˆ™^ØXØÛİ[×ÙYOÎˆİš[™È[ˆ™^ØÛÛ™š\›X][Û—Üİ][Y[ÙYOÎˆİš[™È[ˆÙ™šXÙ\œ×ÜÛ˜\ÚİÚœÛÛÎˆœÛÛ‚ˆØ×ÜÛ˜\ÚİÚœÛÛÎˆœÛÛ‚ˆ™YÚ\İ\™YÛÙ™šXÙWÚœÛÛÎˆœÛÛ‚ˆÚX×ØÛÙ\ÏÎˆİš[™Ö×BˆŞ[˜×Ù\œ›ÜÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÛY[ÚYÎˆİš[™ÂˆÛÛ\[WÛ˜[YOÎˆİš[™ÂˆÛÛ\[WÛ[X™\Îˆİš[™ÂˆÛÛ\[WÜİ]\ÏÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ[˜ÛÜœÜ˜][Û—Ù]OÎˆİš[™È[ˆ\İØXØÛİ[×ÙYOÎˆİš[™È[ˆ\İØÛÛ™š\›X][Û—Üİ][Y[Ù]OÎˆİš[™È[ˆ\İÜŞ[˜ÙYØ]Îˆİš[™È[ˆ™^ØXØÛİ[×ÙYOÎˆİš[™È[ˆ™^ØÛÛ™š\›X][Û—Üİ][Y[ÙYOÎˆİš[™È[ˆÙ™šXÙ\œ×ÜÛ˜\ÚİÚœÛÛÎˆœÛÛ‚ˆØ×ÜÛ˜\ÚİÚœÛÛÎˆœÛÛ‚ˆ™YÚ\İ\™YÛÙ™šXÙWÚœÛÛÎˆœÛÛ‚ˆÚX×ØÛÙ\ÏÎˆİš[™Ö×BˆŞ[˜×Ù\œ›ÜÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ›Ùš[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ›Ùš[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ›Ùš[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ›Ùš[\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ›Ùš[\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ›Ùš[\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛÛ\[WÜ™YÚ\İ\—Ù\™XİÜœÎˆÂˆ›İÎˆÂˆ\Ú[YÛÛˆİš[™È[ˆÚÛÙ™šXÙ\—ÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆ]WÛÙ—Øš\ˆİš[™È[ˆ[Û˜[YNˆİš[™ÂˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[‚ˆ˜][Û˜[]Nˆİš[™È[ˆØØİ\][Ûˆİš[™È[ˆ™\ÚY[X[ØY™\Ü×ÚœÛÛˆœÛÛ‚ˆ™\ÚYÛ™YÛÛˆİš[™È[ˆÙ\šXÙWØY™\Ü×ÚœÛÛˆœÛÛ‚ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ\Ú[YÛÛÎˆİš[™È[ˆÚÛÙ™šXÙ\—ÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ]WÛÙ—Øš\Îˆİš[™È[ˆ[Û˜[YNˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ˜][Û˜[]OÎˆİš[™È[ˆØØİ\][ÛÎˆİš[™È[ˆ™\ÚY[X[ØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ™\ÚYÛ™YÛÛÎˆİš[™È[ˆÙ\šXÙWØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ\Ú[YÛÛÎˆİš[™È[ˆÚÛÙ™šXÙ\—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ]WÛÙ—Øš\Îˆİš[™È[ˆ[Û˜[YOÎˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ˜][Û˜[]OÎˆİš[™È[ˆØØİ\][ÛÎˆİš[™È[ˆ™\ÚY[X[ØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ™\ÚYÛ™YÛÛÎˆİš[™È[ˆÙ\šXÙWØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—Ù\™XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—Ù\™XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—Ù\™XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—Ù\™XİÜœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—Ù\™XİÜœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—Ù\™XİÜœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛÛ\[WÜ™YÚ\İ\—ÛY[X™\œÎˆÂˆ›İÎˆÂˆY™\Ü×ÚœÛÛˆœÛÛ‚ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆ]WØ™XØ[YWÛY[X™\ˆİš[™È[ˆ]WØÙX\ÙYÛY[X™\ˆİš[™È[ˆ[Û˜[YNˆİš[™ÂˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[‚ˆÚ\™WØÛ\Ü×ÚYˆİš[™È[ˆÚ\™\×Ú[ˆ[X™\‚ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ]WØ™XØ[YWÛY[X™\Îˆİš[™È[ˆ]WØÙX\ÙYÛY[X™\Îˆİš[™È[ˆ[Û˜[YNˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆÚ\™WØÛ\Ü×ÚYÎˆİš[™È[ˆÚ\™\×Ú[Îˆ[X™\‚ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ]WØ™XØ[YWÛY[X™\Îˆİš[™È[ˆ]WØÙX\ÙYÛY[X™\Îˆİš[™È[ˆ[Û˜[YOÎˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆÚ\™WØÛ\Ü×ÚYÎˆİš[™È[ˆÚ\™\×Ú[Îˆ[X™\‚ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÛY[X™\œ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÛY[X™\œ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÛY[X™\œ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÛY[X™\œ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÛY[X™\œ×ÜÚ\™WØÛ\Ü×ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈœÚ\™WØÛ\Ü×ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][ÛˆœÚ\™WØÛ\ÜÙ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÛY[X™\œ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÛY[X™\œ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛÛ\[WÜ™YÚ\İ\—ÜØÎˆÂˆ›İÎˆÂˆÙX\ÙYÛÛˆİš[™È[ˆÚÜØ×ÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÛİ[WÛÙ—Ü™\ÚY[˜ÙNˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆ]WÛÙ—Øš\ˆİš[™È[ˆ[Û˜[YNˆİš[™ÂˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[‚ˆ˜][Û˜[]Nˆİš[™È[ˆ˜]\™\×ÛÙ—ØÛÛ›Ûˆİš[™Ö×Bˆ›İYšYYÛÛˆİš[™È[ˆÙ\šXÙWØY™\Ü×ÚœÛÛˆœÛÛ‚ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÙX\ÙYÛÛÎˆİš[™È[ˆÚÜØ×ÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÛİ[WÛÙ—Ü™\ÚY[˜ÙOÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ]WÛÙ—Øš\Îˆİš[™È[ˆ[Û˜[YNˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ˜][Û˜[]OÎˆİš[™È[ˆ˜]\™\×ÛÙ—ØÛÛ›ÛÎˆİš[™Ö×Bˆ›İYšYYÛÛÎˆİš[™È[ˆÙ\šXÙWØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÙX\ÙYÛÛÎˆİš[™È[ˆÚÜØ×ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÛİ[WÛÙ—Ü™\ÚY[˜ÙOÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ]WÛÙ—Øš\Îˆİš[™È[ˆ[Û˜[YOÎˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ˜][Û˜[]OÎˆİš[™È[ˆ˜]\™\×ÛÙ—ØÛÛ›ÛÎˆİš[™Ö×Bˆ›İYšYYÛÛÎˆİš[™È[ˆÙ\šXÙWØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÜØ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÜØ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÜØ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÜØ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÜØ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ\[WÜ™YÚ\İ\—ÜØ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛÛ™š\›X][Û—Üİ][Y[ØŞXÛ\ÎˆÂˆ›İÎˆÂˆÚÙš[[™×ÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYWÙ]Nˆİš[™Âˆš[YØ]ˆİš[™È[ˆYˆİš[™Âˆ™]šY]×Ü\š[ÙÙ[™ˆİš[™Âˆ™]šY]×Ü\š[ÙÜİ\ˆİš[™Âˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÚÙš[[™×ÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYWÙ]Nˆİš[™Âˆš[YØ]Îˆİš[™È[ˆYÎˆİš[™Âˆ™]šY]×Ü\š[ÙÙ[™ˆİš[™Âˆ™]šY]×Ü\š[ÙÜİ\ˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÚÙš[[™×ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYWÙ]OÎˆİš[™Âˆš[YØ]Îˆİš[™È[ˆYÎˆİš[™Âˆ™]šY]×Ü\š[ÙÙ[™Îˆİš[™Âˆ™]šY]×Ü\š[ÙÜİ\Îˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ™š\›X][Û—Üİ][Y[ØŞXÛ\×ØÚÙš[[™×ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÚÙš[[™×ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÚÙš[[™ÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ™š\›X][Û—Üİ][Y[ØŞXÛ\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ™š\›X][Û—Üİ][Y[ØŞXÛ\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ™š\›X][Û—Üİ][Y[ØŞXÛ\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ™š\›X][Û—Üİ][Y[ØŞXÛ\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ™š\›X][Û—Üİ][Y[ØŞXÛ\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜ÛÛ™š\›X][Û—Üİ][Y[ØŞXÛ\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆİ\œ™[˜ÚY\ÎˆÂˆ›İÎˆÂˆÛÙNˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆ^Ú[™ÙWÜ˜]Nˆ[X™\‚ˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[‚ˆ\×Ø˜\ÙNˆ›ÛÛX[‚ˆ˜[YNˆİš[™Âˆ˜]Wİ\]YØ]ˆİš[™È[ˆŞ[X›Ûˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛÙNˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ^Ú[™ÙWÜ˜]OÎˆ[X™\‚ˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ\×Ø˜\ÙOÎˆ›ÛÛX[‚ˆ˜[YNˆİš[™Âˆ˜]Wİ\]YØ]Îˆİš[™È[ˆŞ[X›ÛÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÛÙOÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ^Ú[™ÙWÜ˜]OÎˆ[X™\‚ˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ\×Ø˜\ÙOÎˆ›ÛÛX[‚ˆ˜[YOÎˆİš[™Âˆ˜]Wİ\]YØ]Îˆİš[™È[ˆŞ[X›ÛÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜İ\œ™[˜ÚY\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ˜İ\œ™[˜ÚY\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆØİ[Y[Ü™\]Y\İÎˆÂˆ›İÎˆÂˆÛY[ÚYˆİš[™ÂˆÛÛ\]YØ]ˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆ\ØÜš\[Ûˆİš[™È[ˆØİ[Y[İ\\Îˆİš[™Ö×BˆYWÙ]Nˆİš[™È[ˆYˆİš[™Âˆ™\]Y\İYØWİ\Ù\—ÚYˆİš[™È[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛY[ÚYˆİš[™ÂˆÛÛ\]YØ]Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™È[ˆØİ[Y[İ\\ÏÎˆİš[™Ö×BˆYWÙ]OÎˆİš[™È[ˆYÎˆİš[™Âˆ™\]Y\İYØWİ\Ù\—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÛY[ÚYÎˆİš[™ÂˆÛÛ\]YØ]Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™È[ˆØİ[Y[İ\\ÏÎˆİš[™Ö×BˆYWÙ]OÎˆİš[™È[ˆYÎˆİš[™Âˆ™\]Y\İYØWİ\Ù\—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ]OÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[Ü™\]Y\İ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[Ü™\]Y\İ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[Ü™\]Y\İ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[Ü™\]Y\İ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[Ü™\]Y\İ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[Ü™\]Y\İ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆØİ[Y[İYÜÎˆÂˆ›İÎˆÂˆÛÛÜˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛÛÜÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ\]NˆÂˆÛÛÜÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ˜[YOÎˆİš[™Âˆ[˜[ÚYÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[İYÜ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[İYÜ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆØİ[Y[İ™\œÚ[ÛœÎˆÂˆ›İÎˆÂˆÜ™X]YØ]ˆİš[™ÂˆØİ[Y[ÚYˆİš[™ÂˆYˆİš[™Âˆ›İ\Îˆİš[™È[ˆÚ^™WØ]\Îˆ[X™\‚ˆİÜ˜YÙWÜ]ˆİš[™Âˆ\ØYYØWİ\Ù\—ÚYˆİš[™È[ˆ™\œÚ[Û—Û[X™\ˆ[X™\‚ˆBˆ[œÙ\ˆÂˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYˆİš[™ÂˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆÚ^™WØ]\ÏÎˆ[X™\‚ˆİÜ˜YÙWÜ]ˆİš[™Âˆ\ØYYØWİ\Ù\—ÚYÎˆİš[™È[ˆ™\œÚ[Û—Û[X™\Îˆ[X™\‚ˆBˆ\]NˆÂˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYÎˆİš[™ÂˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆÚ^™WØ]\ÏÎˆ[X™\‚ˆİÜ˜YÙWÜ]Îˆİš[™Âˆ\ØYYØWİ\Ù\—ÚYÎˆİš[™È[ˆ™\œÚ[Û—Û[X™\Îˆ[X™\‚ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[İ™\œÚ[Ûœ×ÙØİ[Y[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ™Øİ[Y[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ™Øİ[Y[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆBˆBˆØİ[Y[ÎˆÂˆ›İÎˆÂˆÛY[ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆØİ[Y[İ\Nˆİš[™Âˆš[[˜[YNˆİš[™Âˆ›Û\—Ü]ˆİš[™ÂˆYˆİš[™ÂˆY]Y]WÚœÛÛˆœÛÛ‚ˆZ[YWİ\Nˆİš[™ÂˆØÜ—İ^ˆİš[™È[ˆ™\]Y\İÚYˆİš[™È[ˆÚ^™WØ]\Îˆ[X™\‚ˆİ]\Îˆİš[™ÂˆİÜ˜YÙWÜ]ˆİš[™ÂˆYÜÎˆİš[™Ö×H[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™Âˆ\ØYYØWİ\Ù\—ÚYˆİš[™È[ˆBˆ[œÙ\ˆÂˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[İ\OÎˆİš[™Âˆš[[˜[YNˆİš[™Âˆ›Û\—Ü]Îˆİš[™ÂˆYÎˆİš[™ÂˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆZ[YWİ\Nˆİš[™ÂˆØÜ—İ^Îˆİš[™È[ˆ™\]Y\İÚYÎˆİš[™È[ˆÚ^™WØ]\ÏÎˆ[X™\‚ˆİ]\ÏÎˆİš[™ÂˆİÜ˜YÙWÜ]ˆİš[™ÂˆYÜÏÎˆİš[™Ö×H[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ\ØYYØWİ\Ù\—ÚYÎˆİš[™È[ˆBˆ\]NˆÂˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[İ\OÎˆİš[™Âˆš[[˜[YOÎˆİš[™Âˆ›Û\—Ü]Îˆİš[™ÂˆYÎˆİš[™ÂˆY]Y]WÚœÛÛÎˆœÛÛ‚ˆZ[YWİ\OÎˆİš[™ÂˆØÜ—İ^Îˆİš[™È[ˆ™\]Y\İÚYÎˆİš[™È[ˆÚ^™WØ]\ÏÎˆ[X™\‚ˆİ]\ÏÎˆİš[™ÂˆİÜ˜YÙWÜ]Îˆİš[™ÂˆYÜÏÎˆİš[™Ö×H[ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ\ØYYØWİ\Ù\—ÚYÎˆİš[™È[ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[×Ü™\]Y\İÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈœ™\]Y\İÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ™Øİ[Y[Ü™\]Y\İÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™Øİ[Y[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆÛXZ[—Ù]™[ÎˆÂˆ›İÎˆÂˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ^[ØYˆœÛÛ‚ˆ›ØÙ\ÜÙYˆ›ÛÛX[‚ˆ[˜[ÚYˆİš[™ÂˆšYÙÙ\ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ^[ØYÎˆœÛÛ‚ˆ›ØÙ\ÜÙYÎˆ›ÛÛX[‚ˆ[˜[ÚYˆİš[™ÂˆšYÙÙ\ˆİš[™ÂˆBˆ\]NˆÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ^[ØYÎˆœÛÛ‚ˆ›ØÙ\ÜÙYÎˆ›ÛÛX[‚ˆ[˜[ÚYÎˆİš[™ÂˆšYÙÙ\Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™ÛXZ[—Ù]™[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™ÛXZ[—Ù]™[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆX×ÜØ[\×Ù[šY\ÎˆÂˆ›İÎˆÂˆÛY[ÚYˆİš[™ÂˆÛİ[WØÛÙNˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆİ\İÛY\—Û˜[YNˆİš[™Âˆİ\İÛY\—İ˜]Û[X™\ˆİš[™ÂˆYˆİš[™Âˆ\š[ÙÙ[™ˆİš[™Âˆ\š[ÙÜİ\ˆİš[™Âˆİ]\Îˆİš[™Âˆİ\Wİ\Nˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™Âˆ˜[YWÙØœÜ[˜ÙNˆ[X™\‚ˆ˜]Ü™]\›—ÚYˆİš[™È[ˆBˆ[œÙ\ˆÂˆÛY[ÚYˆİš[™ÂˆÛİ[WØÛÙNˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆİ\İÛY\—Û˜[YNˆİš[™Âˆİ\İÛY\—İ˜]Û[X™\ˆİš[™ÂˆYÎˆİš[™Âˆ\š[ÙÙ[™ˆİš[™Âˆ\š[ÙÜİ\ˆİš[™Âˆİ]\ÏÎˆİš[™Âˆİ\Wİ\OÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ˜[YWÙØœÜ[˜ÙOÎˆ[X™\‚ˆ˜]Ü™]\›—ÚYÎˆİš[™È[ˆBˆ\]NˆÂˆÛY[ÚYÎˆİš[™ÂˆÛİ[WØÛÙOÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆİ\İÛY\—Û˜[YOÎˆİš[™Âˆİ\İÛY\—İ˜]Û[X™\Îˆİš[™ÂˆYÎˆİš[™Âˆ\š[ÙÙ[™Îˆİš[™Âˆ\š[ÙÜİ\Îˆİš[™Âˆİ]\ÏÎˆİš[™Âˆİ\Wİ\OÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ˜[YWÙØœÜ[˜ÙOÎˆ[X™\‚ˆ˜]Ü™]\›—ÚYÎˆİš[™È[ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™X×ÜØ[\×Ù[šY\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™X×ÜØ[\×Ù[šY\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™X×ÜØ[\×Ù[šY\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™X×ÜØ[\×Ù[šY\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™X×ÜØ[\×Ù[šY\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™X×ÜØ[\×Ù[šY\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™X×ÜØ[\×Ù[šY\×İ˜]Ü™]\›—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜]Ü™]\›—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ˜]ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜]Ü™]\›—ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™X×ÜØ[\×Ù[šY\×İ˜]Ü™]\›—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜]Ü™]\›—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜]Ü™]\›œÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆBˆBˆ[XZ[İ[\]\ÎˆÂˆ›İÎˆÂˆ›ÙWÚ[ˆİš[™Âˆ›ÙWİ^ˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[ˆ[ˆÙ^Nˆİš[™Âˆ˜[YNˆİš[™ÂˆİXš™Xİˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™Âˆ˜\šXX›\×ÚœÛÛˆœÛÛ‚ˆBˆ[œÙ\ˆÂˆ›ÙWÚ[ˆİš[™Âˆ›ÙWİ^Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[ˆ[ˆÙ^Nˆİš[™Âˆ˜[YNˆİš[™ÂˆİXš™Xİˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ˜\šXX›\×ÚœÛÛÎˆœÛÛ‚ˆBˆ\]NˆÂˆ›ÙWÚ[Îˆİš[™Âˆ›ÙWİ^Îˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[ˆ[ˆÙ^OÎˆİš[™Âˆ˜[YOÎˆİš[™ÂˆİXš™XİÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ˜\šXX›\×ÚœÛÛÎˆœÛÛ‚ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™[XZ[İ[\]\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™[XZ[İ[\]\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[™ØYÙ[Y[ÜÙ\šXÙ\ÎˆÂˆ›İÎˆÂˆÜ™X]YØ]ˆİš[™Âˆ\ØÜš\[Ûˆİš[™È[ˆYˆİš[™Âˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™È[ˆYÎˆİš[™Âˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™È[ˆYÎˆİš[™Âˆ˜[YOÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™[™ØYÙ[Y[ÜÙ\šXÙ\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™[™ØYÙ[Y[ÜÙ\šXÙ\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ]™[ÙY\NˆÂˆ›İÎˆÂˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™ÂˆÙ^Nˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ[œÙ\ˆÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™ÂˆÙ^Nˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ\]NˆÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™ÂˆÙ^OÎˆİš[™Âˆ[˜[ÚYÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™]™[ÙY\Wİ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™]™[ÙY\Wİ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ]™[ÛÙÜÎˆÂˆ›İÎˆÂˆXİÜ—İ\Ù\—ÚYˆİš[™È[ˆÛY[ÚYˆİš[™È[ˆÛÜœ™[][Û—ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆ]™[İ\Nˆİš[™ÂˆYˆİš[™Âˆ^[ØYÚœÛÛˆœÛÛ‚ˆÛİ\˜ÙNˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ[œÙ\ˆÂˆXİÜ—İ\Ù\—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™È[ˆÛÜœ™[][Û—ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ]™[İ\Nˆİš[™ÂˆYÎˆİš[™Âˆ^[ØYÚœÛÛÎˆœÛÛ‚ˆÛİ\˜ÙOÎˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ\]NˆÂˆXİÜ—İ\Ù\—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™È[ˆÛÜœ™[][Û—ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ]™[İ\OÎˆİš[™ÂˆYÎˆİš[™Âˆ^[ØYÚœÛÛÎˆœÛÛ‚ˆÛİ\˜ÙOÎˆİš[™Âˆ[˜[ÚYÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™]™[ÛÙÜ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™]™[ÛÙÜ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™]™[ÛÙÜ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™]™[ÛÙÜ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™]™[ÛÙÜ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ™]™[ÛÙÜ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[˜ÛÜœÙØİ[Y[ÎˆÂˆ›İÎˆÂˆ\XØ][Û—ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆØİ[Y[ÚYˆİš[™È[ˆØİ[Y[İ\Nˆİš[™ÂˆYˆİš[™Âˆ\œÛÛ—ÚYˆİš[™È[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ[œÙ\ˆÂˆ\XØ][Û—ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYÎˆİš[™È[ˆØİ[Y[İ\Nˆİš[™ÂˆYÎˆİš[™Âˆ\œÛÛ—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™ÂˆBˆ\]NˆÂˆ\XØ][Û—ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYÎˆİš[™È[ˆØİ[Y[İ\OÎˆİš[™ÂˆYÎˆİš[™Âˆ\œÛÛ—ÚYÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÙØİ[Y[×Ø\XØ][Û—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜\XØ][Û—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš[˜ÛÜœÜ˜][Û—Ø\XØ][ÛœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÙØİ[Y[×ÙØİ[Y[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ™Øİ[Y[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ™Øİ[Y[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÙØİ[Y[×Ü\œÛÛ—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈœ\œÛÛ—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš[˜ÛÜœÜ[ÜH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÙØİ[Y[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÙØİ[Y[×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[˜ÛÜœÜ[ÜNˆÂˆ›İÎˆÂˆ\XØ][Û—ÚYˆİš[™ÂˆÛÛœÙ[İ×ØXİˆ›ÛÛX[‚ˆÛİ[WÛÙ—Ü™\ÚY[˜ÙNˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆ]WÛÙ—Øš\ˆİš[™È[ˆš\œİÛ˜[YNˆİš[™ÂˆYˆİš[™ÂˆŞX×Üİ]\Îˆİš[™Âˆ\İÛ˜[YNˆİš[™ÂˆZYWÛ˜[Y\Îˆİš[™È[ˆ˜][Û˜[]Nˆİš[™È[ˆ˜]\™\×ÛÙ—ØÛÛ›Ûˆİš[™Ö×H[ˆØØİ\][Ûˆİš[™È[ˆ™\ÚY[X[ØY™\Ü×ÚœÛÛˆœÛÛ‚ˆ›ÛNˆİš[™ÂˆÙ\šXÙWØY™\Ü×ÚœÛÛˆœÛÛ‚ˆ[˜[ÚYˆİš[™Âˆ]Nˆİš[™È[ˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ\XØ][Û—ÚYˆİš[™ÂˆÛÛœÙ[İ×ØXİÎˆ›ÛÛX[‚ˆÛİ[WÛÙ—Ü™\ÚY[˜ÙOÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ]WÛÙ—Øš\Îˆİš[™È[ˆš\œİÛ˜[YNˆİš[™ÂˆYÎˆİš[™ÂˆŞX×Üİ]\ÏÎˆİš[™Âˆ\İÛ˜[YNˆİš[™ÂˆZYWÛ˜[Y\ÏÎˆİš[™È[ˆ˜][Û˜[]OÎˆİš[™È[ˆ˜]\™\×ÛÙ—ØÛÛ›ÛÎˆİš[™Ö×H[ˆØØİ\][ÛÎˆİš[™È[ˆ™\ÚY[X[ØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ›ÛNˆİš[™ÂˆÙ\šXÙWØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ[˜[ÚYˆİš[™Âˆ]OÎˆİš[™È[ˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ\XØ][Û—ÚYÎˆİš[™ÂˆÛÛœÙ[İ×ØXİÎˆ›ÛÛX[‚ˆÛİ[WÛÙ—Ü™\ÚY[˜ÙOÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆ]WÛÙ—Øš\Îˆİš[™È[ˆš\œİÛ˜[YOÎˆİš[™ÂˆYÎˆİš[™ÂˆŞX×Üİ]\ÏÎˆİš[™Âˆ\İÛ˜[YOÎˆİš[™ÂˆZYWÛ˜[Y\ÏÎˆİš[™È[ˆ˜][Û˜[]OÎˆİš[™È[ˆ˜]\™\×ÛÙ—ØÛÛ›ÛÎˆİš[™Ö×H[ˆØØİ\][ÛÎˆİš[™È[ˆ™\ÚY[X[ØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ›ÛOÎˆİš[™ÂˆÙ\šXÙWØY™\Ü×ÚœÛÛÎˆœÛÛ‚ˆ[˜[ÚYÎˆİš[™Âˆ]OÎˆİš[™È[ˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ[ÜWØ\XØ][Û—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜\XØ][Û—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš[˜ÛÜœÜ˜][Û—Ø\XØ][ÛœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ[ÜWİ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ[ÜWİ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[˜ÛÜœÜÚ\™WÜİXİ\™NˆÂˆ›İÎˆÂˆ[[İ[ÜZYÜ[˜ÙNˆ[X™\‚ˆ[[İ[İ[œZYÜ[˜ÙNˆ[X™\‚ˆ\XØ][Û—ÚYˆİš[™ÂˆÛ\Ü×Û˜[YNˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆİ\œ™[˜ŞNˆİš[™ÂˆYˆİš[™Âˆ›ÛZ[˜[İ˜[YWÜ[˜ÙNˆ[X™\‚ˆÚ\™\×ÜİXœØÜšX™Yˆ[X™\‚ˆİXœØÜšX™\—Ü\œÛÛ—ÚYˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆİ[ÜÚ\™\Îˆ[X™\‚ˆBˆ[œÙ\ˆÂˆ[[İ[ÜZYÜ[˜ÙOÎˆ[X™\‚ˆ[[İ[İ[œZYÜ[˜ÙOÎˆ[X™\‚ˆ\XØ][Û—ÚYˆİš[™ÂˆÛ\Ü×Û˜[YOÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆİ\œ™[˜ŞOÎˆİš[™ÂˆYÎˆİš[™Âˆ›ÛZ[˜[İ˜[YWÜ[˜ÙOÎˆ[X™\‚ˆÚ\™\×ÜİXœØÜšX™YÎˆ[X™\‚ˆİXœØÜšX™\—Ü\œÛÛ—ÚYÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆİ[ÜÚ\™\ÏÎˆ[X™\‚ˆBˆ\]NˆÂˆ[[İ[ÜZYÜ[˜ÙOÎˆ[X™\‚ˆ[[İ[İ[œZYÜ[˜ÙOÎˆ[X™\‚ˆ\XØ][Û—ÚYÎˆİš[™ÂˆÛ\Ü×Û˜[YOÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆİ\œ™[˜ŞOÎˆİš[™ÂˆYÎˆİš[™Âˆ›ÛZ[˜[İ˜[YWÜ[˜ÙOÎˆ[X™\‚ˆÚ\™\×ÜİXœØÜšX™YÎˆ[X™\‚ˆİXœØÜšX™\—Ü\œÛÛ—ÚYÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆİ[ÜÚ\™\ÏÎˆ[X™\‚ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜÚ\™WÜİXİ\™WØ\XØ][Û—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜\XØ][Û—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš[˜ÛÜœÜ˜][Û—Ø\XØ][ÛœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜÚ\™WÜİXİ\™WÜİXœØÜšX™\—Ü\œÛÛ—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈœİXœØÜšX™\—Ü\œÛÛ—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš[˜ÛÜœÜ[ÜH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜÚ\™WÜİXİ\™Wİ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜÚ\™WÜİXİ\™Wİ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[˜ÛÜœÜİ]\×Ú\İÜNˆÂˆ›İÎˆÂˆ\XØ][Û—ÚYˆİš[™ÂˆÚ[™ÙYØWİ\Ù\—ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™Âˆœ›ÛWÜİ]\Îˆİš[™È[ˆYˆİš[™Âˆ›İ\Îˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ×Üİ]\Îˆİš[™ÂˆBˆ[œÙ\ˆÂˆ\XØ][Û—ÚYˆİš[™ÂˆÚ[™ÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆœ›ÛWÜİ]\ÏÎˆİš[™È[ˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ×Üİ]\Îˆİš[™ÂˆBˆ\]NˆÂˆ\XØ][Û—ÚYÎˆİš[™ÂˆÚ[™ÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™Âˆœ›ÛWÜİ]\ÏÎˆİš[™È[ˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ×Üİ]\ÏÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜİ]\×Ú\İÜWØ\XØ][Û—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜\XØ][Û—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš[˜ÛÜœÜ˜][Û—Ø\XØ][ÛœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜİ]\×Ú\İÜWİ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜİ]\×Ú\İÜWİ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[˜ÛÜœÜ˜][Û—Ø\XØ][ÛœÎˆÂˆ›İÎˆÂˆ\XÛ\×İ\Nˆİš[™ÂˆÚØÛÛ\[WÛ[X™\ˆİš[™È[ˆÚÚ[˜ÛÜœÜ˜][Û—Ù]Nˆİš[™È[ˆÚÜİX›Z\ÜÚ[Û—ÚYˆİš[™È[ˆÛY[ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆÜ™X]YØWİ\Ù\—ÚYˆİš[™È[ˆ]WÚœÛÛˆœÛÛ‚ˆ[]Wİ\Nˆİš[™ÂˆYˆİš[™Âˆ^[Y[Ø[[İ[Ü[˜ÙNˆ[X™\ˆ[ˆ^[Y[Ü™Y™\™[˜ÙNˆİš[™È[ˆ^[Y[Üİ]\Îˆİš[™Âˆ›ÜÜÙYÛ˜[YNˆİš[™È[ˆ™YÚ\İ\™YÛÙ™šXÙWÚœÛÛˆœÛÛ‚ˆØZ[ØY™\Ü×ÚœÛÛˆœÛÛˆ[ˆÚX×ØÛÙ\Îˆİš[™Ö×Bˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ\XÛ\×İ\OÎˆİš[™ÂˆÚØÛÛ\[WÛ[X™\Îˆİš[™È[ˆÚÚ[˜ÛÜœÜ˜][Û—Ù]OÎˆİš[™È[ˆÚÜİX›Z\ÜÚ[Û—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØWİ\Ù\—ÚYÎˆİš[™È[ˆ]WÚœÛÛÎˆœÛÛ‚ˆ[]Wİ\OÎˆİš[™ÂˆYÎˆİš[™Âˆ^[Y[Ø[[İ[Ü[˜ÙOÎˆ[X™\ˆ[ˆ^[Y[Ü™Y™\™[˜ÙOÎˆİš[™È[ˆ^[Y[Üİ]\ÏÎˆİš[™Âˆ›ÜÜÙYÛ˜[YOÎˆİš[™È[ˆ™YÚ\İ\™YÛÙ™šXÙWÚœÛÛÎˆœÛÛ‚ˆØZ[ØY™\Ü×ÚœÛÛÎˆœÛÛˆ[ˆÚX×ØÛÙ\ÏÎˆİš[™Ö×Bˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ\XÛ\×İ\OÎˆİš[™ÂˆÚØÛÛ\[WÛ[X™\Îˆİš[™È[ˆÚÚ[˜ÛÜœÜ˜][Û—Ù]OÎˆİš[™È[ˆÚÜİX›Z\ÜÚ[Û—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØWİ\Ù\—ÚYÎˆİš[™È[ˆ]WÚœÛÛÎˆœÛÛ‚ˆ[]Wİ\OÎˆİš[™ÂˆYÎˆİš[™Âˆ^[Y[Ø[[İ[Ü[˜ÙOÎˆ[X™\ˆ[ˆ^[Y[Ü™Y™\™[˜ÙOÎˆİš[™È[ˆ^[Y[Üİ]\ÏÎˆİš[™Âˆ›ÜÜÙYÛ˜[YOÎˆİš[™È[ˆ™YÚ\İ\™YÛÙ™šXÙWÚœÛÛÎˆœÛÛ‚ˆØZ[ØY™\Ü×ÚœÛÛÎˆœÛÛˆ[ˆÚX×ØÛÙ\ÏÎˆİš[™Ö×Bˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ˜][Û—Ø\XØ][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ˜][Û—Ø\XØ][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ˜][Û—Ø\XØ][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ˜][Û—Ø\XØ][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ˜][Û—Ø\XØ][Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[˜ÛÜœÜ˜][Û—Ø\XØ][Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[YÜ˜][Û—ÚX[ˆÂˆ›İÎˆÂˆÚXÚÙYØ]ˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆYˆİš[™Âˆ\İÙ\œ›Üˆİš[™È[ˆ›İšY\ˆİš[™Âˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÚXÚÙYØ]Îˆİš[™ÂˆÛY[ÚYˆİš[™ÂˆYÎˆİš[™Âˆ\İÙ\œ›ÜÎˆİš[™È[ˆ›İšY\ˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÚXÚÙYØ]Îˆİš[™ÂˆÛY[ÚYÎˆİš[™ÂˆYÎˆİš[™Âˆ\İÙ\œ›ÜÎˆİš[™È[ˆ›İšY\Îˆİš[™Âˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[YÜ˜][Û—ÚX[ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[YÜ˜][Û—ÚX[ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[YÜ˜][Û—ÚX[ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[YÜ˜][Û—ÚX[ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[YÜ˜][Û—ÚX[İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[YÜ˜][Û—ÚX[İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[›ÚXÙWÛ[™\ÎˆÂˆ›İÎˆÂˆÜ™X]YØ]ˆİš[™Âˆ\ØÜš\[Ûˆİš[™ÂˆYˆİš[™Âˆ[›ÚXÙWÚYˆİš[™Âˆ[™Wİİ[ˆ[X™\‚ˆ]X[]Nˆ[X™\‚ˆ[š]ÜšXÙNˆ[X™\‚ˆ˜]Ü˜]Nˆ[X™\‚ˆBˆ[œÙ\ˆÂˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[Ûˆİš[™ÂˆYÎˆİš[™Âˆ[›ÚXÙWÚYˆİš[™Âˆ[™Wİİ[Îˆ[X™\‚ˆ]X[]OÎˆ[X™\‚ˆ[š]ÜšXÙOÎˆ[X™\‚ˆ˜]Ü˜]OÎˆ[X™\‚ˆBˆ\]NˆÂˆÜ™X]YØ]Îˆİš[™Âˆ\ØÜš\[ÛÎˆİš[™ÂˆYÎˆİš[™Âˆ[›ÚXÙWÚYÎˆİš[™Âˆ[™Wİİ[Îˆ[X™\‚ˆ]X[]OÎˆ[X™\‚ˆ[š]ÜšXÙOÎˆ[X™\‚ˆ˜]Ü˜]OÎˆ[X™\‚ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙWÛ[™\×Ú[›ÚXÙWÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈš[›ÚXÙWÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš[›ÚXÙ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆBˆBˆ[›ÚXÙWİ[\]\ÎˆÂˆ›İÎˆÂˆÜ™X]YØ]ˆİš[™Âˆ›Ûİ\—İ^ˆİš[™È[ˆYˆİš[™Âˆ\×ÙY˜][ˆ›ÛÛX[ˆ[ˆÙ^Nˆİš[™Âˆ^[İ]ÚœÛÛˆœÛÛ‚ˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\›\×İ^ˆİš[™È[ˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÜ™X]YØ]Îˆİš[™Âˆ›Ûİ\—İ^Îˆİš[™È[ˆYÎˆİš[™Âˆ\×ÙY˜][Îˆ›ÛÛX[ˆ[ˆÙ^Nˆİš[™Âˆ^[İ]ÚœÛÛÎˆœÛÛ‚ˆ˜[YNˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\›\×İ^Îˆİš[™È[ˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÜ™X]YØ]Îˆİš[™Âˆ›Ûİ\—İ^Îˆİš[™È[ˆYÎˆİš[™Âˆ\×ÙY˜][Îˆ›ÛÛX[ˆ[ˆÙ^OÎˆİš[™Âˆ^[İ]ÚœÛÛÎˆœÛÛ‚ˆ˜[YOÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\›\×İ^Îˆİš[™È[ˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙWİ[\]\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙWİ[\]\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ[›ÚXÙ\ÎˆÂˆ›İÎˆÂˆ[[İ[ÜZYˆ[X™\‚ˆÛY[ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆYWÙ]Nˆİš[™È[ˆ[›š[™×ØÛİ[ˆ[X™\ˆ[ˆYˆİš[™Âˆ[›ÚXÙWÛ[X™\ˆİš[™Âˆ\ÜİYWÙ]Nˆİš[™Âˆ\İÙ[›š[™×Ø]ˆİš[™È[ˆ›İ\Îˆİš[™È[ˆİ]\Îˆİš[™Âˆİš\WØÚXÚÛİ]İ\›ˆİš[™È[ˆİš\WÚ[›ÚXÙWÚYˆİš[™È[ˆİš\WÜ^[Y[Ú[[ÚYˆİš[™È[ˆİš\WÜÙ\ÜÚ[Û—ÚYˆİš[™È[ˆİXİ[ˆ[X™\‚ˆ[˜[ÚYˆİš[™Âˆİ[ˆ[X™\‚ˆ\]YØ]ˆİš[™Âˆ˜]Ø[[İ[ˆ[X™\‚ˆBˆ[œÙ\ˆÂˆ[[İ[ÜZYÎˆ[X™\‚ˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆYWÙ]OÎˆİš[™È[ˆ[›š[™×ØÛİ[Îˆ[X™\ˆ[ˆYÎˆİš[™Âˆ[›ÚXÙWÛ[X™\ˆİš[™Âˆ\ÜİYWÙ]OÎˆİš[™Âˆ\İÙ[›š[™×Ø]Îˆİš[™È[ˆ›İ\ÏÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆİš\WØÚXÚÛİ]İ\›Îˆİš[™È[ˆİš\WÚ[›ÚXÙWÚYÎˆİš[™È[ˆİš\WÜ^[Y[Ú[[ÚYÎˆİš[™È[ˆİš\WÜÙ\ÜÚ[Û—ÚYÎˆİš[™È[ˆİXİ[Îˆ[X™\‚ˆ[˜[ÚYˆİš[™Âˆİ[Îˆ[X™\‚ˆ\]YØ]Îˆİš[™Âˆ˜]Ø[[İ[Îˆ[X™\‚ˆBˆ\]NˆÂˆ[[İ[ÜZYÎˆ[X™\‚ˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆYWÙ]OÎˆİš[™È[ˆ[›š[™×ØÛİ[Îˆ[X™\ˆ[ˆYÎˆİš[™Âˆ[›ÚXÙWÛ[X™\Îˆİš[™Âˆ\ÜİYWÙ]OÎˆİš[™Âˆ\İÙ[›š[™×Ø]Îˆİš[™È[ˆ›İ\ÏÎˆİš[™È[ˆİ]\ÏÎˆİš[™Âˆİš\WØÚXÚÛİ]İ\›Îˆİš[™È[ˆİš\WÚ[›ÚXÙWÚYÎˆİš[™È[ˆİš\WÜ^[Y[Ú[[ÚYÎˆİš[™È[ˆİš\WÜÙ\ÜÚ[Û—ÚYÎˆİš[™È[ˆİXİ[Îˆ[X™\‚ˆ[˜[ÚYÎˆİš[™Âˆİ[Îˆ[X™\‚ˆ\]YØ]Îˆİš[™Âˆ˜]Ø[[İ[Îˆ[X™\‚ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙ\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙ\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙ\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙ\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙ\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš[›ÚXÙ\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ]ØWÙš[˜[ÙXÛ\˜][ÛœÎˆÂˆ›İÎˆÂˆØ[İ[][Û—ÚœÛÛˆœÛÛ‚ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆXÛ\˜][Û—ØXØÙ\Yˆ›ÛÛX[‚ˆ\˜×Ü™XÙZ\ÚYˆİš[™È[ˆYˆİš[™Âˆİ]\Îˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYˆİš[™È[ˆİX›Z]YØ]ˆİš[™È[ˆ^ŞYX\ˆİš[™Âˆ[˜[ÚYˆİš[™Âˆİ[ÙYXİ[Ûœ×Ü[˜ÙNˆ[X™\‚ˆİ[Ú[˜ÛÛYWÜ[˜ÙNˆ[X™\‚ˆİ[İ^ÙYWÜ[˜ÙNˆ[X™\‚ˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆØ[İ[][Û—ÚœÛÛÎˆœÛÛ‚ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆXÛ\˜][Û—ØXØÙ\YÎˆ›ÛÛX[‚ˆ\˜×Ü™XÙZ\ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆİ]\ÏÎˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYÎˆİš[™È[ˆİX›Z]YØ]Îˆİš[™È[ˆ^ŞYX\ˆİš[™Âˆ[˜[ÚYˆİš[™Âˆİ[ÙYXİ[Ûœ×Ü[˜ÙOÎˆ[X™\‚ˆİ[Ú[˜ÛÛYWÜ[˜ÙOÎˆ[X™\‚ˆİ[İ^ÙYWÜ[˜ÙOÎˆ[X™\‚ˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆØ[İ[][Û—ÚœÛÛÎˆœÛÛ‚ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆXÛ\˜][Û—ØXØÙ\YÎˆ›ÛÛX[‚ˆ\˜×Ü™XÙZ\ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆİ]\ÏÎˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYÎˆİš[™È[ˆİX›Z]YØ]Îˆİš[™È[ˆ^ŞYX\Îˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆİ[ÙYXİ[Ûœ×Ü[˜ÙOÎˆ[X™\‚ˆİ[Ú[˜ÛÛYWÜ[˜ÙOÎˆ[X™\‚ˆİ[İ^ÙYWÜ[˜ÙOÎˆ[X™\‚ˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÙš[˜[ÙXÛ\˜][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÙš[˜[ÙXÛ\˜][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÙš[˜[ÙXÛ\˜][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÙš[˜[ÙXÛ\˜][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÙš[˜[ÙXÛ\˜][Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÙš[˜[ÙXÛ\˜][Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ]ØWÛØ›YØ][ÛœÎˆÂˆ›İÎˆÂˆ\Ú[™\Ü×ÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆYWÙ]Nˆİš[™Âˆ\˜×Ü™XÙZ\ÚYˆİš[™È[ˆYˆİš[™Âˆš[›Îˆİš[™ÂˆØ›YØ][Û—İ\Nˆİš[™Âˆ\š[ÙÙ[™ˆİš[™Âˆ\š[ÙÜİ\ˆİš[™Âˆİ]\Îˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYˆİš[™È[ˆİX›Z]YØ]ˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ\Ú[™\Ü×ÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYWÙ]Nˆİš[™Âˆ\˜×Ü™XÙZ\ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆš[›Îˆİš[™ÂˆØ›YØ][Û—İ\OÎˆİš[™Âˆ\š[ÙÙ[™ˆİš[™Âˆ\š[ÙÜİ\ˆİš[™Âˆİ]\ÏÎˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYÎˆİš[™È[ˆİX›Z]YØ]Îˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ\Ú[™\Ü×ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆYWÙ]OÎˆİš[™Âˆ\˜×Ü™XÙZ\ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆš[›ÏÎˆİš[™ÂˆØ›YØ][Û—İ\OÎˆİš[™Âˆ\š[ÙÙ[™Îˆİš[™Âˆ\š[ÙÜİ\Îˆİš[™Âˆİ]\ÏÎˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYÎˆİš[™È[ˆİX›Z]YØ]Îˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÛØ›YØ][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÛØ›YØ][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÛØ›YØ][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÛØ›YØ][Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÛØ›YØ][Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWÛØ›YØ][Ûœ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ]ØWİ\]\ÎˆÂˆ›İÎˆÂˆY\İY[×ÚœÛÛˆœÛÛ‚ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆ^[œÙ\×ÚœÛÛˆœÛÛ‚ˆ\˜×Ü™XÙZ\ÚYˆİš[™È[ˆYˆİš[™Âˆ[˜ÛÛYWÚœÛÛˆœÛÛ‚ˆ™]Ü›Ùš]Ü[˜ÙNˆ[X™\‚ˆØ›YØ][Û—ÚYˆİš[™Âˆİ]\Îˆİš[™ÂˆİX›Z]YØ]ˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆİ[Ù^[œÙ\×Ü[˜ÙNˆ[X™\‚ˆİ[Ú[˜ÛÛYWÜ[˜ÙNˆ[X™\‚ˆ\]Wİ\Nˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆY\İY[×ÚœÛÛÎˆœÛÛ‚ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ^[œÙ\×ÚœÛÛÎˆœÛÛ‚ˆ\˜×Ü™XÙZ\ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆ[˜ÛÛYWÚœÛÛÎˆœÛÛ‚ˆ™]Ü›Ùš]Ü[˜ÙOÎˆ[X™\‚ˆØ›YØ][Û—ÚYˆİš[™Âˆİ]\ÏÎˆİš[™ÂˆİX›Z]YØ]Îˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆİ[Ù^[œÙ\×Ü[˜ÙOÎˆ[X™\‚ˆİ[Ú[˜ÛÛYWÜ[˜ÙOÎˆ[X™\‚ˆ\]Wİ\OÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆY\İY[×ÚœÛÛÎˆœÛÛ‚ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ^[œÙ\×ÚœÛÛÎˆœÛÛ‚ˆ\˜×Ü™XÙZ\ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆ[˜ÛÛYWÚœÛÛÎˆœÛÛ‚ˆ™]Ü›Ùš]Ü[˜ÙOÎˆ[X™\‚ˆØ›YØ][Û—ÚYÎˆİš[™Âˆİ]\ÏÎˆİš[™ÂˆİX›Z]YØ]Îˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆİ[Ù^[œÙ\×Ü[˜ÙOÎˆ[X™\‚ˆİ[Ú[˜ÛÛYWÜ[˜ÙOÎˆ[X™\‚ˆ\]Wİ\OÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWİ\]\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWİ\]\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWİ\]\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWİ\]\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWİ\]\×ÛØ›YØ][Û—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ›Ø›YØ][Û—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš]ØWÛØ›YØ][ÛœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWİ\]\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš]ØWİ\]\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ^œ›Ùš[[™×Ú[œİ[˜Ù\ÎˆÂˆ›İÎˆÂˆXØÛİ[×Ü\š[ÙÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆÙ[™\˜]YØ]ˆİš[™È[ˆÙ[™\˜]YŞœ›ˆİš[™È[ˆYˆİš[™Âˆİ]\Îˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYˆİš[™È[ˆİX›Z]YØ]ˆİš[™È[ˆ^Û›Û^WÚYˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™Âˆ˜[Y][Û—Ù\œ›Üœ×ÚœÛÛˆœÛÛ‚ˆBˆ[œÙ\ˆÂˆXØÛİ[×Ü\š[ÙÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆÙ[™\˜]YØ]Îˆİš[™È[ˆÙ[™\˜]YŞœ›Îˆİš[™È[ˆYÎˆİš[™Âˆİ]\ÏÎˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYÎˆİš[™È[ˆİX›Z]YØ]Îˆİš[™È[ˆ^Û›Û^WÚYˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ˜[Y][Û—Ù\œ›Üœ×ÚœÛÛÎˆœÛÛ‚ˆBˆ\]NˆÂˆXØÛİ[×Ü\š[ÙÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆÙ[™\˜]YØ]Îˆİš[™È[ˆÙ[™\˜]YŞœ›Îˆİš[™È[ˆYÎˆİš[™Âˆİ]\ÏÎˆİš[™ÂˆİX›Z\ÜÚ[Û—Ú›Ø—ÚYÎˆİš[™È[ˆİX›Z]YØ]Îˆİš[™È[ˆ^Û›Û^WÚYÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™Âˆ˜[Y][Û—Ù\œ›Üœ×ÚœÛÛÎˆœÛÛ‚ˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›Ùš[[™×Ú[œİ[˜Ù\×ØXØÛİ[×Ü\š[ÙÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜XØÛİ[×Ü\š[ÙÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜XØÛİ[×Ü\š[ÙÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›Ùš[[™×Ú[œİ[˜Ù\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›Ùš[[™×Ú[œİ[˜Ù\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›Ùš[[™×Ú[œİ[˜Ù\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›Ùš[[™×Ú[œİ[˜Ù\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›Ùš[[™×Ú[œİ[˜Ù\×İ^Û›Û^WÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ^Û›Û^WÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš^œ›İ^Û›ÛZY\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›Ùš[[™×Ú[œİ[˜Ù\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›Ùš[[™×Ú[œİ[˜Ù\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ^œ›İY×ÛX\[™ÜÎˆÂˆ›İÎˆÂˆXØÛİ[ØÛÙNˆİš[™ÂˆÛÛ^Ü™Yˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆXÚ[X[Îˆ[X™\ˆ[ˆYˆİš[™Âˆ\×Øİ\İÛNˆ›ÛÛX[‚ˆ›İ\Îˆİš[™È[ˆY×Û˜[YNˆİš[™ÂˆY×Û˜[Y\ÜXÙNˆİš[™Âˆ^Û›Û^WÚYˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ[š]Ü™Yˆİš[™È[ˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆXØÛİ[ØÛÙNˆİš[™ÂˆÛÛ^Ü™YÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆXÚ[X[ÏÎˆ[X™\ˆ[ˆYÎˆİš[™Âˆ\×Øİ\İÛOÎˆ›ÛÛX[‚ˆ›İ\ÏÎˆİš[™È[ˆY×Û˜[YNˆİš[™ÂˆY×Û˜[Y\ÜXÙOÎˆİš[™Âˆ^Û›Û^WÚYˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ[š]Ü™YÎˆİš[™È[ˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆXØÛİ[ØÛÙOÎˆİš[™ÂˆÛÛ^Ü™YÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆXÚ[X[ÏÎˆ[X™\ˆ[ˆYÎˆİš[™Âˆ\×Øİ\İÛOÎˆ›ÛÛX[‚ˆ›İ\ÏÎˆİš[™È[ˆY×Û˜[YOÎˆİš[™ÂˆY×Û˜[Y\ÜXÙOÎˆİš[™Âˆ^Û›Û^WÚYÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ[š]Ü™YÎˆİš[™È[ˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›İY×ÛX\[™Ü×İ^Û›Û^WÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ^Û›Û^WÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš^œ›İ^Û›ÛZY\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›İY×ÛX\[™Ü×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš^œ›İY×ÛX\[™Ü×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ^œ›İ^Û›ÛZY\ÎˆÂˆ›İÎˆÂˆÜ™X]YØ]ˆİš[™ÂˆYˆİš[™Âˆ\×ØXİ]™Nˆ›ÛÛX[‚ˆ˜[YNˆİš[™ÂˆØÚ[XWİ\›ˆİš[™È[ˆ^Û›Û^Wİ\Nˆİš[™Âˆ™\œÚ[Ûˆİš[™ÂˆBˆ[œÙ\ˆÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ˜[YNˆİš[™ÂˆØÚ[XWİ\›Îˆİš[™È[ˆ^Û›Û^Wİ\OÎˆİš[™Âˆ™\œÚ[Ûˆİš[™ÂˆBˆ\]NˆÂˆÜ™X]YØ]Îˆİš[™ÂˆYÎˆİš[™Âˆ\×ØXİ]™OÎˆ›ÛÛX[‚ˆ˜[YOÎˆİš[™ÂˆØÚ[XWİ\›Îˆİš[™È[ˆ^Û›Û^Wİ\OÎˆİš[™Âˆ™\œÚ[ÛÎˆİš[™ÂˆBˆ™[][ÛœÚ\Îˆ×BˆBˆ›İ\›˜[Ù[šY\ÎˆÂˆ›İÎˆÂˆÛY[ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆÜ™X]YØNˆİš[™È[ˆ[WÙ]Nˆİš[™ÂˆYˆİš[™Âˆ\×ÜÜİYˆ›ÛÛX[‚ˆ˜\œ˜][Ûˆİš[™È[ˆ™Y™\™[˜ÙNˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØOÎˆİš[™È[ˆ[WÙ]OÎˆİš[™ÂˆYÎˆİš[™Âˆ\×ÜÜİYÎˆ›ÛÛX[‚ˆ˜\œ˜][ÛÎˆİš[™È[ˆ™Y™\™[˜ÙOÎˆİš[™È[ˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆÛY[ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆÜ™X]YØOÎˆİš[™È[ˆ[WÙ]OÎˆİš[™ÂˆYÎˆİš[™Âˆ\×ÜÜİYÎˆ›ÛÛX[‚ˆ˜\œ˜][ÛÎˆİš[™È[ˆ™Y™\™[˜ÙOÎˆİš[™È[ˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš›İ\›˜[Ù[šY\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš›İ\›˜[Ù[šY\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš›İ\›˜[Ù[šY\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš›İ\›˜[Ù[šY\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš›İ\›˜[Ù[šY\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš›İ\›˜[Ù[šY\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆ›İ\›˜[Û[™\ÎˆÂˆ›İÎˆÂˆXØÛİ[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆÜ™Y]ˆ[X™\‚ˆXš]ˆ[X™\‚ˆ\ØÜš\[Ûˆİš[™È[ˆYˆİš[™Âˆ›İ\›˜[Ù[WÚYˆİš[™ÂˆBˆ[œÙ\ˆÂˆXØÛİ[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆÜ™Y]Îˆ[X™\‚ˆXš]Îˆ[X™\‚ˆ\ØÜš\[ÛÎˆİš[™È[ˆYÎˆİš[™Âˆ›İ\›˜[Ù[WÚYˆİš[™ÂˆBˆ\]NˆÂˆXØÛİ[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆÜ™Y]Îˆ[X™\‚ˆXš]Îˆ[X™\‚ˆ\ØÜš\[ÛÎˆİš[™È[ˆYÎˆİš[™Âˆ›İ\›˜[Ù[WÚYÎˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš›İ\›˜[Û[™\×ØXØÛİ[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜XØÛİ[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜Ú\ÛÙ—ØXØÛİ[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆš›İ\›˜[Û[™\×Ú›İ\›˜[Ù[WÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈš›İ\›˜[Ù[WÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆš›İ\›˜[Ù[šY\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆBˆBˆŞX×ØØ\Ù\ÎˆÂˆ›İÎˆÂˆY™\œÙWÛYYXWØÚXÚÎˆ›ÛÛX[ˆ[ˆ\›İ™YØ]ˆİš[™È[ˆ\›İ™YØWİ\Ù\—ÚYˆİš[™È[ˆ\ÜÚYÛ™Yİ×İ\Ù\—ÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™Âˆ^\™\×Ø]ˆİš[™È[ˆYˆİš[™ÂˆYİ™\šYšXØ][Û—Ü›İšY\ˆİš[™È[ˆYİ™\šYšXØ][Û—Ü™Y™\™[˜ÙNˆİš[™È[ˆYİ™\šYšXØ][Û—Ü™\İ[ÚœÛÛˆœÛÛ‚ˆYİ™\šYšXØ][Û—Üİ]\Îˆİš[™È[ˆ\İÛ[Ûš]Ü™YØ]ˆİš[™È[ˆ[Ûš]Üš[™×Ù[˜X›Yˆ›ÛÛX[‚ˆ™^Ü™]šY]×Ù]Nˆİš[™È[ˆ\ØÚXÚÎˆ›ÛÛX[ˆ[ˆš\Ú×Û]™[ˆİš[™Âˆš\Ú×Û›İ\Îˆİš[™È[ˆš\Ú×ÜØÛÜ™Nˆ[X™\ˆ[ˆØ[˜İ[Ûœ×ØÚXÚÎˆ›ÛÛX[ˆ[ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆY™\œÙWÛYYXWØÚXÚÏÎˆ›ÛÛX[ˆ[ˆ\›İ™YØ]Îˆİš[™È[ˆ\›İ™YØWİ\Ù\—ÚYÎˆİš[™È[ˆ\ÜÚYÛ™Yİ×İ\Ù\—ÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ^\™\×Ø]Îˆİš[™È[ˆYÎˆİš[™ÂˆYİ™\šYšXØ][Û—Ü›İšY\Îˆİš[™È[ˆYİ™\šYšXØ][Û—Ü™Y™\™[˜ÙOÎˆİš[™È[ˆYİ™\šYšXØ][Û—Ü™\İ[ÚœÛÛÎˆœÛÛ‚ˆYİ™\šYšXØ][Û—Üİ]\ÏÎˆİš[™È[ˆ\İÛ[Ûš]Ü™YØ]Îˆİš[™È[ˆ[Ûš]Üš[™×Ù[˜X›YÎˆ›ÛÛX[‚ˆ™^Ü™]šY]×Ù]OÎˆİš[™È[ˆ\ØÚXÚÏÎˆ›ÛÛX[ˆ[ˆš\Ú×Û]™[Îˆİš[™Âˆš\Ú×Û›İ\ÏÎˆİš[™È[ˆš\Ú×ÜØÛÜ™OÎˆ[X™\ˆ[ˆØ[˜İ[Ûœ×ØÚXÚÏÎˆ›ÛÛX[ˆ[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆY™\œÙWÛYYXWØÚXÚÏÎˆ›ÛÛX[ˆ[ˆ\›İ™YØ]Îˆİš[™È[ˆ\›İ™YØWİ\Ù\—ÚYÎˆİš[™È[ˆ\ÜÚYÛ™Yİ×İ\Ù\—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™Âˆ^\™\×Ø]Îˆİš[™È[ˆYÎˆİš[™ÂˆYİ™\šYšXØ][Û—Ü›İšY\Îˆİš[™È[ˆYİ™\šYšXØ][Û—Ü™Y™\™[˜ÙOÎˆİš[™È[ˆYİ™\šYšXØ][Û—Ü™\İ[ÚœÛÛÎˆœÛÛ‚ˆYİ™\šYšXØ][Û—Üİ]\ÏÎˆİš[™È[ˆ\İÛ[Ûš]Ü™YØ]Îˆİš[™È[ˆ[Ûš]Üš[™×Ù[˜X›YÎˆ›ÛÛX[‚ˆ™^Ü™]šY]×Ù]OÎˆİš[™È[ˆ\ØÚXÚÏÎˆ›ÛÛX[ˆ[ˆš\Ú×Û]™[Îˆİš[™Âˆš\Ú×Û›İ\ÏÎˆİš[™È[ˆš\Ú×ÜØÛÜ™OÎˆ[X™\ˆ[ˆØ[˜İ[Ûœ×ØÚXÚÏÎˆ›ÛÛX[ˆ[ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØØ\Ù\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØØ\Ù\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØØ\Ù\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØØ\Ù\×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØØ\Ù\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØØ\Ù\×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆŞX×ØÚXÚÜÎˆÂˆ›İÎˆÂˆØ\ÙWÚYˆİš[™ÂˆÚXÚ×İ\Nˆİš[™ÂˆÚXÚÙYØ]ˆİš[™È[ˆÚXÚÙYØWİ\Ù\—ÚYˆİš[™È[ˆÜ™X]YØ]ˆİš[™ÂˆØİ[Y[ÚYˆİš[™È[ˆYˆİš[™Âˆ›İ\Îˆİš[™È[ˆ™\İ[ÚœÛÛˆœÛÛ‚ˆİ]\Îˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆØ\ÙWÚYˆİš[™ÂˆÚXÚ×İ\Nˆİš[™ÂˆÚXÚÙYØ]Îˆİš[™È[ˆÚXÚÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆ™\İ[ÚœÛÛÎˆœÛÛ‚ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆØ\ÙWÚYÎˆİš[™ÂˆÚXÚ×İ\OÎˆİš[™ÂˆÚXÚÙYØ]Îˆİš[™È[ˆÚXÚÙYØWİ\Ù\—ÚYÎˆİš[™È[ˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆ›İ\ÏÎˆİš[™È[ˆ™\İ[ÚœÛÛÎˆœÛÛ‚ˆİ]\ÏÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØÚXÚÜ×ØØ\ÙWÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜Ø\ÙWÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][ÛˆšŞX×ØØ\Ù\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØÚXÚÜ×ÙØİ[Y[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ™Øİ[Y[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ™Øİ[Y[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØÚXÚÜ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ[˜[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆšŞX×ØÚXÚÜ×İ[˜[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ[˜[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ü˜XİXÙWÙ\Ú›Ø\™ÚÜ\È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ[˜[ÚY—BˆKˆBˆBˆYÙ\—ÜİYÙÙ\İ[ÛœÎˆÂˆ›İÎˆÂˆ\›İ™YØ]ˆİš[™È[ˆ\›İ™YØWİ\Ù\—ÚYˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]ˆİš[™ÂˆØİ[Y[ÚYˆİš[™Âˆ^˜Xİ[Û—ÚYˆİš[™È[ˆYˆİš[™Âˆ[™\×ÚœÛÛˆœÛÛ‚ˆÜİYÚ›İ\›˜[ÚYˆİš[™È[ˆ™X\ÛÛˆİš[™È[ˆİ]\Îˆİš[™ÂˆİYÙÙ\İYØNˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]ˆİš[™ÂˆBˆ[œÙ\ˆÂˆ\›İ™YØ]Îˆİš[™È[ˆ\›İ™YØWİ\Ù\—ÚYÎˆİš[™È[ˆÛY[ÚYˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYˆİš[™Âˆ^˜Xİ[Û—ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆ[™\×ÚœÛÛÎˆœÛÛ‚ˆÜİYÚ›İ\›˜[ÚYÎˆİš[™È[ˆ™X\ÛÛÎˆİš[™È[ˆİ]\ÏÎˆİš[™ÂˆİYÙÙ\İYØOÎˆİš[™Âˆ[˜[ÚYˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ\]NˆÂˆ\›İ™YØ]Îˆİš[™È[ˆ\›İ™YØWİ\Ù\—ÚYÎˆİš[™È[ˆÛY[ÚYÎˆİš[™ÂˆÜ™X]YØ]Îˆİš[™ÂˆØİ[Y[ÚYÎˆİš[™Âˆ^˜Xİ[Û—ÚYÎˆİš[™È[ˆYÎˆİš[™Âˆ[™\×ÚœÛÛÎˆœÛÛ‚ˆÜİYÚ›İ\›˜[ÚYÎˆİš[™È[ˆ™X\ÛÛÎˆİš[™È[ˆİ]\ÏÎˆİš[™ÂˆİYÙÙ\İYØOÎˆİš[™Âˆ[˜[ÚYÎˆİš[™Âˆ\]YØ]Îˆİš[™ÂˆBˆ™[][ÛœÚ\ÎˆÂˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ›YÙ\—ÜİYÙÙ\İ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ˜ÛY[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ›YÙ\—ÜİYÙÙ\İ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—Ûİ™\™YWİ\ÚÜÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ›YÙ\—ÜİYÙÙ\İ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—ÜÙXÜ™]\šX[ÙYH‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ›YÙ\—ÜİYÙÙ\İ[Ûœ×ØÛY[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ˜ÛY[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ—İ\ÚÜ×ÙYWÛ™^ÌM‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈ˜ÛY[ÚY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ›YÙ\—ÜİYÙÙ\İ[Ûœ×ÙØİ[Y[ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ™Øİ[Y[ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆ™Øİ[Y[È‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[YNˆ›YÙ\—ÜİYÙÙ\İ[Ûœ×Ù^˜Xİ[Û—ÚYÙšÙ^H‚ˆÛÛ[[œÎˆÈ™^˜Xİ[Û—ÚY—Bˆ\ÓÛ™UÓÛ™Nˆ˜[ÙBˆ™Y™\™[˜ÙY™[][Ûˆœ™XÙZ\Ù^˜Xİ[ÛœÈ‚ˆ™Y™\™[˜ÙYÛÛ[[œÎˆÈšY—BˆKˆÂˆ›Ü™ZYÛ’Ù^S˜[wë-¢G§²ÚîÆ­y×VÖVçEö–Có¢7G&–ærÂçVÆÀ¢Fö7VÖVçE÷G—Só¢7G&–æp¢–Có¢7G&–æp¢6V7&WF&–ÅöWfVçEö–Có¢7G&–ærÂçVÆÀ¢6–væVEöCó¢7G&–ærÂçVÆÀ¢FV×ÆFUö¶W“ó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F—FÆS¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–æp¢6öçFVçEö‡FÖÃó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢Fö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢Fö7VÖVçE÷G—Só¢7G&–æp¢–Có¢7G&–æp¢6V7&WF&–ÅöWfVçEö–Có¢7G&–ærÂçVÆÀ¢6–væVEöCó¢7G&–ærÂçVÆÀ¢FV×ÆFUö¶W“ó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢F—FÆSó¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&Ö–çWFW5öFö7VÖVçG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&Ö–çWFW5öFö7VÖVçG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&Ö–çWFW5öFö7VÖVçG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&Ö–çWFW5öFö7VÖVçG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&Ö–çWFW5öFö7VÖVçG5öFö7VÖVçEö–Eöf¶W’ ¢6öÇVÖç3¢²&Fö7VÖVçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&Fö7VÖVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&Ö–çWFW5öFö7VÖVçG5÷6V7&WF&–ÅöWfVçEö–Eöf¶W’ ¢6öÇVÖç3¢²'6V7&WF&–ÅöWfVçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'6V7&WF&–ÅöWfVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&Ö–çWFW5öFö7VÖVçG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&Ö–çWFW5öFö7VÖVçG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢æ÷F–f–6F–öåöÆöw3¢°¢&÷s¢°¢&öG•÷&Wf–Ws¢7G&–ærÂçVÆÀ¢6†ææVÃ¢7G&–æp¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢W'&÷%öÖW76vS¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢ÖWFö§6öã¢§6öà¢&÷f–FW#¢7G&–ærÂçVÆÀ¢&÷f–FW%öÖW76vUö–C¢7G&–ærÂçVÆÀ¢6VçEöC¢7G&–ærÂçVÆÀ¢7FGW3¢7G&–æp¢7V&¦V7C¢7G&–ærÂçVÆÀ¢FV×ÆFUö¶W“¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢FõöFG&W73¢7G&–ærÂçVÆÀ¢W6W%ö–C¢7G&–ærÂçVÆÀ¢Ğ¢–ç6W'C¢°¢&öG•÷&Wf–Wsó¢7G&–ærÂçVÆÀ¢6†ææVÃ¢7G&–æp¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢W'&÷%öÖW76vSó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢ÖWFö§6öãó¢§6öà¢&÷f–FW#ó¢7G&–ærÂçVÆÀ¢&÷f–FW%öÖW76vUö–Có¢7G&–ærÂçVÆÀ¢6VçEöCó¢7G&–ærÂçVÆÀ¢7FGW3ó¢7G&–æp¢7V&¦V7Có¢7G&–ærÂçVÆÀ¢FV×ÆFUö¶W“ó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢FõöFG&W73ó¢7G&–ærÂçVÆÀ¢W6W%ö–Có¢7G&–ærÂçVÆÀ¢Ğ¢WFFS¢°¢&öG•÷&Wf–Wsó¢7G&–ærÂçVÆÀ¢6†ææVÃó¢7G&–æp¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢W'&÷%öÖW76vSó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢ÖWFö§6öãó¢§6öà¢&÷f–FW#ó¢7G&–ærÂçVÆÀ¢&÷f–FW%öÖW76vUö–Có¢7G&–ærÂçVÆÀ¢6VçEöCó¢7G&–ærÂçVÆÀ¢7FGW3ó¢7G&–æp¢7V&¦V7Có¢7G&–ærÂçVÆÀ¢FV×ÆFUö¶W“ó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢FõöFG&W73ó¢7G&–ærÂçVÆÀ¢W6W%ö–Có¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öåöÆöw5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öåöÆöw5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öåöÆöw5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öåöÆöw5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öåöÆöw5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öåöÆöw5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢æ÷F–f–6F–öå÷VWVS¢°¢&÷s¢°¢GFV×Eö6÷VçC¢çVÖ&W ¢6†ææVÃ¢7G&–æp¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢–C¢7G&–æp¢Æ7EöW'&÷#¢7G&–ærÂçVÆÀ¢æW‡E÷&WG'•öC¢7G&–ærÂçVÆÀ¢–ÆöEö§6öã¢§6öà¢7FGW3¢7G&–æp¢FV×ÆFUö¶W“¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢GFV×Eö6÷VçCó¢çVÖ&W ¢6†ææVÃ¢7G&–æp¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢–Có¢7G&–æp¢Æ7EöW'&÷#ó¢7G&–ærÂçVÆÀ¢æW‡E÷&WG'•öCó¢7G&–ærÂçVÆÀ¢–ÆöEö§6öãó¢§6öà¢7FGW3ó¢7G&–æp¢FV×ÆFUö¶W“ó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢GFV×Eö6÷VçCó¢çVÖ&W ¢6†ææVÃó¢7G&–æp¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢–Có¢7G&–æp¢Æ7EöW'&÷#ó¢7G&–ærÂçVÆÀ¢æW‡E÷&WG'•öCó¢7G&–ærÂçVÆÀ¢–ÆöEö§6öãó¢§6öà¢7FGW3ó¢7G&–æp¢FV×ÆFUö¶W“ó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öå÷VWVUö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öå÷VWVUö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öå÷VWVUö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öå÷VWVUö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öå÷VWVU÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öå÷VWVU÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢æ÷F–f–6F–öå÷'VÆW3¢°¢&÷s¢°¢Æ–W5÷Fõö§6öã¢§6öà¢6†ææVÃ¢7G&–æp¢7&VFVEöC¢7G&–æp¢F—5ö&Vf÷&UöGVS¢çVÖ&W ¢–C¢7G&–æp¢—5öVæ&ÆVC¢&ööÆVâÂçVÆÀ¢æÖS¢7G&–æp¢FV×ÆFUö¶W“¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢Ğ¢–ç6W'C¢°¢Æ–W5÷Fõö§6öãó¢§6öà¢6†ææVÃ¢7G&–æp¢7&VFVEöCó¢7G&–æp¢F—5ö&Vf÷&UöGVSó¢çVÖ&W ¢–Có¢7G&–æp¢—5öVæ&ÆVCó¢&ööÆVâÂçVÆÀ¢æÖS¢7G&–æp¢FV×ÆFUö¶W“ó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢Ğ¢WFFS¢°¢Æ–W5÷Fõö§6öãó¢§6öà¢6†ææVÃó¢7G&–æp¢7&VFVEöCó¢7G&–æp¢F—5ö&Vf÷&UöGVSó¢çVÖ&W ¢–Có¢7G&–æp¢—5öVæ&ÆVCó¢&ööÆVâÂçVÆÀ¢æÖSó¢7G&–æp¢FV×ÆFUö¶W“ó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öå÷'VÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&æ÷F–f–6F–öå÷'VÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢ö7%ö¦ö'3¢°¢&÷s¢°¢GFV×Eö6÷VçC¢çVÖ&W ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢Fö7VÖVçEö–C¢7G&–æp¢–C¢7G&–æp¢Æ7EöW'&÷#¢7G&–ærÂçVÆÀ¢&÷f–FW#¢7G&–æp¢&WVW7Eö§6öã¢§6öà¢&W7VÇEö§6öã¢§6öâÂçVÆÀ¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢GFV×Eö6÷VçCó¢çVÖ&W ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢Fö7VÖVçEö–C¢7G&–æp¢–Có¢7G&–æp¢Æ7EöW'&÷#ó¢7G&–ærÂçVÆÀ¢&÷f–FW#ó¢7G&–æp¢&WVW7Eö§6öãó¢§6öà¢&W7VÇEö§6öãó¢§6öâÂçVÆÀ¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢GFV×Eö6÷VçCó¢çVÖ&W ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢Fö7VÖVçEö–Có¢7G&–æp¢–Có¢7G&–æp¢Æ7EöW'&÷#ó¢7G&–ærÂçVÆÀ¢&÷f–FW#ó¢7G&–æp¢&WVW7Eö§6öãó¢§6öà¢&W7VÇEö§6öãó¢§6öâÂçVÆÀ¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&ö7%ö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ö7%ö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ö7%ö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ö7%ö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ö7%ö¦ö'5öFö7VÖVçEö–Eöf¶W’ ¢6öÇVÖç3¢²&Fö7VÖVçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&Fö7VÖVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ö7%ö¦ö'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ö7%ö¦ö'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢öæ&ö&F–æuö66W3¢°¢&÷s¢°¢6†V6¶Æ—7Eö§6öã¢§6öà¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢7&VFVEö'•÷W6W%ö–C¢7G&–ærÂçVÆÀ¢FFö§6öã¢§6öà¢VçF—G•÷G—S¢7G&–æp¢–C¢7G&–æp¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢6†V6¶Æ—7Eö§6öãó¢§6öà¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢FFö§6öãó¢§6öà¢VçF—G•÷G—S¢7G&–æp¢–Có¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢6†V6¶Æ—7Eö§6öãó¢§6öà¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢FFö§6öãó¢§6öà¢VçF—G•÷G—Só¢7G&–æp¢–Có¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æuö66W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æuö66W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æuö66W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æuö66W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æuö66W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æuö66W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢öæ&ö&F–æu÷7FW3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢FFö§6öã¢§6öà¢–C¢7G&–æp¢öæ&ö&F–æuö66Uö–C¢7G&–æp¢&WV—&VC¢&ööÆVà¢7FWö¶W“¢7G&–æp¢7FW÷7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢FFö§6öãó¢§6öà¢–Có¢7G&–æp¢öæ&ö&F–æuö66Uö–C¢7G&–æp¢&WV—&VCó¢&ööÆVà¢7FWö¶W“¢7G&–æp¢7FW÷7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢FFö§6öãó¢§6öà¢–Có¢7G&–æp¢öæ&ö&F–æuö66Uö–Có¢7G&–æp¢&WV—&VCó¢&ööÆVà¢7FWö¶W“ó¢7G&–æp¢7FW÷7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æu÷7FW5ööæ&ö&F–æuö66Uö–Eöf¶W’ ¢6öÇVÖç3¢²&öæ&ö&F–æuö66Uö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&öæ&ö&F–æuö66W2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æu÷7FW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&öæ&ö&F–æu÷7FW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢•÷'Vç3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢V×Æ÷–W%ö–C¢7G&–æp¢W5÷7V&Ö—76–öåö¦ö%ö–C¢7G&–ærÂçVÆÀ¢g5÷7V&Ö—76–öåö¦ö%ö–C¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢æ÷FW3¢7G&–ærÂçVÆÀ¢•öFFS¢7G&–æp¢•ög&WVVæ7“¢7G&–æp¢W&–öEöVæC¢7G&–æp¢W&–öE÷7F'C¢7G&–æp¢7FGW3¢7G&–æp¢F…÷W&–öC¢çVÖ&W ¢F…÷–V#¢7G&–æp¢FVæçEö–C¢7G&–æp¢F÷FÅöw&÷75÷Væ6S¢çVÖ&W ¢F÷FÅöæWE÷Væ6S¢çVÖ&W ¢F÷FÅöæ•öV×Æ÷–VU÷Væ6S¢çVÖ&W ¢F÷FÅöæ•öV×Æ÷–W%÷Væ6S¢çVÖ&W ¢F÷FÅ÷Vç6–öåöV×Æ÷–VU÷Væ6S¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷Vç6–öåöV×Æ÷–W%÷Væ6S¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷7GVFVçEöÆöå÷Væ6S¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷F…÷Væ6S¢çVÖ&W ¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢V×Æ÷–W%ö–C¢7G&–æp¢W5÷7V&Ö—76–öåö¦ö%ö–Có¢7G&–ærÂçVÆÀ¢g5÷7V&Ö—76–öåö¦ö%ö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢•öFFS¢7G&–æp¢•ög&WVVæ7“ó¢7G&–æp¢W&–öEöVæC¢7G&–æp¢W&–öE÷7F'C¢7G&–æp¢7FGW3ó¢7G&–æp¢F…÷W&–öC¢çVÖ&W ¢F…÷–V#ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢F÷FÅöw&÷75÷Væ6Só¢çVÖ&W ¢F÷FÅöæWE÷Væ6Só¢çVÖ&W ¢F÷FÅöæ•öV×Æ÷–VU÷Væ6Só¢çVÖ&W ¢F÷FÅöæ•öV×Æ÷–W%÷Væ6Só¢çVÖ&W ¢F÷FÅ÷Vç6–öåöV×Æ÷–VU÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷Vç6–öåöV×Æ÷–W%÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷7GVFVçEöÆöå÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷F…÷Væ6Só¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢V×Æ÷–W%ö–Có¢7G&–æp¢W5÷7V&Ö—76–öåö¦ö%ö–Có¢7G&–ærÂçVÆÀ¢g5÷7V&Ö—76–öåö¦ö%ö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢•öFFSó¢7G&–æp¢•ög&WVVæ7“ó¢7G&–æp¢W&–öEöVæCó¢7G&–æp¢W&–öE÷7F'Có¢7G&–æp¢7FGW3ó¢7G&–æp¢F…÷W&–öCó¢çVÖ&W ¢F…÷–V#ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢F÷FÅöw&÷75÷Væ6Só¢çVÖ&W ¢F÷FÅöæWE÷Væ6Só¢çVÖ&W ¢F÷FÅöæ•öV×Æ÷–VU÷Væ6Só¢çVÖ&W ¢F÷FÅöæ•öV×Æ÷–W%÷Væ6Só¢çVÖ&W ¢F÷FÅ÷Vç6–öåöV×Æ÷–VU÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷Vç6–öåöV×Æ÷–W%÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷7GVFVçEöÆöå÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷F…÷Væ6Só¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'•÷'Vç5öV×Æ÷–W%ö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–W%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–W'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'•÷'Vç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'•÷'Vç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢—&öÆÅö'6Væ6W3¢°¢&÷s¢°¢'6Væ6U÷G—S¢7G&–æp¢7&VFVEöC¢7G&–æp¢F—3¢çVÖ&W ¢V×Æ÷–VUö–C¢7G&–æp¢V×Æ÷–W%ö–C¢7G&–æp¢VæEöFFS¢7G&–ærÂçVÆÀ¢†÷W'3¢çVÖ&W"ÂçVÆÀ¢–C¢7G&–æp¢—5÷–C¢&ööÆVà¢æ÷FW3¢7G&–ærÂçVÆÀ¢7F'EöFFS¢7G&–æp¢7FGW3¢7G&–æp¢7FGWF÷'•÷•÷G—S¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢'6Væ6U÷G—S¢7G&–æp¢7&VFVEöCó¢7G&–æp¢F—3ó¢çVÖ&W ¢V×Æ÷–VUö–C¢7G&–æp¢V×Æ÷–W%ö–C¢7G&–æp¢VæEöFFSó¢7G&–ærÂçVÆÀ¢†÷W'3ó¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢—5÷–Có¢&ööÆVà¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢7F'EöFFS¢7G&–æp¢7FGW3ó¢7G&–æp¢7FGWF÷'•÷•÷G—Só¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢'6Væ6U÷G—Só¢7G&–æp¢7&VFVEöCó¢7G&–æp¢F—3ó¢çVÖ&W ¢V×Æ÷–VUö–Có¢7G&–æp¢V×Æ÷–W%ö–Có¢7G&–æp¢VæEöFFSó¢7G&–ærÂçVÆÀ¢†÷W'3ó¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢—5÷–Có¢&ööÆVà¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢7F'EöFFSó¢7G&–æp¢7FGW3ó¢7G&–æp¢7FGWF÷'•÷•÷G—Só¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅö'6Væ6W5öV×Æ÷–VUö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–VUö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–VW2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅö'6Væ6W5öV×Æ÷–W%ö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–W%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–W'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅö'6Væ6W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅö'6Væ6W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢—&öÆÅö&VæVf—G3¢°¢&÷s¢°¢Ö÷VçEöÖFUövööE÷Væ6S¢çVÖ&W"ÂçVÆÀ¢&VæVf—E÷G—S¢7G&–æp¢66…öWV—fÆVçE÷Væ6S¢çVÖ&W ¢7&VFVEöC¢7G&–æp¢FW67&—F–öã¢7G&–æp¢V×Æ÷–VUö–C¢7G&–æp¢V×Æ÷–W%ö–C¢7G&–æp¢VæEöFFS¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢ÖWFFFö§6öã¢§6öà¢—&öÆÆVC¢&ööÆVà¢6V7F–öã¢7G&–ærÂçVÆÀ¢7F'EöFFS¢7G&–ærÂçVÆÀ¢F…÷–V#¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢Ö÷VçEöÖFUövööE÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢&VæVf—E÷G—S¢7G&–æp¢66…öWV—fÆVçE÷Væ6Só¢çVÖ&W ¢7&VFVEöCó¢7G&–æp¢FW67&—F–öã¢7G&–æp¢V×Æ÷–VUö–C¢7G&–æp¢V×Æ÷–W%ö–C¢7G&–æp¢VæEöFFSó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢ÖWFFFö§6öãó¢§6öà¢—&öÆÆVCó¢&ööÆVà¢6V7F–öãó¢7G&–ærÂçVÆÀ¢7F'EöFFSó¢7G&–ærÂçVÆÀ¢F…÷–V#ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢Ö÷VçEöÖFUövööE÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢&VæVf—E÷G—Só¢7G&–æp¢66…öWV—fÆVçE÷Væ6Só¢çVÖ&W ¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–æp¢V×Æ÷–VUö–Có¢7G&–æp¢V×Æ÷–W%ö–Có¢7G&–æp¢VæEöFFSó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢ÖWFFFö§6öãó¢§6öà¢—&öÆÆVCó¢&ööÆVà¢6V7F–öãó¢7G&–ærÂçVÆÀ¢7F'EöFFSó¢7G&–ærÂçVÆÀ¢F…÷–V#ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅö&VæVf—G5öV×Æ÷–VUö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–VUö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–VW2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅö&VæVf—G5öV×Æ÷–W%ö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–W%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–W'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅö&VæVf—G5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅö&VæVf—G5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢—&öÆÅöV×Æ÷–VW3¢°¢&÷s¢°¢66÷VçEöæÖS¢7G&–ærÂçVÆÀ¢66÷VçEöçVÖ&W#¢7G&–ærÂçVÆÀ¢FG&W75ö§6öã¢§6öà¢FG&W75öÆ–æS¢7G&–ærÂçVÆÀ¢FG&W75öÆ–æS#¢7G&–ærÂçVÆÀ¢æçVÅ÷6Æ'•÷Væ6S¢çVÖ&W"ÂçVÆÀ¢&æµö66÷VçEö§6öã¢§6öà¢6—G“¢7G&–ærÂçVÆÀ¢6÷VçG'“¢7G&–ærÂçVÆÀ¢6÷VçG“¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢FFUööeö&—'Fƒ¢7G&–ærÂçVÆÀ¢F—&V7F÷'5öæ–5öÖWF†öC¢7G&–ærÂçVÆÀ¢VÖ–Ã¢7G&–ærÂçVÆÀ¢V×Æ÷–W%ö–C¢7G&–æp¢f—'7EöæÖS¢7G&–æp¢vVæFW#¢7G&–ærÂçVÆÀ¢†öÆ–F•ö6'&–VEöf÷'v&C¢çVÖ&W"ÂçVÆÀ¢†öÆ–F•öVçF—FÆVÖVçEöF—3¢çVÖ&W"ÂçVÆÀ¢†öÆ–F•÷F¶VåöF—3¢çVÖ&W"ÂçVÆÀ¢†÷W&Ç•÷&FU÷Væ6S¢çVÖ&W"ÂçVÆÀ¢–C¢7G&–æp¢—5ö7F—fS¢&ööÆVà¢—5öF—&V7F÷#¢&ööÆVà¢—5ö—'&VwVÆ%öV×Æ÷–ÖVçC¢&ööÆVâÂçVÆÀ¢Æ7EöæÖS¢7G&–æp¢ÆVfUöFFS¢7G&–ærÂçVÆÀ¢æ•ö6FVv÷'“¢7G&–ærÂçVÆÀ¢æ•öçVÖ&W#¢7G&–ærÂçVÆÀ¢æ÷FW3¢7G&–ærÂçVÆÀ¢CUö—77VUöFFS¢7G&–ærÂçVÆÀ¢CU÷&Wf–÷W5÷•÷Væ6S¢çVÖ&W"ÂçVÆÀ¢CU÷&Wf–÷W5÷F…÷Væ6S¢çVÖ&W"ÂçVÆÀ¢•öÖWF†öC¢7G&–æp¢–ÖVçEöÖWF†öC¢7G&–ærÂçVÆÀ¢—&öÆÅö–C¢7G&–ærÂçVÆÀ¢Vç6–öåöV×Æ÷–VU÷7C¢çVÖ&W"ÂçVÆÀ¢Vç6–öåöV×Æ÷–W%÷7C¢çVÖ&W"ÂçVÆÀ¢Vç6–öåö÷Eö÷WC¢&ööÆVà¢†öæS¢7G&–ærÂçVÆÀ¢÷7F6öFS¢7G&–ærÂçVÆÀ¢÷7Fw&EöÆöã¢&ööÆVà¢6÷'Eö6öFS¢7G&–ærÂçVÆÀ¢7F'EöFFS¢7G&–ærÂçVÆÀ¢7F'FW%öFV6Æ&F–öã¢7G&–ærÂçVÆÀ¢7GVFVçEöÆöå÷Æã¢7G&–ærÂçVÆÀ¢F…ö6öFS¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F—FÆS¢7G&–ærÂçVÆÀ¢WFFVEöC¢7G&–æp¢vVV³öÖöçFƒ¢&ööÆVâÂçVÆÀ¢Ğ¢–ç6W'C¢°¢66÷VçEöæÖSó¢7G&–ærÂçVÆÀ¢66÷VçEöçVÖ&W#ó¢7G&–ærÂçVÆÀ¢FG&W75ö§6öãó¢§6öà¢FG&W75öÆ–æSó¢7G&–ærÂçVÆÀ¢FG&W75öÆ–æS#ó¢7G&–ærÂçVÆÀ¢æçVÅ÷6Æ'•÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢&æµö66÷VçEö§6öãó¢§6öà¢6—G“ó¢7G&–ærÂçVÆÀ¢6÷VçG'“ó¢7G&–ærÂçVÆÀ¢6÷VçG“ó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FFUööeö&—'Fƒó¢7G&–ærÂçVÆÀ¢F—&V7F÷'5öæ–5öÖWF†öCó¢7G&–ærÂçVÆÀ¢VÖ–Ãó¢7G&–ærÂçVÆÀ¢V×Æ÷–W%ö–C¢7G&–æp¢f—'7EöæÖS¢7G&–æp¢vVæFW#ó¢7G&–ærÂçVÆÀ¢†öÆ–F•ö6'&–VEöf÷'v&Có¢çVÖ&W"ÂçVÆÀ¢†öÆ–F•öVçF—FÆVÖVçEöF—3ó¢çVÖ&W"ÂçVÆÀ¢†öÆ–F•÷F¶VåöF—3ó¢çVÖ&W"ÂçVÆÀ¢†÷W&Ç•÷&FU÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢—5ö7F—fSó¢&ööÆVà¢—5öF—&V7F÷#ó¢&ööÆVà¢—5ö—'&VwVÆ%öV×Æ÷–ÖVçCó¢&ööÆVâÂçVÆÀ¢Æ7EöæÖS¢7G&–æp¢ÆVfUöFFSó¢7G&–ærÂçVÆÀ¢æ•ö6FVv÷'“ó¢7G&–ærÂçVÆÀ¢æ•öçVÖ&W#ó¢7G&–ærÂçVÆÀ¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢CUö—77VUöFFSó¢7G&–ærÂçVÆÀ¢CU÷&Wf–÷W5÷•÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢CU÷&Wf–÷W5÷F…÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢•öÖWF†öCó¢7G&–æp¢–ÖVçEöÖWF†öCó¢7G&–ærÂçVÆÀ¢—&öÆÅö–Có¢7G&–ærÂçVÆÀ¢Vç6–öåöV×Æ÷–VU÷7Có¢çVÖ&W"ÂçVÆÀ¢Vç6–öåöV×Æ÷–W%÷7Có¢çVÖ&W"ÂçVÆÀ¢Vç6–öåö÷Eö÷WCó¢&ööÆVà¢†öæSó¢7G&–ærÂçVÆÀ¢÷7F6öFSó¢7G&–ærÂçVÆÀ¢÷7Fw&EöÆöãó¢&ööÆVà¢6÷'Eö6öFSó¢7G&–ærÂçVÆÀ¢7F'EöFFSó¢7G&–ærÂçVÆÀ¢7F'FW%öFV6Æ&F–öãó¢7G&–ærÂçVÆÀ¢7GVFVçEöÆöå÷Æãó¢7G&–ærÂçVÆÀ¢F…ö6öFSó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F—FÆSó¢7G&–ærÂçVÆÀ¢WFFVEöCó¢7G&–æp¢vVV³öÖöçFƒó¢&ööÆVâÂçVÆÀ¢Ğ¢WFFS¢°¢66÷VçEöæÖSó¢7G&–ærÂçVÆÀ¢66÷VçEöçVÖ&W#ó¢7G&–ærÂçVÆÀ¢FG&W75ö§6öãó¢§6öà¢FG&W75öÆ–æSó¢7G&–ærÂçVÆÀ¢FG&W75öÆ–æS#ó¢7G&–ærÂçVÆÀ¢æçVÅ÷6Æ'•÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢&æµö66÷VçEö§6öãó¢§6öà¢6—G“ó¢7G&–ærÂçVÆÀ¢6÷VçG'“ó¢7G&–ærÂçVÆÀ¢6÷VçG“ó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FFUööeö&—'Fƒó¢7G&–ærÂçVÆÀ¢F—&V7F÷'5öæ–5öÖWF†öCó¢7G&–ærÂçVÆÀ¢VÖ–Ãó¢7G&–ærÂçVÆÀ¢V×Æ÷–W%ö–Có¢7G&–æp¢f—'7EöæÖSó¢7G&–æp¢vVæFW#ó¢7G&–ærÂçVÆÀ¢†öÆ–F•ö6'&–VEöf÷'v&Có¢çVÖ&W"ÂçVÆÀ¢†öÆ–F•öVçF—FÆVÖVçEöF—3ó¢çVÖ&W"ÂçVÆÀ¢†öÆ–F•÷F¶VåöF—3ó¢çVÖ&W"ÂçVÆÀ¢†÷W&Ç•÷&FU÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢—5ö7F—fSó¢&ööÆVà¢—5öF—&V7F÷#ó¢&ööÆVà¢—5ö—'&VwVÆ%öV×Æ÷–ÖVçCó¢&ööÆVâÂçVÆÀ¢Æ7EöæÖSó¢7G&–æp¢ÆVfUöFFSó¢7G&–ærÂçVÆÀ¢æ•ö6FVv÷'“ó¢7G&–ærÂçVÆÀ¢æ•öçVÖ&W#ó¢7G&–ærÂçVÆÀ¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢CUö—77VUöFFSó¢7G&–ærÂçVÆÀ¢CU÷&Wf–÷W5÷•÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢CU÷&Wf–÷W5÷F…÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢•öÖWF†öCó¢7G&–æp¢–ÖVçEöÖWF†öCó¢7G&–ærÂçVÆÀ¢—&öÆÅö–Có¢7G&–ærÂçVÆÀ¢Vç6–öåöV×Æ÷–VU÷7Có¢çVÖ&W"ÂçVÆÀ¢Vç6–öåöV×Æ÷–W%÷7Có¢çVÖ&W"ÂçVÆÀ¢Vç6–öåö÷Eö÷WCó¢&ööÆVà¢†öæSó¢7G&–ærÂçVÆÀ¢÷7F6öFSó¢7G&–ærÂçVÆÀ¢÷7Fw&EöÆöãó¢&ööÆVà¢6÷'Eö6öFSó¢7G&–ærÂçVÆÀ¢7F'EöFFSó¢7G&–ærÂçVÆÀ¢7F'FW%öFV6Æ&F–öãó¢7G&–ærÂçVÆÀ¢7GVFVçEöÆöå÷Æãó¢7G&–ærÂçVÆÀ¢F…ö6öFSó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢F—FÆSó¢7G&–ærÂçVÆÀ¢WFFVEöCó¢7G&–æp¢vVV³öÖöçFƒó¢&ööÆVâÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–VW5öV×Æ÷–W%ö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–W%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–W'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–VW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–VW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢—&öÆÅöV×Æ÷–W'3¢°¢&÷s¢°¢66÷VçG5ööff–6U÷&Vc¢7G&–ærÂçVÆÀ¢&VçF–6W6†—öÆWg“¢&ööÆVâÂçVÆÀ¢&VçF–6W6†—öÆWg•öÆÆ÷væ6U÷Væ6S¢çVÖ&W"ÂçVÆÀ¢6—5÷&Vv—7FW&VC¢&ööÆVâÂçVÆÀ¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöC¢7G&–æp¢V×Æ÷–W%öæÖS¢7G&–æp¢V×Æ÷–ÖVçEöÆÆ÷væ6S¢&ööÆVâÂçVÆÀ¢†×&5övFWv•ö–C¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢—5ö7F—fS¢&ööÆVà¢•ög&WVVæ7“¢7G&–æp¢–U÷&VfW&Væ6S¢7G&–ærÂçVÆÀ¢Vç6–öå÷&÷f–FW#¢7G&–ærÂçVÆÀ¢Vç6–öå÷66†VÖU÷&Vc¢7G&–ærÂçVÆÀ¢6ÖÆÅöV×Æ÷–W#¢&ööÆVâÂçVÆÀ¢7Fv–æuöFFS¢7G&–ærÂçVÆÀ¢F…÷–V#¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢66÷VçG5ööff–6U÷&Vcó¢7G&–ærÂçVÆÀ¢&VçF–6W6†—öÆWg“ó¢&ööÆVâÂçVÆÀ¢&VçF–6W6†—öÆWg•öÆÆ÷væ6U÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢6—5÷&Vv—7FW&VCó¢&ööÆVâÂçVÆÀ¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöCó¢7G&–æp¢V×Æ÷–W%öæÖS¢7G&–æp¢V×Æ÷–ÖVçEöÆÆ÷væ6Só¢&ööÆVâÂçVÆÀ¢†×&5övFWv•ö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢—5ö7F—fSó¢&ööÆVà¢•ög&WVVæ7“ó¢7G&–æp¢–U÷&VfW&Væ6Só¢7G&–ærÂçVÆÀ¢Vç6–öå÷&÷f–FW#ó¢7G&–ærÂçVÆÀ¢Vç6–öå÷66†VÖU÷&Vcó¢7G&–ærÂçVÆÀ¢6ÖÆÅöV×Æ÷–W#ó¢&ööÆVâÂçVÆÀ¢7Fv–æuöFFSó¢7G&–ærÂçVÆÀ¢F…÷–V#ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢66÷VçG5ööff–6U÷&Vcó¢7G&–ærÂçVÆÀ¢&VçF–6W6†—öÆWg“ó¢&ööÆVâÂçVÆÀ¢&VçF–6W6†—öÆWg•öÆÆ÷væ6U÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢6—5÷&Vv—7FW&VCó¢&ööÆVâÂçVÆÀ¢6Æ–VçEö–Có¢7G&–æp¢7&VFVEöCó¢7G&–æp¢V×Æ÷–W%öæÖSó¢7G&–æp¢V×Æ÷–ÖVçEöÆÆ÷væ6Só¢&ööÆVâÂçVÆÀ¢†×&5övFWv•ö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢—5ö7F—fSó¢&ööÆVà¢•ög&WVVæ7“ó¢7G&–æp¢–U÷&VfW&Væ6Só¢7G&–ærÂçVÆÀ¢Vç6–öå÷&÷f–FW#ó¢7G&–ærÂçVÆÀ¢Vç6–öå÷66†VÖU÷&Vcó¢7G&–ærÂçVÆÀ¢6ÖÆÅöV×Æ÷–W#ó¢&ööÆVâÂçVÆÀ¢7Fv–æuöFFSó¢7G&–ærÂçVÆÀ¢F…÷–V#ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–W'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–W'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–W'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–W'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–W'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöV×Æ÷–W'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢—&öÆÅöf÷&×3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢Fö7VÖVçEö–C¢7G&–ærÂçVÆÀ¢V×Æ÷–VUö–C¢7G&–ærÂçVÆÀ¢V×Æ÷–W%ö–C¢7G&–æp¢f÷&ÕöFFö§6öã¢§6öà¢f÷&Õ÷G—S¢7G&–æp¢vVæW&FVEöC¢7G&–ærÂçVÆÀ¢†×&5÷&W7öç6Uö§6öã¢§6öâÂçVÆÀ¢–C¢7G&–æp¢æ÷FW3¢7G&–ærÂçVÆÀ¢6VçEöC¢7G&–ærÂçVÆÀ¢7FGW3¢7G&–æp¢7V&Ö—GFVEöC¢7G&–ærÂçVÆÀ¢F…÷–V#¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢Fö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢V×Æ÷–VUö–Có¢7G&–ærÂçVÆÀ¢V×Æ÷–W%ö–C¢7G&–æp¢f÷&ÕöFFö§6öãó¢§6öà¢f÷&Õ÷G—S¢7G&–æp¢vVæW&FVEöCó¢7G&–ærÂçVÆÀ¢†×&5÷&W7öç6Uö§6öãó¢§6öâÂçVÆÀ¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢6VçEöCó¢7G&–ærÂçVÆÀ¢7FGW3ó¢7G&–æp¢7V&Ö—GFVEöCó¢7G&–ærÂçVÆÀ¢F…÷–V#ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢Fö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢V×Æ÷–VUö–Có¢7G&–ærÂçVÆÀ¢V×Æ÷–W%ö–Có¢7G&–æp¢f÷&ÕöFFö§6öãó¢§6öà¢f÷&Õ÷G—Só¢7G&–æp¢vVæW&FVEöCó¢7G&–ærÂçVÆÀ¢†×&5÷&W7öç6Uö§6öãó¢§6öâÂçVÆÀ¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢6VçEöCó¢7G&–ærÂçVÆÀ¢7FGW3ó¢7G&–æp¢7V&Ö—GFVEöCó¢7G&–ærÂçVÆÀ¢F…÷–V#ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöf÷&×5öFö7VÖVçEö–Eöf¶W’ ¢6öÇVÖç3¢²&Fö7VÖVçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&Fö7VÖVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöf÷&×5öV×Æ÷–VUö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–VUö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–VW2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöf÷&×5öV×Æ÷–W%ö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–W%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–W'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöf÷&×5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—&öÆÅöf÷&×5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢—6Æ—3¢°¢&÷s¢°¢FF—F–öç5ö§6öã¢§6öà¢GF6†ÖVçEööeöV&æ–æw5÷Væ6S¢çVÖ&W"ÂçVÆÀ¢7&VFVEöC¢7G&–æp¢FVGV7F–öç5ö§6öã¢§6öà¢Fö7VÖVçEö–C¢7G&–ærÂçVÆÀ¢V×Æ÷–VUö–C¢7G&–ærÂçVÆÀ¢V×Æ÷–VUöæÖS¢7G&–æp¢w&÷75÷Væ6S¢çVÖ&W ¢†öÆ–F•÷•÷Væ6S¢çVÖ&W"ÂçVÆÀ¢†÷W'5÷v÷&¶VC¢çVÖ&W"ÂçVÆÀ¢–C¢7G&–æp¢æWE÷Væ6S¢çVÖ&W ¢æ•öV×Æ÷–VU÷Væ6S¢çVÖ&W ¢æ•öV×Æ÷–W%÷Væ6S¢çVÖ&W ¢æ•öçVÖ&W#¢7G&–ærÂçVÆÀ¢÷fW'F–ÖUö†÷W'3¢çVÖ&W"ÂçVÆÀ¢÷fW'F–ÖU÷Væ6S¢çVÖ&W"ÂçVÆÀ¢•÷'Våö–C¢7G&–æp¢Vç6–öåöV×Æ÷–VU÷Væ6S¢çVÖ&W ¢Vç6–öåöV×Æ÷–W%÷Væ6S¢çVÖ&W ¢6÷Væ6S¢çVÖ&W"ÂçVÆÀ¢6‡÷Væ6S¢çVÖ&W"ÂçVÆÀ¢6–6µ÷•÷Væ6S¢çVÖ&W"ÂçVÆÀ¢6×÷Væ6S¢çVÖ&W"ÂçVÆÀ¢7÷Væ6S¢çVÖ&W"ÂçVÆÀ¢7GVFVçEöÆöå÷Væ6S¢çVÖ&W ¢F…ö6öFS¢7G&–ærÂçVÆÀ¢F…÷Væ6S¢çVÖ&W ¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢—FEöw&÷75÷Væ6S¢çVÖ&W ¢—FEöæ•÷Væ6S¢çVÖ&W ¢—FE÷F…÷Væ6S¢çVÖ&W ¢Ğ¢–ç6W'C¢°¢FF—F–öç5ö§6öãó¢§6öà¢GF6†ÖVçEööeöV&æ–æw5÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FVGV7F–öç5ö§6öãó¢§6öà¢Fö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢V×Æ÷–VUö–Có¢7G&–ærÂçVÆÀ¢V×Æ÷–VUöæÖS¢7G&–æp¢w&÷75÷Væ6Só¢çVÖ&W ¢†öÆ–F•÷•÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢†÷W'5÷v÷&¶VCó¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢æWE÷Væ6Só¢çVÖ&W ¢æ•öV×Æ÷–VU÷Væ6Só¢çVÖ&W ¢æ•öV×Æ÷–W%÷Væ6Só¢çVÖ&W ¢æ•öçVÖ&W#ó¢7G&–ærÂçVÆÀ¢÷fW'F–ÖUö†÷W'3ó¢çVÖ&W"ÂçVÆÀ¢÷fW'F–ÖU÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢•÷'Våö–C¢7G&–æp¢Vç6–öåöV×Æ÷–VU÷Væ6Só¢çVÖ&W ¢Vç6–öåöV×Æ÷–W%÷Væ6Só¢çVÖ&W ¢6÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢6‡÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢6–6µ÷•÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢6×÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢7÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢7GVFVçEöÆöå÷Væ6Só¢çVÖ&W ¢F…ö6öFSó¢7G&–ærÂçVÆÀ¢F…÷Væ6Só¢çVÖ&W ¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢—FEöw&÷75÷Væ6Só¢çVÖ&W ¢—FEöæ•÷Væ6Só¢çVÖ&W ¢—FE÷F…÷Væ6Só¢çVÖ&W ¢Ğ¢WFFS¢°¢FF—F–öç5ö§6öãó¢§6öà¢GF6†ÖVçEööeöV&æ–æw5÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FVGV7F–öç5ö§6öãó¢§6öà¢Fö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢V×Æ÷–VUö–Có¢7G&–ærÂçVÆÀ¢V×Æ÷–VUöæÖSó¢7G&–æp¢w&÷75÷Væ6Só¢çVÖ&W ¢†öÆ–F•÷•÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢†÷W'5÷v÷&¶VCó¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢æWE÷Væ6Só¢çVÖ&W ¢æ•öV×Æ÷–VU÷Væ6Só¢çVÖ&W ¢æ•öV×Æ÷–W%÷Væ6Só¢çVÖ&W ¢æ•öçVÖ&W#ó¢7G&–ærÂçVÆÀ¢÷fW'F–ÖUö†÷W'3ó¢çVÖ&W"ÂçVÆÀ¢÷fW'F–ÖU÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢•÷'Våö–Có¢7G&–æp¢Vç6–öåöV×Æ÷–VU÷Væ6Só¢çVÖ&W ¢Vç6–öåöV×Æ÷–W%÷Væ6Só¢çVÖ&W ¢6÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢6‡÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢6–6µ÷•÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢6×÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢7÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢7GVFVçEöÆöå÷Væ6Só¢çVÖ&W ¢F…ö6öFSó¢7G&–ærÂçVÆÀ¢F…÷Væ6Só¢çVÖ&W ¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢—FEöw&÷75÷Væ6Só¢çVÖ&W ¢—FEöæ•÷Væ6Só¢çVÖ&W ¢—FE÷F…÷Væ6Só¢çVÖ&W ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'—6Æ—5öV×Æ÷–VUö–Eöf¶W’ ¢6öÇVÖç3¢²&V×Æ÷–VUö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'—&öÆÅöV×Æ÷–VW2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—6Æ—5÷•÷'Våö–Eöf¶W’ ¢6öÇVÖç3¢²'•÷'Våö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'•÷'Vç2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—6Æ—5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'—6Æ—5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢Vç6–öåö6öçG&–'WF–öç3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢V×Æ÷–VUö6öçG&–'WF–öå÷Væ6S¢çVÖ&W ¢V×Æ÷–W%ö6öçG&–'WF–öå÷Væ6S¢çVÖ&W ¢Vç&öÆÖVçEö–C¢7G&–æp¢–C¢7G&–æp¢—'Våö–C¢7G&–ærÂçVÆÀ¢W&–öC¢7G&–æp¢VÆ–g––æuöV&æ–æw5÷Væ6S¢çVÖ&W ¢66†VÖUö–C¢7G&–æp¢7FGW3¢7G&–æp¢7V&Ö—GFVE÷Fõ÷&÷f–FW%öC¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F÷FÅö6öçG&–'WF–öå÷Væ6S¢çVÖ&W ¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢V×Æ÷–VUö6öçG&–'WF–öå÷Væ6Só¢çVÖ&W ¢V×Æ÷–W%ö6öçG&–'WF–öå÷Væ6Só¢çVÖ&W ¢Vç&öÆÖVçEö–C¢7G&–æp¢–Có¢7G&–æp¢—'Våö–Có¢7G&–ærÂçVÆÀ¢W&–öC¢7G&–æp¢VÆ–g––æuöV&æ–æw5÷Væ6Só¢çVÖ&W ¢66†VÖUö–C¢7G&–æp¢7FGW3ó¢7G&–æp¢7V&Ö—GFVE÷Fõ÷&÷f–FW%öCó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F÷FÅö6öçG&–'WF–öå÷Væ6Só¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢V×Æ÷–VUö6öçG&–'WF–öå÷Væ6Só¢çVÖ&W ¢V×Æ÷–W%ö6öçG&–'WF–öå÷Væ6Só¢çVÖ&W ¢Vç&öÆÖVçEö–Có¢7G&–æp¢–Có¢7G&–æp¢—'Våö–Có¢7G&–ærÂçVÆÀ¢W&–öCó¢7G&–æp¢VÆ–g––æuöV&æ–æw5÷Væ6Só¢çVÖ&W ¢66†VÖUö–Có¢7G&–æp¢7FGW3ó¢7G&–æp¢7V&Ö—GFVE÷Fõ÷&÷f–FW%öCó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢F÷FÅö6öçG&–'WF–öå÷Væ6Só¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öåö6öçG&–'WF–öç5öVç&öÆÖVçEö–Eöf¶W’ ¢6öÇVÖç3¢²&Vç&öÆÖVçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'Vç6–öåöVç&öÆÖVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öåö6öçG&–'WF–öç5÷66†VÖUö–Eöf¶W’ ¢6öÇVÖç3¢²'66†VÖUö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'Vç6–öå÷66†VÖW2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öåö6öçG&–'WF–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öåö6öçG&–'WF–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢Vç6–öåöVç&öÆÖVçG3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢V×Æ÷–VUö6öçG&–'WF–öå÷7C¢çVÖ&W"ÂçVÆÀ¢V×Æ÷–VUö–C¢7G&–æp¢V×Æ÷–W%ö6öçG&–'WF–öå÷7C¢çVÖ&W"ÂçVÆÀ¢Vç&öÆÆVEöC¢7G&–æp¢Vç&öÆÖVçE÷G—S¢7G&–æp¢–C¢7G&–æp¢÷Eö÷WE÷v–æF÷uöVæC¢7G&–ærÂçVÆÀ¢÷FVEö÷WEöC¢7G&–ærÂçVÆÀ¢÷7GöæVÖVçEöVæC¢7G&–ærÂçVÆÀ¢66†VÖUö–C¢7G&–æp¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢V×Æ÷–VUö6öçG&–'WF–öå÷7Có¢çVÖ&W"ÂçVÆÀ¢V×Æ÷–VUö–C¢7G&–æp¢V×Æ÷–W%ö6öçG&–'WF–öå÷7Có¢çVÖ&W"ÂçVÆÀ¢Vç&öÆÆVEöCó¢7G&–æp¢Vç&öÆÖVçE÷G—Só¢7G&–æp¢–Có¢7G&–æp¢÷Eö÷WE÷v–æF÷uöVæCó¢7G&–ærÂçVÆÀ¢÷FVEö÷WEöCó¢7G&–ærÂçVÆÀ¢÷7GöæVÖVçEöVæCó¢7G&–ærÂçVÆÀ¢66†VÖUö–C¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢V×Æ÷–VUö6öçG&–'WF–öå÷7Có¢çVÖ&W"ÂçVÆÀ¢V×Æ÷–VUö–Có¢7G&–æp¢V×Æ÷–W%ö6öçG&–'WF–öå÷7Có¢çVÖ&W"ÂçVÆÀ¢Vç&öÆÆVEöCó¢7G&–æp¢Vç&öÆÖVçE÷G—Só¢7G&–æp¢–Có¢7G&–æp¢÷Eö÷WE÷v–æF÷uöVæCó¢7G&–ærÂçVÆÀ¢÷FVEö÷WEöCó¢7G&–ærÂçVÆÀ¢÷7GöæVÖVçEöVæCó¢7G&–ærÂçVÆÀ¢66†VÖUö–Có¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öåöVç&öÆÖVçG5÷66†VÖUö–Eöf¶W’ ¢6öÇVÖç3¢²'66†VÖUö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'Vç6–öå÷66†VÖW2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öåöVç&öÆÖVçG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öåöVç&öÆÖVçG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢Vç6–öå÷66†VÖW3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–æp¢6öçG&–'WF–öåöV×Æ÷–VU÷7C¢çVÖ&W ¢6öçG&–'WF–öåöV×Æ÷–W%÷7C¢çVÖ&W ¢7&VFVEöC¢7G&–æp¢V×Æ÷–W%÷&VfW&Væ6S¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢ÖWFFFö§6öã¢§6öà¢&÷f–FW#¢7G&–æp¢VÆ–g––æuöV&æ–æw5öÆ÷vW%÷Væ6S¢çVÖ&W ¢VÆ–g––æuöV&æ–æw5÷WW%÷Væ6S¢çVÖ&W ¢&UöVç&öÆÖVçEöFFS¢7G&–ærÂçVÆÀ¢66†VÖU÷&VfW&Væ6S¢7G&–ærÂçVÆÀ¢7Fv–æuöFFS¢7G&–ærÂçVÆÀ¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–C¢7G&–æp¢6öçG&–'WF–öåöV×Æ÷–VU÷7Có¢çVÖ&W ¢6öçG&–'WF–öåöV×Æ÷–W%÷7Có¢çVÖ&W ¢7&VFVEöCó¢7G&–æp¢V×Æ÷–W%÷&VfW&Væ6Só¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢ÖWFFFö§6öãó¢§6öà¢&÷f–FW#ó¢7G&–æp¢VÆ–g––æuöV&æ–æw5öÆ÷vW%÷Væ6Só¢çVÖ&W ¢VÆ–g––æuöV&æ–æw5÷WW%÷Væ6Só¢çVÖ&W ¢&UöVç&öÆÖVçEöFFSó¢7G&–ærÂçVÆÀ¢66†VÖU÷&VfW&Væ6Só¢7G&–ærÂçVÆÀ¢7Fv–æuöFFSó¢7G&–ærÂçVÆÀ¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–æp¢6öçG&–'WF–öåöV×Æ÷–VU÷7Có¢çVÖ&W ¢6öçG&–'WF–öåöV×Æ÷–W%÷7Có¢çVÖ&W ¢7&VFVEöCó¢7G&–æp¢V×Æ÷–W%÷&VfW&Væ6Só¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢ÖWFFFö§6öãó¢§6öà¢&÷f–FW#ó¢7G&–æp¢VÆ–g––æuöV&æ–æw5öÆ÷vW%÷Væ6Só¢çVÖ&W ¢VÆ–g––æuöV&æ–æw5÷WW%÷Væ6Só¢çVÖ&W ¢&UöVç&öÆÖVçEöFFSó¢7G&–ærÂçVÆÀ¢66†VÖU÷&VfW&Væ6Só¢7G&–ærÂçVÆÀ¢7Fv–æuöFFSó¢7G&–ærÂçVÆÀ¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öå÷66†VÖW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öå÷66†VÖW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öå÷66†VÖW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öå÷66†VÖW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öå÷66†VÖW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'Vç6–öå÷66†VÖW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢W&Ö—76–öå÷&W6WG3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢FW67&—F–öã¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢æÖS¢7G&–æp¢W&Ö—76–öç5ö§6öã¢§6öà¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢æÖS¢7G&–æp¢W&Ö—76–öç5ö§6öãó¢§6öà¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢æÖSó¢7G&–æp¢W&Ö—76–öç5ö§6öãó¢§6öà¢Ğ¢&VÆF–öç6†—3¢µĞ¢Ğ¢÷'FÅö–çf—FF–öç3¢°¢&÷s¢°¢66WFVEöC¢7G&–ærÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢VÖ–Ã¢7G&–æp¢W‡—&W5öC¢7G&–æp¢–C¢7G&–æp¢–çf—FVEö'“¢7G&–ærÂçVÆÀ¢÷'FÅ÷&öÆS¢7G&–æp¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢Fö¶Vã¢7G&–æp¢Ğ¢–ç6W'C¢°¢66WFVEöCó¢7G&–ærÂçVÆÀ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢VÖ–Ã¢7G&–æp¢W‡—&W5öCó¢7G&–æp¢–Có¢7G&–æp¢–çf—FVEö'“ó¢7G&–ærÂçVÆÀ¢÷'FÅ÷&öÆSó¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢Fö¶Vãó¢7G&–æp¢Ğ¢WFFS¢°¢66WFVEöCó¢7G&–ærÂçVÆÀ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢VÖ–Ãó¢7G&–æp¢W‡—&W5öCó¢7G&–æp¢–Có¢7G&–æp¢–çf—FVEö'“ó¢7G&–ærÂçVÆÀ¢÷'FÅ÷&öÆSó¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢Fö¶Vãó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅö–çf—FF–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅö–çf—FF–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅö–çf—FF–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅö–çf—FF–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅö–çf—FF–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅö–çf—FF–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢÷'FÅ÷W6W'3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢F—7Æ•öæÖS¢7G&–æp¢–C¢7G&–æp¢Æ7EöÆöv–åöC¢7G&–ærÂçVÆÀ¢†öæS¢7G&–ærÂçVÆÀ¢÷'FÅ÷&öÆS¢7G&–æp¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢F—7Æ•öæÖSó¢7G&–æp¢–Có¢7G&–æp¢Æ7EöÆöv–åöCó¢7G&–ærÂçVÆÀ¢†öæSó¢7G&–ærÂçVÆÀ¢÷'FÅ÷&öÆSó¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢F—7Æ•öæÖSó¢7G&–æp¢–Có¢7G&–æp¢Æ7EöÆöv–åöCó¢7G&–ærÂçVÆÀ¢†öæSó¢7G&–ærÂçVÆÀ¢÷'FÅ÷&öÆSó¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢W6W%ö–Có¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅ÷W6W'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅ÷W6W'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅ÷W6W'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅ÷W6W'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅ÷W6W'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'÷'FÅ÷W6W'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢&öf–ÆW3¢°¢&÷s¢°¢fF%÷W&Ã¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢VÖ–Ã¢7G&–ærÂçVÆÀ¢gVÆÅöæÖS¢7G&–æp¢–C¢7G&–æp¢FVæçEö–C¢7G&–ærÂçVÆÀ¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢fF%÷W&Ãó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢VÖ–Ãó¢7G&–ærÂçVÆÀ¢gVÆÅöæÖSó¢7G&–æp¢–C¢7G&–æp¢FVæçEö–Có¢7G&–ærÂçVÆÀ¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢fF%÷W&Ãó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢VÖ–Ãó¢7G&–ærÂçVÆÀ¢gVÆÅöæÖSó¢7G&–æp¢–Có¢7G&–æp¢FVæçEö–Có¢7G&–ærÂçVÆÀ¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'&öf–ÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&öf–ÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢&÷÷6Ç3¢°¢&÷s¢°¢66WFVEöC¢7G&–ærÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢7&VFVEö'“¢7G&–ærÂçVÆÀ¢FV6Æ–æVEöC¢7G&–ærÂçVÆÀ¢VævvVÖVçEöÆWGFW%öFö5ö–C¢7G&–ærÂçVÆÀ¢fVUö'&V¶F÷våö§6öã¢§6öà¢fVUög&WVVæ7“¢7G&–æp¢–C¢7G&–æp¢&÷7V7EöVÖ–Ã¢7G&–ærÂçVÆÀ¢&÷7V7EöæÖS¢7G&–ærÂçVÆÀ¢6VçEöC¢7G&–ærÂçVÆÀ¢6W'f–6W5ö§6öã¢§6öà¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢FW&×5÷FW‡C¢7G&–ærÂçVÆÀ¢F—FÆS¢7G&–æp¢F÷FÅöfVU÷Væ6S¢çVÖ&W ¢WFFVEöC¢7G&–æp¢fÆ–E÷VçF–Ã¢7G&–ærÂçVÆÀ¢Ğ¢–ç6W'C¢°¢66WFVEöCó¢7G&–ærÂçVÆÀ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7&VFVEö'“ó¢7G&–ærÂçVÆÀ¢FV6Æ–æVEöCó¢7G&–ærÂçVÆÀ¢VævvVÖVçEöÆWGFW%öFö5ö–Có¢7G&–ærÂçVÆÀ¢fVUö'&V¶F÷våö§6öãó¢§6öà¢fVUög&WVVæ7“ó¢7G&–æp¢–Có¢7G&–æp¢&÷7V7EöVÖ–Ãó¢7G&–ærÂçVÆÀ¢&÷7V7EöæÖSó¢7G&–ærÂçVÆÀ¢6VçEöCó¢7G&–ærÂçVÆÀ¢6W'f–6W5ö§6öãó¢§6öà¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢FW&×5÷FW‡Có¢7G&–ærÂçVÆÀ¢F—FÆS¢7G&–æp¢F÷FÅöfVU÷Væ6Só¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢fÆ–E÷VçF–Ãó¢7G&–ærÂçVÆÀ¢Ğ¢WFFS¢°¢66WFVEöCó¢7G&–ærÂçVÆÀ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7&VFVEö'“ó¢7G&–ærÂçVÆÀ¢FV6Æ–æVEöCó¢7G&–ærÂçVÆÀ¢VævvVÖVçEöÆWGFW%öFö5ö–Có¢7G&–ærÂçVÆÀ¢fVUö'&V¶F÷våö§6öãó¢§6öà¢fVUög&WVVæ7“ó¢7G&–æp¢–Có¢7G&–æp¢&÷7V7EöVÖ–Ãó¢7G&–ærÂçVÆÀ¢&÷7V7EöæÖSó¢7G&–ærÂçVÆÀ¢6VçEöCó¢7G&–ærÂçVÆÀ¢6W'f–6W5ö§6öãó¢§6öà¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢FW&×5÷FW‡Có¢7G&–ærÂçVÆÀ¢F—FÆSó¢7G&–æp¢F÷FÅöfVU÷Væ6Só¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢fÆ–E÷VçF–Ãó¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'&÷÷6Ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&÷÷6Ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&÷÷6Ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&÷÷6Ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&÷÷6Ç5öVævvVÖVçEöÆWGFW%öFö5ö–Eöf¶W’ ¢6öÇVÖç3¢²&VævvVÖVçEöÆWGFW%öFö5ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&Fö7VÖVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&÷÷6Ç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&÷÷6Ç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢W6…÷Fö¶Vç3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢–C¢7G&–æp¢ÆFf÷&Ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢Fö¶Vã¢7G&–æp¢WFFVEöC¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢–Có¢7G&–æp¢ÆFf÷&Ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢Fö¶Vã¢7G&–æp¢WFFVEöCó¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢–Có¢7G&–æp¢ÆFf÷&Óó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢Fö¶Vãó¢7G&–æp¢WFFVEöCó¢7G&–æp¢W6W%ö–Có¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'W6…÷Fö¶Vç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'W6…÷Fö¶Vç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢&V6V—EöW‡G&7F–öç3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6öæf–FVæ6S¢çVÖ&W"ÂçVÆÀ¢7&VFVEöC¢7G&–æp¢7W'&Væ7“¢7G&–ærÂçVÆÀ¢Fö7VÖVçEö–C¢7G&–æp¢–C¢7G&–æp¢–çfö–6UöçVÖ&W#¢7G&–ærÂçVÆÀ¢&uö§6öã¢§6öà¢&V6V—EöFFS¢7G&–ærÂçVÆÀ¢7WÆ–W%öæÖS¢7G&–ærÂçVÆÀ¢7WÆ–W%÷fEöçVÖ&W#¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F÷FÅöw&÷75÷Væ6S¢çVÖ&W"ÂçVÆÀ¢F÷FÅöæWE÷Væ6S¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷fE÷Væ6S¢çVÖ&W"ÂçVÆÀ¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢6öæf–FVæ6Só¢çVÖ&W"ÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7W'&Væ7“ó¢7G&–ærÂçVÆÀ¢Fö7VÖVçEö–C¢7G&–æp¢–Có¢7G&–æp¢–çfö–6UöçVÖ&W#ó¢7G&–ærÂçVÆÀ¢&uö§6öãó¢§6öà¢&V6V—EöFFSó¢7G&–ærÂçVÆÀ¢7WÆ–W%öæÖSó¢7G&–ærÂçVÆÀ¢7WÆ–W%÷fEöçVÖ&W#ó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F÷FÅöw&÷75÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅöæWE÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷fE÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢6öæf–FVæ6Só¢çVÖ&W"ÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7W'&Væ7“ó¢7G&–ærÂçVÆÀ¢Fö7VÖVçEö–Có¢7G&–æp¢–Có¢7G&–æp¢–çfö–6UöçVÖ&W#ó¢7G&–ærÂçVÆÀ¢&uö§6öãó¢§6öà¢&V6V—EöFFSó¢7G&–ærÂçVÆÀ¢7WÆ–W%öæÖSó¢7G&–ærÂçVÆÀ¢7WÆ–W%÷fEöçVÖ&W#ó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢F÷FÅöw&÷75÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅöæWE÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢F÷FÅ÷fE÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'&V6V—EöW‡G&7F–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V6V—EöW‡G&7F–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V6V—EöW‡G&7F–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V6V—EöW‡G&7F–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V6V—EöW‡G&7F–öç5öFö7VÖVçEö–Eöf¶W’ ¢6öÇVÖç3¢²&Fö7VÖVçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&Fö7VÖVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V6V—EöW‡G&7F–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V6V—EöW‡G&7F–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢&V7W'&–æuö–çfö–6U÷FV×ÆFW3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöC¢7G&–æp¢FW67&—F–öã¢7G&–æp¢g&WVVæ7“¢7G&–æp¢–C¢7G&–æp¢—5ö7F—fS¢&ööÆVà¢Æ7Eö—77VVEöC¢7G&–ærÂçVÆÀ¢æWEöÖ÷VçE÷Væ6S¢çVÖ&W ¢æW‡Eö—77VUöFFS¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F÷FÅ÷Væ6S¢çVÖ&W ¢WFFVEöC¢7G&–æp¢fE÷&FS¢çVÖ&W ¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–æp¢g&WVVæ7“ó¢7G&–æp¢–Có¢7G&–æp¢—5ö7F—fSó¢&ööÆVà¢Æ7Eö—77VVEöCó¢7G&–ærÂçVÆÀ¢æWEöÖ÷VçE÷Væ6Só¢çVÖ&W ¢æW‡Eö—77VUöFFSó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F÷FÅ÷Væ6Só¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢fE÷&FSó¢çVÖ&W ¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–æp¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–æp¢g&WVVæ7“ó¢7G&–æp¢–Có¢7G&–æp¢—5ö7F—fSó¢&ööÆVà¢Æ7Eö—77VVEöCó¢7G&–ærÂçVÆÀ¢æWEöÖ÷VçE÷Væ6Só¢çVÖ&W ¢æW‡Eö—77VUöFFSó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢F÷FÅ÷Væ6Só¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢fE÷&FSó¢çVÖ&W ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'&V7W'&–æuö–çfö–6U÷FV×ÆFW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V7W'&–æuö–çfö–6U÷FV×ÆFW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V7W'&–æuö–çfö–6U÷FV×ÆFW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V7W'&–æuö–çfö–6U÷FV×ÆFW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V7W'&–æuö–çfö–6U÷FV×ÆFW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&V7W'&–æuö–çfö–6U÷FV×ÆFW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢&öÆW3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢FW67&—F–öã¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢—5÷7—7FVÕ÷&öÆS¢&ööÆVâÂçVÆÀ¢æÖS¢7G&–æp¢W&Ö—76–öç5ö§6öã¢§6öà¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢—5÷7—7FVÕ÷&öÆSó¢&ööÆVâÂçVÆÀ¢æÖS¢7G&–æp¢W&Ö—76–öç5ö§6öãó¢§6öà¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢—5÷7—7FVÕ÷&öÆSó¢&ööÆVâÂçVÆÀ¢æÖSó¢7G&–æp¢W&Ö—76–öç5ö§6öãó¢§6öà¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'&öÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'&öÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢6V7&WF&–Åö6†ævW3¢°¢&÷s¢°¢&÷fVEöC¢7G&–ærÂçVÆÀ¢&÷fVEö'•÷W6W%ö–C¢7G&–ærÂçVÆÀ¢76–væVE÷W6W%ö–C¢7G&–ærÂçVÆÀ¢6†ævU÷G—S¢7G&–æp¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöC¢7G&–æp¢7&VFVEö'•÷W6W%ö–C¢7G&–ærÂçVÆÀ¢FW67&—F–öã¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢–ÆöEö§6öã¢§6öà¢&WV—&W5öWF…ö6öFS¢&ööÆVà¢7FGW3¢7G&–æp¢7V&Ö—76–öåö¦ö%ö–C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F—FÆS¢7G&–æp¢WFFVEöC¢7G&–æp¢fÆ–FF–öåö§6öã¢§6öà¢Ğ¢–ç6W'C¢°¢&÷fVEöCó¢7G&–ærÂçVÆÀ¢&÷fVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢76–væVE÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢6†ævU÷G—S¢7G&–æp¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢–ÆöEö§6öãó¢§6öà¢&WV—&W5öWF…ö6öFSó¢&ööÆVà¢7FGW3ó¢7G&–æp¢7V&Ö—76–öåö¦ö%ö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢F—FÆS¢7G&–æp¢WFFVEöCó¢7G&–æp¢fÆ–FF–öåö§6öãó¢§6öà¢Ğ¢WFFS¢°¢&÷fVEöCó¢7G&–ærÂçVÆÀ¢&÷fVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢76–væVE÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢6†ævU÷G—Só¢7G&–æp¢6Æ–VçEö–Có¢7G&–æp¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢–ÆöEö§6öãó¢§6öà¢&WV—&W5öWF…ö6öFSó¢&ööÆVà¢7FGW3ó¢7G&–æp¢7V&Ö—76–öåö¦ö%ö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢F—FÆSó¢7G&–æp¢WFFVEöCó¢7G&–æp¢fÆ–FF–öåö§6öãó¢§6öà¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5÷7V&Ö—76–öåö¦ö%ö–Eöf¶W’ ¢6öÇVÖç3¢²'7V&Ö—76–öåö¦ö%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'7V&Ö—76–öåö¦ö'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5÷7V&Ö—76–öåö¦ö%ö–Eöf¶W’ ¢6öÇVÖç3¢²'7V&Ö—76–öåö¦ö%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷7V&Ö—76–öåö¦ö'5÷&V6VçB ¢&VfW&Væ6VD6öÇVÖç3¢²'7V&Ö—76–öåö¦ö%ö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢6V7&WF&–ÅöWfVçG3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöC¢7G&–æp¢7&VFVEö'•÷W6W%ö–C¢7G&–ærÂçVÆÀ¢FW67&—F–öã¢7G&–ærÂçVÆÀ¢VffV7F—fUöFFS¢7G&–ærÂçVÆÀ¢WfVçE÷G—S¢7G&–æp¢f–ÆVEöC¢7G&–ærÂçVÆÀ¢f–Æ–æuö–C¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢–ÆöEö§6öã¢§6öà¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢VffV7F—fUöFFSó¢7G&–ærÂçVÆÀ¢WfVçE÷G—S¢7G&–æp¢f–ÆVEöCó¢7G&–ærÂçVÆÀ¢f–Æ–æuö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢–ÆöEö§6öãó¢§6öà¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–æp¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢VffV7F—fUöFFSó¢7G&–ærÂçVÆÀ¢WfVçE÷G—Só¢7G&–æp¢f–ÆVEöCó¢7G&–ærÂçVÆÀ¢f–Æ–æuö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢–ÆöEö§6öãó¢§6öà¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–ÅöWfVçG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–ÅöWfVçG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–ÅöWfVçG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–ÅöWfVçG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–ÅöWfVçG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–ÅöWfVçG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢6†&Uö6Æ76W3¢°¢&÷s¢°¢6Æ75öæÖS¢7G&–æp¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöC¢7G&–æp¢7W'&Væ7“¢7G&–æp¢F—f–FVæE÷&–v‡G3¢&ööÆVà¢–C¢7G&–æp¢æöÖ–æÅ÷fÇVU÷Væ6S¢çVÖ&W ¢FVæçEö–C¢7G&–æp¢F÷FÅö—77VVC¢çVÖ&W ¢WFFVEöC¢7G&–æp¢f÷F–æu÷&–v‡G3¢&ööÆVà¢Ğ¢–ç6W'C¢°¢6Æ75öæÖSó¢7G&–æp¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöCó¢7G&–æp¢7W'&Væ7“ó¢7G&–æp¢F—f–FVæE÷&–v‡G3ó¢&ööÆVà¢–Có¢7G&–æp¢æöÖ–æÅ÷fÇVU÷Væ6Só¢çVÖ&W ¢FVæçEö–C¢7G&–æp¢F÷FÅö—77VVCó¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢f÷F–æu÷&–v‡G3ó¢&ööÆVà¢Ğ¢WFFS¢°¢6Æ75öæÖSó¢7G&–æp¢6Æ–VçEö–Có¢7G&–æp¢7&VFVEöCó¢7G&–æp¢7W'&Væ7“ó¢7G&–æp¢F—f–FVæE÷&–v‡G3ó¢&ööÆVà¢–Có¢7G&–æp¢æöÖ–æÅ÷fÇVU÷Væ6Só¢çVÖ&W ¢FVæçEö–Có¢7G&–æp¢F÷FÅö—77VVCó¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢f÷F–æu÷&–v‡G3ó¢&ööÆVà¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'6†&Uö6Æ76W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&Uö6Æ76W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&Uö6Æ76W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&Uö6Æ76W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&Uö6Æ76W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&Uö6Æ76W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢6†&U÷G&ç67F–öç3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–æp¢6öç6–FW&F–öå÷FW‡C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢VffV7F—fUöFFS¢7G&–æp¢g&öÕöÖVÖ&W%ö–C¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢çVÕ÷6†&W3¢çVÖ&W ¢&–6U÷W%÷6†&U÷Væ6S¢çVÖ&W"ÂçVÆÀ¢&W6öÇWF–öåöFö7VÖVçEö–C¢7G&–ærÂçVÆÀ¢6†&Uö6Æ75ö–C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢FõöÖVÖ&W%ö–C¢7G&–ærÂçVÆÀ¢G&ç67F–öå÷G—S¢7G&–æp¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–C¢7G&–æp¢6öç6–FW&F–öå÷FW‡Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢VffV7F—fUöFFSó¢7G&–æp¢g&öÕöÖVÖ&W%ö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢çVÕ÷6†&W3¢çVÖ&W ¢&–6U÷W%÷6†&U÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢&W6öÇWF–öåöFö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢6†&Uö6Æ75ö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢FõöÖVÖ&W%ö–Có¢7G&–ærÂçVÆÀ¢G&ç67F–öå÷G—Só¢7G&–æp¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–æp¢6öç6–FW&F–öå÷FW‡Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢VffV7F—fUöFFSó¢7G&–æp¢g&öÕöÖVÖ&W%ö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢çVÕ÷6†&W3ó¢çVÖ&W ¢&–6U÷W%÷6†&U÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢&W6öÇWF–öåöFö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢6†&Uö6Æ75ö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢FõöÖVÖ&W%ö–Có¢7G&–ærÂçVÆÀ¢G&ç67F–öå÷G—Só¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5ög&öÕöÖVÖ&W%ö–Eöf¶W’ ¢6öÇVÖç3¢²&g&öÕöÖVÖ&W%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6ö×ç•÷&Vv—7FW%öÖVÖ&W'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5÷&W6öÇWF–öåöFö7VÖVçEö–Eöf¶W’ ¢6öÇVÖç3¢²'&W6öÇWF–öåöFö7VÖVçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&Fö7VÖVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5÷6†&Uö6Æ75ö–Eöf¶W’ ¢6öÇVÖç3¢²'6†&Uö6Æ75ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'6†&Uö6Æ76W2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6†&U÷G&ç67F–öç5÷FõöÖVÖ&W%ö–Eöf¶W’ ¢6öÇVÖç3¢²'FõöÖVÖ&W%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6ö×ç•÷&Vv—7FW%öÖVÖ&W'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢Ğ¢Ğ¢6–væGW&U÷&WVW7G3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöC¢7G&–æp¢7&VFVEö'•÷W6W%ö–C¢7G&–ærÂçVÆÀ¢FV6Æ–æU÷&V6öã¢7G&–ærÂçVÆÀ¢FV6Æ–æVEöC¢7G&–ærÂçVÆÀ¢Fö7VÖVçEö–C¢7G&–ærÂçVÆÀ¢W‡—&W5öC¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢Æ7E÷&VÖ–æFW%öC¢7G&–ærÂçVÆÀ¢&VÖ–æFW%ö6÷VçC¢çVÖ&W ¢6VçEöC¢7G&–ærÂçVÆÀ¢6–væVEöC¢7G&–ærÂçVÆÀ¢6–væVEöFö7VÖVçE÷Fƒ¢7G&–ærÂçVÆÀ¢6–væW%öVÖ–Ã¢7G&–æp¢6–væW%öæÖS¢7G&–æp¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢F—FÆS¢7G&–æp¢WFFVEöC¢7G&–æp¢f–WvVEöC¢7G&–ærÂçVÆÀ¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢FV6Æ–æU÷&V6öãó¢7G&–ærÂçVÆÀ¢FV6Æ–æVEöCó¢7G&–ærÂçVÆÀ¢Fö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢W‡—&W5öCó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢Æ7E÷&VÖ–æFW%öCó¢7G&–ærÂçVÆÀ¢&VÖ–æFW%ö6÷VçCó¢çVÖ&W ¢6VçEöCó¢7G&–ærÂçVÆÀ¢6–væVEöCó¢7G&–ærÂçVÆÀ¢6–væVEöFö7VÖVçE÷Fƒó¢7G&–ærÂçVÆÀ¢6–væW%öVÖ–Ã¢7G&–æp¢6–væW%öæÖS¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢F—FÆS¢7G&–æp¢WFFVEöCó¢7G&–æp¢f–WvVEöCó¢7G&–ærÂçVÆÀ¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–æp¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢FV6Æ–æU÷&V6öãó¢7G&–ærÂçVÆÀ¢FV6Æ–æVEöCó¢7G&–ærÂçVÆÀ¢Fö7VÖVçEö–Có¢7G&–ærÂçVÆÀ¢W‡—&W5öCó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢Æ7E÷&VÖ–æFW%öCó¢7G&–ærÂçVÆÀ¢&VÖ–æFW%ö6÷VçCó¢çVÖ&W ¢6VçEöCó¢7G&–ærÂçVÆÀ¢6–væVEöCó¢7G&–ærÂçVÆÀ¢6–væVEöFö7VÖVçE÷Fƒó¢7G&–ærÂçVÆÀ¢6–væW%öVÖ–Ãó¢7G&–æp¢6–væW%öæÖSó¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢F—FÆSó¢7G&–æp¢WFFVEöCó¢7G&–æp¢f–WvVEöCó¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'6–væGW&U÷&WVW7G5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6–væGW&U÷&WVW7G5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6–væGW&U÷&WVW7G5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6–væGW&U÷&WVW7G5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6–væGW&U÷&WVW7G5öFö7VÖVçEö–Eöf¶W’ ¢6öÇVÖç3¢²&Fö7VÖVçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&Fö7VÖVçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6–væGW&U÷&WVW7G5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6–væGW&U÷&WVW7G5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢7Ffeöf–Æ&–Æ—G“¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢FFS¢7G&–æp¢†÷W'5öf–Æ&ÆS¢çVÖ&W"ÂçVÆÀ¢–C¢7G&–æp¢æ÷FW3¢7G&–ærÂçVÆÀ¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢FFS¢7G&–æp¢†÷W'5öf–Æ&ÆSó¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢FFSó¢7G&–æp¢†÷W'5öf–Æ&ÆSó¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢W6W%ö–Có¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'7Ffeöf–Æ&–Æ—G•÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7Ffeöf–Æ&–Æ—G•÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢7V&Ö—76–öåöGFV×G3¢°¢&÷s¢°¢GFV×Eöæó¢çVÖ&W ¢GW&F–öåö×3¢çVÖ&W"ÂçVÆÀ¢W'&÷%ö6Æ73¢7G&–ærÂçVÆÀ¢W'&÷%öFWF–Ã¢7G&–ærÂçVÆÀ¢W'&÷%öÖW76vS¢7G&–ærÂçVÆÀ¢f–æ—6†VEöC¢7G&–ærÂçVÆÀ¢‡GG÷7FGW3¢çVÖ&W"ÂçVÆÀ¢–C¢7G&–æp¢¦ö%ö–C¢7G&–æp¢&÷f–FW%ö6öFS¢7G&–ærÂçVÆÀ¢&÷f–FW%öÖW76vS¢7G&–ærÂçVÆÀ¢&WVW7EöÖWF÷&VF7FVC¢§6öâÂçVÆÀ¢&W7öç6UöÖWF÷&VF7FVC¢§6öâÂçVÆÀ¢7F'FVEöC¢7G&–æp¢7FGW3¢7G&–æp¢Ğ¢–ç6W'C¢°¢GFV×Eöæó¢çVÖ&W ¢GW&F–öåö×3ó¢çVÖ&W"ÂçVÆÀ¢W'&÷%ö6Æ73ó¢7G&–ærÂçVÆÀ¢W'&÷%öFWF–Ãó¢7G&–ærÂçVÆÀ¢W'&÷%öÖW76vSó¢7G&–ærÂçVÆÀ¢f–æ—6†VEöCó¢7G&–ærÂçVÆÀ¢‡GG÷7FGW3ó¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢¦ö%ö–C¢7G&–æp¢&÷f–FW%ö6öFSó¢7G&–ærÂçVÆÀ¢&÷f–FW%öÖW76vSó¢7G&–ærÂçVÆÀ¢&WVW7EöÖWF÷&VF7FVCó¢§6öâÂçVÆÀ¢&W7öç6UöÖWF÷&VF7FVCó¢§6öâÂçVÆÀ¢7F'FVEöCó¢7G&–æp¢7FGW3ó¢7G&–æp¢Ğ¢WFFS¢°¢GFV×Eöæóó¢çVÖ&W ¢GW&F–öåö×3ó¢çVÖ&W"ÂçVÆÀ¢W'&÷%ö6Æ73ó¢7G&–ærÂçVÆÀ¢W'&÷%öFWF–Ãó¢7G&–ærÂçVÆÀ¢W'&÷%öÖW76vSó¢7G&–ærÂçVÆÀ¢f–æ—6†VEöCó¢7G&–ærÂçVÆÀ¢‡GG÷7FGW3ó¢çVÖ&W"ÂçVÆÀ¢–Có¢7G&–æp¢¦ö%ö–Có¢7G&–æp¢&÷f–FW%ö6öFSó¢7G&–ærÂçVÆÀ¢&÷f–FW%öÖW76vSó¢7G&–ærÂçVÆÀ¢&WVW7EöÖWF÷&VF7FVCó¢§6öâÂçVÆÀ¢&W7öç6UöÖWF÷&VF7FVCó¢§6öâÂçVÆÀ¢7F'FVEöCó¢7G&–æp¢7FGW3ó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåöGFV×G5ö¦ö%ö–Eöf¶W’ ¢6öÇVÖç3¢²&¦ö%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'7V&Ö—76–öåö¦ö'2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåöGFV×G5ö¦ö%ö–Eöf¶W’ ¢6öÇVÖç3¢²&¦ö%ö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷7V&Ö—76–öåö¦ö'5÷&V6VçB ¢&VfW&Væ6VD6öÇVÖç3¢²'7V&Ö—76–öåö¦ö%ö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢7V&Ö—76–öåö¦ö'3¢°¢&÷s¢°¢GFV×Eö6÷VçC¢çVÖ&W ¢6Æ–VçEö–C¢7G&–æp¢6÷'&VÆF–öåö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢–C¢7G&–æp¢–FV×÷FVæ7•ö¶W“¢7G&–æp¢Æ7EöW'&÷#¢7G&–ærÂçVÆÀ¢æW‡E÷&WG'•öC¢7G&–ærÂçVÆÀ¢&÷f–FW#¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&–çFVw&F–öå÷&÷f–FW"%Ğ¢&WVW7Eö§6öã¢§6öà¢&W7öç6Uö§6öã¢§6öâÂçVÆÀ¢7FGW3¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'7V&Ö—76–öå÷7FGW2%Ğ¢7V&Ö—76–öå÷G—S¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢GFV×Eö6÷VçCó¢çVÖ&W ¢6Æ–VçEö–C¢7G&–æp¢6÷'&VÆF–öåö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢–Có¢7G&–æp¢–FV×÷FVæ7•ö¶W“¢7G&–æp¢Æ7EöW'&÷#ó¢7G&–ærÂçVÆÀ¢æW‡E÷&WG'•öCó¢7G&–ærÂçVÆÀ¢&÷f–FW#¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&–çFVw&F–öå÷&÷f–FW"%Ğ¢&WVW7Eö§6öãó¢§6öà¢&W7öç6Uö§6öãó¢§6öâÂçVÆÀ¢7FGW3ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'7V&Ö—76–öå÷7FGW2%Ğ¢7V&Ö—76–öå÷G—S¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢GFV×Eö6÷VçCó¢çVÖ&W ¢6Æ–VçEö–Có¢7G&–æp¢6÷'&VÆF–öåö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢–Có¢7G&–æp¢–FV×÷FVæ7•ö¶W“ó¢7G&–æp¢Æ7EöW'&÷#ó¢7G&–ærÂçVÆÀ¢æW‡E÷&WG'•öCó¢7G&–ærÂçVÆÀ¢&÷f–FW#ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&–çFVw&F–öå÷&÷f–FW"%Ğ¢&WVW7Eö§6öãó¢§6öà¢&W7öç6Uö§6öãó¢§6öâÂçVÆÀ¢7FGW3ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'7V&Ö—76–öå÷7FGW2%Ğ¢7V&Ö—76–öå÷G—Só¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢7V'67&—F–öå÷Æç3¢°¢&÷s¢°¢ÆÆ÷vVEöÖöGVÆW3¢7G&–æuµĞ¢6öFS¢7G&–æp¢7&VFVEöC¢7G&–æp¢FW67&—F–öã¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢—5ö7F—fS¢&ööÆVà¢Ö…ö6Æ–VçG3¢çVÖ&W ¢Ö…÷W6W'3¢çVÖ&W ¢æÖS¢7G&–æp¢&–6UöæçVÅ÷Væ6S¢çVÖ&W ¢&–6UöÖöçF†Ç•÷Væ6S¢çVÖ&W ¢6÷'Eö÷&FW#¢çVÖ&W ¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢ÆÆ÷vVEöÖöGVÆW3ó¢7G&–æuµĞ¢6öFS¢7G&–æp¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢—5ö7F—fSó¢&ööÆVà¢Ö…ö6Æ–VçG3ó¢çVÖ&W ¢Ö…÷W6W'3ó¢çVÖ&W ¢æÖS¢7G&–æp¢&–6UöæçVÅ÷Væ6Só¢çVÖ&W ¢&–6UöÖöçF†Ç•÷Væ6Só¢çVÖ&W ¢6÷'Eö÷&FW#ó¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢ÆÆ÷vVEöÖöGVÆW3ó¢7G&–æuµĞ¢6öFSó¢7G&–æp¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢—5ö7F—fSó¢&ööÆVà¢Ö…ö6Æ–VçG3ó¢çVÖ&W ¢Ö…÷W6W'3ó¢çVÖ&W ¢æÖSó¢7G&–æp¢&–6UöæçVÅ÷Væ6Só¢çVÖ&W ¢&–6UöÖöçF†Ç•÷Væ6Só¢çVÖ&W ¢6÷'Eö÷&FW#ó¢çVÖ&W ¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢µĞ¢Ğ¢F6µ÷FV×ÆFW3¢°¢&÷s¢°¢6†V6¶Æ—7Eö§6öã¢§6öâÂçVÆÀ¢7&VFVEöC¢7G&–æp¢FVfVÇEöF—5ö&Vf÷&UöGVS¢çVÖ&W"ÂçVÆÀ¢FVfVÇE÷&–÷&—G“¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'&–÷&—G’%Ğ¢FW67&—F–öã¢7G&–ærÂçVÆÀ¢VçF—G•÷G—W3¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&VçF—G•÷G—R%ÕµÒÂçVÆÀ¢–C¢7G&–æp¢æÖS¢7G&–æp¢6W'f–6Uö–C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢6†V6¶Æ—7Eö§6öãó¢§6öâÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FVfVÇEöF—5ö&Vf÷&UöGVSó¢çVÖ&W"ÂçVÆÀ¢FVfVÇE÷&–÷&—G“ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'&–÷&—G’%Ğ¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢VçF—G•÷G—W3ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&VçF—G•÷G—R%ÕµÒÂçVÆÀ¢–Có¢7G&–æp¢æÖS¢7G&–æp¢6W'f–6Uö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢6†V6¶Æ—7Eö§6öãó¢§6öâÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FVfVÇEöF—5ö&Vf÷&UöGVSó¢çVÖ&W"ÂçVÆÀ¢FVfVÇE÷&–÷&—G“ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'&–÷&—G’%Ğ¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢VçF—G•÷G—W3ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&VçF—G•÷G—R%ÕµÒÂçVÆÀ¢–Có¢7G&–æp¢æÖSó¢7G&–æp¢6W'f–6Uö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'F6µ÷FV×ÆFW5÷6W'f–6Uö–Eöf¶W’ ¢6öÇVÖç3¢²'6W'f–6Uö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&VævvVÖVçE÷6W'f–6W2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6µ÷FV×ÆFW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6µ÷FV×ÆFW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢F6·3¢°¢&÷s¢°¢76–væVE÷Fõ÷W6W%ö–C¢7G&–ærÂçVÆÀ¢6†V6¶Æ—7Eö§6öã¢§6öâÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6öÆ÷%÷Fs¢7G&–ærÂçVÆÀ¢6ö×ÆWFVEöC¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢FW67&—F–öã¢7G&–ærÂçVÆÀ¢GVUöFFS¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢&–÷&—G“¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'&–÷&—G’%Ğ¢7FGW3¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'F6µ÷7FGW2%Ğ¢FVæçEö–C¢7G&–æp¢F—FÆS¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢76–væVE÷Fõ÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢6†V6¶Æ—7Eö§6öãó¢§6öâÂçVÆÀ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢6öÆ÷%÷Fsó¢7G&–ærÂçVÆÀ¢6ö×ÆWFVEöCó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢GVUöFFSó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢&–÷&—G“ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'&–÷&—G’%Ğ¢7FGW3ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'F6µ÷7FGW2%Ğ¢FVæçEö–C¢7G&–æp¢F—FÆS¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢76–væVE÷Fõ÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢6†V6¶Æ—7Eö§6öãó¢§6öâÂçVÆÀ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢6öÆ÷%÷Fsó¢7G&–ærÂçVÆÀ¢6ö×ÆWFVEöCó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢GVUöFFSó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢&–÷&—G“ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'&–÷&—G’%Ğ¢7FGW3ó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'F6µ÷7FGW2%Ğ¢FVæçEö–Có¢7G&–æp¢F—FÆSó¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'F6·5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6·5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6·5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6·5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6·5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6·5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢F…ö6ö×WFF–öç3¢°¢&÷s¢°¢6ö×WFF–öå÷G—S¢7G&–æp¢6ö×WFVE÷fÇVW3¢§6öà¢7&VFVEöC¢7G&–æp¢f÷&ÕöFF¢§6öà¢–C¢7G&–æp¢æ÷FW3¢7G&–ærÂçVÆÀ¢W&–öEö–C¢7G&–æp¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢6ö×WFF–öå÷G—Só¢7G&–æp¢6ö×WFVE÷fÇVW3ó¢§6öà¢7&VFVEöCó¢7G&–æp¢f÷&ÕöFFó¢§6öà¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢W&–öEö–C¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢6ö×WFF–öå÷G—Só¢7G&–æp¢6ö×WFVE÷fÇVW3ó¢§6öà¢7&VFVEöCó¢7G&–æp¢f÷&ÕöFFó¢§6öà¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢W&–öEö–Có¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'F…ö6ö×WFF–öç5÷W&–öEö–Eöf¶W’ ¢6öÇVÖç3¢²'W&–öEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&66÷VçG5÷W&–öG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F…ö6ö×WFF–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F…ö6ö×WFF–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢F%ö–×÷'G3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöC¢7G&–æp¢W'&÷%öÆöuö§6öã¢§6öà¢f–ÆUöæÖS¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢–×÷'FVEö'“¢7G&–ærÂçVÆÀ¢Ö–æuö§6öã¢§6öà¢&÷w5öÖVC¢çVÖ&W"ÂçVÆÀ¢&÷w5÷÷7FVC¢çVÖ&W"ÂçVÆÀ¢&÷w5÷F÷FÃ¢çVÖ&W"ÂçVÆÀ¢6÷W&6S¢7G&–æp¢7FGW3¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–C¢7G&–æp¢7&VFVEöCó¢7G&–æp¢W'&÷%öÆöuö§6öãó¢§6öà¢f–ÆUöæÖSó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢–×÷'FVEö'“ó¢7G&–ærÂçVÆÀ¢Ö–æuö§6öãó¢§6öà¢&÷w5öÖVCó¢çVÖ&W"ÂçVÆÀ¢&÷w5÷÷7FVCó¢çVÖ&W"ÂçVÆÀ¢&÷w5÷F÷FÃó¢çVÖ&W"ÂçVÆÀ¢6÷W&6Só¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–æp¢7&VFVEöCó¢7G&–æp¢W'&÷%öÆöuö§6öãó¢§6öà¢f–ÆUöæÖSó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢–×÷'FVEö'“ó¢7G&–ærÂçVÆÀ¢Ö–æuö§6öãó¢§6öà¢&÷w5öÖVCó¢çVÖ&W"ÂçVÆÀ¢&÷w5÷÷7FVCó¢çVÖ&W"ÂçVÆÀ¢&÷w5÷F÷FÃó¢çVÖ&W"ÂçVÆÀ¢6÷W&6Só¢7G&–æp¢7FGW3ó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'F%ö–×÷'G5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F%ö–×÷'G5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F%ö–×÷'G5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F%ö–×÷'G5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F%ö–×÷'G5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F%ö–×÷'G5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢FV×ÆFU÷f&–&ÆU÷v†—FVÆ—7C¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢FW67&—F–öã¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢¶W“¢7G&–æp¢FV×ÆFU÷G—S¢7G&–æp¢FVæçEö–C¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢¶W“¢7G&–æp¢FV×ÆFU÷G—Só¢7G&–æp¢FVæçEö–C¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢FW67&—F–öãó¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢¶W“ó¢7G&–æp¢FV×ÆFU÷G—Só¢7G&–æp¢FVæçEö–Có¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'FV×ÆFU÷f&–&ÆU÷v†—FVÆ—7E÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'FV×ÆFU÷f&–&ÆU÷v†—FVÆ—7E÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢FV×ÆFU÷fW'6–öç3¢°¢&÷s¢°¢&öG•ö‡FÖÃ¢7G&–ærÂçVÆÀ¢&öG•÷FW‡C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢7&VFVEö'•÷W6W%ö–C¢7G&–ærÂçVÆÀ¢–C¢7G&–æp¢7V&¦V7C¢7G&–ærÂçVÆÀ¢FV×ÆFUö¶W“¢7G&–æp¢FV×ÆFU÷G—S¢7G&–æp¢FVæçEö–C¢7G&–æp¢f&–&ÆW5ö§6öã¢§6öà¢fW'6–öã¢çVÖ&W ¢Ğ¢–ç6W'C¢°¢&öG•ö‡FÖÃó¢7G&–ærÂçVÆÀ¢&öG•÷FW‡Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢7V&¦V7Có¢7G&–ærÂçVÆÀ¢FV×ÆFUö¶W“¢7G&–æp¢FV×ÆFU÷G—Só¢7G&–æp¢FVæçEö–C¢7G&–æp¢f&–&ÆW5ö§6öãó¢§6öà¢fW'6–öã¢çVÖ&W ¢Ğ¢WFFS¢°¢&öG•ö‡FÖÃó¢7G&–ærÂçVÆÀ¢&öG•÷FW‡Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7&VFVEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢–Có¢7G&–æp¢7V&¦V7Có¢7G&–ærÂçVÆÀ¢FV×ÆFUö¶W“ó¢7G&–æp¢FV×ÆFU÷G—Só¢7G&–æp¢FVæçEö–Có¢7G&–æp¢f&–&ÆW5ö§6öãó¢§6öà¢fW'6–öãó¢çVÖ&W ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'FV×ÆFU÷fW'6–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'FV×ÆFU÷fW'6–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢FVæçE÷7V'67&—F–öç3¢°¢&÷s¢°¢&–ÆÆ–æuö7–6ÆS¢7G&–æp¢6æ6VÆÆVEöC¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢7W'&VçE÷W&–öEöVæC¢7G&–æp¢7W'&VçE÷W&–öE÷7F'C¢7G&–æp¢–C¢7G&–æp¢Æåö–C¢7G&–æp¢7FGW3¢7G&–æp¢7G&—Uö7W7FöÖW%ö–C¢7G&–ærÂçVÆÀ¢7G&—U÷7V'67&—F–öåö–C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢G&–ÅöVæG5öC¢7G&–ærÂçVÆÀ¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢&–ÆÆ–æuö7–6ÆSó¢7G&–æp¢6æ6VÆÆVEöCó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7W'&VçE÷W&–öEöVæCó¢7G&–æp¢7W'&VçE÷W&–öE÷7F'Có¢7G&–æp¢–Có¢7G&–æp¢Æåö–C¢7G&–æp¢7FGW3ó¢7G&–æp¢7G&—Uö7W7FöÖW%ö–Có¢7G&–ærÂçVÆÀ¢7G&—U÷7V'67&—F–öåö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢G&–ÅöVæG5öCó¢7G&–ærÂçVÆÀ¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢&–ÆÆ–æuö7–6ÆSó¢7G&–æp¢6æ6VÆÆVEöCó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢7W'&VçE÷W&–öEöVæCó¢7G&–æp¢7W'&VçE÷W&–öE÷7F'Có¢7G&–æp¢–Có¢7G&–æp¢Æåö–Có¢7G&–æp¢7FGW3ó¢7G&–æp¢7G&—Uö7W7FöÖW%ö–Có¢7G&–ærÂçVÆÀ¢7G&—U÷7V'67&—F–öåö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢G&–ÅöVæG5öCó¢7G&–ærÂçVÆÀ¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'FVæçE÷7V'67&—F–öç5÷Æåö–Eöf¶W’ ¢6öÇVÖç3¢²'Æåö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'7V'67&—F–öå÷Æç2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'FVæçE÷7V'67&—F–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢G'VP¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'FVæçE÷7V'67&—F–öç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢G'VP¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢FVæçG3¢°¢&÷s¢°¢FG&W75ö§6öã¢§6öâÂçVÆÀ¢'&æE÷&–Ö'•ö6öÆ÷#¢7G&–ærÂçVÆÀ¢'&æE÷6V6öæF'•ö6öÆ÷#¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢f—&ÕöæÖS¢7G&–æp¢–C¢7G&–æp¢—5÷v†—FUöÆ&VÅöVæ&ÆVC¢&ööÆVâÂçVÆÀ¢Æövõ÷W&Ã¢7G&–ærÂçVÆÀ¢†öæS¢7G&–ærÂçVÆÀ¢Æåö6öFS¢7G&–ærÂçVÆÀ¢&–Ö'•öFöÖ–ã¢7G&–ærÂçVÆÀ¢7G&—Uö7W7FöÖW%ö–C¢7G&–ærÂçVÆÀ¢7W÷'EöVÖ–Ã¢7G&–ærÂçVÆÀ¢F–ÖW¦öæS¢7G&–ærÂçVÆÀ¢G&F–æuöæÖS¢7G&–ærÂçVÆÀ¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢FG&W75ö§6öãó¢§6öâÂçVÆÀ¢'&æE÷&–Ö'•ö6öÆ÷#ó¢7G&–ærÂçVÆÀ¢'&æE÷6V6öæF'•ö6öÆ÷#ó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢f—&ÕöæÖS¢7G&–æp¢–Có¢7G&–æp¢—5÷v†—FUöÆ&VÅöVæ&ÆVCó¢&ööÆVâÂçVÆÀ¢Æövõ÷W&Ãó¢7G&–ærÂçVÆÀ¢†öæSó¢7G&–ærÂçVÆÀ¢Æåö6öFSó¢7G&–ærÂçVÆÀ¢&–Ö'•öFöÖ–ãó¢7G&–ærÂçVÆÀ¢7G&—Uö7W7FöÖW%ö–Có¢7G&–ærÂçVÆÀ¢7W÷'EöVÖ–Ãó¢7G&–ærÂçVÆÀ¢F–ÖW¦öæSó¢7G&–ærÂçVÆÀ¢G&F–æuöæÖSó¢7G&–ærÂçVÆÀ¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢FG&W75ö§6öãó¢§6öâÂçVÆÀ¢'&æE÷&–Ö'•ö6öÆ÷#ó¢7G&–ærÂçVÆÀ¢'&æE÷6V6öæF'•ö6öÆ÷#ó¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢f—&ÕöæÖSó¢7G&–æp¢–Có¢7G&–æp¢—5÷v†—FUöÆ&VÅöVæ&ÆVCó¢&ööÆVâÂçVÆÀ¢Æövõ÷W&Ãó¢7G&–ærÂçVÆÀ¢†öæSó¢7G&–ærÂçVÆÀ¢Æåö6öFSó¢7G&–ærÂçVÆÀ¢&–Ö'•öFöÖ–ãó¢7G&–ærÂçVÆÀ¢7G&—Uö7W7FöÖW%ö–Có¢7G&–ærÂçVÆÀ¢7W÷'EöVÖ–Ãó¢7G&–ærÂçVÆÀ¢F–ÖW¦öæSó¢7G&–ærÂçVÆÀ¢G&F–æuöæÖSó¢7G&–ærÂçVÆÀ¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢µĞ¢Ğ¢F–ÖUöVçG&–W3¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢FFS¢7G&–æp¢FW67&—F–öã¢7G&–æp¢GW&F–öåöÖ–çWFW3¢çVÖ&W ¢–C¢7G&–æp¢—5ö&–ÆÆ&ÆS¢&ööÆVà¢&FU÷Væ6S¢çVÖ&W"ÂçVÆÀ¢7FGW3¢7G&–æp¢F6µö–C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢–ç6W'C¢°¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FFSó¢7G&–æp¢FW67&—F–öãó¢7G&–æp¢GW&F–öåöÖ–çWFW3ó¢çVÖ&W ¢–Có¢7G&–æp¢—5ö&–ÆÆ&ÆSó¢&ööÆVà¢&FU÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢7FGW3ó¢7G&–æp¢F6µö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢WFFS¢°¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢FFSó¢7G&–æp¢FW67&—F–öãó¢7G&–æp¢GW&F–öåöÖ–çWFW3ó¢çVÖ&W ¢–Có¢7G&–æp¢—5ö&–ÆÆ&ÆSó¢&ööÆVà¢&FU÷Væ6Só¢çVÖ&W"ÂçVÆÀ¢7FGW3ó¢7G&–æp¢F6µö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢W6W%ö–Có¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5÷F6µö–Eöf¶W’ ¢6öÇVÖç3¢²'F6µö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5÷F6µö–Eöf¶W’ ¢6öÇVÖç3¢²'F6µö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²'F6µö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5÷F6µö–Eöf¶W’ ¢6öÇVÖç3¢²'F6µö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²'F6µö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F–ÖUöVçG&–W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢G&–Åö&Ææ6UöVçG&–W3¢°¢&÷s¢°¢66÷VçEö6öFS¢7G&–æp¢66÷VçEöæÖS¢7G&–æp¢66÷VçE÷G—S¢7G&–æp¢F§W7FÖVçEö7&VF—E÷Væ6S¢çVÖ&W ¢F§W7FÖVçEöFV&—E÷Væ6S¢çVÖ&W ¢F§W7FÖVçEöæ÷FW3¢7G&–ærÂçVÆÀ¢'&÷Vv‡Eöf÷'v&C¢&ööÆVà¢6ö×&F—fUö7&VF—E÷Væ6S¢çVÖ&W ¢6ö×&F—fUöFV&—E÷Væ6S¢çVÖ&W ¢7&VFVEöC¢7G&–æp¢7&VF—E÷Væ6S¢çVÖ&W ¢FV&—E÷Væ6S¢çVÖ&W ¢–C¢7G&–æp¢W&–öEö–C¢7G&–æp¢6÷'Eö÷&FW#¢çVÖ&W ¢6÷W&6U÷W&–öEö–C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢66÷VçEö6öFS¢7G&–æp¢66÷VçEöæÖS¢7G&–æp¢66÷VçE÷G—Só¢7G&–æp¢F§W7FÖVçEö7&VF—E÷Væ6Só¢çVÖ&W ¢F§W7FÖVçEöFV&—E÷Væ6Só¢çVÖ&W ¢F§W7FÖVçEöæ÷FW3ó¢7G&–ærÂçVÆÀ¢'&÷Vv‡Eöf÷'v&Có¢&ööÆVà¢6ö×&F—fUö7&VF—E÷Væ6Só¢çVÖ&W ¢6ö×&F—fUöFV&—E÷Væ6Só¢çVÖ&W ¢7&VFVEöCó¢7G&–æp¢7&VF—E÷Væ6Só¢çVÖ&W ¢FV&—E÷Væ6Só¢çVÖ&W ¢–Có¢7G&–æp¢W&–öEö–C¢7G&–æp¢6÷'Eö÷&FW#ó¢çVÖ&W ¢6÷W&6U÷W&–öEö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢66÷VçEö6öFSó¢7G&–æp¢66÷VçEöæÖSó¢7G&–æp¢66÷VçE÷G—Só¢7G&–æp¢F§W7FÖVçEö7&VF—E÷Væ6Só¢çVÖ&W ¢F§W7FÖVçEöFV&—E÷Væ6Só¢çVÖ&W ¢F§W7FÖVçEöæ÷FW3ó¢7G&–ærÂçVÆÀ¢'&÷Vv‡Eöf÷'v&Có¢&ööÆVà¢6ö×&F—fUö7&VF—E÷Væ6Só¢çVÖ&W ¢6ö×&F—fUöFV&—E÷Væ6Só¢çVÖ&W ¢7&VFVEöCó¢7G&–æp¢7&VF—E÷Væ6Só¢çVÖ&W ¢FV&—E÷Væ6Só¢çVÖ&W ¢–Có¢7G&–æp¢W&–öEö–Có¢7G&–æp¢6÷'Eö÷&FW#ó¢çVÖ&W ¢6÷W&6U÷W&–öEö–Có¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'G&–Åö&Ææ6UöVçG&–W5÷W&–öEö–Eöf¶W’ ¢6öÇVÖç3¢²'W&–öEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&66÷VçG5÷W&–öG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'G&–Åö&Ææ6UöVçG&–W5÷6÷W&6U÷W&–öEö–Eöf¶W’ ¢6öÇVÖç3¢²'6÷W&6U÷W&–öEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&66÷VçG5÷W&–öG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'G&–Åö&Ææ6UöVçG&–W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'G&–Åö&Ææ6UöVçG&–W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢W6W%÷&öÆW3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢–C¢7G&–æp¢&öÆS¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&÷&öÆR%Ğ¢FVæçEö–C¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢–Có¢7G&–æp¢&öÆSó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&÷&öÆR%Ğ¢FVæçEö–C¢7G&–æp¢W6W%ö–C¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢–Có¢7G&–æp¢&öÆSó¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&÷&öÆR%Ğ¢FVæçEö–Có¢7G&–æp¢W6W%ö–Có¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'W6W%÷&öÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'W6W%÷&öÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢fE÷&WGW&ç3¢°¢&÷s¢°¢&÷ƒ¢çVÖ&W ¢&÷ƒ#¢çVÖ&W ¢&÷ƒ3¢çVÖ&W ¢&÷ƒC¢çVÖ&W ¢&÷ƒS¢çVÖ&W ¢&÷ƒc¢çVÖ&W ¢&÷ƒs¢çVÖ&W ¢&÷ƒƒ¢çVÖ&W ¢&÷ƒ“¢çVÖ&W ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–æp¢GVUöFFS¢7G&–ærÂçVÆÀ¢f–æÆ—6VEöC¢7G&–ærÂçVÆÀ¢f–æÆ—6VEö'•÷W6W%ö–C¢7G&–ærÂçVÆÀ¢†×&5÷&V6V—C¢7G&–ærÂçVÆÀ¢†×&5÷&W7öç6Uö§6öã¢§6öâÂçVÆÀ¢–C¢7G&–æp¢æ÷FW3¢7G&–ærÂçVÆÀ¢W&–öEöVæC¢7G&–æp¢W&–öEö¶W“¢7G&–ærÂçVÆÀ¢W&–öE÷7F'C¢7G&–æp¢7FGW3¢7G&–æp¢7V&Ö—76–öåö¦ö%ö–C¢7G&–ærÂçVÆÀ¢7V&Ö—GFVEöC¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöC¢7G&–æp¢Ğ¢–ç6W'C¢°¢&÷ƒó¢çVÖ&W ¢&÷ƒ#ó¢çVÖ&W ¢&÷ƒ3ó¢çVÖ&W ¢&÷ƒCó¢çVÖ&W ¢&÷ƒSó¢çVÖ&W ¢&÷ƒcó¢çVÖ&W ¢&÷ƒsó¢çVÖ&W ¢&÷ƒƒó¢çVÖ&W ¢&÷ƒ“ó¢çVÖ&W ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢GVUöFFSó¢7G&–ærÂçVÆÀ¢f–æÆ—6VEöCó¢7G&–ærÂçVÆÀ¢f–æÆ—6VEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢†×&5÷&V6V—Có¢7G&–ærÂçVÆÀ¢†×&5÷&W7öç6Uö§6öãó¢§6öâÂçVÆÀ¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢W&–öEöVæC¢7G&–æp¢W&–öEö¶W“ó¢7G&–ærÂçVÆÀ¢W&–öE÷7F'C¢7G&–æp¢7FGW3ó¢7G&–æp¢7V&Ö—76–öåö¦ö%ö–Có¢7G&–ærÂçVÆÀ¢7V&Ö—GFVEöCó¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢WFFS¢°¢&÷ƒó¢çVÖ&W ¢&÷ƒ#ó¢çVÖ&W ¢&÷ƒ3ó¢çVÖ&W ¢&÷ƒCó¢çVÖ&W ¢&÷ƒSó¢çVÖ&W ¢&÷ƒcó¢çVÖ&W ¢&÷ƒsó¢çVÖ&W ¢&÷ƒƒó¢çVÖ&W ¢&÷ƒ“ó¢çVÖ&W ¢6Æ–VçEö–Có¢7G&–ærÂçVÆÀ¢7&VFVEöCó¢7G&–æp¢GVUöFFSó¢7G&–ærÂçVÆÀ¢f–æÆ—6VEöCó¢7G&–ærÂçVÆÀ¢f–æÆ—6VEö'•÷W6W%ö–Có¢7G&–ærÂçVÆÀ¢†×&5÷&V6V—Có¢7G&–ærÂçVÆÀ¢†×&5÷&W7öç6Uö§6öãó¢§6öâÂçVÆÀ¢–Có¢7G&–æp¢æ÷FW3ó¢7G&–ærÂçVÆÀ¢W&–öEöVæCó¢7G&–æp¢W&–öEö¶W“ó¢7G&–ærÂçVÆÀ¢W&–öE÷7F'Có¢7G&–æp¢7FGW3ó¢7G&–æp¢7V&Ö—76–öåö¦ö%ö–Có¢7G&–ærÂçVÆÀ¢7V&Ö—GFVEöCó¢7G&–ærÂçVÆÀ¢FVæçEö–Có¢7G&–æp¢WFFVEöCó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢vV&†ööµöVæGö–çG3¢°¢&÷s¢°¢7&VFVEöC¢7G&–æp¢WfVçG3¢7G&–æuµĞ¢–C¢7G&–æp¢—5öVæ&ÆVC¢&ööÆVâÂçVÆÀ¢æÖS¢7G&–æp¢6V7&WC¢7G&–æp¢FVæçEö–C¢7G&–æp¢W&Ã¢7G&–æp¢Ğ¢–ç6W'C¢°¢7&VFVEöCó¢7G&–æp¢WfVçG3ó¢7G&–æuµĞ¢–Có¢7G&–æp¢—5öVæ&ÆVCó¢&ööÆVâÂçVÆÀ¢æÖS¢7G&–æp¢6V7&WC¢7G&–æp¢FVæçEö–C¢7G&–æp¢W&Ã¢7G&–æp¢Ğ¢WFFS¢°¢7&VFVEöCó¢7G&–æp¢WfVçG3ó¢7G&–æuµĞ¢–Có¢7G&–æp¢—5öVæ&ÆVCó¢&ööÆVâÂçVÆÀ¢æÖSó¢7G&–æp¢6V7&WCó¢7G&–æp¢FVæçEö–Có¢7G&–æp¢W&Ãó¢7G&–æp¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'vV&†ööµöVæGö–çG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'vV&†ööµöVæGö–çG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢Ğ¢f–Ww3¢°¢eö&–ÆÆ–æuö·—3¢°¢&÷s¢°¢–çfö–6W5ö6÷VçC¢çVÖ&W"ÂçVÆÀ¢–çfö–6W5÷F÷FÃ¢çVÖ&W"ÂçVÆÀ¢ÖöçFƒ¢7G&–ærÂçVÆÀ¢÷fW&GVUö6÷VçC¢çVÖ&W"ÂçVÆÀ¢÷fW&GVU÷F÷FÃ¢çVÖ&W"ÂçVÆÀ¢–E÷F÷FÃ¢çVÖ&W"ÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&–çfö–6W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&–çfö–6W5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢eö6ö×ç•÷&Vv—7FW%ö†VÇFƒ¢°¢&÷s¢°¢7F—fUöF—&V7F÷'3¢çVÖ&W"ÂçVÆÀ¢7F—fUöÖVÖ&W'3¢çVÖ&W"ÂçVÆÀ¢7F—fU÷673¢çVÖ&W"ÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6Æ–VçEöÆVvÅöæÖS¢7G&–ærÂçVÆÀ¢6ö×ç•öçVÖ&W#¢7G&–ærÂçVÆÀ¢†5öWF…ö6öFS¢&ööÆVâÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&6ö×ç•÷&öf–ÆW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&6ö×ç•÷&öf–ÆW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&6ö×ç•÷&öf–ÆW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&6ö×ç•÷&öf–ÆW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&6ö×ç•÷&öf–ÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&6ö×ç•÷&öf–ÆW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢eö÷fW&GVU÷F6·3¢°¢&÷s¢°¢76–væVE÷Fõ÷W6W%ö–C¢7G&–ærÂçVÆÀ¢76–væVE÷W6W%öæÖS¢7G&–ærÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6Æ–VçEöÆVvÅöæÖS¢7G&–ærÂçVÆÀ¢F—5ö÷fW&GVS¢çVÖ&W"ÂçVÆÀ¢GVUöFFS¢7G&–ærÂçVÆÀ¢VçF—G•÷G—S¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&VçF—G•÷G—R%ÒÂçVÆÀ¢&–÷&—G“¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'&–÷&—G’%ÒÂçVÆÀ¢7FGW3¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'F6µ÷7FGW2%ÒÂçVÆÀ¢F6µö–C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢F—FÆS¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'F6·5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6·5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢e÷&7F–6UöF6†&ö&Eö·—3¢°¢&÷s¢°¢7F—fUö6Æ–VçG3¢çVÖ&W"ÂçVÆÀ¢÷Vå÷F6·3¢çVÖ&W"ÂçVÆÀ¢÷fW&GVUö–çfö–6W3¢çVÖ&W"ÂçVÆÀ¢÷fW&GVU÷F6·3¢çVÖ&W"ÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢fEöGVUóFC¢çVÖ&W"ÂçVÆÀ¢Ğ¢–ç6W'C¢°¢7F—fUö6Æ–VçG3ó¢æWfW ¢÷Vå÷F6·3ó¢æWfW ¢÷fW&GVUö–çfö–6W3ó¢æWfW ¢÷fW&GVU÷F6·3ó¢æWfW ¢FVæçEö–Có¢7G&–ærÂçVÆÀ¢fEöGVUóFCó¢æWfW ¢Ğ¢WFFS¢°¢7F—fUö6Æ–VçG3ó¢æWfW ¢÷Vå÷F6·3ó¢æWfW ¢÷fW&GVUö–çfö–6W3ó¢æWfW ¢÷fW&GVU÷F6·3ó¢æWfW ¢FVæçEö–Có¢7G&–ærÂçVÆÀ¢fEöGVUóFCó¢æWfW ¢Ğ¢&VÆF–öç6†—3¢µĞ¢Ğ¢e÷6V7&WF&–Åö6†ævW5÷VæF–æs¢°¢&÷s¢°¢6†ævUö–C¢7G&–ærÂçVÆÀ¢6†ævU÷G—S¢7G&–ærÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6Æ–VçEöÆVvÅöæÖS¢7G&–ærÂçVÆÀ¢&WV—&W5öWF…ö6öFS¢&ööÆVâÂçVÆÀ¢7FGW3¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢F—FÆS¢7G&–ærÂçVÆÀ¢WFFVEöC¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'6V7&WF&–Åö6†ævW5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢e÷6V7&WF&–ÅöGVS¢°¢&÷s¢°¢6…öÆ7E÷7–æ6VEöC¢7G&–ærÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6Æ–VçEöÆVvÅöæÖS¢7G&–ærÂçVÆÀ¢6ö×ç•öçVÖ&W#¢7G&–ærÂçVÆÀ¢6ö×ç•÷7FGW3¢7G&–ærÂçVÆÀ¢æW‡Eö6öæf—&ÖF–öå÷7FFVÖVçEöGVS¢7G&–ærÂçVÆÀ¢÷Vå÷6V7&WF&–Åö6†ævW3¢çVÖ&W"ÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&6Æ–VçG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&6Æ–VçG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢e÷7V&Ö—76–öåö¦ö'5÷&V6VçC¢°¢&÷s¢°¢GFV×Eö6÷VçC¢çVÖ&W"ÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6Æ–VçEöÆVvÅöæÖS¢7G&–ærÂçVÆÀ¢6÷'&VÆF–öåö–C¢7G&–ærÂçVÆÀ¢7&VFVEöC¢7G&–ærÂçVÆÀ¢Æ7EöW'&÷#¢7G&–ærÂçVÆÀ¢&÷f–FW#¢7G&–ærÂçVÆÀ¢7FGW3¢7G&–ærÂçVÆÀ¢7V&Ö—76–öåö¦ö%ö–C¢7G&–ærÂçVÆÀ¢7V&Ö—76–öå÷G—S¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢WFFVEöC¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢e÷7V&Ö—76–öå÷7V66W75ó3C¢°¢&÷s¢°¢66WFVEó3C¢çVÖ&W"ÂçVÆÀ¢&÷f–FW#¢7G&–ærÂçVÆÀ¢&V¦V7FVEó3C¢çVÖ&W"ÂçVÆÀ¢7V&Ö—76–öå÷G—S¢7G&–ærÂçVÆÀ¢7V66W75÷7Eó3C¢çVÖ&W"ÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢F÷FÅó3C¢çVÖ&W"ÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'7V&Ö—76–öåö¦ö'5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢e÷F6·5öGVUöæW‡EóFC¢°¢&÷s¢°¢76–væVE÷W6W%öæÖS¢7G&–ærÂçVÆÀ¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6Æ–VçEöÆVvÅöæÖS¢7G&–ærÂçVÆÀ¢F—5÷VçF–ÅöGVS¢çVÖ&W"ÂçVÆÀ¢GVUöFFS¢7G&–ærÂçVÆÀ¢&–÷&—G“¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'&–÷&—G’%ÒÂçVÆÀ¢7FGW3¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²'F6µ÷7FGW2%ÒÂçVÆÀ¢F6µö–C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢F—FÆS¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'F6·5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'F6·5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢e÷F‡&VG5öæVVF–æuöGFVçF–öã¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6Æ–VçEöÆVvÅöæÖS¢7G&–ærÂçVÆÀ¢Æ7EöÖW76vUöC¢7G&–ærÂçVÆÀ¢Æ7E÷6VæFW%÷G—S¢7G&–ærÂçVÆÀ¢&–÷&—G“¢7G&–ærÂçVÆÀ¢7FGW3¢7G&–ærÂçVÆÀ¢7V&¦V7C¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢F‡&VEö–C¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢&ÖW76vU÷F‡&VG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ÖW76vU÷F‡&VG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ÖW76vU÷F‡&VG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ÖW76vU÷F‡&VG5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ÖW76vU÷F‡&VG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢&ÖW76vU÷F‡&VG5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢e÷fEöGVS¢°¢&÷s¢°¢6Æ–VçEö–C¢7G&–ærÂçVÆÀ¢6Æ–VçEöÆVvÅöæÖS¢7G&–ærÂçVÆÀ¢æWE÷fEöGVS¢çVÖ&W"ÂçVÆÀ¢W&–öEöVæC¢7G&–ærÂçVÆÀ¢W&–öE÷7F'C¢7G&–ærÂçVÆÀ¢7FGW3¢7G&–ærÂçVÆÀ¢7V&Ö—GFVEöC¢7G&–ærÂçVÆÀ¢FVæçEö–C¢7G&–ærÂçVÆÀ¢fE÷&WGW&åö–C¢7G&–ærÂçVÆÀ¢Ğ¢&VÆF–öç6†—3¢°¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢&6Æ–VçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'eö÷fW&GVU÷F6·2 ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷6V7&WF&–ÅöGVR ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5ö6Æ–VçEö–Eöf¶W’ ¢6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷F6·5öGVUöæW‡EóFB ¢&VfW&Væ6VD6öÇVÖç3¢²&6Æ–VçEö–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'FVæçG2 ¢&VfW&Væ6VD6öÇVÖç3¢²&–B%Ğ¢ÒÀ¢°¢f÷&V–vä¶W”æÖS¢'fE÷&WGW&ç5÷FVæçEö–Eöf¶W’ ¢6öÇVÖç3¢²'FVæçEö–B%Ğ¢—4öæUFôöæS¢fÇ6P¢&VfW&Væ6VE&VÆF–öã¢'e÷&7F–6UöF6†&ö&Eö·—2 ¢&VfW&Væ6VD6öÇVÖç3¢²'FVæçEö–B%Ğ¢ÒÀ¢Ğ¢Ğ¢Ğ¢gVæ7F–öç3¢°¢÷7Eö&æµ÷G&ç67F–öã¢°¢&w3¢²÷G&ç67F–öåö–C¢7G&–ærĞ¢&WGW&ç3¢7G&–æp¢Ğ¢'Våö66÷VçG5ö–çFVÆÆ–vVæ6S¢°¢&w3¢²ö6Æ–VçEö–C¢7G&–æs²÷W&–öEö–C¢7G&–ærĞ¢&WGW&ç3¢§6öà¢Ğ¢6VVE÷–V%öVæEö6†V6·3¢°¢&w3¢²÷W&–öEö–C¢7G&–ærĞ¢&WGW&ç3¢çVÖ&W ¢Ğ¢vWE÷FVæçEöÆÆ÷vVEöÖöGVÆW3¢°¢&w3¢²÷FVæçEö–C¢7G&–ærĞ¢&WGW&ç3¢7G&–æuµĞ¢Ğ¢vWE÷FVæçE÷ÆåöÆ–Ö—G3¢°¢&w3¢²÷FVæçEö–C¢7G&–ærĞ¢&WGW&ç3¢°¢Ö…ö6Æ–VçG3¢çVÖ&W ¢Ö…÷W6W'3¢çVÖ&W ¢Æåö6öFS¢7G&–æp¢ÆåöæÖS¢7G&–æp¢ÕµĞ¢Ğ¢vWE÷W6W%÷FVæçEö–C¢²&w3¢²÷W6W%ö–C¢7G&–ærÓ²&WGW&ç3¢7G&–ærĞ¢vWE÷W6W%÷G—S¢²&w3¢²÷W6W%ö–C¢7G&–ærÓ²&WGW&ç3¢§6öâĞ¢†5÷&öÆS¢°¢&w3¢°¢÷&öÆS¢FF&6U²'V&Æ–2%Õ²$VçV×2%Õ²&÷&öÆR%Ğ¢÷W6W%ö–C¢7G&–æp¢Ğ¢&WGW&ç3¢&ööÆVà¢Ğ¢6VVE÷FV×ÆFU÷v†—FVÆ—7C¢°¢&w3¢²÷FVæçEö–C¢7G&–ærĞ¢&WGW&ç3¢VæFVf–æV@¢Ğ¢6VVE÷FV×ÆFW5öæEöWFöÖF–öç3¢°¢&w3¢²÷FVæçEö–C¢7G&–ærĞ¢&WGW&ç3¢VæFVf–æV@¢Ğ¢6VVE÷FVæçC¢²&w3¢²÷FVæçEö–C¢7G&–ærÓ²&WGW&ç3¢VæFVf–æVBĞ¢Ğ¢VçV×3¢°¢÷&öÆS ¢Â'7WW%öFÖ–â ¢Â&f—&Õö÷væW" ¢Â&ÖævW" ¢Â'7Ffb ¢Â'—&öÆÅööff–6W" ¢Â&6Æ–VçE÷W6W" ¢Â&V×Æ÷–VR ¢6Æ–VçE÷7FGW3¢'&÷7V7B"Â&7F—fR"Â&F÷&ÖçB"Â&6V6VB ¢VçF—G•÷G—S ¢Â&ÇFB ¢Â'6öÆU÷G&FW" ¢Â''FæW'6†— ¢Â&ÆÇ ¢Â&6†&—G’ ¢Â'G'W7B ¢–çFVw&F–öå÷&÷f–FW# ¢Â&†×&2 ¢Â&6ö×æ–W5ö†÷W6R ¢Â&6†&—G•ö6öÖÖ—76–öâ ¢Â&÷Våö&æ¶–ær ¢Â'7G&—R ¢Â&vö6&FÆW72 ¢&–÷&—G“¢&Æ÷r"Â&ÖVF—VÒ"Â&†–v‚"Â'W&vVçB ¢7V&Ö—76–öå÷7FGW3 ¢Â&G&gB ¢Â'VWVVB ¢Â'6VçB ¢Â&66WFVB ¢Â'&V¦V7FVB ¢Â&6æ6VÆÆVB ¢F6µ÷7FGW3 ¢Â'FöFò ¢Â&–å÷&öw&W72 ¢Â&&Æö6¶VB ¢Â&v—F–æuö6Æ–VçB ¢Â&v—F–æuö†×&2 ¢Â&FöæR ¢Â&6æ6VÆÆVB ¢Ğ¢6ö×÷6—FUG—W3¢°¢µò–âæWfW%Ó¢æWfW ¢Ğ¢Ğ§Ğ §G—RFF&6Uv—F†÷WD–çFW&æÇ2ÒöÖ—CÄFF&6RÂ%õô–çFW&æÅ7W&6R#à §G—RFVfVÇE66†VÖÒFF&6Uv—F†÷WD–çFW&æÇ5´W‡G&7CÆ¶W–öbFF&6RÂ'V&Æ–2#åĞ ¦W‡÷'BG—RF&ÆW3À¢FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG0¢Â¶W–öb„FVfVÇE66†VÖ²%F&ÆW2%ÒbFVfVÇE66†VÖ²%f–Ww2%Ò¢Â²66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ2ÒÀ¢F&ÆTæÖRW‡FVæG2FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0¢Ğ¢ò¶W–öb„FF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²%F&ÆW2%Ò`¢FF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²%f–Ww2%Ò¢¢æWfW"ÒæWfW"À£âÒFVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0§Ğ¢ò„FF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²%F&ÆW2%Ò`¢FF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²%f–Ww2%Ò•µF&ÆTæÖUÒW‡FVæG2°¢&÷s¢–æfW" ¢Ğ¢ò ¢¢æWfW ¢¢FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2¶W–öb„FVfVÇE66†VÖ²%F&ÆW2%Ò`¢FVfVÇE66†VÖ²%f–Ww2%Ò¢ò„FVfVÇE66†VÖ²%F&ÆW2%Ò`¢FVfVÇE66†VÖ²%f–Ww2%Ò•´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5ÒW‡FVæG2°¢&÷s¢–æfW" ¢Ğ¢ò ¢¢æWfW ¢¢æWfW  ¦W‡÷'BG—RF&ÆW4–ç6W'CÀ¢FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG0¢Â¶W–öbFVfVÇE66†VÖ²%F&ÆW2%Ğ¢Â²66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ2ÒÀ¢F&ÆTæÖRW‡FVæG2FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0¢Ğ¢ò¶W–öbFF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²%F&ÆW2%Ğ¢¢æWfW"ÒæWfW"À£âÒFVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0§Ğ¢òFF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²%F&ÆW2%ÕµF&ÆTæÖUÒW‡FVæG2°¢–ç6W'C¢–æfW"¢Ğ¢ò¢¢æWfW ¢¢FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2¶W–öbFVfVÇE66†VÖ²%F&ÆW2%Ğ¢òFVfVÇE66†VÖ²%F&ÆW2%Õ´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5ÒW‡FVæG2°¢–ç6W'C¢–æfW"¢Ğ¢ò¢¢æWfW ¢¢æWfW  ¦W‡÷'BG—RF&ÆW5WFFSÀ¢FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG0¢Â¶W–öbFVfVÇE66†VÖ²%F&ÆW2%Ğ¢Â²66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ2ÒÀ¢F&ÆTæÖRW‡FVæG2FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0¢Ğ¢ò¶W–öbFF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²%F&ÆW2%Ğ¢¢æWfW"ÒæWfW"À£âÒFVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0§Ğ¢òFF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²%F&ÆW2%ÕµF&ÆTæÖUÒW‡FVæG2°¢WFFS¢–æfW"P¢Ğ¢òP¢¢æWfW ¢¢FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç2W‡FVæG2¶W–öbFVfVÇE66†VÖ²%F&ÆW2%Ğ¢òFVfVÇE66†VÖ²%F&ÆW2%Õ´FVfVÇE66†VÖF&ÆTæÖT÷$÷F–öç5ÒW‡FVæG2°¢WFFS¢–æfW"P¢Ğ¢òP¢¢æWfW ¢¢æWfW  ¦W‡÷'BG—RVçV×3À¢FVfVÇE66†VÖVçVÔæÖT÷$÷F–öç2W‡FVæG0¢Â¶W–öbFVfVÇE66†VÖ²$VçV×2%Ğ¢Â²66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ2ÒÀ¢VçVÔæÖRW‡FVæG2FVfVÇE66†VÖVçVÔæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0¢Ğ¢ò¶W–öbFF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖVçVÔæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²$VçV×2%Ğ¢¢æWfW"ÒæWfW"À£âÒFVfVÇE66†VÖVçVÔæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0§Ğ¢òFF&6Uv—F†÷WD–çFW&æÇ5´FVfVÇE66†VÖVçVÔæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²$VçV×2%Õ´VçVÔæÖUĞ¢¢FVfVÇE66†VÖVçVÔæÖT÷$÷F–öç2W‡FVæG2¶W–öbFVfVÇE66†VÖ²$VçV×2%Ğ¢òFVfVÇE66†VÖ²$VçV×2%Õ´FVfVÇE66†VÖVçVÔæÖT÷$÷F–öç5Ğ¢¢æWfW  ¦W‡÷'BG—R6ö×÷6—FUG—W3À¢V&Æ–46ö×÷6—FUG—TæÖT÷$÷F–öç2W‡FVæG0¢Â¶W–öbFVfVÇE66†VÖ²$6ö×÷6—FUG—W2%Ğ¢Â²66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ2ÒÀ¢6ö×÷6—FUG—TæÖRW‡FVæG2V&Æ–46ö×÷6—FUG—TæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0¢Ğ¢ò¶W–öbFF&6Uv—F†÷WD–çFW&æÇ5µV&Æ–46ö×÷6—FUG—TæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²$6ö×÷6—FUG—W2%Ğ¢¢æWfW"ÒæWfW"À£âÒV&Æ–46ö×÷6—FUG—TæÖT÷$÷F–öç2W‡FVæG2°¢66†VÖ¢¶W–öbFF&6Uv—F†÷WD–çFW&æÇ0§Ğ¢òFF&6Uv—F†÷WD–çFW&æÇ5µV&Æ–46ö×÷6—FUG—TæÖT÷$÷F–öç5²'66†VÖ%ÕÕ²$6ö×÷6—FUG—W2%Õ´6ö×÷6—FUG—TæÖUĞ¢¢V&Æ–46ö×÷6—FUG—TæÖT÷$÷F–öç2W‡FVæG2¶W–öbFVfVÇE66†VÖ²$6ö×÷6—FUG—W2%Ğ¢òFVfVÇE66†VÖ²$6ö×÷6—FUG—W2%ÕµV&Æ–46ö×÷6—FUG—TæÖT÷$÷F–öç5Ğ¢¢æWfW  ¦W‡÷'B6öç7B6öç7FçG2Ò°¢V&Æ–3¢°¢VçV×3¢°¢÷&öÆS¢°¢'7WW%öFÖ–â"À¢&f—&Õö÷væW""À¢&ÖævW""À¢'7Ffb"À¢'—&öÆÅööff–6W""À¢&6Æ–VçE÷W6W""À¢&V×Æ÷–VR"À¢ÒÀ¢6Æ–VçE÷7FGW3¢²'&÷7V7B"Â&7F—fR"Â&F÷&ÖçB"Â&6V6VB%ÒÀ¢VçF—G•÷G—S¢°¢&ÇFB"À¢'6öÆU÷G&FW""À¢''FæW'6†—"À¢&ÆÇ"À¢&6†&—G’"À¢'G'W7B"À¢ÒÀ¢–çFVw&F–öå÷&÷f–FW#¢°¢&†×&2"À¢&6ö×æ–W5ö†÷W6R"À¢&6†&—G•ö6öÖÖ—76–öâ"À¢&÷Våö&æ¶–ær"À¢'7G&—R"À¢&vö6&FÆW72"À¢ÒÀ¢&–÷&—G“¢²&Æ÷r"Â&ÖVF—VÒ"Â&†–v‚"Â'W&vVçB%ÒÀ¢7V&Ö—76–öå÷7FGW3¢°¢&G&gB"À¢'VWVVB"À¢'6VçB"À¢&66WFVB"À¢'&V¦V7FVB"À¢&6æ6VÆÆVB"À¢ÒÀ¢F6µ÷7FGW3¢°¢'FöFò"À¢&–å÷&öw&W72"À¢&&Æö6¶VB"À¢&v—F–æuö6Æ–VçB"À¢&v—F–æuö†×&2"À¢&FöæR"À¢&6æ6VÆÆVB"À¢ÒÀ¢ÒÀ¢ÒÀ§Ò26öç7@

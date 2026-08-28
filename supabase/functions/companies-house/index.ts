@@ -72,6 +72,7 @@ function statusEnvelope(opts: {
   presenterId: string;
   authValue: string;
   transactionId: string;
+  testFlag?: boolean;
 }): string {
   return govTalkEnvelope({
     classType: "GetSubmissionStatus",
@@ -79,6 +80,7 @@ function statusEnvelope(opts: {
     transactionId: opts.transactionId,
     presenterId: opts.presenterId,
     authValue: opts.authValue,
+    testFlag: opts.testFlag,
     bodyXml: "",
   });
 }
@@ -278,10 +280,27 @@ Deno.serve(async (req: Request) => {
     const chApiKey = Deno.env.get("CH_API_KEY");
     const presenterId = Deno.env.get("CH_PRESENTER_ID");
     const presenterAuth = Deno.env.get("CH_PRESENTER_AUTH");
+    const filingMode = Deno.env.get("CH_FILING_MODE") === "production" ? "production" : "test";
+    const productionValidated = Deno.env.get("CH_PRODUCTION_VALIDATED") === "true";
 
     const url = new URL(req.url);
-    const path = url.pathname.replace(/^\/companies-house\/?/, "");
     const body = req.method !== "GET" ? await req.json() : {};
+    const routePath = url.pathname.replace(/^\/companies-house\/?/, "");
+    const path = routePath || String(body?.action || "");
+
+    const authHeader = req.headers.get("Authorization");
+    const jwt = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!jwt) return json({error:"Authentication required"},401);
+    const { data: authData, error: authError } = await supabase.auth.getUser(jwt);
+    if (authError || !authData.user) return json({error:"Invalid session"},401);
+    const { data: callerProfile } = await supabase.from("profiles").select("tenant_id").eq("id",authData.user.id).single();
+    const callerTenantId = callerProfile?.tenant_id;
+    if (!callerTenantId) return json({error:"No practice tenant is associated with this user"},403);
+    if (body?.tenantId && body.tenantId !== callerTenantId) return json({error:"Tenant access denied"},403);
+    if (body?.clientId) {
+      const { data: allowedClient } = await supabase.from("clients").select("id").eq("id",body.clientId).eq("tenant_id",callerTenantId).maybeSingle();
+      if (!allowedClient) return json({error:"Client access denied"},403);
+    }
 
     // ═══════════════════════════════════════════════════════════
     // REST API Endpoints (unchanged — use CH_API_KEY)
@@ -352,7 +371,9 @@ Deno.serve(async (req: Request) => {
         return json({ error: "CH_PRESENTER_ID and CH_PRESENTER_AUTH secrets required for filing" }, 400);
       }
 
-      const { filingType, companyNumber, companyName, companyAuthCode, payload, clientId, tenantId, test } = body;
+      const { filingType, companyNumber, companyName, companyAuthCode, payload, clientId } = body;
+      const tenantId = callerTenantId;
+      if (filingMode === "production" && !productionValidated) return json({error:"Companies House production filing is blocked until CH_PRODUCTION_VALIDATED=true after XML gateway testing"},503);
 
       if (!filingType || !companyNumber || !companyAuthCode) {
         return json({ error: "filingType, companyNumber, and companyAuthCode are required" }, 400);
@@ -387,7 +408,7 @@ Deno.serve(async (req: Request) => {
         transactionId: txId,
         presenterId,
         authValue,
-        testFlag: test === true,
+        testFlag: filingMode !== "production",
         bodyXml,
       });
 
@@ -425,9 +446,10 @@ Deno.serve(async (req: Request) => {
             client_id: clientId,
             filing_type: filingType,
             filing_description: `${filingType} for ${companyNumber}`,
+            environment: filingMode,
             status,
             ch_transaction_id: parsed.transactionId || txId,
-            request_json: { envelope_class: builder.classType, transaction_id: txId, payload },
+            request_json: { envelope_class: builder.classType, transaction_id: txId, mode:filingMode, payload },
             response_json: {
               qualifier: parsed.qualifier,
               gateway_timestamp: parsed.gatewayTimestamp,
@@ -447,6 +469,7 @@ Deno.serve(async (req: Request) => {
 
       return json({
         status,
+        mode: filingMode,
         transactionId: parsed.transactionId || txId,
         filingId,
         qualifier: parsed.qualifier,
@@ -474,6 +497,7 @@ Deno.serve(async (req: Request) => {
         presenterId,
         authValue,
         transactionId,
+        testFlag: filingMode !== "production",
       });
 
       const chRes = await fetch(CH_XML_GW, {
@@ -497,7 +521,7 @@ Deno.serve(async (req: Request) => {
             ch_barcode: barcode,
             accepted_at: new Date().toISOString(),
           })
-          .eq("ch_transaction_id", transactionId);
+          .eq("tenant_id",callerTenantId).eq("ch_transaction_id", transactionId);
       } else if (parsed.errors.length > 0) {
         await supabase
           .from("ch_filings")
@@ -505,7 +529,7 @@ Deno.serve(async (req: Request) => {
             status: "rejected",
             rejected_reason: parsed.errors.join("; "),
           })
-          .eq("ch_transaction_id", transactionId);
+          .eq("tenant_id",callerTenantId).eq("ch_transaction_id", transactionId);
       }
 
       return json({
@@ -561,7 +585,8 @@ Deno.serve(async (req: Request) => {
     // ═══════════════════════════════════════════════════════════
 
     if ((path === "reset-credentials" || body?.action === "reset-credentials") && req.method === "POST") {
-      const { tenantId, clientId } = body;
+      const tenantId = callerTenantId;
+      const { clientId } = body;
 
       // Clear client_credentials entries for CH
       if (tenantId) {
@@ -595,7 +620,9 @@ Deno.serve(async (req: Request) => {
       return json({
         companiesHouse: {
           enabled: !!chApiKey,
-          presenterId: presenterId || null,
+          presenterId: presenterId ? `${presenterId.slice(0,2)}***` : null,
+          filingMode,
+          productionValidated,
           email: null,
           apiKey: chApiKey ? "***" : "",
         },

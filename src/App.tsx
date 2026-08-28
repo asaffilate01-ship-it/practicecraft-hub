@@ -31,6 +31,7 @@ import AmlWorkbench from "@/pages/AmlWorkbench";
 import PayrollWorkbench from "@/pages/PayrollWorkbench";
 import AccountsPage from "@/pages/Accounts";
 import AccountsIntelligence from "@/pages/AccountsIntelligence";
+import RegulatoryReadiness from "@/pages/RegulatoryReadiness";
 import DocumentsLibrary from "@/pages/DocumentsLibrary";
 import ReportsPage from "@/pages/Reports";
 import PracticePage from "@/pages/Practice";
@@ -231,6 +232,7 @@ const AppRoutes = () => (
     {/* ── Accounts Production ──────────────────────────── */}
     <Route path="/accounts" element={<Guarded module="accounts" action="view"><AccountsPage /></Guarded>} />
     <Route path="/accounts-intelligence" element={<Guarded module="accounts" action="view"><AccountsIntelligence /></Guarded>} />
+    <Route path="/regulatory-readiness" element={<Guarded module="submissions" action="view"><RegulatoryReadiness /></Guarded>} />
 
     {/* ── Self Assessment ──────────────────────────────── */}
     <Route path="/self-assessment" element={<Guarded module="accounts" action="view"><SelfAssessment /></Guarded>} />

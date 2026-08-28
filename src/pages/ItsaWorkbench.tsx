@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarClock, FileCheck, FileText, Plus, Send, TrendingUp, Loader2 } from "lucide-react";
+import { AlertTriangle, CalendarClock, FileCheck, FileText, Plus, TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -19,6 +19,7 @@ const statusColors: Record<string, string> = {
   fulfilled: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
   overdue: "bg-destructive/10 text-destructive border-destructive/20",
   draft: "bg-muted text-muted-foreground",
+  ready: "bg-blue-500/10 text-blue-700 border-blue-200",
   submitted: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
   accepted: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
   rejected: "bg-destructive/10 text-destructive border-destructive/20",
@@ -142,26 +143,26 @@ export default function ItsaWorkbench() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const submitUpdate = useMutation({
+  const readyUpdate = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("itsa_updates").update({ status: "submitted", submitted_at: new Date().toISOString() }).eq("id", id);
+      const { error } = await supabase.from("itsa_updates").update({ status: "ready" }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["itsa-updates"] });
-      toast.success("Update marked as submitted");
+      toast.success("Update marked ready for future HMRC validation");
     },
     onError: (e: any) => toast.error(e.message),
   });
 
-  const submitDeclaration = useMutation({
+  const readyDeclaration = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("itsa_final_declarations").update({ status: "submitted", submitted_at: new Date().toISOString() }).eq("id", id);
+      const { error } = await supabase.from("itsa_final_declarations").update({ status: "ready" }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["itsa-declarations"] });
-      toast.success("Declaration marked as submitted");
+      toast.success("Declaration marked ready for future HMRC validation");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -177,9 +178,11 @@ export default function ItsaWorkbench() {
         </p>
       </div>
 
+      <Card className="border-warning/30 bg-warning/5"><CardContent className="flex items-start gap-2 pt-4 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><p>This is a preparation workbench. It does not currently call HMRC or file MTD Income Tax updates or final declarations.</p></CardContent></Card>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground uppercase tracking-wide">Open Obligations</div><div className="text-2xl font-bold mt-1">{openObligations}</div></CardContent></Card>
-        <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground uppercase tracking-wide">Updates Submitted</div><div className="text-2xl font-bold mt-1">{submittedUpdates}</div></CardContent></Card>
+        <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground uppercase tracking-wide">Legacy submitted status</div><div className="text-2xl font-bold mt-1">{submittedUpdates}</div></CardContent></Card>
         <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground uppercase tracking-wide">Final Declarations</div><div className="text-2xl font-bold mt-1">{declarations.length}</div></CardContent></Card>
         <Card><CardContent className="pt-4"><div className="text-xs text-muted-foreground uppercase tracking-wide">Clients</div><div className="text-2xl font-bold mt-1">{new Set(obligations.map((o: any) => o.client_id)).size}</div></CardContent></Card>
       </div>
@@ -264,9 +267,9 @@ export default function ItsaWorkbench() {
                         <TableCell><Badge variant="outline" className={statusColors[u.status] || ""}>{u.status}</Badge></TableCell>
                         <TableCell>
                           {u.status === "draft" && (
-                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Submit"
-                              onClick={() => submitUpdate.mutate(u.id)} disabled={submitUpdate.isPending}>
-                              <Send className="w-3.5 h-3.5" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Mark ready"
+                              onClick={() => readyUpdate.mutate(u.id)} disabled={readyUpdate.isPending}>
+                              <FileCheck className="w-3.5 h-3.5" />
                             </Button>
                           )}
                         </TableCell>
@@ -312,9 +315,9 @@ export default function ItsaWorkbench() {
                         <TableCell><Badge variant="outline" className={statusColors[d.status] || ""}>{d.status}</Badge></TableCell>
                         <TableCell>
                           {d.status === "draft" && (
-                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Submit"
-                              onClick={() => submitDeclaration.mutate(d.id)} disabled={submitDeclaration.isPending}>
-                              <Send className="w-3.5 h-3.5" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Mark ready"
+                              onClick={() => readyDeclaration.mutate(d.id)} disabled={readyDeclaration.isPending}>
+                              <FileCheck className="w-3.5 h-3.5" />
                             </Button>
                           )}
                         </TableCell>
