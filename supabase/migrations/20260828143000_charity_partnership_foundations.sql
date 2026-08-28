@@ -218,3 +218,6 @@ CREATE TRIGGER update_llp_accounts_reviews_updated_at BEFORE UPDATE ON public.ll
 COMMENT ON TABLE public.charity_annual_returns IS 'Prepared Charity Commission annual-return workspaces. Filing remains manual unless a regulator submission interface is separately approved.';
 COMMENT ON TABLE public.gift_aid_claims IS 'Charities Online claim workspaces. A sent or accepted state requires an immutable submission job and provider evidence.';
 COMMENT ON TABLE public.partnership_returns IS 'SA800 preparation and partner allocation workspaces. Production transmission requires current-year HMRC XML testing.';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.charity_profiles, public.charity_applications, public.gift_aid_claims, public.gift_aid_donations, public.charity_annual_returns, public.partnership_profiles, public.partners, public.partnership_returns, public.llp_accounts_reviews TO authenticated;
+GRANT ALL ON public.charity_profiles, public.charity_applications, public.gift_aid_claims, public.gift_aid_donations, public.charity_annual_returns, public.partnership_profiles, public.partners, public.partnership_returns, public.llp_accounts_reviews TO service_role;
