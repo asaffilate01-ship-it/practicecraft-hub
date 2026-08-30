@@ -22,8 +22,22 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/~oauth/],
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        globPatterns: [
+          "**/*.{css,html,ico,png,svg,woff2}",
+          "assets/index-*.js",
+          "assets/react-dom-*.js",
+          "assets/client-*.js",
+          "assets/jsx-runtime-*.js",
+        ],
         runtimeCaching: [
+          {
+            urlPattern: /\/assets\/.*\.js$/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "practicecraft-route-modules",
+              expiration: { maxEntries: 120, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            },
+          },
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: "NetworkFirst",

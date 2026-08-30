@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint:security": "eslint src/lib/edgeFunctions.ts src/components/billing/InvoicePaymentButton.tsx src/components/billing/StripeCheckoutButton.tsx src/components/client/CredentialsTab.tsx src/components/secretarial/AuthCodeModal.tsx src/pages/GdprSettings.tsx src/pages/PaymentHistory.tsx src/pages/portal/PortalInvoiceDetailPage.tsx src/pages/portal/PortalInvoicesPage.tsx src/test/goLiveSecurityContracts.test.ts",
+    "security:contracts": "vitest run src/test/goLiveSecurityContracts.test.ts"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
