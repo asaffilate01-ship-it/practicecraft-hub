@@ -19,7 +19,7 @@ const iconByKind = {
   submission: Send,
 };
 
-const humanise = (value: string) => value.split("_").join(" ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+const humanise = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 export function ClientActivityTimeline({ clientId }: { clientId: string }) {
   const { data = [], isLoading } = useQuery({

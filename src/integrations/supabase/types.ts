@@ -14,6 +14,147 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts_compliance_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          period_id: string
+          reason: string | null
+          snapshot: Json
+          tenant_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          period_id: string
+          reason?: string | null
+          snapshot?: Json
+          tenant_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          period_id?: string
+          reason?: string | null
+          snapshot?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_compliance_events_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_compliance_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounts_compliance_profiles: {
+        Row: {
+          comparatives_complete: boolean
+          comparatives_required: boolean
+          created_at: string
+          disclosure_checks: Json
+          entity_size: string
+          framework: string
+          framework_eligibility_confirmed: boolean
+          id: string
+          locked_snapshot: Json | null
+          period_id: string
+          policy_data: Json
+          prepared_at: string | null
+          prepared_by_user_id: string | null
+          reopen_reason: string | null
+          reopened_at: string | null
+          reopened_by_user_id: string | null
+          review_statement: string | null
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
+          rounding_basis: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          comparatives_complete?: boolean
+          comparatives_required?: boolean
+          created_at?: string
+          disclosure_checks?: Json
+          entity_size?: string
+          framework?: string
+          framework_eligibility_confirmed?: boolean
+          id?: string
+          locked_snapshot?: Json | null
+          period_id: string
+          policy_data?: Json
+          prepared_at?: string | null
+          prepared_by_user_id?: string | null
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by_user_id?: string | null
+          review_statement?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          rounding_basis?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          comparatives_complete?: boolean
+          comparatives_required?: boolean
+          created_at?: string
+          disclosure_checks?: Json
+          entity_size?: string
+          framework?: string
+          framework_eligibility_confirmed?: boolean
+          id?: string
+          locked_snapshot?: Json | null
+          period_id?: string
+          policy_data?: Json
+          prepared_at?: string | null
+          prepared_by_user_id?: string | null
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by_user_id?: string | null
+          review_statement?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          rounding_basis?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_compliance_profiles_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: true
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_compliance_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounting_judgements: {
         Row: {
           amount_pence: number | null
@@ -5161,51 +5302,153 @@ export type Database = {
           },
         ]
       }
+      ixbrl_filing_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          evidence: Json
+          filing_instance_id: string
+          id: string
+          tenant_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          evidence?: Json
+          filing_instance_id: string
+          id?: string
+          tenant_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          evidence?: Json
+          filing_instance_id?: string
+          id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ixbrl_filing_events_filing_instance_id_fkey"
+            columns: ["filing_instance_id"]
+            isOneToOne: false
+            referencedRelation: "ixbrl_filing_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ixbrl_filing_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ixbrl_filing_instances: {
         Row: {
           accounts_period_id: string | null
+          blocking_issue_count: number
           client_id: string
+          content_sha256: string | null
           created_at: string
+          external_validation_evidence: Json
+          external_validation_status: string
+          facts_review_statement: string | null
+          facts_reviewed_at: string | null
+          facts_reviewed_by_user_id: string | null
+          facts_json: Json
           generated_at: string | null
           generated_xbrl: string | null
           id: string
+          live_filing_enabled: boolean
+          mapping_coverage: number
+          package_kind: string
+          package_version: number
+          preflight_status: string
+          prepared_by_user_id: string | null
+          renderer_version: string | null
+          source_snapshot: Json
           status: string
           submission_job_id: string | null
           submitted_at: string | null
           taxonomy_id: string
           tenant_id: string
+          test_package_evidence: Json
+          test_package_status: string
           updated_at: string
           validation_errors_json: Json
+          warning_issue_count: number
         }
         Insert: {
           accounts_period_id?: string | null
+          blocking_issue_count?: number
           client_id: string
+          content_sha256?: string | null
           created_at?: string
+          external_validation_evidence?: Json
+          external_validation_status?: string
+          facts_review_statement?: string | null
+          facts_reviewed_at?: string | null
+          facts_reviewed_by_user_id?: string | null
+          facts_json?: Json
           generated_at?: string | null
           generated_xbrl?: string | null
           id?: string
+          live_filing_enabled?: boolean
+          mapping_coverage?: number
+          package_kind?: string
+          package_version?: number
+          preflight_status?: string
+          prepared_by_user_id?: string | null
+          renderer_version?: string | null
+          source_snapshot?: Json
           status?: string
           submission_job_id?: string | null
           submitted_at?: string | null
           taxonomy_id: string
           tenant_id: string
+          test_package_evidence?: Json
+          test_package_status?: string
           updated_at?: string
           validation_errors_json?: Json
+          warning_issue_count?: number
         }
         Update: {
           accounts_period_id?: string | null
+          blocking_issue_count?: number
           client_id?: string
+          content_sha256?: string | null
           created_at?: string
+          external_validation_evidence?: Json
+          external_validation_status?: string
+          facts_review_statement?: string | null
+          facts_reviewed_at?: string | null
+          facts_reviewed_by_user_id?: string | null
+          facts_json?: Json
           generated_at?: string | null
           generated_xbrl?: string | null
           id?: string
+          live_filing_enabled?: boolean
+          mapping_coverage?: number
+          package_kind?: string
+          package_version?: number
+          preflight_status?: string
+          prepared_by_user_id?: string | null
+          renderer_version?: string | null
+          source_snapshot?: Json
           status?: string
           submission_job_id?: string | null
           submitted_at?: string | null
           taxonomy_id?: string
           tenant_id?: string
+          test_package_evidence?: Json
+          test_package_status?: string
           updated_at?: string
           validation_errors_json?: Json
+          warning_issue_count?: number
         }
         Relationships: [
           {
@@ -5338,30 +5581,51 @@ export type Database = {
       }
       ixbrl_taxonomies: {
         Row: {
+          accepted_period_end: string | null
+          accepted_period_start: string | null
+          authority_url: string | null
           created_at: string
           id: string
           is_active: boolean
           name: string
+          reference_status: string
+          release_date: string | null
           schema_url: string | null
           taxonomy_type: string
+          validation_profile: string | null
+          verified_at: string | null
           version: string
         }
         Insert: {
+          accepted_period_end?: string | null
+          accepted_period_start?: string | null
+          authority_url?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           name: string
+          reference_status?: string
+          release_date?: string | null
           schema_url?: string | null
           taxonomy_type?: string
+          validation_profile?: string | null
+          verified_at?: string | null
           version: string
         }
         Update: {
+          accepted_period_end?: string | null
+          accepted_period_start?: string | null
+          authority_url?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           name?: string
+          reference_status?: string
+          release_date?: string | null
           schema_url?: string | null
           taxonomy_type?: string
+          validation_profile?: string | null
+          verified_at?: string | null
           version?: string
         }
         Relationships: []
@@ -8496,6 +8760,123 @@ export type Database = {
           },
         ]
       }
+      regulatory_capability_controls: {
+        Row: {
+          application_reference: string | null
+          capability_key: string
+          control_status: string
+          created_at: string
+          created_by_user_id: string | null
+          id: string
+          next_review_date: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_user_id: string | null
+          production_enabled: boolean
+          production_enabled_at: string | null
+          production_enabled_by_user_id: string | null
+          production_gate_reason: string | null
+          target_date: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          application_reference?: string | null
+          capability_key: string
+          control_status?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          production_enabled?: boolean
+          production_enabled_at?: string | null
+          production_enabled_by_user_id?: string | null
+          production_gate_reason?: string | null
+          target_date?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          application_reference?: string | null
+          capability_key?: string
+          control_status?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          production_enabled?: boolean
+          production_enabled_at?: string | null
+          production_enabled_by_user_id?: string | null
+          production_gate_reason?: string | null
+          target_date?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      regulatory_readiness_evidence: {
+        Row: {
+          capability_key: string
+          created_at: string
+          document_id: string | null
+          environment: string
+          evidence_kind: string
+          evidence_url: string | null
+          id: string
+          notes: string | null
+          recorded_by_user_id: string | null
+          reference: string | null
+          result: string
+          tenant_id: string
+          tested_at: string | null
+          title: string
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          capability_key: string
+          created_at?: string
+          document_id?: string | null
+          environment?: string
+          evidence_kind: string
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          recorded_by_user_id?: string | null
+          reference?: string | null
+          result?: string
+          tenant_id: string
+          tested_at?: string | null
+          title: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          capability_key?: string
+          created_at?: string
+          document_id?: string | null
+          environment?: string
+          evidence_kind?: string
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          recorded_by_user_id?: string | null
+          reference?: string | null
+          result?: string
+          tenant_id?: string
+          tested_at?: string | null
+          title?: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       proposals: {
         Row: {
           accepted_at: string | null
@@ -11442,6 +11823,18 @@ export type Database = {
         Args: { p_period_id: string; p_review_statement: string }
         Returns: Json
       }
+      approve_ixbrl_facts_review: {
+        Args: { p_filing_instance_id: string; p_review_statement: string }
+        Returns: Json
+      }
+      build_ixbrl_preflight: {
+        Args: {
+          p_package_kind?: string
+          p_period_id: string
+          p_taxonomy_id: string
+        }
+        Returns: Json
+      }
       can_portal_view_pay_run: {
         Args: { _run_id: string; _user_id: string }
         Returns: boolean
@@ -11479,7 +11872,10 @@ export type Database = {
         }
         Returns: boolean
       }
-      mark_accounts_prepared: { Args: { p_period_id: string }; Returns: Json }
+      mark_accounts_prepared: {
+        Args: { p_period_id: string }
+        Returns: Json
+      }
       post_bank_transaction: {
         Args: { p_transaction_id: string }
         Returns: string
@@ -11490,6 +11886,14 @@ export type Database = {
       }
       run_accounts_intelligence: {
         Args: { p_client_id: string; p_period_id: string }
+        Returns: Json
+      }
+      reopen_accounts_period: {
+        Args: { p_period_id: string; p_reason: string }
+        Returns: Json
+      }
+      request_ixbrl_test_package: {
+        Args: { p_filing_instance_id: string }
         Returns: Json
       }
       seed_template_whitelist: {

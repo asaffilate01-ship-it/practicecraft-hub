@@ -1,73 +1,46 @@
-# Welcome to your Lovable project
+# PracticeCraft Hub
 
-## Project info
+PracticeCraft Hub is a UK accountancy-practice platform covering practice management, client and employee portals, accounts preparation, bookkeeping intelligence and regulator-facing workbenches.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Current release status
 
-## How can I edit this code?
+The application is a controlled beta. It must not be used for production client data or live regulatory filing until the deployment, tenant-isolation and regulator evidence gates in [`docs/go-live-readiness.md`](docs/go-live-readiness.md) are complete.
 
-There are several ways of editing your application.
+The current filing foundations include VAT MTD, selected Companies House secretarial forms, payroll/RTI, Corporation Tax, Self Assessment, MTD Income Tax, charities, Gift Aid, partnerships and LLPs. A visible workbench or generated payload is not evidence of HMRC recognition or Companies House acceptance.
 
-**Use Lovable**
+## Local development
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requirements: Node.js 22 and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+cp .env.example .env.local
+npm ci
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Required browser variables are documented in `.env.example`. Server credentials belong in Supabase Edge Function secrets and must never use the `VITE_` prefix.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Verification
 
-**Use GitHub Codespaces**
+```sh
+npm run typecheck
+npm run lint:security
+npm test
+npm run build
+npm audit --omit=dev --audit-level=high
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+GitHub Actions runs these checks on pull requests and release branches. The migration job additionally rebuilds a local Supabase database from the complete migration chain.
 
-## What technologies are used for this project?
+## Deployment
 
-This project is built with:
+Use a separate Supabase staging project before production:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Apply the migration chain in order.
+2. Configure the secrets listed in [`docs/go-live-security-stage.md`](docs/go-live-security-stage.md).
+3. Deploy the updated `stripe`, `stripe-webhook`, `portal` and `secretarial` functions.
+4. Register the Stripe webhook and retain a signed-event test report.
+5. Run the four-role and cross-tenant acceptance matrix.
+6. Promote the exact tested commit; do not deploy an untested working tree.
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Production switches for HMRC and Companies House remain fail-closed until their corresponding recognition or test-service evidence is complete.
