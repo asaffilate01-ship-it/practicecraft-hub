@@ -85,3 +85,11 @@ The benchmark is capability and workflow quality, not visual copying.
 - attach immutable request, response, receipt, approval and software-version evidence to every submission;
 - complete four-role, cross-tenant, accessibility, mobile and disaster-recovery testing; and
 - obtain the relevant HMRC recognition and Companies House software filing approval before marketing production filing.
+
+### Stage C1 — implemented in the regulatory control commit
+
+- replaced the static readiness page with a tenant-persistent Regulatory Control Centre;
+- documented each required REST API, XML gateway, OAuth/credential route and portal-only handoff;
+- added accountable owners, application references, target/review dates and blockers per filing capability;
+- added a structured evidence register for sandbox, schema, fraud-header, security, accessibility and recognition results; and
+- added a database-enforced production kill switch that authenticated browser users cannot enable.
