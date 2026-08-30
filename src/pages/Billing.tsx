@@ -18,6 +18,7 @@ import { InvoicePaymentButton } from "@/components/billing/InvoicePaymentButton"
 import { SubscriptionPlans } from "@/components/billing/SubscriptionPlans";
 import { RecurringInvoiceBuilder } from "@/components/billing/RecurringInvoiceBuilder";
 import { DunningWorkflow } from "@/components/billing/DunningWorkflow";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -154,15 +155,7 @@ export default function Billing() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Billing</h1>
-          <p className="text-sm text-muted-foreground">Invoicing, recurring billing, payment tracking & collections</p>
-        </div>
-        <Button className="gap-2" onClick={() => { setForm({ ...form, invoice_number: nextInvoiceNumber() }); setShowCreate(true); }}>
-          <Plus className="w-4 h-4" /> New Invoice
-        </Button>
-      </div>
+      <WorkspacePageHeader eyebrow="Fees and collections" title="Billing" icon={CreditCard} description="Invoicing, recurring billing, payment tracking and collections." actions={<Button className="gap-2" onClick={() => { setForm({ ...form, invoice_number: nextInvoiceNumber() }); setShowCreate(true); }}><Plus className="h-4 w-4" /> New Invoice</Button>} />
 
       <Tabs defaultValue="invoices">
         <TabsList>

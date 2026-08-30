@@ -8,12 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useClientContext } from "@/contexts/ClientContext";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 export default function PartnershipsWorkbench() {
   const { tenantId } = usePermissions();
   const queryClient = useQueryClient();
   const sb = supabase as any;
   const [clientId, setClientId] = useState("");
+  const { selectedClientId, selectClient } = useClientContext();
 
   const { data: clients = [] } = useQuery({
     queryKey: ["partnership-clients", tenantId],
@@ -24,8 +27,17 @@ export default function PartnershipsWorkbench() {
     },
     enabled: !!tenantId,
   });
-  useEffect(() => { if (!clientId && clients[0]?.id) setClientId(clients[0].id); }, [clients, clientId]);
+  useEffect(() => {
+    if (clientId) return;
+    const selectedClient = clients.find((client) => client.id === selectedClientId) ?? clients[0];
+    if (selectedClient) setClientId(selectedClient.id);
+  }, [clients, clientId, selectedClientId]);
   const selected = clients.find((client) => client.id === clientId);
+  const chooseClient = (id: string) => {
+    setClientId(id);
+    const client = clients.find((item) => item.id === id);
+    if (client) selectClient(client.id, client.legal_name);
+  };
 
   const { data: profile } = useQuery({
     queryKey: ["partnership-profile", clientId],
@@ -69,8 +81,8 @@ export default function PartnershipsWorkbench() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><div className="flex items-center gap-2"><Users className="h-6 w-6 text-primary" /><h1 className="text-2xl font-bold">Partnerships & LLPs</h1></div><p className="mt-1 text-sm text-muted-foreground">Accounts production, partner allocations, SA800 preparation and LLP Companies House controls.</p></div><Select value={clientId} onValueChange={setClientId}><SelectTrigger className="w-full lg:w-80"><SelectValue placeholder="Select partnership or LLP" /></SelectTrigger><SelectContent>{clients.map((client) => <SelectItem key={client.id} value={client.id}>{client.legal_name} · {client.entity_type.toUpperCase()}</SelectItem>)}</SelectContent></Select></div>
-      <Card className="border-warning/30 bg-warning/5"><CardContent className="pt-6 text-sm">SA800 and LLP filing states remain preparation-only until the current HMRC XML and Companies House iXBRL test suites are accepted. Partner allocations require explicit review before a return can be marked ready.</CardContent></Card>
+      <WorkspacePageHeader eyebrow="Entity compliance" title="Partnerships & LLPs" icon={Users} description="Accounts production, partner allocations, SA800 preparation and LLP Companies House controls." actions={<Select value={clientId} onValueChange={chooseClient}><SelectTrigger className="w-full bg-card lg:w-80"><SelectValue placeholder="Select partnership or LLP" /></SelectTrigger><SelectContent>{clients.map((client) => <SelectItem key={client.id} value={client.id}>{client.legal_name} · {client.entity_type.toUpperCase()}</SelectItem>)}</SelectContent></Select>} />
+      <Card className="workspace-panel border-warning/30 bg-warning/5"><CardContent className="pt-6 text-sm">SA800 and LLP filing states remain preparation-only until the current HMRC XML and Companies House iXBRL test suites are accepted. Partner allocations require explicit review before a return can be marked ready.</CardContent></Card>
       {!clients.length ? <Card><CardContent className="py-12 text-center text-sm text-muted-foreground">Add a Partnership or LLP client to begin.</CardContent></Card> : <div className="grid gap-4 lg:grid-cols-3">
         <Card><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Building2 className="h-4 w-4" /> Entity profile</CardTitle><CardDescription>UTR, Companies House number, accounting date and nominated partner.</CardDescription></CardHeader><CardContent className="space-y-4"><Badge variant="outline">{selected?.entity_type?.toUpperCase()}</Badge><Button className="w-full" variant="outline" onClick={() => setup.mutate()} disabled={setup.isPending}>{profile ? "Refresh profile" : "Create profile"}</Button></CardContent></Card>
         <Card><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Users className="h-4 w-4" /> Partners</CardTitle><CardDescription>Join/leave dates, partner type and profit/loss allocation controls.</CardDescription></CardHeader><CardContent><div className="text-3xl font-semibold">{partners.filter((partner: any) => !partner.left_at).length}</div><p className="mt-2 text-xs text-muted-foreground">Active partners recorded</p></CardContent></Card>

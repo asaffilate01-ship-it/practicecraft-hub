@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Code2, Database, FileCheck, FileCode, Plus, Search, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -72,15 +73,8 @@ export default function IxbrlTagging() {
     : mappings;
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <Code2 className="w-6 h-6 text-primary" /> iXBRL Tagging
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Map chart of accounts to iXBRL taxonomy tags for statutory accounts and CT600 filings
-        </p>
-      </div>
+    <div className="space-y-6">
+      <WorkspacePageHeader eyebrow="Digital filing preparation" title="iXBRL Tagging" icon={Code2} description="Map the chart of accounts to taxonomy tags for statutory accounts and CT600 filings." />
 
       <Card className="border-warning/30 bg-warning/5"><CardContent className="flex items-start gap-2 pt-4 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><p>Tag mappings are preparation data only. PracticeCraft does not yet generate or validate a standards-conformant accounts or computation iXBRL document.</p></CardContent></Card>
 

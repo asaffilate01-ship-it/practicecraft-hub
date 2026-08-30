@@ -33,4 +33,33 @@ describe("product unification contracts", () => {
     expect(companiesHouse).toContain('event_type: "companies_house_company_synced"');
     expect(companiesHouse).toContain('.eq("tenant_id",callerTenantId)');
   });
+
+  it("keeps one selected client visible across practice modules", () => {
+    const layout = read("src/components/layout/AppLayout.tsx");
+    const clientBar = read("src/components/layout/ClientWorkspaceBar.tsx");
+    expect(layout).toContain("<ClientWorkspaceBar />");
+    expect(clientBar).toContain("selectedClientId");
+    expect(clientBar).toContain("entityRoutes");
+    expect(read("src/pages/ClientDetail.tsx")).toContain("<ClientActivityTimeline");
+  });
+
+  it("uses persistent operational records instead of sample dashboards", () => {
+    const proposals = read("src/pages/Proposals.tsx");
+    const calendar = read("src/pages/Calendar.tsx");
+    const currencies = read("src/pages/MultiCurrency.tsx");
+    const trialBalance = read("src/pages/TrialBalanceImport.tsx");
+    expect(proposals).toContain('from("proposals")');
+    expect(calendar).toContain('from("calendar_events")');
+    expect(currencies).toContain('from("currencies")');
+    expect(currencies).toContain('from("ec_sales_entries")');
+    expect(trialBalance).toContain('from("tb_imports")');
+    expect(trialBalance).toContain("parseTrialBalance");
+    expect(`${proposals}${calendar}${currencies}${trialBalance}`).not.toContain("SAMPLE_");
+  });
+
+  it("applies the shared workspace header to specialist workbenches", () => {
+    for (const page of ["CharitiesWorkbench", "PartnershipsWorkbench", "AmlWorkbench", "CisWorkbench", "ItsaWorkbench", "PensionWorkbench", "IxbrlTagging", "Incorporations", "Submissions"]) {
+      expect(read(`src/pages/${page}.tsx`)).toContain("<WorkspacePageHeader");
+    }
+  });
 });

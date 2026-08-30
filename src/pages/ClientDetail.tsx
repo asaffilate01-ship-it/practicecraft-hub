@@ -15,6 +15,7 @@ import { VatTab } from "@/components/client/VatTab";
 import { PayrollTab } from "@/components/client/PayrollTab";
 import { CredentialsTab } from "@/components/client/CredentialsTab";
 import { useClientContext } from "@/contexts/ClientContext";
+import { ClientActivityTimeline } from "@/components/client/ClientActivityTimeline";
 
 const entityLabels: Record<string, string> = {
   ltd: "Ltd Company", sole_trader: "Sole Trader", partnership: "Partnership",
@@ -96,7 +97,7 @@ export default function ClientDetail() {
       )}
 
       <Tabs defaultValue="overview">
-        <TabsList>
+        <TabsList className="w-max min-w-full justify-start">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tasks">Tasks ({taskCount})</TabsTrigger>
           <TabsTrigger value="secretarial">Secretarial</TabsTrigger>
@@ -145,6 +146,7 @@ export default function ClientDetail() {
             </CardContent>
           </Card>
           </div>
+          <div className="mt-4"><ClientActivityTimeline clientId={client.id} /></div>
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-4">

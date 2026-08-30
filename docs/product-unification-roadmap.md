@@ -60,11 +60,23 @@ The benchmark is capability and workflow quality, not visual copying.
 
 ### Stage B — next build
 
-- introduce a common client workspace header and timeline across bookkeeping, accounts, tax, payroll, VAT and secretarial;
-- convert remaining list/workbench pages to shared filters, KPIs, empty states and mobile cards;
+- finish the common client workspace header conversion inside every bookkeeping, accounts, tax, payroll, VAT and secretarial detail screen;
+- finish converting lower-priority list/workbench pages to shared filters, KPIs, empty states and mobile cards;
 - move practice-level AI suggestions into controlled Review Centre sections;
 - add saved views, assignee/work-status filters and bulk operations that actually execute;
 - add company secretarial document generation and register exports.
+
+### Stage B1 — implemented in the next-phase commit
+
+- added a persistent selected-client workspace bar with entity-aware links, task warnings and submission state;
+- added a cross-module client activity timeline sourced from audit events, tasks, documents and submission jobs;
+- linked charity and partnership selectors to the shared client context;
+- converted AML, CIS, ITSA, pensions, iXBRL, incorporations, submissions, billing, documents, charity and partnership headers to the shared responsive hierarchy;
+- removed duplicated inner-page padding from specialist workbenches;
+- replaced hard-coded proposal examples with tenant-scoped proposal persistence;
+- replaced the hard-coded March 2026 calendar with persistent monthly client/staff events and mobile agenda cards; and
+- replaced hard-coded currencies and EC Sales examples with tenant-scoped database records, while leaving automatic rate refresh disabled until a provider is configured.
+- replaced the sample trial balance with real CSV parsing, exact-code mapping, balance validation and a persistent review history; ledger posting remains a separate controlled action.
 
 ### Stage C — regulatory completion
 
