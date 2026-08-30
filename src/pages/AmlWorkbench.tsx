@@ -21,6 +21,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const RISK_COLORS: Record<string, string> = {
   low: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
@@ -187,19 +188,7 @@ export default function AmlWorkbench() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
-            AML / KYC Workbench
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Client identity verification, PEP screening, risk scoring, and compliance cases.
-          </p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="w-4 h-4 mr-1.5" /> New Case
-        </Button>
-      </div>
+      <WorkspacePageHeader eyebrow="Client compliance" title="AML / KYC Workbench" icon={ShieldCheck} description="Client identity verification, PEP screening, risk scoring and compliance cases." actions={<Button onClick={() => setCreateOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> New Case</Button>} />
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

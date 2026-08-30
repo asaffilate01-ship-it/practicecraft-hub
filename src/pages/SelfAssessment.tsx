@@ -16,6 +16,7 @@ import { DueDatePill } from "@/components/ui/due-date-pill";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { FileText, Send, Calculator, CheckCircle2, Clock, AlertTriangle, Plus, Pencil, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 import { useNavigate } from "react-router-dom";
 
 const SA_FORMS = [
@@ -103,12 +104,7 @@ export default function SelfAssessment() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Self Assessment</h1>
-          <p className="text-muted-foreground">SA100, SA800 & SA900 returns</p>
-        </div>
-        <div className="flex items-center gap-3">
+      <WorkspacePageHeader eyebrow="Personal and partnership tax" title="Self Assessment" description="SA100, SA800 and SA900 preparation with review, approval and submission evidence." actions={<>
           <Select value={filterForm} onValueChange={setFilterForm}>
             <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -121,8 +117,7 @@ export default function SelfAssessment() {
           <Button className="gap-1.5" onClick={() => setShowNewPeriod(true)}>
             <Plus className="w-4 h-4" /> New SA Return
           </Button>
-        </div>
-      </div>
+        </>} />
 
       <Card className="border-warning/30 bg-warning/5"><CardContent className="flex items-start gap-2 pt-4 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><p>Preparation only: PracticeCraft does not yet generate or file current-year Self Assessment returns. Any existing “submitted” status is a legacy workflow record and must be checked against an HMRC receipt.</p></CardContent></Card>
 

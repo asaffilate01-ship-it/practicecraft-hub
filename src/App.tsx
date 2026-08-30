@@ -9,108 +9,105 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { CookieConsent } from "@/components/CookieConsent";
+import { lazy, Suspense } from "react";
 
 
 
-// ── Pages ───────────────────────────────────────────────────
-import Dashboard from "@/pages/Dashboard";
-import Clients from "@/pages/Clients";
-import ClientDetail from "@/pages/ClientDetail";
-import Tasks from "@/pages/Tasks";
-import Bookkeeping from "@/pages/Bookkeeping";
-import BankFeeds from "@/pages/BankFeeds";
-import CategorisationRules from "@/pages/CategorisationRules";
-import ClientOnboarding from "@/pages/ClientOnboarding";
-import VatReturns from "@/pages/VatReturns";
-import Billing from "@/pages/Billing";
-import Settings from "@/pages/Settings";
-import Secretarial from "@/pages/Secretarial";
-import Incorporations from "@/pages/Incorporations";
-import Submissions from "@/pages/Submissions";
-import AmlWorkbench from "@/pages/AmlWorkbench";
-import PayrollWorkbench from "@/pages/PayrollWorkbench";
-import AccountsPage from "@/pages/Accounts";
-import AccountsIntelligence from "@/pages/AccountsIntelligence";
-import RegulatoryReadiness from "@/pages/RegulatoryReadiness";
-import DocumentsLibrary from "@/pages/DocumentsLibrary";
-import ReportsPage from "@/pages/Reports";
-import PracticePage from "@/pages/Practice";
-import TenantOnboarding from "@/pages/TenantOnboarding";
-
-import BrandingSettings from "@/pages/BrandingSettings";
-import NotificationSettings from "@/pages/NotificationSettings";
-import GdprSettings from "@/pages/GdprSettings";
-import SecuritySettings from "@/pages/SecuritySettings";
-import FilingHistory from "@/pages/FilingHistory";
-import WorkflowsPage from "@/pages/WorkflowsPage";
-import IntegrationsHub from "@/pages/IntegrationsHub";
-import SubmissionJobDetail from "@/pages/SubmissionJobDetail";
-import PaymentHistory from "@/pages/PaymentHistory";
-import CompaniesHouseWizard from "@/pages/CompaniesHouseWizard";
-import HmrcWizard from "@/pages/HmrcWizard";
-import AuditLog from "@/pages/AuditLog";
-import DocumentRequests from "@/pages/DocumentRequests";
-import ESignatures from "@/pages/ESignatures";
-import AmlMonitoring from "@/pages/AmlMonitoring";
-import TimeRecording from "@/pages/TimeRecording";
-import EmailTemplates from "@/pages/EmailTemplates";
-import TenantAdmin from "@/pages/TenantAdmin";
-import FpsBuilderPage from "@/pages/rti/FpsBuilderPage";
-import EpsBuilderPage from "@/pages/rti/EpsBuilderPage";
-import SelfAssessment from "@/pages/SelfAssessment";
-import CharitiesWorkbench from "@/pages/CharitiesWorkbench";
-import PartnershipsWorkbench from "@/pages/PartnershipsWorkbench";
-import CorporationTax from "@/pages/CorporationTax";
-import CisWorkbench from "@/pages/CisWorkbench";
-import ItsaWorkbench from "@/pages/ItsaWorkbench";
-import IxbrlTagging from "@/pages/IxbrlTagging";
-import MultiCurrency from "@/pages/MultiCurrency";
-import Proposals from "@/pages/Proposals";
-import Calendar from "@/pages/Calendar";
-import TrialBalanceImport from "@/pages/TrialBalanceImport";
-import PensionWorkbench from "@/pages/PensionWorkbench";
-import InvoiceEntry from "@/pages/InvoiceEntry";
-import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import TermsOfService from "@/pages/TermsOfService";
-import VatReturnDetail from "@/pages/VatReturnDetail";
-import VatObligations from "@/pages/VatObligations";
-import PayrollEmployerDetail from "@/pages/PayrollEmployerDetail";
-import PayrollRunDetail from "@/pages/PayrollRunDetail";
-import SecretarialChangeDetail from "@/pages/SecretarialChangeDetail";
-import IncorporationDetail from "@/pages/IncorporationDetail";
-import AmlCaseDetail from "@/pages/AmlCaseDetail";
-import BillingPlans from "@/pages/BillingPlans";
-import RolesManagement from "@/pages/RolesManagement";
-import { StaffUsersTab } from "@/pages/practice/StaffUsersTab";
-
-// ── Auth pages ──────────────────────────────────────────────
-import Login from "@/pages/auth/Login";
-import Signup from "@/pages/auth/Signup";
-import PortalSignup from "@/pages/auth/PortalSignup";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
-import ResetPassword from "@/pages/auth/ResetPassword";
-import HmrcCallback from "@/pages/auth/HmrcCallback";
-import NotFound from "./pages/NotFound";
-
-// ── Portal / Employee pages ─────────────────────────────────
-import PortalHome from "@/pages/portal/PortalHome";
-import EmployeePayslips from "@/pages/employee/EmployeePayslips";
+// Route-level splitting keeps the mobile shell small. A module is downloaded
+// only when the user opens it.
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Clients = lazy(() => import("@/pages/Clients"));
+const ClientDetail = lazy(() => import("@/pages/ClientDetail"));
+const Tasks = lazy(() => import("@/pages/Tasks"));
+const Bookkeeping = lazy(() => import("@/pages/Bookkeeping"));
+const BankFeeds = lazy(() => import("@/pages/BankFeeds"));
+const CategorisationRules = lazy(() => import("@/pages/CategorisationRules"));
+const ClientOnboarding = lazy(() => import("@/pages/ClientOnboarding"));
+const VatReturns = lazy(() => import("@/pages/VatReturns"));
+const Billing = lazy(() => import("@/pages/Billing"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Secretarial = lazy(() => import("@/pages/Secretarial"));
+const CompanySecretarialRecord = lazy(() => import("@/pages/CompanySecretarialRecord"));
+const Incorporations = lazy(() => import("@/pages/Incorporations"));
+const Submissions = lazy(() => import("@/pages/Submissions"));
+const AmlWorkbench = lazy(() => import("@/pages/AmlWorkbench"));
+const PayrollWorkbench = lazy(() => import("@/pages/PayrollWorkbench"));
+const AccountsPage = lazy(() => import("@/pages/Accounts"));
+const AccountsIntelligence = lazy(() => import("@/pages/AccountsIntelligence"));
+const RegulatoryReadiness = lazy(() => import("@/pages/RegulatoryReadiness"));
+const DocumentsLibrary = lazy(() => import("@/pages/DocumentsLibrary"));
+const ReportsPage = lazy(() => import("@/pages/Reports"));
+const PracticePage = lazy(() => import("@/pages/Practice"));
+const TenantOnboarding = lazy(() => import("@/pages/TenantOnboarding"));
+const BrandingSettings = lazy(() => import("@/pages/BrandingSettings"));
+const NotificationSettings = lazy(() => import("@/pages/NotificationSettings"));
+const GdprSettings = lazy(() => import("@/pages/GdprSettings"));
+const SecuritySettings = lazy(() => import("@/pages/SecuritySettings"));
+const FilingHistory = lazy(() => import("@/pages/FilingHistory"));
+const WorkflowsPage = lazy(() => import("@/pages/WorkflowsPage"));
+const IntegrationsHub = lazy(() => import("@/pages/IntegrationsHub"));
+const SubmissionJobDetail = lazy(() => import("@/pages/SubmissionJobDetail"));
+const PaymentHistory = lazy(() => import("@/pages/PaymentHistory"));
+const CompaniesHouseWizard = lazy(() => import("@/pages/CompaniesHouseWizard"));
+const HmrcWizard = lazy(() => import("@/pages/HmrcWizard"));
+const AuditLog = lazy(() => import("@/pages/AuditLog"));
+const DocumentRequests = lazy(() => import("@/pages/DocumentRequests"));
+const ESignatures = lazy(() => import("@/pages/ESignatures"));
+const AmlMonitoring = lazy(() => import("@/pages/AmlMonitoring"));
+const TimeRecording = lazy(() => import("@/pages/TimeRecording"));
+const EmailTemplates = lazy(() => import("@/pages/EmailTemplates"));
+const TenantAdmin = lazy(() => import("@/pages/TenantAdmin"));
+const FpsBuilderPage = lazy(() => import("@/pages/rti/FpsBuilderPage"));
+const EpsBuilderPage = lazy(() => import("@/pages/rti/EpsBuilderPage"));
+const SelfAssessment = lazy(() => import("@/pages/SelfAssessment"));
+const CharitiesWorkbench = lazy(() => import("@/pages/CharitiesWorkbench"));
+const PartnershipsWorkbench = lazy(() => import("@/pages/PartnershipsWorkbench"));
+const CorporationTax = lazy(() => import("@/pages/CorporationTax"));
+const CisWorkbench = lazy(() => import("@/pages/CisWorkbench"));
+const ItsaWorkbench = lazy(() => import("@/pages/ItsaWorkbench"));
+const IxbrlTagging = lazy(() => import("@/pages/IxbrlTagging"));
+const MultiCurrency = lazy(() => import("@/pages/MultiCurrency"));
+const Proposals = lazy(() => import("@/pages/Proposals"));
+const Calendar = lazy(() => import("@/pages/Calendar"));
+const TrialBalanceImport = lazy(() => import("@/pages/TrialBalanceImport"));
+const PensionWorkbench = lazy(() => import("@/pages/PensionWorkbench"));
+const InvoiceEntry = lazy(() => import("@/pages/InvoiceEntry"));
+const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("@/pages/TermsOfService"));
+const VatReturnDetail = lazy(() => import("@/pages/VatReturnDetail"));
+const VatObligations = lazy(() => import("@/pages/VatObligations"));
+const PayrollEmployerDetail = lazy(() => import("@/pages/PayrollEmployerDetail"));
+const PayrollRunDetail = lazy(() => import("@/pages/PayrollRunDetail"));
+const SecretarialChangeDetail = lazy(() => import("@/pages/SecretarialChangeDetail"));
+const IncorporationDetail = lazy(() => import("@/pages/IncorporationDetail"));
+const AmlCaseDetail = lazy(() => import("@/pages/AmlCaseDetail"));
+const BillingPlans = lazy(() => import("@/pages/BillingPlans"));
+const RolesManagement = lazy(() => import("@/pages/RolesManagement"));
+const StaffUsersTab = lazy(() => import("@/pages/practice/StaffUsersTab").then((module) => ({ default: module.StaffUsersTab })));
+const Login = lazy(() => import("@/pages/auth/Login"));
+const Signup = lazy(() => import("@/pages/auth/Signup"));
+const PortalSignup = lazy(() => import("@/pages/auth/PortalSignup"));
+const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"));
+const HmrcCallback = lazy(() => import("@/pages/auth/HmrcCallback"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const EmployeePayslips = lazy(() => import("@/pages/employee/EmployeePayslips"));
 
 // ── Portal shell + pages ────────────────────────────────────
 import { PortalShell } from "@/portal/layout/PortalShell";
 import { BrandingProvider } from "@/portal/branding/BrandingProvider";
 import { FeaturesProvider } from "@/portal/features/FeaturesProvider";
-import PortalHomePage from "@/pages/portal/PortalHomePage";
-import PortalDeadlinesPage from "@/pages/portal/PortalDeadlinesPage";
-import PortalDocumentsPage from "@/pages/portal/PortalDocumentsPage";
-import PortalMessagesPage from "@/pages/portal/PortalMessagesPage";
-import PortalMessageThreadPage from "@/pages/portal/PortalMessageThreadPage";
-import PortalInvoicesPage from "@/pages/portal/PortalInvoicesPage";
-import PortalInvoiceDetailPage from "@/pages/portal/PortalInvoiceDetailPage";
-import PortalVatPage from "@/pages/portal/PortalVatPage";
-import PortalPayslipsPage from "@/pages/portal/PortalPayslipsPage";
-import PortalSubmissionsPage from "@/pages/portal/PortalSubmissionsPage";
-import PortalSettingsPage from "@/pages/portal/PortalSettingsPage";
+const PortalHomePage = lazy(() => import("@/pages/portal/PortalHomePage"));
+const PortalDeadlinesPage = lazy(() => import("@/pages/portal/PortalDeadlinesPage"));
+const PortalDocumentsPage = lazy(() => import("@/pages/portal/PortalDocumentsPage"));
+const PortalMessagesPage = lazy(() => import("@/pages/portal/PortalMessagesPage"));
+const PortalMessageThreadPage = lazy(() => import("@/pages/portal/PortalMessageThreadPage"));
+const PortalInvoicesPage = lazy(() => import("@/pages/portal/PortalInvoicesPage"));
+const PortalInvoiceDetailPage = lazy(() => import("@/pages/portal/PortalInvoiceDetailPage"));
+const PortalVatPage = lazy(() => import("@/pages/portal/PortalVatPage"));
+const PortalPayslipsPage = lazy(() => import("@/pages/portal/PortalPayslipsPage"));
+const PortalSubmissionsPage = lazy(() => import("@/pages/portal/PortalSubmissionsPage"));
+const PortalSettingsPage = lazy(() => import("@/pages/portal/PortalSettingsPage"));
 
 const queryClient = new QueryClient();
 
@@ -255,6 +252,7 @@ const AppRoutes = () => (
     {/* ── Accounts Production ──────────────────────────── */}
     <Route path="/accounts" element={<Guarded module="accounts" action="view"><AccountsPage /></Guarded>} />
     <Route path="/accounts-intelligence" element={<Guarded module="accounts" action="view"><AccountsIntelligence /></Guarded>} />
+    <Route path="/review-centre" element={<Guarded module="accounts" action="view"><AccountsIntelligence /></Guarded>} />
     <Route path="/regulatory-readiness" element={<Guarded module="submissions" action="view"><RegulatoryReadiness /></Guarded>} />
 
     {/* ── Self Assessment ──────────────────────────────── */}
@@ -289,7 +287,9 @@ const AppRoutes = () => (
     {/* ── Trial Balance Import ─────────────────────────── */}
     <Route path="/import" element={<Guarded module="ledger" action="view"><TrialBalanceImport /></Guarded>} />
 
+    <Route path="/secretarial" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
     <Route path="/secretarial/workbench" element={<Guarded module="secretarial" action="view"><Secretarial /></Guarded>} />
+    <Route path="/secretarial/companies/:clientId" element={<Guarded module="secretarial" action="view"><CompanySecretarialRecord /></Guarded>} />
     <Route path="/secretarial/changes/:changeId" element={<Guarded module="secretarial" action="view"><SecretarialChangeDetail /></Guarded>} />
     <Route path="/secretarial/filings" element={<Guarded module="secretarial" action="view"><FilingHistory /></Guarded>} />
 
@@ -390,7 +390,9 @@ const App = () => (
       <AuthProvider>
         <ClientContextProvider>
           <BrowserRouter>
-            <AppRoutes />
+            <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" aria-label="Loading workspace" /></div>}>
+              <AppRoutes />
+            </Suspense>
             <CookieConsent />
           </BrowserRouter>
         </ClientContextProvider>

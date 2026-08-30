@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
 
         <h2>1. Who We Are</h2>
         <p>
-          IQ Practice Cloud is a multi-tenant SaaS platform for UK accounting firms. When your accounting practice uses our platform, we act as a <strong>data processor</strong> on behalf of your firm (the <strong>data controller</strong>).
+          PracticeCraft is a multi-tenant SaaS platform for UK accounting firms. When your accounting practice uses our platform, we act as a <strong>data processor</strong> on behalf of your firm (the <strong>data controller</strong>).
         </p>
 
         <h2>2. Data We Collect</h2>

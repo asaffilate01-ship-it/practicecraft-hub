@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePermissions } from "@/hooks/usePermissions";
 import { Button } from "@/components/ui/button";
 import { CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -12,17 +11,14 @@ interface Props {
 }
 
 export function StripeCheckoutButton({ planCode, label, variant = "default" }: Props) {
-  const { tenantId } = usePermissions();
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
-    if (!tenantId) return;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("stripe", {
         body: {
           action: "create-checkout",
-          tenantId,
           planCode,
           successUrl: `${window.location.origin}/settings?checkout=success`,
           cancelUrl: `${window.location.origin}/settings?checkout=cancelled`,
@@ -32,8 +28,8 @@ export function StripeCheckoutButton({ planCode, label, variant = "default" }: P
       if (data?.url) {
         window.location.href = data.url;
       }
-    } catch (e: any) {
-      toast.error(e.message || "Failed to start checkout");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to start checkout");
     } finally {
       setLoading(false);
     }

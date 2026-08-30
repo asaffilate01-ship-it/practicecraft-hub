@@ -362,6 +362,131 @@ Deno.serve(async (req: Request) => {
       return json(await res.json());
     }
 
+    // ── Sync the practice company record ──────────────
+    // Public Companies House data is copied into the tenant-scoped register
+    // tables. Local-only historic entries are preserved and filing still uses
+    // the separate controlled approval workflow.
+    if (path === "sync-company" && req.method === "POST") {
+      const { clientId, companyNumber } = body;
+      if (!clientId || !companyNumber) return json({ error: "clientId and companyNumber are required" }, 400);
+      if (!chApiKey) return json({ error: "CH_API_KEY not configured" }, 400);
+
+      const chGet = async (endpoint: string) => {
+        const response = await fetch(`${CH_REST_BASE}${endpoint}`, { headers: restAuth(chApiKey) });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.error || `Companies House returned ${response.status}`);
+        return payload;
+      };
+
+      try {
+        const [company, officers, psc] = await Promise.all([
+          chGet(`/company/${encodeURIComponent(companyNumber)}`),
+          chGet(`/company/${encodeURIComponent(companyNumber)}/officers?items_per_page=100`),
+          chGet(`/company/${encodeURIComponent(companyNumber)}/persons-with-significant-control?items_per_page=100`),
+        ]);
+
+        const syncedAt = new Date().toISOString();
+        const { error: companyError } = await supabase.from("company_profiles").upsert({
+          tenant_id: callerTenantId,
+          client_id: clientId,
+          company_number: company.company_number || companyNumber,
+          company_name: company.company_name,
+          company_status: company.company_status || "active",
+          registered_office_json: company.registered_office_address || {},
+          sic_codes: company.sic_codes || [],
+          incorporation_date: company.date_of_creation || null,
+          last_accounts_due: company.accounts?.last_accounts?.due_on || null,
+          next_accounts_due: company.accounts?.next_due || null,
+          last_confirmation_statement_date: company.confirmation_statement?.last_made_up_to || null,
+          next_confirmation_statement_due: company.confirmation_statement?.next_due || null,
+          officers_snapshot_json: officers.items || [],
+          psc_snapshot_json: psc.items || [],
+          last_synced_at: syncedAt,
+          sync_error: null,
+          updated_at: syncedAt,
+        }, { onConflict: "tenant_id,client_id" });
+        if (companyError) throw companyError;
+
+        const syncDirector = async (officer: any) => {
+          const sourceId = officer.links?.officer?.appointments || officer.links?.self || null;
+          let existingQuery = supabase.from("company_register_directors").select("id")
+            .eq("tenant_id", callerTenantId).eq("client_id", clientId);
+          existingQuery = sourceId
+            ? existingQuery.eq("ch_officer_id", sourceId)
+            : existingQuery.eq("full_name", officer.name).eq("appointed_on", officer.appointed_on || "1900-01-01");
+          const { data: existing } = await existingQuery.maybeSingle();
+          const values = {
+            full_name: officer.name,
+            nationality: officer.nationality || null,
+            occupation: officer.occupation || null,
+            service_address_json: officer.address || {},
+            appointed_on: officer.appointed_on || null,
+            resigned_on: officer.resigned_on || null,
+            is_active: !officer.resigned_on,
+            ch_officer_id: sourceId,
+            updated_at: syncedAt,
+          };
+          const result = existing
+            ? await supabase.from("company_register_directors").update(values).eq("id", existing.id).eq("tenant_id", callerTenantId)
+            : await supabase.from("company_register_directors").insert({ ...values, tenant_id: callerTenantId, client_id: clientId });
+          if (result.error) throw result.error;
+        };
+
+        const syncPsc = async (person: any) => {
+          const sourceId = person.links?.self || null;
+          let existingQuery = supabase.from("company_register_psc").select("id")
+            .eq("tenant_id", callerTenantId).eq("client_id", clientId);
+          existingQuery = sourceId
+            ? existingQuery.eq("ch_psc_id", sourceId)
+            : existingQuery.eq("full_name", person.name).eq("notified_on", person.notified_on || "1900-01-01");
+          const { data: existing } = await existingQuery.maybeSingle();
+          const values = {
+            full_name: person.name || person.name_elements?.surname || "PSC",
+            nationality: person.nationality || null,
+            country_of_residence: person.country_of_residence || null,
+            service_address_json: person.address || {},
+            natures_of_control: person.natures_of_control || [],
+            notified_on: person.notified_on || null,
+            ceased_on: person.ceased_on || null,
+            is_active: !person.ceased_on,
+            ch_psc_id: sourceId,
+            updated_at: syncedAt,
+          };
+          const result = existing
+            ? await supabase.from("company_register_psc").update(values).eq("id", existing.id).eq("tenant_id", callerTenantId)
+            : await supabase.from("company_register_psc").insert({ ...values, tenant_id: callerTenantId, client_id: clientId });
+          if (result.error) throw result.error;
+        };
+
+        await Promise.all([
+          ...(officers.items || []).map(syncDirector),
+          ...(psc.items || []).map(syncPsc),
+        ]);
+
+        await supabase.from("event_logs").insert({
+          tenant_id: callerTenantId,
+          event_type: "companies_house_company_synced",
+          source: "user",
+          actor_user_id: authData.user.id,
+          client_id: clientId,
+          payload_json: { companyNumber, officers: officers.items?.length || 0, pscs: psc.items?.length || 0 },
+        });
+
+        return json({
+          success: true,
+          companyNumber: company.company_number || companyNumber,
+          syncedAt,
+          officers: officers.items?.length || 0,
+          pscs: psc.items?.length || 0,
+        });
+      } catch (syncError) {
+        const message = syncError instanceof Error ? syncError.message : "Companies House sync failed";
+        await supabase.from("company_profiles").update({ sync_error: message, updated_at: new Date().toISOString() })
+          .eq("tenant_id", callerTenantId).eq("client_id", clientId);
+        return json({ error: message }, 502);
+      }
+    }
+
     // ═══════════════════════════════════════════════════════════
     // XML Gateway Filing (live with presenter credentials)
     // ═══════════════════════════════════════════════════════════

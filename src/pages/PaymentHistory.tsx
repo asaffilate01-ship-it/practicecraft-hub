@@ -5,8 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { CreditCard, Download, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { CreditCard, CheckCircle2 } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+type PaymentInvoice = Database["public"]["Tables"]["invoices"]["Row"] & {
+  clients: { legal_name: string } | null;
+};
 
 export default function PaymentHistory() {
   const { tenantId } = usePermissions();
@@ -26,8 +30,8 @@ export default function PaymentHistory() {
     enabled: !!tenantId,
   });
 
-  const formatCurrency = (pence: number) =>
-    new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(amount);
 
   return (
     <div className="space-y-6">
@@ -59,7 +63,7 @@ export default function PaymentHistory() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invoices.map((inv: any) => (
+                {(invoices as PaymentInvoice[]).map((inv) => (
                   <TableRow key={inv.id}>
                     <TableCell className="font-mono text-sm">{inv.invoice_number || inv.id.slice(0, 8)}</TableCell>
                     <TableCell className="font-medium">{inv.clients?.legal_name || "—"}</TableCell>

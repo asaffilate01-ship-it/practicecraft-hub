@@ -65,7 +65,7 @@ export function AccountsPdfPreview({ entries, entityType, standard, periodStart,
         .footer { margin-top: 30pt; font-size: 8pt; color: #999; text-align: center; border-top: 0.5pt solid #ccc; padding-top: 6pt; }
         .bs-statement { font-style: italic; font-size: 10pt; margin-top: 16pt; border: 1pt solid #ddd; padding: 12pt; background: #fafafa; }
       </style></head><body>${content.innerHTML}
-      <div class="footer">Produced by IQ Practice Cloud &bull; ${standard} &bull; Draft — Subject to review</div>
+      <div class="footer">Produced by PracticeCraft &bull; ${standard} &bull; Draft — Subject to review</div>
       </body></html>
     `);
     win.document.close();

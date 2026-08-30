@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useClientContext } from "@/contexts/ClientContext";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const yearStart = () => `${new Date().getUTCFullYear()}-01-01`;
@@ -17,6 +19,7 @@ export default function CharitiesWorkbench() {
   const queryClient = useQueryClient();
   const sb = supabase as any;
   const [clientId, setClientId] = useState("");
+  const { selectedClientId, selectClient } = useClientContext();
 
   const { data: clients = [] } = useQuery({
     queryKey: ["charity-clients", tenantId],
@@ -29,8 +32,16 @@ export default function CharitiesWorkbench() {
   });
 
   useEffect(() => {
-    if (!clientId && clients[0]?.id) setClientId(clients[0].id);
-  }, [clients, clientId]);
+    if (clientId) return;
+    const selected = clients.find((client) => client.id === selectedClientId) ?? clients[0];
+    if (selected) setClientId(selected.id);
+  }, [clients, clientId, selectedClientId]);
+
+  const chooseClient = (id: string) => {
+    setClientId(id);
+    const client = clients.find((item) => item.id === id);
+    if (client) selectClient(client.id, client.legal_name);
+  };
 
   const { data: profile } = useQuery({
     queryKey: ["charity-profile", clientId],
@@ -96,12 +107,9 @@ export default function CharitiesWorkbench() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div><div className="flex items-center gap-2"><Landmark className="h-6 w-6 text-primary" /><h1 className="text-2xl font-bold">Charities</h1></div><p className="mt-1 text-sm text-muted-foreground">Registration, charity accounts, Gift Aid claims and Charity Commission annual-return preparation.</p></div>
-        <Select value={clientId} onValueChange={setClientId}><SelectTrigger className="w-full lg:w-80"><SelectValue placeholder="Select charity client" /></SelectTrigger><SelectContent>{clients.map((client) => <SelectItem key={client.id} value={client.id}>{client.legal_name}</SelectItem>)}</SelectContent></Select>
-      </div>
+      <WorkspacePageHeader eyebrow="Specialist compliance" title="Charities" icon={Landmark} description="Registration, charity accounts, Gift Aid claims and Charity Commission annual-return preparation." actions={<Select value={clientId} onValueChange={chooseClient}><SelectTrigger className="w-full bg-card lg:w-80"><SelectValue placeholder="Select charity client" /></SelectTrigger><SelectContent>{clients.map((client) => <SelectItem key={client.id} value={client.id}>{client.legal_name}</SelectItem>)}</SelectContent></Select>} />
 
-      <Card className="border-warning/30 bg-warning/5"><CardContent className="flex gap-3 pt-6 text-sm"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-warning" /><p>Gift Aid transmission remains test-only until the HMRC Charities Online XML test pack passes. Charity Commission annual returns are prepared here and then evidenced after submission through the Commission online service.</p></CardContent></Card>
+      <Card className="workspace-panel border-warning/30 bg-warning/5"><CardContent className="flex gap-3 pt-6 text-sm"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-warning" /><p>Gift Aid transmission remains test-only until the HMRC Charities Online XML test pack passes. Charity Commission annual returns are prepared here and then evidenced after submission through the Commission online service.</p></CardContent></Card>
 
       {!clients.length ? <Card><CardContent className="py-12 text-center text-sm text-muted-foreground">Add a client with entity type “Charity” to begin.</CardContent></Card> : (
         <div className="grid gap-4 lg:grid-cols-3">

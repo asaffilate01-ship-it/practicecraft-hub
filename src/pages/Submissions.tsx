@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { qk } from "@/lib/queryKeys";
 import { toast } from "sonner";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const providerLabels: Record<string, string> = {
   hmrc: "HMRC",
@@ -212,10 +213,7 @@ export default function SubmissionsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Submissions</h1>
-        <p className="text-sm text-muted-foreground">Track all regulatory submission jobs across HMRC and Companies House</p>
-      </div>
+      <WorkspacePageHeader eyebrow="Regulatory evidence" title="Submissions" icon={Send} description="Track regulatory jobs, responses, receipts and exceptions across HMRC and Companies House." />
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

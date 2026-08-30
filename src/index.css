@@ -152,4 +152,21 @@
   .workspace-panel {
     border-radius: 1rem;
   }
+
+  [role="tablist"] {
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  [role="tablist"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  [role="tab"] {
+    flex: 0 0 auto;
+    min-height: 2.5rem;
+  }
 }

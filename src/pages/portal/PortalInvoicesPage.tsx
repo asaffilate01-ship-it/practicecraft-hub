@@ -4,8 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { InvoicePaymentButton } from "@/components/billing/InvoicePaymentButton";
 import { Loader2, FileText } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+type PortalInvoice = Pick<Database["public"]["Tables"]["invoices"]["Row"],
+  "id" | "invoice_number" | "issue_date" | "due_date" | "total" | "amount_paid" | "status" | "stripe_checkout_url"
+>;
 
 export default function PortalInvoicesPage() {
   const { user } = useAuth();
@@ -75,7 +80,7 @@ export default function PortalInvoicesPage() {
               <p className="text-sm text-muted-foreground">No invoices yet.</p>
             </div>
           ) : (
-            invoices.map((inv: any) => (
+            (invoices as PortalInvoice[]).map((inv) => (
               <div key={inv.id} className="grid grid-cols-12 px-4 py-3 border-t text-sm items-center">
                 <div className="col-span-3 font-medium">
                   <Link to={`/portal/invoices/${inv.id}`} className="text-primary hover:underline">
@@ -89,10 +94,8 @@ export default function PortalInvoicesPage() {
                   <Badge variant={statusVariant(inv.status)}>{inv.status}</Badge>
                 </div>
                 <div className="col-span-1 text-right">
-                  {inv.status !== "paid" && inv.stripe_checkout_url && (
-                    <Button size="sm" variant="outline" asChild>
-                      <a href={inv.stripe_checkout_url} target="_blank" rel="noopener noreferrer">Pay</a>
-                    </Button>
+                  {inv.status !== "paid" && (
+                    <InvoicePaymentButton invoiceId={inv.id} checkoutUrl={inv.stripe_checkout_url} />
                   )}
                 </div>
               </div>

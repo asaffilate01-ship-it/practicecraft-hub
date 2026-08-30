@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 
@@ -218,15 +219,9 @@ export default function Tasks() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Tasks</h1>
-          <p className="text-sm text-muted-foreground">Drag cards between columns to update status</p>
-        </div>
-        <Button className="gap-2" onClick={() => { setForm(emptyForm); setShowAdd(true); }}>
+      <WorkspacePageHeader eyebrow="Practice workflow" title="Tasks" description="Prioritise, assign and move client work through a consistent practice workflow." actions={<Button className="gap-2" onClick={() => { setForm(emptyForm); setShowAdd(true); }}>
           <Plus className="w-4 h-4" /> Add Task
-        </Button>
-      </div>
+        </Button>} />
 
       <BulkOperationsPanel />
 

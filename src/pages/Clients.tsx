@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Search, Pencil, Trash2, Archive, ArchiveRestore } from "lucide-react";
 import { toast } from "sonner";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const entityLabels: Record<string, string> = {
   ltd: "Ltd", sole_trader: "Sole Trader", partnership: "Partnership",
@@ -253,15 +254,9 @@ export default function Clients() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Clients</h1>
-          <p className="text-sm text-muted-foreground">Manage your client portfolio</p>
-        </div>
-        <Button className="gap-2" onClick={() => { setForm(emptyForm); setShowAdd(true); }}>
+      <WorkspacePageHeader eyebrow="Single client record" title="Clients" description="Manage the practice portfolio, ownership, services and compliance work from one client record." actions={<Button className="gap-2" onClick={() => { setForm(emptyForm); setShowAdd(true); }}>
           <Plus className="w-4 h-4" /> Add Client
-        </Button>
-      </div>
+        </Button>} />
 
       <Card>
         <CardHeader className="pb-3">

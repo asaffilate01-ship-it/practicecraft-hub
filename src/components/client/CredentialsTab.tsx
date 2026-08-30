@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -24,17 +23,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Eye,
-  EyeOff,
   Plus,
   Pencil,
   Trash2,
   KeyRound,
   Building2,
   ShieldCheck,
-  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
+import { callEdgePath } from "@/lib/edgeFunctions";
 
 interface CredentialsTabProps {
   clientId: string;
@@ -44,63 +41,28 @@ type Credential = {
   id: string;
   provider: string;
   credential_type: string;
-  ciphertext: string;
-  metadata_json: Record<string, any>;
+  metadata_json: Record<string, unknown>;
   expires_at: string | null;
   created_at: string;
   updated_at: string;
-};
-
-const PROVIDER_LABELS: Record<string, string> = {
-  companies_house: "Companies House",
-  hmrc: "HMRC",
+  is_stored: boolean;
 };
 
 const TYPE_LABELS: Record<string, string> = {
   auth_code: "Auth Code",
   director_verification_code: "Director Verification Code",
   psc_verification_code: "PSC Verification Code",
-  gateway_id: "Government Gateway ID",
-  gateway_password: "Government Gateway Password",
 };
 
 const TYPE_ICONS: Record<string, typeof KeyRound> = {
   auth_code: Building2,
   director_verification_code: ShieldCheck,
   psc_verification_code: ShieldCheck,
-  gateway_id: KeyRound,
-  gateway_password: Lock,
 };
-
-function MaskedValue({ value, alwaysMask = false }: { value: string; alwaysMask?: boolean }) {
-  const [visible, setVisible] = useState(false);
-
-  if (alwaysMask && !visible) {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="font-mono text-sm">{"•".repeat(Math.min(value.length, 12))}</span>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setVisible(true)}>
-          <Eye className="w-3.5 h-3.5" />
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="font-mono text-sm">{visible || !alwaysMask ? value : "•".repeat(12)}</span>
-      {alwaysMask && (
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setVisible(false)}>
-          <EyeOff className="w-3.5 h-3.5" />
-        </Button>
-      )}
-    </div>
-  );
-}
 
 export function CredentialsTab({ clientId }: CredentialsTabProps) {
   const queryClient = useQueryClient();
-  const { tenantId, can } = usePermissions();
+  const { can } = usePermissions();
   const [addOpen, setAddOpen] = useState(false);
   const [editCred, setEditCred] = useState<Credential | null>(null);
 
@@ -115,16 +77,7 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
 
   const { data: credentials = [], isLoading } = useQuery({
     queryKey: ["client-credentials", clientId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("client_credentials")
-        .select("*")
-        .eq("client_id", clientId)
-        .order("provider", { ascending: true })
-        .order("credential_type", { ascending: true });
-      if (error) throw error;
-      return data as Credential[];
-    },
+    queryFn: () => callEdgePath<Credential[]>("secretarial", `credentials?clientId=${encodeURIComponent(clientId)}`),
     enabled: !!clientId,
   });
 
@@ -158,31 +111,21 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
 
   const upsertMutation = useMutation({
     mutationFn: async (isEdit: boolean) => {
-      const metadata: Record<string, any> = {};
+      const metadata: Record<string, unknown> = {};
       if (personName) metadata.person_name = personName;
 
-      if (isEdit && editCred) {
-        const { error } = await supabase
-          .from("client_credentials")
-          .update({
-            ciphertext: value,
-            metadata_json: metadata,
-            expires_at: expiresAt || null,
-          })
-          .eq("id", editCred.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("client_credentials").insert({
-          client_id: clientId,
-          tenant_id: tenantId!,
-          provider,
-          credential_type: credType,
-          ciphertext: value,
-          metadata_json: metadata,
-          expires_at: expiresAt || null,
-        });
-        if (error) throw error;
-      }
+      if (!value.trim()) throw new Error("Enter the new credential value.");
+      await callEdgePath("secretarial", "credentials", {
+        method: "POST",
+        body: JSON.stringify({
+          id: isEdit ? editCred?.id : undefined,
+          clientId,
+          credentialType: credType,
+          value,
+          metadata,
+          expiresAt: expiresAt || null,
+        }),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client-credentials", clientId] });
@@ -194,8 +137,7 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("client_credentials").delete().eq("id", id);
-      if (error) throw error;
+      await callEdgePath("secretarial", `credentials/${encodeURIComponent(id)}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client-credentials", clientId] });
@@ -218,8 +160,8 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
     setEditCred(cred);
     setProvider(cred.provider);
     setCredType(cred.credential_type);
-    setValue(cred.ciphertext);
-    setPersonName(cred.metadata_json?.person_name || "");
+    setValue("");
+    setPersonName(typeof cred.metadata_json?.person_name === "string" ? cred.metadata_json.person_name : "");
     setExpiresAt(cred.expires_at?.slice(0, 10) || "");
     setAddOpen(true);
   };
@@ -233,21 +175,18 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
         { value: "psc_verification_code", label: "PSC Verification Code" },
       ];
     }
-    return [
-      { value: "gateway_id", label: "Government Gateway ID" },
-      { value: "gateway_password", label: "Government Gateway Password" },
-    ];
+    return [];
   };
 
   const needsPersonName = credType === "director_verification_code" || credType === "psc_verification_code";
 
   // Group credentials by provider
   const chCreds = credentials.filter((c) => c.provider === "companies_house");
-  const hmrcCreds = credentials.filter((c) => c.provider === "hmrc");
 
   const renderCredCard = (cred: Credential) => {
     const Icon = TYPE_ICONS[cred.credential_type] || KeyRound;
     const meta = cred.metadata_json || {};
+    const personName = typeof meta.person_name === "string" ? meta.person_name : null;
 
     return (
       <div
@@ -262,10 +201,10 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
             <div className="text-sm font-medium">
               {TYPE_LABELS[cred.credential_type] || cred.credential_type}
             </div>
-            {meta.person_name && (
-              <div className="text-xs text-muted-foreground">{meta.person_name}</div>
+            {personName && (
+              <div className="text-xs text-muted-foreground">{personName}</div>
             )}
-            <MaskedValue value={cred.ciphertext} alwaysMask />
+            <div className="text-xs text-muted-foreground">Encrypted · value hidden</div>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -308,7 +247,7 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
         <div>
           <h3 className="text-base font-semibold">Credentials & Access</h3>
           <p className="text-sm text-muted-foreground">
-            Securely stored authentication codes and gateway credentials
+            Server-encrypted Companies House authentication and identity codes
           </p>
         </div>
         {canEdit && (
@@ -337,24 +276,9 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
         </CardContent>
       </Card>
 
-      {/* HMRC section */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <KeyRound className="w-4 h-4" /> HMRC Government Gateway
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Gateway User ID and password for HMRC services
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {hmrcCreds.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-2">No HMRC Gateway credentials stored.</p>
-          ) : (
-            hmrcCreds.map(renderCredCard)
-          )}
-        </CardContent>
-      </Card>
+      <p className="text-xs text-muted-foreground">
+        HMRC connections use the secure OAuth connection flow. Government Gateway passwords are never stored here.
+      </p>
 
       {/* Add/Edit Dialog */}
       <Dialog open={addOpen} onOpenChange={(open) => { if (!open) resetForm(); }}>
@@ -371,13 +295,12 @@ export function CredentialsTab({ clientId }: CredentialsTabProps) {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Provider</Label>
-              <Select value={provider} onValueChange={(v) => { setProvider(v); setCredType(v === "companies_house" ? "auth_code" : "gateway_id"); }} disabled={!!editCred}>
+              <Select value={provider} onValueChange={setProvider} disabled>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="companies_house">Companies House</SelectItem>
-                  <SelectItem value="hmrc">HMRC</SelectItem>
                 </SelectContent>
               </Select>
             </div>

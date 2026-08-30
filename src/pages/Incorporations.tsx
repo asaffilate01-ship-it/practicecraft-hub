@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const pipelineStages = [
   { key: "draft", label: "Draft", color: "bg-muted-foreground" },
@@ -141,15 +142,7 @@ export default function Incorporations() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Incorporations</h1>
-          <p className="text-sm text-muted-foreground">LTD company formation — Companies House filing pipeline</p>
-        </div>
-        <Button className="gap-1.5" onClick={() => { setShowWizard(true); setWizardStep(0); }}>
-          <Plus className="w-3.5 h-3.5" /> New Incorporation
-        </Button>
-      </div>
+      <WorkspacePageHeader eyebrow="Company formation" title="Incorporations" icon={Building2} description="Limited-company formation, KYC, payment and Companies House filing pipeline." actions={<Button className="gap-1.5" onClick={() => { setShowWizard(true); setWizardStep(0); }}><Plus className="h-3.5 w-3.5" /> New Incorporation</Button>} />
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
