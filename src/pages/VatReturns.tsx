@@ -16,6 +16,7 @@ import { Plus, FileText, Send, Eye, Upload, Download, Pencil, Trash2, Loader2, C
 import { toast } from "sonner";
 import { useRef, useCallback } from "react";
 import { HmrcObligations } from "@/components/vat/HmrcObligations";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { collectHmrcFraudContext } from "@/lib/hmrcFraudHeaders";
 
@@ -271,15 +272,7 @@ export default function VatReturns() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">VAT (MTD)</h1>
-          <p className="text-sm text-muted-foreground">Making Tax Digital VAT returns & HMRC submission</p>
-        </div>
-        <div className="flex gap-2">
-          <Button className="gap-2" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4" /> New VAT Return</Button>
-        </div>
-      </div>
+      <WorkspacePageHeader eyebrow="HMRC compliance" title="VAT (MTD)" description="Obligations, digital records, VAT return preparation, approval and submission evidence." actions={<Button className="gap-2" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4" /> New VAT Return</Button>} />
 
       <Card><CardContent className="pt-6"><div className="max-w-md space-y-2"><Label>Client for HMRC VAT</Label><Select value={hmrcClientId} onValueChange={setHmrcClientId}><SelectTrigger><SelectValue placeholder="Select a VAT-registered client" /></SelectTrigger><SelectContent>{clients.filter((c: any) => c.vat_number).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.legal_name} · {c.vat_number}</SelectItem>)}</SelectContent></Select></div></CardContent></Card>
       <HmrcObligations clientId={hmrcClientId} vrn={(clients.find((c: any) => c.id === hmrcClientId) as any)?.vat_number || ""} />

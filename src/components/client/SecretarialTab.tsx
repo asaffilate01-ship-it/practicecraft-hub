@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KPICard } from "@/components/dashboard/KPICard";
 import {
   Building2, Clock, FileText, AlertTriangle, RefreshCw,
-  ShieldCheck, CheckCircle2, Lock, Users, Share2, ShieldAlert,
+  CheckCircle2, Lock, Users, ShieldAlert, Plus, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FilingDrawer } from "@/components/secretarial/FilingDrawer";
 import { ChangeWizard } from "@/components/secretarial/ChangeWizard";
 import { AuthCodeModal } from "@/components/secretarial/AuthCodeModal";
+import { toast } from "sonner";
 
 interface SecretarialTabProps {
   clientId: string;
@@ -31,6 +32,7 @@ const dueBadge = (dueDate: string | null) => {
 };
 
 export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps) {
+  const queryClient = useQueryClient();
   const [drawerChangeId, setDrawerChangeId] = useState<string | null>(null);
   const [showWizard, setShowWizard] = useState(false);
   const [showAuthCode, setShowAuthCode] = useState(false);
@@ -151,6 +153,29 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
   const rejectedFilings = filings.filter((f: any) => f.status === "rejected").length;
   const activeDirectors = directors.filter((d: any) => d.is_active).length;
 
+  const syncCompany = useMutation({
+    mutationFn: async () => {
+      const number = companyProfile?.company_number || companyNumber;
+      if (!number) throw new Error("A Companies House number is required before this record can be synced.");
+      const { data, error } = await supabase.functions.invoke("companies-house", {
+        body: { action: "sync-company", clientId, companyNumber: number },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: async (result) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["company-profile", clientId] }),
+        queryClient.invalidateQueries({ queryKey: ["directors", clientId] }),
+        queryClient.invalidateQueries({ queryKey: ["pscs", clientId] }),
+        queryClient.invalidateQueries({ queryKey: ["secretarial-company-portfolio"] }),
+      ]);
+      toast.success(`Companies House synced: ${result.officers} officers and ${result.pscs} PSC records checked.`);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   return (
     <div className="space-y-6">
       {/* Compliance banners */}
@@ -202,12 +227,15 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <RefreshCw className="w-3 h-3" /> Sync
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => syncCompany.mutate()} disabled={syncCompany.isPending || !(companyProfile?.company_number || companyNumber)}>
+              {syncCompany.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Sync
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAuthCode(true)}>
               <Lock className="w-3 h-3" /> {authCode ? "Update Auth Code" : "Store Auth Code"}
+            </Button>
+            <Button size="sm" className="gap-1.5" onClick={() => setShowWizard(true)}>
+              <Plus className="h-3 w-3" /> Create change
             </Button>
           </div>
         </div>
@@ -230,13 +258,15 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
 
       {/* Registers */}
       <Tabs defaultValue="directors">
-        <TabsList>
+        <div className="overflow-x-auto pb-1">
+        <TabsList className="w-max min-w-full justify-start">
           <TabsTrigger value="directors">Directors ({directors.length})</TabsTrigger>
           <TabsTrigger value="psc">PSC ({pscs.length})</TabsTrigger>
           <TabsTrigger value="members">Members ({members.length})</TabsTrigger>
           <TabsTrigger value="changes">Changes ({changes.length})</TabsTrigger>
           <TabsTrigger value="filings">Filings ({filings.length})</TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="directors" className="mt-4">
           <Card>

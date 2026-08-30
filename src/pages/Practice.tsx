@@ -3,16 +3,12 @@ import { Users, Zap, Plug } from "lucide-react";
 import { StaffUsersTab } from "./practice/StaffUsersTab";
 import { WorkflowsTab } from "./practice/WorkflowsTab";
 import { IntegrationsTab } from "./practice/IntegrationsTab";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 export default function PracticePage() {
   return (
     <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Practice Management</h1>
-        <p className="text-sm text-muted-foreground">
-          Users, roles, workflows, and integrations management
-        </p>
-      </div>
+      <WorkspacePageHeader eyebrow="Firm operations" title="Practice Management" description="People, roles, repeatable workflows, integrations and operating controls." />
 
       <Tabs defaultValue="staff">
         <TabsList>

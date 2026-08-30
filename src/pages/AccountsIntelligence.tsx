@@ -341,9 +341,9 @@ export default function AccountsIntelligence() {
           <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
             <Sparkles className="h-3.5 w-3.5" /> Evidence to accounts
           </div>
-          <h1 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">Accounts Intelligence</h1>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">AI Review Centre</h1>
           <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-            Match receipts and invoices to bank activity, resolve duplicates, record accounting judgements and control the year-end close.
+            One controlled queue for evidence matching, duplicates, accounting judgements and year-end checks. Suggestions require human approval before posting or filing.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">

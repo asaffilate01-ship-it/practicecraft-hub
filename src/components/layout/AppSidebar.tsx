@@ -60,7 +60,7 @@ const navGroups: NavGroup[] = [
       { title: "VAT (MTD)", url: "/vat", icon: Receipt, permission: ["vat", "view"], featureKey: "vat", moduleKey: "vat" },
       { title: "Payroll (RTI)", url: "/payroll", icon: Wallet, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
       { title: "Accounts", url: "/accounts", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
-      { title: "Accounts Intelligence", url: "/accounts-intelligence", icon: ScanSearch, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
+      { title: "AI Review Centre", url: "/review-centre", icon: ScanSearch, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Self Assessment", url: "/self-assessment", icon: FileText, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Charities & Gift Aid", url: "/charities", icon: Landmark, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Partnerships & LLPs", url: "/partnerships", icon: Users, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
@@ -69,7 +69,7 @@ const navGroups: NavGroup[] = [
       { title: "MTD IT (ITSA)", url: "/itsa", icon: TrendingUp, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "iXBRL Tagging", url: "/ixbrl", icon: Code2, permission: ["accounts", "view"], featureKey: "accounts", moduleKey: "accounts" },
       { title: "Pensions", url: "/pensions", icon: PiggyBank, permission: ["payroll", "view"], featureKey: "payroll", moduleKey: "payroll" },
-      { title: "Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
+      { title: "Company Secretarial", url: "/secretarial", icon: Building2, permission: ["secretarial", "view"], featureKey: "secretarial", moduleKey: "secretarial" },
       { title: "Incorporations", url: "/incorporations", icon: FilePlus2, permission: ["incorporations", "view"], featureKey: "incorporations", moduleKey: "incorporations" },
     ],
   },
@@ -131,7 +131,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
   // Track which groups are open
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(navGroups.map((g) => [g.label, true]))
+    Object.fromEntries(navGroups.map((g) => [g.label, g.defaultOpen ?? false]))
   );
 
   const toggleGroup = (label: string) => {

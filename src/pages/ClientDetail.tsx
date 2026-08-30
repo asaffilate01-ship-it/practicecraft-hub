@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Mail, Phone, Hash, FileText, Pencil, KeyRound } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Hash, FileText, Pencil, KeyRound, Calculator, Landmark, ShieldCheck, Sparkles, CreditCard, ArrowRight } from "lucide-react";
 import { SecretarialTab } from "@/components/client/SecretarialTab";
 import { TasksTab } from "@/components/client/TasksTab";
 import { DocumentsTab } from "@/components/client/DocumentsTab";
@@ -13,6 +14,7 @@ import { BookkeepingTab } from "@/components/client/BookkeepingTab";
 import { VatTab } from "@/components/client/VatTab";
 import { PayrollTab } from "@/components/client/PayrollTab";
 import { CredentialsTab } from "@/components/client/CredentialsTab";
+import { useClientContext } from "@/contexts/ClientContext";
 
 const entityLabels: Record<string, string> = {
   ltd: "Ltd Company", sole_trader: "Sole Trader", partnership: "Partnership",
@@ -22,6 +24,7 @@ const entityLabels: Record<string, string> = {
 export default function ClientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { selectClient } = useClientContext();
 
   const { data: client, isLoading } = useQuery({
     queryKey: ["client", id],
@@ -42,6 +45,10 @@ export default function ClientDetail() {
     },
     enabled: !!id,
   });
+
+  useEffect(() => {
+    if (client) selectClient(client.id, client.legal_name);
+  }, [client, selectClient]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center py-20"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>;
@@ -66,7 +73,7 @@ export default function ClientDetail() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight">{client.legal_name}</h1>
+            <h1 className="font-serif text-3xl font-semibold tracking-tight">{client.legal_name}</h1>
             <Badge variant="secondary" className="text-xs">{entityLabels[client.entity_type] || client.entity_type}</Badge>
             <Badge variant="default" className="text-xs capitalize">{client.status}</Badge>
           </div>
@@ -101,7 +108,8 @@ export default function ClientDetail() {
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-          <Card>
+          <div className="grid gap-4 xl:grid-cols-[1fr_1.35fr]">
+          <Card className="workspace-panel">
             <CardHeader><CardTitle className="text-base">Client Summary</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -117,6 +125,26 @@ export default function ClientDetail() {
               </div>
             </CardContent>
           </Card>
+          <Card className="workspace-panel">
+            <CardHeader><CardTitle className="text-base">Services and workspaces</CardTitle></CardHeader>
+            <CardContent className="grid gap-2 sm:grid-cols-2">
+              {[
+                { label: "Accounts production", helper: "Periods, TB and statements", icon: FileText, href: "/accounts" },
+                { label: "AI Review Centre", helper: "Evidence and accounting decisions", icon: Sparkles, href: `/review-centre?client=${client.id}` },
+                { label: "Corporation tax", helper: "CT600 preparation", icon: Calculator, href: "/corporation-tax" },
+                { label: "Self Assessment", helper: "SA returns and schedules", icon: Landmark, href: "/self-assessment" },
+                { label: "AML and KYC", helper: "Risk and identity evidence", icon: ShieldCheck, href: "/aml" },
+                { label: "Billing", helper: "Invoices and payments", icon: CreditCard, href: "/billing" },
+              ].map(({ label, helper, icon: Icon, href }) => (
+                <button key={label} type="button" onClick={() => navigate(href)} className="group flex min-h-20 items-center gap-3 rounded-xl border bg-card p-3 text-left transition hover:border-primary/30 hover:bg-muted/40">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted"><Icon className="h-4 w-4" /></span>
+                  <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{label}</span><span className="mt-0.5 block text-xs text-muted-foreground">{helper}</span></span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5" />
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-4">

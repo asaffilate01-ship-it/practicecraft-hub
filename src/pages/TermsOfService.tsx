@@ -7,12 +7,12 @@ export default function TermsOfService() {
 
         <h2>1. Acceptance</h2>
         <p>
-          By creating an account or using IQ Practice Cloud, you agree to these Terms. If you are using the platform on behalf of an organisation, you represent that you have authority to bind that organisation.
+          By creating an account or using PracticeCraft, you agree to these Terms. If you are using the platform on behalf of an organisation, you represent that you have authority to bind that organisation.
         </p>
 
         <h2>2. Service Description</h2>
         <p>
-          IQ Practice Cloud is a cloud-based practice management platform for UK accounting firms. Services include bookkeeping, VAT MTD, payroll RTI, company secretarial, AML/KYC, billing, and client portal capabilities.
+          PracticeCraft is a cloud-based practice management platform for UK accounting firms. Services include bookkeeping, VAT MTD, payroll RTI, company secretarial, AML/KYC, billing, and client portal capabilities.
         </p>
 
         <h2>3. Accounts & Security</h2>
@@ -52,7 +52,7 @@ export default function TermsOfService() {
 
         <h2>8. Limitation of Liability</h2>
         <p>
-          To the maximum extent permitted by law, IQ Practice Cloud shall not be liable for any indirect, incidental, or consequential damages arising from use of the platform.
+          To the maximum extent permitted by law, PracticeCraft shall not be liable for any indirect, incidental, or consequential damages arising from use of the platform.
         </p>
 
         <h2>9. Termination</h2>

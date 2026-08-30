@@ -15,12 +15,13 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DueDatePill } from "@/components/ui/due-date-pill";
 import {
   Building2, Search, AlertTriangle, Clock, FileX, FileText,
-  Plus, RefreshCw, CheckCircle2, Users, Download,
+  Plus, CheckCircle2, Users, Download,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { FilingDrawer } from "@/components/secretarial/FilingDrawer";
 import { ChangeWizard } from "@/components/secretarial/ChangeWizard";
+import { CompanyPortfolio } from "@/components/secretarial/CompanyPortfolio";
 import { qk } from "@/lib/queryKeys";
 
 const changeTypeLabels: Record<string, string> = {
@@ -125,6 +126,16 @@ export default function Secretarial() {
     enabled: !!profile?.tenant_id,
   });
 
+  const { data: companyChoices = [] } = useQuery({
+    queryKey: ["secretarial-company-choices", profile?.tenant_id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("company_profiles").select("client_id,company_name,company_number").order("company_name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile?.tenant_id,
+  });
+
   // Build auth code lookup
   const authCodeMap = useMemo(() => {
     const map = new Map<string, boolean>();
@@ -197,18 +208,20 @@ export default function Secretarial() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Company Secretarial</h1>
+          <p className="workspace-eyebrow">Governance and statutory compliance</p>
+          <h1 className="mt-1 font-serif text-3xl font-semibold tracking-tight">Company Secretarial</h1>
           <p className="text-sm text-muted-foreground">
-            Companies House filings, registers & compliance workbench
+            One portfolio for company records, statutory registers, approvals and Companies House evidence.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-1.5">
-            <RefreshCw className="w-3.5 h-3.5" /> Sync All
-          </Button>
-          <Button className="gap-1.5" onClick={() => setShowWizard(true)}>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
+          <Select value={wizardClientId} onValueChange={setWizardClientId}>
+            <SelectTrigger className="w-full bg-card sm:w-64"><SelectValue placeholder="Choose company" /></SelectTrigger>
+            <SelectContent>{companyChoices.map((company) => <SelectItem key={company.client_id} value={company.client_id}>{company.company_name} · {company.company_number}</SelectItem>)}</SelectContent>
+          </Select>
+          <Button className="gap-1.5" onClick={() => setShowWizard(true)} disabled={!wizardClientId}>
             <Plus className="w-3.5 h-3.5" /> Create Change
           </Button>
         </div>
@@ -250,14 +263,21 @@ export default function Secretarial() {
         />
       </div>
 
-      <Tabs defaultValue="workbench">
-        <TabsList>
+      <Tabs defaultValue="portfolio">
+        <div className="overflow-x-auto pb-1">
+        <TabsList className="w-max min-w-full justify-start">
+          <TabsTrigger value="portfolio">Company Portfolio</TabsTrigger>
           <TabsTrigger value="workbench">Workbench</TabsTrigger>
           <TabsTrigger value="confirmation">
             Confirmation Statements ({csCycles.length})
           </TabsTrigger>
           <TabsTrigger value="filings">Filing History ({filings.length})</TabsTrigger>
         </TabsList>
+        </div>
+
+        <TabsContent value="portfolio" className="mt-4">
+          <CompanyPortfolio />
+        </TabsContent>
 
         {/* ── Workbench Tab ─────────────────────────────── */}
         <TabsContent value="workbench" className="mt-4 space-y-4">

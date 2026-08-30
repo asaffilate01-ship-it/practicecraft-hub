@@ -30,6 +30,7 @@ import { RtiSchedule } from "@/components/payroll/RtiSchedule";
 import { PaymentsSummary } from "@/components/payroll/PaymentsSummary";
 import { PayslipsBatch } from "@/components/payroll/PayslipsBatch";
 import { calculatePay, type PayFrequency } from "@/components/payroll/PayCalculationEngine";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const fmt = (pence: number) => `£${(pence / 100).toFixed(2)}`;
 
@@ -487,16 +488,13 @@ export default function PayrollWorkbench() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Payroll (RTI)</h1>
-          <p className="text-sm text-muted-foreground">
+      <WorkspacePageHeader eyebrow="PAYE and Real Time Information" title="Payroll (RTI)" description={
+          <>
             {selectedClientName
               ? `Payroll for ${selectedClientName}`
               : "Select a client from the top bar to view payroll"}
-          </p>
-        </div>
-        <div className="flex gap-2">
+          </>
+        } actions={<>
           <Badge variant="outline">RTI test mode</Badge>
           <Button variant="outline" className="gap-1.5" disabled={!selectedClientId} onClick={() => { setNewEmployerClientId(selectedClientId || ""); setShowNewEmployer(true); }}>
             <Users className="w-3.5 h-3.5" /> Add Employer
@@ -509,8 +507,7 @@ export default function PayrollWorkbench() {
           }}>
             <Plus className="w-3.5 h-3.5" /> New Pay Run
           </Button>
-        </div>
-      </div>
+        </>} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Draft Runs" value={draftRuns} change="Awaiting finalisation" changeType={draftRuns ? "negative" : "positive"} icon={FileText} iconColor="bg-warning/10" />

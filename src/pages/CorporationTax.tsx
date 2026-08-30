@@ -16,6 +16,7 @@ import { DueDatePill } from "@/components/ui/due-date-pill";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { FileText, Send, Calculator, CheckCircle2, Clock, AlertTriangle, PoundSterling, Plus, Pencil, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 import { useNavigate } from "react-router-dom";
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive"; icon: typeof Clock }> = {
@@ -96,15 +97,9 @@ export default function CorporationTax() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Corporation Tax</h1>
-          <p className="text-muted-foreground">CT600 preparation, computation & filing</p>
-        </div>
-        <Button className="gap-1.5" onClick={() => setShowNewPeriod(true)}>
+      <WorkspacePageHeader eyebrow="Company tax" title="Corporation Tax" description="CT600 preparation, tax computation, review, iXBRL package and filing evidence." actions={<Button className="gap-1.5" onClick={() => setShowNewPeriod(true)}>
           <Plus className="w-4 h-4" /> New CT600 Period
-        </Button>
-      </div>
+        </Button>} />
 
       <Card className="border-warning/30 bg-warning/5"><CardContent className="flex items-start gap-2 pt-4 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><p>Preparation only: PracticeCraft does not yet generate or file a valid CT600 with accounts and computation iXBRL. Any existing “filed” status is a legacy workflow record and must be checked against an HMRC receipt.</p></CardContent></Card>
 

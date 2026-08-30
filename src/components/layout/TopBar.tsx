@@ -1,5 +1,4 @@
-import { Search, Bell, ChevronDown, User, LogOut, Menu } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Bell, ChevronDown, User, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { usePracticeBranding } from "@/practice/branding/PracticeBrandingProvider";
 import { ClientSelector } from "@/components/layout/ClientSelector";
+import { GlobalPracticeSearch } from "@/components/layout/GlobalPracticeSearch";
 
 interface TopBarProps {
   onMenuClick?: () => void;
@@ -47,13 +47,11 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary font-serif text-base font-bold text-primary-foreground">P</span>
           <div><div className="text-xs font-semibold leading-none">PracticeCraft</div><div className="mt-1 text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Practice & accounts</div></div>
         </div>
-        <div className="relative w-48 md:w-80 hidden sm:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Search clients, tasks..." className="pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1" />
-        </div>
+        <div className="hidden sm:block"><GlobalPracticeSearch /></div>
       </div>
 
       <div className="flex items-center gap-2 md:gap-3">
+        <div className="sm:hidden"><GlobalPracticeSearch /></div>
         <div className="hidden sm:block"><ClientSelector /></div>
         <Button variant="ghost" size="icon" className="relative rounded-xl">
           <Bell className="w-4 h-4" />
