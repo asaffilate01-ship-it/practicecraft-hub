@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Save, Send, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Send, CheckCircle2, LockKeyhole } from "lucide-react";
 import { TrialBalanceStep, type TBEntry } from "./TrialBalanceStep";
 import { FinancialStatementsStep } from "./FinancialStatementsStep";
 import { TaxComputationStep, defaultTaxCompData, type TaxCompData } from "./TaxComputationStep";
@@ -16,9 +16,36 @@ import { FixedAssetScheduleStep, defaultFixedAssetScheduleData, type FixedAssetS
 import { NotesToAccountsStep, defaultNotesData, type NotesData } from "./NotesToAccountsStep";
 import { DirectorsReportStep, defaultDirectorsReportData, type DirectorsReportData } from "./DirectorsReportStep";
 import { EvidenceControlStep } from "./EvidenceControlStep";
+import { AccountsComplianceStep } from "./AccountsComplianceStep";
+import {
+  defaultComplianceProfile,
+  type AccountsComplianceProfile,
+} from "@/lib/accountsCompliance";
+import type { Json, Tables } from "@/integrations/supabase/types";
+
+type AccountsPeriod = Tables<"accounts_periods"> & {
+  clients: Pick<Tables<"clients">, "legal_name" | "entity_type" | "company_number" | "utr"> | null;
+};
+
+type SavedFormData = {
+  formData?: Record<string, string>;
+  checks?: Record<string, boolean>;
+  checkNotes?: Record<string, string>;
+};
+
+type SavedComputedValues = {
+  compData?: Partial<TaxCompData>;
+  assetData?: Partial<FixedAssetScheduleData>;
+  notesData?: Partial<NotesData>;
+  directorsData?: Partial<DirectorsReportData>;
+};
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unable to save the accounts workpaper.";
+}
 
 type Props = {
-  period: any;
+  period: AccountsPeriod;
   onClose: () => void;
 };
 
@@ -44,6 +71,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
 
   // Build steps dynamically based on entity type
   const STEPS = [
+    { key: "compliance", label: "Compliance" },
     { key: "evidence", label: "Evidence" },
     { key: "tb", label: "Trial Balance" },
     { key: "adj", label: "Adjustments" },
@@ -70,6 +98,44 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
     },
     enabled: !!user,
   });
+
+  const { data: roles = [] } = useQuery({
+    queryKey: ["accounts-review-roles", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", user!.id);
+      if (error) throw error;
+      return data.map((item) => item.role);
+    },
+    enabled: !!user,
+  });
+
+  const { data: existingCompliance, isLoading: complianceLoading, refetch: refetchCompliance } = useQuery({
+    queryKey: ["accounts-compliance", period?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("accounts_compliance_profiles")
+        .select("*")
+        .eq("period_id", period.id)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        ...data,
+        framework: data.framework as AccountsComplianceProfile["framework"],
+        entity_size: data.entity_size as AccountsComplianceProfile["entity_size"],
+        rounding_basis: data.rounding_basis as AccountsComplianceProfile["rounding_basis"],
+        status: data.status as AccountsComplianceProfile["status"],
+        policy_data: (data.policy_data ?? {}) as Record<string, string>,
+        disclosure_checks: (data.disclosure_checks ?? {}) as Record<string, boolean>,
+      } satisfies AccountsComplianceProfile;
+    },
+    enabled: !!period?.id,
+  });
+
+  const complianceProfile = existingCompliance
+    ?? defaultComplianceProfile(profile?.tenant_id ?? "", period.id, period.accounts_standard);
+  const isLocked = existingCompliance?.status === "locked";
+  const canReview = roles.some((role) => ["super_admin", "firm_owner", "manager"].includes(role));
 
   // Load existing TB entries
   const { data: existingTB } = useQuery({
@@ -102,7 +168,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
 
   useEffect(() => {
     if (existingTB && existingTB.length > 0) {
-      setTbEntries(existingTB.map((e: any) => ({
+      setTbEntries(existingTB.map((e) => ({
         id: e.id,
         account_code: e.account_code,
         account_name: e.account_name,
@@ -121,8 +187,8 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
 
   useEffect(() => {
     if (existingComp) {
-      const fd = existingComp.form_data as any;
-      const cv = existingComp.computed_values as any;
+      const fd = existingComp.form_data as SavedFormData;
+      const cv = existingComp.computed_values as SavedComputedValues;
       if (cv?.compData) setCompData({ ...defaultTaxCompData, ...cv.compData });
       if (cv?.assetData) setAssetData({ ...defaultFixedAssetScheduleData, ...cv.assetData });
       if (cv?.notesData) setNotesData({ ...defaultNotesData, ...cv.notesData });
@@ -134,6 +200,10 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
   }, [existingComp]);
 
   const saveTB = async () => {
+    if (isLocked) {
+      toast.error("Final accounts are locked. A manager must reopen them before editing.");
+      return;
+    }
     if (!profile?.tenant_id || !period?.id) return;
     setSaving(true);
     try {
@@ -158,14 +228,18 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         if (error) throw error;
       }
       toast.success("Trial balance saved");
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (error: unknown) {
+      toast.error(errorMessage(error));
     } finally {
       setSaving(false);
     }
   };
 
   const saveTaxComp = async () => {
+    if (isLocked) {
+      toast.error("Final accounts are locked. A manager must reopen them before editing.");
+      return;
+    }
     if (!profile?.tenant_id || !period?.id) return;
     setSaving(true);
     try {
@@ -174,8 +248,8 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         tenant_id: profile.tenant_id,
         period_id: period.id,
         computation_type: compType,
-        form_data: { formData, checks, checkNotes } as any,
-        computed_values: { compData, assetData, notesData, directorsData } as any,
+        form_data: { formData, checks, checkNotes } as Json,
+        computed_values: { compData, assetData, notesData, directorsData } as unknown as Json,
         status: "draft",
       };
 
@@ -191,8 +265,8 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
       }
       queryClient.invalidateQueries({ queryKey: ["tax-comp", period.id] });
       toast.success("All data saved");
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (error: unknown) {
+      toast.error(errorMessage(error));
     } finally {
       setSaving(false);
     }
@@ -204,11 +278,23 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
   };
 
   const markReady = async () => {
-    await saveAll();
-    await supabase.from("accounts_periods").update({ status: "review" }).eq("id", period.id);
-    queryClient.invalidateQueries({ queryKey: ["accounts-periods"] });
-    toast.success("Marked as ready for review");
-    onClose();
+    if (isLocked) return;
+    setSaving(true);
+    try {
+      await saveAll();
+      const { error } = await supabase.rpc("mark_accounts_prepared", { p_period_id: period.id });
+      if (error) throw error;
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["accounts-periods"] }),
+        queryClient.invalidateQueries({ queryKey: ["accounts-compliance", period.id] }),
+      ]);
+      toast.success("Accounts marked prepared and sent to independent review");
+      onClose();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Accounts preparation checks failed");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const currentStep = STEPS[step];
@@ -216,7 +302,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={onClose}>
@@ -227,14 +313,15 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
           <p className="text-sm text-muted-foreground">
             {new Date(period.period_start).toLocaleDateString("en-GB")} — {new Date(period.period_end).toLocaleDateString("en-GB")}
             <Badge variant="outline" className="ml-2 text-xs capitalize">{entityType.replace("_", " ")}</Badge>
-            <Badge variant="outline" className="ml-1 text-xs">{period.accounts_standard}</Badge>
+            <Badge variant="outline" className="ml-1 text-xs">{complianceProfile.framework === "frs105" ? "FRS 105" : "FRS 102 Section 1A"}</Badge>
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={saveAll} disabled={saving}>
+        <div className="flex flex-wrap gap-2">
+          {isLocked && <Badge className="gap-1"><LockKeyhole className="h-3 w-3" /> Reviewer locked</Badge>}
+          <Button variant="outline" size="sm" onClick={saveAll} disabled={saving || isLocked || complianceLoading}>
             <Save className="w-3.5 h-3.5 mr-1" /> {saving ? "Saving…" : "Save All"}
           </Button>
-          <Button size="sm" onClick={markReady}>
+          <Button size="sm" onClick={markReady} disabled={saving || isLocked || complianceLoading}>
             <Send className="w-3.5 h-3.5 mr-1" /> Mark Ready for Review
           </Button>
         </div>
@@ -267,6 +354,18 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
       </Card>
 
       {/* Step content */}
+      {currentStep.key === "compliance" && !complianceLoading && (
+        <AccountsComplianceStep
+          periodId={period.id}
+          entityType={entityType}
+          entries={tbEntries}
+          value={complianceProfile}
+          canReview={canReview}
+          currentUserId={user?.id ?? ""}
+          onChanged={async () => { await refetchCompliance(); }}
+        />
+      )}
+      <div className={(isLocked || complianceLoading) && currentStep.key !== "compliance" ? "pointer-events-none opacity-60" : undefined}>
       {currentStep.key === "evidence" && (
         <EvidenceControlStep
           clientId={period.client_id}
@@ -291,8 +390,10 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
       {currentStep.key === "fs" && (
         <FinancialStatementsStep
           entries={tbEntries} entityType={entityType}
-          standard={period.accounts_standard} periodStart={period.period_start}
+          standard={complianceProfile.framework === "frs105" ? "FRS 105" : "FRS 102 Section 1A"} periodStart={period.period_start}
           periodEnd={period.period_end} clientName={clientName}
+          roundingBasis={complianceProfile.rounding_basis}
+          comparativesRequired={complianceProfile.comparatives_required}
         />
       )}
       {currentStep.key === "notes" && (
@@ -300,7 +401,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
           notes={notesData} onChange={setNotesData}
           entries={tbEntries} assets={assetData.assets}
           entityType={entityType} periodEnd={period.period_end}
-          clientName={clientName} standard={period.accounts_standard}
+          clientName={clientName} standard={complianceProfile.framework === "frs105" ? "FRS 105" : "FRS 102 Section 1A"}
           monthsInPeriod={monthsInPeriod}
         />
       )}
@@ -327,6 +428,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
           onCheckChange={setChecks} onNotesChange={setCheckNotes}
         />
       )}
+      </div>
 
       {/* Navigation */}
       <div className="flex items-center justify-between pt-2">
@@ -335,7 +437,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
         </Button>
         <span className="text-xs text-muted-foreground">Step {step + 1} of {STEPS.length}</span>
         {step < STEPS.length - 1 ? (
-          <Button onClick={() => {
+          <Button disabled={complianceLoading || (isLocked && currentStep.key !== "compliance")} onClick={() => {
             if (["tb", "adj"].includes(currentStep.key)) saveTB();
             if (["tax_comp", "tax_form", "checklist"].includes(currentStep.key)) saveTaxComp();
             setStep(step + 1);
@@ -343,7 +445,7 @@ export function AccountsProductionWizard({ period, onClose }: Props) {
             Next <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         ) : (
-          <Button onClick={markReady}>
+          <Button onClick={markReady} disabled={saving || isLocked || complianceLoading}>
             <Send className="w-4 h-4 mr-1" /> Complete & Submit for Review
           </Button>
         )}

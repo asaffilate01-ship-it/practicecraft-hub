@@ -3,8 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Printer } from "lucide-react";
 import type { TBEntry } from "./TrialBalanceStep";
+import type { AccountsRoundingBasis } from "@/lib/accountsCompliance";
+import type { DirectorsReportData } from "./DirectorsReportStep";
+import type { NotesData } from "./NotesToAccountsStep";
 
-const pence = (v: number) => `£${(v / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatAmount = (valuePence: number, roundingBasis: AccountsRoundingBasis) => {
+  const divisor = roundingBasis === "thousands" ? 100_000 : 100;
+  const unit = roundingBasis === "thousands" ? "£000 " : "£";
+  return `${unit}${Math.round(valuePence / divisor).toLocaleString("en-GB")}`;
+};
 
 function netBalance(entry: TBEntry) {
   return (entry.debit_pence + entry.adjustment_debit_pence) - (entry.credit_pence + entry.adjustment_credit_pence);
@@ -18,12 +25,15 @@ type Props = {
   periodEnd: string;
   clientName: string;
   companyNumber?: string;
-  directorsReport?: any;
-  notesData?: any;
+  directorsReport?: DirectorsReportData;
+  notesData?: NotesData;
+  roundingBasis?: AccountsRoundingBasis;
+  comparativesRequired?: boolean;
 };
 
-export function AccountsPdfPreview({ entries, entityType, standard, periodStart, periodEnd, clientName, companyNumber, directorsReport, notesData }: Props) {
+export function AccountsPdfPreview({ entries, entityType, standard, periodStart, periodEnd, clientName, companyNumber, directorsReport, notesData, roundingBasis = "pounds", comparativesRequired = true }: Props) {
   const printRef = useRef<HTMLDivElement>(null);
+  const pence = (valuePence: number) => formatAmount(valuePence, roundingBasis);
 
   const handlePrint = () => {
     const content = printRef.current;
@@ -131,7 +141,7 @@ export function AccountsPdfPreview({ entries, entityType, standard, periodStart,
             {companyNumber && <div className="co-num">Registered Number: {companyNumber}</div>}
             <h2>{isSoleTrader ? "Unaudited Accounts" : isPartnership ? "Partnership Accounts" : "Unaudited Financial Statements"}</h2>
             <div className="period">For the period {fmtDate(periodStart)} to {fmtDate(periodEnd)}</div>
-            <div className="standard">{standard}</div>
+            <div className="standard">{standard} · rounded to {roundingBasis === "thousands" ? "£000" : "whole pounds"}{comparativesRequired ? " · comparative figures enabled" : ""}</div>
           </div>
 
           {/* ═══ CONTENTS ═══ */}
@@ -158,7 +168,7 @@ export function AccountsPdfPreview({ entries, entityType, standard, periodStart,
                 <tbody>
                   {companyNumber && <tr><td><strong>Registered number</strong></td><td>{companyNumber}</td></tr>}
                   {directorsReport?.directors?.length > 0 && (
-                    <tr><td><strong>Directors</strong></td><td>{directorsReport.directors.map((d: any) => d.name).filter(Boolean).join(", ") || "—"}</td></tr>
+                    <tr><td><strong>Directors</strong></td><td>{directorsReport.directors.map((director) => director.name).filter(Boolean).join(", ") || "—"}</td></tr>
                   )}
                   <tr><td><strong>Accountants</strong></td><td>[Practice Name]</td></tr>
                 </tbody>
@@ -210,7 +220,7 @@ export function AccountsPdfPreview({ entries, entityType, standard, periodStart,
                     The following directors held office during the period:
                   </p>
                   <ul style={{ marginLeft: "20pt" }}>
-                    {directorsReport.directors.map((d: any, i: number) => (
+                    {directorsReport.directors.map((d, i) => (
                       <li key={i}>{d.name}{d.resignedDate ? ` (resigned ${fmtDate(d.resignedDate)})` : ""}</li>
                     ))}
                   </ul>

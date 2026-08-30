@@ -22,6 +22,8 @@ Every connector requires authenticated caller and server-derived tenant, client 
 
 AI may extract records, suggest matches, detect duplicates, propose codes/capex and explain exceptions. It must not silently delete duplicates, post material journals, choose estimates, finalise returns, apply declarations or change provider evidence. Deterministic engines calculate tax, validate schemas and generate final filing payloads.
 
+The first accounts-control slice now records the selected FRS 105 or FRS 102 Section 1A framework, eligibility judgement, policies, disclosures, comparatives and rounding basis; checks the adjusted trial balance; requires a different manager/owner reviewer; and locks source records with an append-only approval history. This is an internal preparation control only. Current-taxonomy iXBRL generation, formal content evaluation and Companies House/HMRC acceptance are still outstanding.
+
 ## Official routes
 
 - [HMRC API terms](https://developer.service.hmrc.gov.uk/api-documentation/docs/terms-of-use)
@@ -34,3 +36,6 @@ AI may extract records, suggest matches, detect duplicates, propose codes/capex 
 - [HMRC Charities Online XML API](https://developer.service.hmrc.gov.uk/api-documentation/docs/api/xml/Charities%20Online)
 - [Charity Commission online services](https://www.gov.uk/guidance/online-services-for-charities)
 - [Companies House filing tests](https://www.gov.uk/government/publications/technical-interface-specifications-for-companies-house-software/important-information-for-software-developers-read-first)
+- [FRC FRS 105](https://www.frc.org.uk/library/standards-codes-policy/accounting-and-reporting/uk-accounting-standards/frs-105/)
+- [FRC FRS 102](https://www.frc.org.uk/library/standards-codes-policy/accounting-and-reporting/uk-accounting-standards/frs-102/)
+- [Companies House accounts filing changes from April 2028](https://www.gov.uk/government/news/companies-house-to-bring-in-changes-to-accounts-filing-from-april-2028)
