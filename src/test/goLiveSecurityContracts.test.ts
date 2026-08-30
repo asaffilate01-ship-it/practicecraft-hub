@@ -10,6 +10,7 @@ describe("go-live security contracts", () => {
   const portal = read("supabase/functions/portal/index.ts");
   const migration = read("supabase/migrations/20260829233000_go_live_security_stage.sql");
   const regulatoryMigration = read("supabase/migrations/20260830150000_regulatory_control_centre.sql");
+  const accountsComplianceMigration = read("supabase/migrations/20260830190000_accounts_compliance_phase.sql");
 
   it("accepts payment state changes only through verified Stripe events", () => {
     expect(stripeWebhook).toContain("constructEventAsync");
@@ -53,5 +54,14 @@ describe("go-live security contracts", () => {
     expect(regulatoryMigration).toContain("production_gate_reason");
     expect(regulatoryMigration).toContain("Recognition status requires passed production recognition evidence");
     expect(read("src/pages/RegulatoryReadiness.tsx")).not.toMatch(/production_enabled:\s*true/);
+  });
+
+  it("enforces controlled accounts preparation and independent reviewer locks", () => {
+    expect(accountsComplianceMigration).toContain("protect_locked_accounts_source");
+    expect(accountsComplianceMigration).toContain("Preparation and review status can only be set by the controlled sign-off workflows");
+    expect(accountsComplianceMigration).toContain("The reviewer must be different from the preparer");
+    expect(accountsComplianceMigration).toContain("There is intentionally no authenticated INSERT/UPDATE/DELETE policy");
+    expect(accountsComplianceMigration).toContain("The adjusted trial balance is not balanced");
+    expect(accountsComplianceMigration).not.toContain("GRANT INSERT ON public.accounts_compliance_events TO authenticated");
   });
 });
