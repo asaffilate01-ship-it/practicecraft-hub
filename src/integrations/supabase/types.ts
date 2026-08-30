@@ -2758,6 +2758,63 @@ export type Database = {
           },
         ]
       }
+      data_subject_requests: {
+        Row: {
+          acknowledged_at: string | null
+          completed_at: string | null
+          created_at: string
+          decision_notes: string | null
+          id: string
+          request_type: string
+          requested_at: string
+          status: string
+          subject_user_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          decision_notes?: string | null
+          id?: string
+          request_type: string
+          requested_at?: string
+          status?: string
+          subject_user_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          decision_notes?: string | null
+          id?: string
+          request_type?: string
+          requested_at?: string
+          status?: string
+          subject_user_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_subject_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_subject_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       document_fingerprints: {
         Row: {
           client_id: string | null
@@ -4542,6 +4599,8 @@ export type Database = {
           issue_date: string
           last_dunning_at: string | null
           notes: string | null
+          paid_at: string | null
+          payment_method: string | null
           status: string
           stripe_checkout_url: string | null
           stripe_invoice_id: string | null
@@ -4564,6 +4623,8 @@ export type Database = {
           issue_date?: string
           last_dunning_at?: string | null
           notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
           status?: string
           stripe_checkout_url?: string | null
           stripe_invoice_id?: string | null
@@ -4586,6 +4647,8 @@ export type Database = {
           issue_date?: string
           last_dunning_at?: string | null
           notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
           status?: string
           stripe_checkout_url?: string | null
           stripe_invoice_id?: string | null
@@ -9267,6 +9330,42 @@ export type Database = {
           },
         ]
       }
+      stripe_webhook_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          event_id: string
+          event_type: string
+          last_error: string | null
+          livemode: boolean
+          processed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          event_id: string
+          event_type: string
+          last_error?: string | null
+          livemode: boolean
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          event_id?: string
+          event_type?: string
+          last_error?: string | null
+          livemode?: boolean
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       submission_attempts: {
         Row: {
           attempt_no: number
@@ -11021,6 +11120,10 @@ export type Database = {
       }
       can_portal_view_payslip: {
         Args: { _payslip_id: string; _user_id: string }
+        Returns: boolean
+      }
+      claim_stripe_webhook_event: {
+        Args: { p_event_id: string; p_event_type: string; p_livemode: boolean }
         Returns: boolean
       }
       get_portal_client_id: { Args: { _user_id: string }; Returns: string }
