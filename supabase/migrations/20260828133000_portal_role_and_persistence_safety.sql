@@ -173,6 +173,7 @@ $$;
 
 -- Client-scoped read/write policies. Existing tenant policies continue to
 -- serve staff users; these policies add the narrower portal path.
+DROP POLICY IF EXISTS "Portal can view linked client" ON public.clients;
 CREATE POLICY "Portal can view linked client"
   ON public.clients FOR SELECT TO authenticated
   USING (
@@ -181,6 +182,7 @@ CREATE POLICY "Portal can view linked client"
     AND tenant_id = public.get_portal_tenant_id(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Portal can view client tasks" ON public.tasks;
 CREATE POLICY "Portal can view client tasks"
   ON public.tasks FOR SELECT TO authenticated
   USING (
@@ -189,6 +191,7 @@ CREATE POLICY "Portal can view client tasks"
     AND tenant_id = public.get_portal_tenant_id(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Portal can view client VAT returns" ON public.vat_returns;
 CREATE POLICY "Portal can view client VAT returns"
   ON public.vat_returns FOR SELECT TO authenticated
   USING (
@@ -197,6 +200,7 @@ CREATE POLICY "Portal can view client VAT returns"
     AND tenant_id = public.get_portal_tenant_id(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Portal can view client invoices" ON public.invoices;
 CREATE POLICY "Portal can view client invoices"
   ON public.invoices FOR SELECT TO authenticated
   USING (
@@ -205,6 +209,7 @@ CREATE POLICY "Portal can view client invoices"
     AND tenant_id = public.get_portal_tenant_id(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Portal can view client invoice lines" ON public.invoice_lines;
 CREATE POLICY "Portal can view client invoice lines"
   ON public.invoice_lines FOR SELECT TO authenticated
   USING (EXISTS (
@@ -215,6 +220,7 @@ CREATE POLICY "Portal can view client invoice lines"
       AND invoice.tenant_id = public.get_portal_tenant_id(auth.uid())
   ));
 
+DROP POLICY IF EXISTS "Portal can view document requests" ON public.document_requests;
 CREATE POLICY "Portal can view document requests"
   ON public.document_requests FOR SELECT TO authenticated
   USING (
@@ -223,6 +229,7 @@ CREATE POLICY "Portal can view document requests"
     AND tenant_id = public.get_portal_tenant_id(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Portal can view client submissions" ON public.submission_jobs;
 CREATE POLICY "Portal can view client submissions"
   ON public.submission_jobs FOR SELECT TO authenticated
   USING (
@@ -231,6 +238,7 @@ CREATE POLICY "Portal can view client submissions"
     AND tenant_id = public.get_portal_tenant_id(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Portal can view client threads" ON public.message_threads;
 CREATE POLICY "Portal can view client threads"
   ON public.message_threads FOR SELECT TO authenticated
   USING (
@@ -239,6 +247,7 @@ CREATE POLICY "Portal can view client threads"
     AND tenant_id = public.get_portal_tenant_id(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Portal can create client threads" ON public.message_threads;
 CREATE POLICY "Portal can create client threads"
   ON public.message_threads FOR INSERT TO authenticated
   WITH CHECK (
@@ -248,6 +257,7 @@ CREATE POLICY "Portal can create client threads"
     AND created_by_user_id = auth.uid()
   );
 
+DROP POLICY IF EXISTS "Portal can view non-internal client messages" ON public.messages;
 CREATE POLICY "Portal can view non-internal client messages"
   ON public.messages FOR SELECT TO authenticated
   USING (
@@ -261,6 +271,7 @@ CREATE POLICY "Portal can view non-internal client messages"
     )
   );
 
+DROP POLICY IF EXISTS "Portal can send client messages" ON public.messages;
 CREATE POLICY "Portal can send client messages"
   ON public.messages FOR INSERT TO authenticated
   WITH CHECK (
@@ -276,6 +287,7 @@ CREATE POLICY "Portal can send client messages"
     )
   );
 
+DROP POLICY IF EXISTS "Portal can view client documents" ON public.documents;
 CREATE POLICY "Portal can view client documents"
   ON public.documents FOR SELECT TO authenticated
   USING (
@@ -298,6 +310,7 @@ CREATE POLICY "Portal can view client documents"
     )
   );
 
+DROP POLICY IF EXISTS "Portal can upload client documents" ON public.documents;
 CREATE POLICY "Portal can upload client documents"
   ON public.documents FOR INSERT TO authenticated
   WITH CHECK (
@@ -309,6 +322,7 @@ CREATE POLICY "Portal can upload client documents"
     AND document_type IN ('receipt','invoice','bank_statement','id_document','correspondence','other')
   );
 
+DROP POLICY IF EXISTS "Portal can view client payroll employers" ON public.payroll_employers;
 CREATE POLICY "Portal can view client payroll employers"
   ON public.payroll_employers FOR SELECT TO authenticated
   USING (
@@ -326,6 +340,7 @@ CREATE POLICY "Portal can view client payroll employers"
     )
   );
 
+DROP POLICY IF EXISTS "Employee can view own payroll record" ON public.payroll_employees;
 CREATE POLICY "Employee can view own payroll record"
   ON public.payroll_employees FOR SELECT TO authenticated
   USING (
@@ -334,10 +349,12 @@ CREATE POLICY "Employee can view own payroll record"
     AND tenant_id = public.get_portal_tenant_id(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Portal can view scoped pay runs" ON public.pay_runs;
 CREATE POLICY "Portal can view scoped pay runs"
   ON public.pay_runs FOR SELECT TO authenticated
   USING (public.can_portal_view_pay_run(id, auth.uid()));
 
+DROP POLICY IF EXISTS "Portal can view scoped payslips" ON public.payslips;
 CREATE POLICY "Portal can view scoped payslips"
   ON public.payslips FOR SELECT TO authenticated
   USING (public.can_portal_view_payslip(id, auth.uid()));
@@ -360,6 +377,7 @@ SET file_size_limit = 20971520,
     ]
 WHERE id = 'client-documents';
 
+DROP POLICY IF EXISTS "Scoped users can view client documents" ON storage.objects;
 CREATE POLICY "Scoped users can view client documents"
   ON storage.objects FOR SELECT TO authenticated
   USING (
@@ -389,6 +407,7 @@ CREATE POLICY "Scoped users can view client documents"
     )
   );
 
+DROP POLICY IF EXISTS "Scoped users can upload client documents" ON storage.objects;
 CREATE POLICY "Scoped users can upload client documents"
   ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (
@@ -403,6 +422,7 @@ CREATE POLICY "Scoped users can upload client documents"
     )
   );
 
+DROP POLICY IF EXISTS "Staff can update tenant client documents" ON storage.objects;
 CREATE POLICY "Staff can update tenant client documents"
   ON storage.objects FOR UPDATE TO authenticated
   USING (
@@ -410,6 +430,7 @@ CREATE POLICY "Staff can update tenant client documents"
     AND (storage.foldername(name))[1] = public.get_user_tenant_id(auth.uid())::text
   );
 
+DROP POLICY IF EXISTS "Staff can delete tenant client documents" ON storage.objects;
 CREATE POLICY "Staff can delete tenant client documents"
   ON storage.objects FOR DELETE TO authenticated
   USING (
