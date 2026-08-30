@@ -305,6 +305,161 @@ export type Database = {
           },
         ]
       }
+      accounts_compliance_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          period_id: string
+          reason: string | null
+          snapshot: Json
+          tenant_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          period_id: string
+          reason?: string | null
+          snapshot?: Json
+          tenant_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          period_id?: string
+          reason?: string | null
+          snapshot?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_compliance_events_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_compliance_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_compliance_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      accounts_compliance_profiles: {
+        Row: {
+          comparatives_complete: boolean
+          comparatives_required: boolean
+          created_at: string
+          disclosure_checks: Json
+          entity_size: string
+          framework: string
+          framework_eligibility_confirmed: boolean
+          id: string
+          locked_snapshot: Json | null
+          period_id: string
+          policy_data: Json
+          prepared_at: string | null
+          prepared_by_user_id: string | null
+          reopen_reason: string | null
+          reopened_at: string | null
+          reopened_by_user_id: string | null
+          review_statement: string | null
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
+          rounding_basis: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          comparatives_complete?: boolean
+          comparatives_required?: boolean
+          created_at?: string
+          disclosure_checks?: Json
+          entity_size?: string
+          framework?: string
+          framework_eligibility_confirmed?: boolean
+          id?: string
+          locked_snapshot?: Json | null
+          period_id: string
+          policy_data?: Json
+          prepared_at?: string | null
+          prepared_by_user_id?: string | null
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by_user_id?: string | null
+          review_statement?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          rounding_basis?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          comparatives_complete?: boolean
+          comparatives_required?: boolean
+          created_at?: string
+          disclosure_checks?: Json
+          entity_size?: string
+          framework?: string
+          framework_eligibility_confirmed?: boolean
+          id?: string
+          locked_snapshot?: Json | null
+          period_id?: string
+          policy_data?: Json
+          prepared_at?: string | null
+          prepared_by_user_id?: string | null
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by_user_id?: string | null
+          review_statement?: string | null
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
+          rounding_basis?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_compliance_profiles_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: true
+            referencedRelation: "accounts_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_compliance_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_compliance_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       accounts_periods: {
         Row: {
           accounts_standard: string
@@ -9084,6 +9239,160 @@ export type Database = {
           },
         ]
       }
+      regulatory_capability_controls: {
+        Row: {
+          application_reference: string | null
+          capability_key: string
+          control_status: string
+          created_at: string
+          created_by_user_id: string | null
+          id: string
+          next_review_date: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_user_id: string | null
+          production_enabled: boolean
+          production_enabled_at: string | null
+          production_enabled_by_user_id: string | null
+          production_gate_reason: string | null
+          target_date: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          application_reference?: string | null
+          capability_key: string
+          control_status?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          production_enabled?: boolean
+          production_enabled_at?: string | null
+          production_enabled_by_user_id?: string | null
+          production_gate_reason?: string | null
+          target_date?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          application_reference?: string | null
+          capability_key?: string
+          control_status?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          production_enabled?: boolean
+          production_enabled_at?: string | null
+          production_enabled_by_user_id?: string | null
+          production_gate_reason?: string | null
+          target_date?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulatory_capability_controls_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_capability_controls_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      regulatory_readiness_evidence: {
+        Row: {
+          capability_key: string
+          created_at: string
+          document_id: string | null
+          environment: string
+          evidence_kind: string
+          evidence_url: string | null
+          id: string
+          notes: string | null
+          recorded_by_user_id: string | null
+          reference: string | null
+          result: string
+          tenant_id: string
+          tested_at: string | null
+          title: string
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          capability_key: string
+          created_at?: string
+          document_id?: string | null
+          environment?: string
+          evidence_kind: string
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          recorded_by_user_id?: string | null
+          reference?: string | null
+          result?: string
+          tenant_id: string
+          tested_at?: string | null
+          title: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          capability_key?: string
+          created_at?: string
+          document_id?: string | null
+          environment?: string
+          evidence_kind?: string
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          recorded_by_user_id?: string | null
+          reference?: string | null
+          result?: string
+          tenant_id?: string
+          tested_at?: string | null
+          title?: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulatory_readiness_evidence_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_readiness_evidence_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_readiness_evidence_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           created_at: string
@@ -11499,6 +11808,17 @@ export type Database = {
         Args: { p_period_id: string }
         Returns: Json
       }
+      accounts_required_disclosure_keys: {
+        Args: {
+          p_entity_type: Database["public"]["Enums"]["entity_type"]
+          p_framework: string
+        }
+        Returns: string[]
+      }
+      accounts_required_policy_keys: {
+        Args: { p_framework: string }
+        Returns: string[]
+      }
       approve_accounts_period: {
         Args: { p_period_id: string; p_review_statement: string }
         Returns: Json
@@ -11559,6 +11879,10 @@ export type Database = {
       post_bank_transaction: {
         Args: { p_transaction_id: string }
         Returns: string
+      }
+      reopen_accounts_period: {
+        Args: { p_period_id: string; p_reason: string }
+        Returns: Json
       }
       run_accounts_intelligence: {
         Args: { p_client_id: string; p_period_id: string }

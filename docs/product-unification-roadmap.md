@@ -93,7 +93,6 @@ The benchmark is capability and workflow quality, not visual copying.
 - added accountable owners, application references, target/review dates and blockers per filing capability;
 - added a structured evidence register for sandbox, schema, fraud-header, security, accessibility and recognition results; and
 - added a database-enforced production kill switch that authenticated browser users cannot enable.
-
 ### Stage C2 — implemented in the accounts compliance phase
 
 - added tenant-persistent FRS 105 and FRS 102 Section 1A preparation profiles;
