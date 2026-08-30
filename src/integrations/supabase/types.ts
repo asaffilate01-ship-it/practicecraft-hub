@@ -8703,6 +8703,160 @@ export type Database = {
           },
         ]
       }
+      regulatory_capability_controls: {
+        Row: {
+          application_reference: string | null
+          capability_key: string
+          control_status: string
+          created_at: string
+          created_by_user_id: string | null
+          id: string
+          next_review_date: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_user_id: string | null
+          production_enabled: boolean
+          production_enabled_at: string | null
+          production_enabled_by_user_id: string | null
+          production_gate_reason: string | null
+          target_date: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          application_reference?: string | null
+          capability_key: string
+          control_status?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          production_enabled?: boolean
+          production_enabled_at?: string | null
+          production_enabled_by_user_id?: string | null
+          production_gate_reason?: string | null
+          target_date?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          application_reference?: string | null
+          capability_key?: string
+          control_status?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          production_enabled?: boolean
+          production_enabled_at?: string | null
+          production_enabled_by_user_id?: string | null
+          production_gate_reason?: string | null
+          target_date?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulatory_capability_controls_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_capability_controls_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
+      regulatory_readiness_evidence: {
+        Row: {
+          capability_key: string
+          created_at: string
+          document_id: string | null
+          environment: string
+          evidence_kind: string
+          evidence_url: string | null
+          id: string
+          notes: string | null
+          recorded_by_user_id: string | null
+          reference: string | null
+          result: string
+          tenant_id: string
+          tested_at: string | null
+          title: string
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          capability_key: string
+          created_at?: string
+          document_id?: string | null
+          environment?: string
+          evidence_kind: string
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          recorded_by_user_id?: string | null
+          reference?: string | null
+          result?: string
+          tenant_id: string
+          tested_at?: string | null
+          title: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          capability_key?: string
+          created_at?: string
+          document_id?: string | null
+          environment?: string
+          evidence_kind?: string
+          evidence_url?: string | null
+          id?: string
+          notes?: string | null
+          recorded_by_user_id?: string | null
+          reference?: string | null
+          result?: string
+          tenant_id?: string
+          tested_at?: string | null
+          title?: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulatory_readiness_evidence_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_readiness_evidence_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_readiness_evidence_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "v_practice_dashboard_kpis"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           created_at: string
