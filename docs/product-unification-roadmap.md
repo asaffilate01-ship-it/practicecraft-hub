@@ -104,4 +104,16 @@ The benchmark is capability and workflow quality, not visual copying.
 - added an append-only prepared/locked/reopened evidence ledger and retained locked snapshots; and
 - added comparative statement columns and consistent whole-pound or £000 presentation rounding.
 
-This phase does not claim standards-valid iXBRL or Companies House/HMRC acceptance. Current-taxonomy tagging, validator evidence and provider test acceptance remain the next accounts filing stage.
+This phase does not claim standards-valid iXBRL or Companies House/HMRC acceptance.
+
+### Stage C3 — implemented in the iXBRL preflight phase
+
+- replaced the placeholder iXBRL page with a responsive filing workspace, package pipeline, mapping editor, facts inspection and append-only audit view;
+- registered the FRC Taxonomy Suite 2026, Charities Taxonomy 2026 and HMRC Corporation Tax computational 2025 release as authority-controlled reference data;
+- made reviewer-locked final accounts mandatory before a digital accounts package can be built;
+- added versioned source and tagged-fact snapshots, period/identity checks, non-zero mapping coverage and duplicate concept/context warnings;
+- added independent tagged-facts review, restricted to managers/owners and requiring a different user from the preparer;
+- reserved external validator and test-service outcomes for service-role workflows, preventing browser users from fabricating acceptance; and
+- kept live accounts filing disabled and blocked test readiness until real external validation evidence exists.
+
+The next accounts filing stage is the standards-conformant XHTML/iXBRL renderer, rendered-document visual review, execution against the HMRC joint filing checks and Companies House Accounts TIS 5.9 validator, followed by recorded Companies House test-service acceptance.

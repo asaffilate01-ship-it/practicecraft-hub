@@ -5147,51 +5147,153 @@ export type Database = {
           },
         ]
       }
+      ixbrl_filing_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          evidence: Json
+          filing_instance_id: string
+          id: string
+          tenant_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          evidence?: Json
+          filing_instance_id: string
+          id?: string
+          tenant_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          evidence?: Json
+          filing_instance_id?: string
+          id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ixbrl_filing_events_filing_instance_id_fkey"
+            columns: ["filing_instance_id"]
+            isOneToOne: false
+            referencedRelation: "ixbrl_filing_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ixbrl_filing_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ixbrl_filing_instances: {
         Row: {
           accounts_period_id: string | null
+          blocking_issue_count: number
           client_id: string
+          content_sha256: string | null
           created_at: string
+          external_validation_evidence: Json
+          external_validation_status: string
+          facts_review_statement: string | null
+          facts_reviewed_at: string | null
+          facts_reviewed_by_user_id: string | null
+          facts_json: Json
           generated_at: string | null
           generated_xbrl: string | null
           id: string
+          live_filing_enabled: boolean
+          mapping_coverage: number
+          package_kind: string
+          package_version: number
+          preflight_status: string
+          prepared_by_user_id: string | null
+          renderer_version: string | null
+          source_snapshot: Json
           status: string
           submission_job_id: string | null
           submitted_at: string | null
           taxonomy_id: string
           tenant_id: string
+          test_package_evidence: Json
+          test_package_status: string
           updated_at: string
           validation_errors_json: Json
+          warning_issue_count: number
         }
         Insert: {
           accounts_period_id?: string | null
+          blocking_issue_count?: number
           client_id: string
+          content_sha256?: string | null
           created_at?: string
+          external_validation_evidence?: Json
+          external_validation_status?: string
+          facts_review_statement?: string | null
+          facts_reviewed_at?: string | null
+          facts_reviewed_by_user_id?: string | null
+          facts_json?: Json
           generated_at?: string | null
           generated_xbrl?: string | null
           id?: string
+          live_filing_enabled?: boolean
+          mapping_coverage?: number
+          package_kind?: string
+          package_version?: number
+          preflight_status?: string
+          prepared_by_user_id?: string | null
+          renderer_version?: string | null
+          source_snapshot?: Json
           status?: string
           submission_job_id?: string | null
           submitted_at?: string | null
           taxonomy_id: string
           tenant_id: string
+          test_package_evidence?: Json
+          test_package_status?: string
           updated_at?: string
           validation_errors_json?: Json
+          warning_issue_count?: number
         }
         Update: {
           accounts_period_id?: string | null
+          blocking_issue_count?: number
           client_id?: string
+          content_sha256?: string | null
           created_at?: string
+          external_validation_evidence?: Json
+          external_validation_status?: string
+          facts_review_statement?: string | null
+          facts_reviewed_at?: string | null
+          facts_reviewed_by_user_id?: string | null
+          facts_json?: Json
           generated_at?: string | null
           generated_xbrl?: string | null
           id?: string
+          live_filing_enabled?: boolean
+          mapping_coverage?: number
+          package_kind?: string
+          package_version?: number
+          preflight_status?: string
+          prepared_by_user_id?: string | null
+          renderer_version?: string | null
+          source_snapshot?: Json
           status?: string
           submission_job_id?: string | null
           submitted_at?: string | null
           taxonomy_id?: string
           tenant_id?: string
+          test_package_evidence?: Json
+          test_package_status?: string
           updated_at?: string
           validation_errors_json?: Json
+          warning_issue_count?: number
         }
         Relationships: [
           {
@@ -5324,30 +5426,51 @@ export type Database = {
       }
       ixbrl_taxonomies: {
         Row: {
+          accepted_period_end: string | null
+          accepted_period_start: string | null
+          authority_url: string | null
           created_at: string
           id: string
           is_active: boolean
           name: string
+          reference_status: string
+          release_date: string | null
           schema_url: string | null
           taxonomy_type: string
+          validation_profile: string | null
+          verified_at: string | null
           version: string
         }
         Insert: {
+          accepted_period_end?: string | null
+          accepted_period_start?: string | null
+          authority_url?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           name: string
+          reference_status?: string
+          release_date?: string | null
           schema_url?: string | null
           taxonomy_type?: string
+          validation_profile?: string | null
+          verified_at?: string | null
           version: string
         }
         Update: {
+          accepted_period_end?: string | null
+          accepted_period_start?: string | null
+          authority_url?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           name?: string
+          reference_status?: string
+          release_date?: string | null
           schema_url?: string | null
           taxonomy_type?: string
+          validation_profile?: string | null
+          verified_at?: string | null
           version?: string
         }
         Relationships: []
@@ -11380,6 +11503,18 @@ export type Database = {
         Args: { p_period_id: string; p_review_statement: string }
         Returns: Json
       }
+      approve_ixbrl_facts_review: {
+        Args: { p_filing_instance_id: string; p_review_statement: string }
+        Returns: Json
+      }
+      build_ixbrl_preflight: {
+        Args: {
+          p_package_kind?: string
+          p_period_id: string
+          p_taxonomy_id: string
+        }
+        Returns: Json
+      }
       can_portal_view_pay_run: {
         Args: { _run_id: string; _user_id: string }
         Returns: boolean
@@ -11431,6 +11566,10 @@ export type Database = {
       }
       reopen_accounts_period: {
         Args: { p_period_id: string; p_reason: string }
+        Returns: Json
+      }
+      request_ixbrl_test_package: {
+        Args: { p_filing_instance_id: string }
         Returns: Json
       }
       seed_template_whitelist: {
