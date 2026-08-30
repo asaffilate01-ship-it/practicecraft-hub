@@ -1,266 +1,102 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { ChangeEvent, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, ArrowRight, CheckCircle, Database, FileSpreadsheet, Upload } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileSpreadsheet, Database, ArrowRight, CheckCircle, AlertTriangle, X } from "lucide-react";
-import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
+import { useAuth } from "@/contexts/AuthContext";
+import { useClientContext } from "@/contexts/ClientContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import { supabase } from "@/integrations/supabase/client";
 
-type ImportRow = {
-  source_code: string;
-  source_name: string;
-  debit: number;
-  credit: number;
-  mapped_code: string | null;
-  mapped_name: string | null;
-  status: "mapped" | "unmapped" | "skipped";
-};
+type ImportRow = { source_code: string; source_name: string; debit: number; credit: number; mapped_code: string | null };
+const money = (value: number) => value ? `£${value.toLocaleString("en-GB", { minimumFractionDigits: 2 })}` : "—";
 
-const SAMPLE_IMPORT: ImportRow[] = [
-  { source_code: "1000", source_name: "Bank Current Account", debit: 45230.50, credit: 0, mapped_code: "1000", mapped_name: "Bank - Current Account", status: "mapped" },
-  { source_code: "1100", source_name: "Trade Debtors", debit: 12800.00, credit: 0, mapped_code: "1100", mapped_name: "Accounts Receivable (Debtors)", status: "mapped" },
-  { source_code: "2100", source_name: "Trade Creditors", debit: 0, credit: 8900.00, mapped_code: "2000", mapped_name: "Accounts Payable (Creditors)", status: "mapped" },
-  { source_code: "2200", source_name: "VAT Liability", debit: 0, credit: 3450.00, mapped_code: "1300", mapped_name: "VAT Control", status: "mapped" },
-  { source_code: "4000", source_name: "Revenue", debit: 0, credit: 185000.00, mapped_code: "4000", mapped_name: "Sales", status: "mapped" },
-  { source_code: "5000", source_name: "Purchases", debit: 92000.00, credit: 0, mapped_code: "5000", mapped_name: "Cost of Sales", status: "mapped" },
-  { source_code: "6100", source_name: "Wages & Salaries", debit: 48000.00, credit: 0, mapped_code: "6000", mapped_name: "Staff Wages", status: "mapped" },
-  { source_code: "7200", source_name: "Directors Loan", debit: 5000.00, credit: 0, mapped_code: null, mapped_name: null, status: "unmapped" },
-  { source_code: "7500", source_name: "Sundry Expenses", debit: 1200.00, credit: 0, mapped_code: null, mapped_name: null, status: "unmapped" },
-];
+function parseCsvLine(line: string) {
+  const values: string[] = [];
+  let value = "";
+  let quoted = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if (character === '"' && line[index + 1] === '"') { value += '"'; index += 1; }
+    else if (character === '"') quoted = !quoted;
+    else if (character === "," && !quoted) { values.push(value.trim()); value = ""; }
+    else value += character;
+  }
+  values.push(value.trim());
+  return values;
+}
 
-const PAST_IMPORTS = [
-  { id: "1", client: "Acme Ltd", source: "Xero", date: "2026-03-10", rows: 42, mapped: 40, posted: 40, status: "completed" },
-  { id: "2", client: "Beta Services", source: "CSV", date: "2026-03-05", rows: 28, mapped: 28, posted: 28, status: "completed" },
-  { id: "3", client: "Delta Holdings", source: "QuickBooks", date: "2026-02-28", rows: 65, mapped: 62, posted: 0, status: "mapped" },
-];
+function parseTrialBalance(csv: string) {
+  const lines = csv.split(/\r?\n/).filter((line) => line.trim());
+  if (lines.length < 2) throw new Error("The CSV does not contain any trial-balance rows");
+  const headers = parseCsvLine(lines[0]).map((header) => header.toLowerCase().replace(/[^a-z]/g, ""));
+  const column = (...names: string[]) => headers.findIndex((header) => names.includes(header));
+  const codeIndex = column("code", "accountcode", "nominalcode");
+  const nameIndex = column("name", "accountname", "description");
+  const debitIndex = column("debit", "debits");
+  const creditIndex = column("credit", "credits");
+  if ([codeIndex, nameIndex, debitIndex, creditIndex].some((index) => index < 0)) throw new Error("CSV headings must include account code, account name, debit and credit");
+  return lines.slice(1).map((line) => { const values = parseCsvLine(line); return { source_code: values[codeIndex], source_name: values[nameIndex], debit: Number(values[debitIndex]?.replace(/[,£]/g, "")) || 0, credit: Number(values[creditIndex]?.replace(/[,£]/g, "")) || 0, mapped_code: null } satisfies ImportRow; }).filter((row) => row.source_code || row.source_name);
+}
 
 export default function TrialBalanceImport() {
-  const [importStep, setImportStep] = useState<"source" | "mapping" | "review">("source");
-  const [selectedSource, setSelectedSource] = useState("");
-  const [importRows] = useState(SAMPLE_IMPORT);
+  const queryClient = useQueryClient();
+  const { tenantId } = usePermissions();
+  const { user } = useAuth();
+  const { selectedClientId } = useClientContext();
+  const [fileName, setFileName] = useState("");
+  const [rows, setRows] = useState<ImportRow[]>([]);
 
-  const mapped = importRows.filter(r => r.status === "mapped").length;
-  const unmapped = importRows.filter(r => r.status === "unmapped").length;
-  const progress = Math.round((mapped / importRows.length) * 100);
+  const { data: accounts = [] } = useQuery({ queryKey: ["trial-balance-coa", tenantId], queryFn: async () => { const { data, error } = await supabase.from("chart_of_accounts").select("code,name").eq("is_active", true).order("code"); if (error) throw error; return data; }, enabled: !!tenantId });
+  const { data: clients = [] } = useQuery({ queryKey: ["trial-balance-clients", tenantId], queryFn: async () => { const { data, error } = await supabase.from("clients").select("id,legal_name").eq("status", "active").order("legal_name"); if (error) throw error; return data; }, enabled: !!tenantId, staleTime: 60_000 });
+  const { data: history = [] } = useQuery({ queryKey: ["tb-import-history", tenantId, selectedClientId], queryFn: async () => { let query = supabase.from("tb_imports").select("id,client_id,source,file_name,status,rows_total,rows_mapped,rows_posted,created_at,clients(legal_name)").order("created_at", { ascending: false }); if (selectedClientId) query = query.eq("client_id", selectedClientId); const { data, error } = await query; if (error) throw error; return data; }, enabled: !!tenantId });
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Trial Balance Import & Migration</h1>
-          <p className="text-muted-foreground">Import from Xero, QuickBooks, CSV, or migrate from other software</p>
-        </div>
-      </div>
+  const mapped = rows.filter((row) => row.mapped_code).length;
+  const progress = rows.length ? Math.round((mapped / rows.length) * 100) : 0;
+  const debitTotal = useMemo(() => rows.reduce((sum, row) => sum + row.debit, 0), [rows]);
+  const creditTotal = useMemo(() => rows.reduce((sum, row) => sum + row.credit, 0), [rows]);
 
-      <Tabs defaultValue="import">
-        <TabsList>
-          <TabsTrigger value="import"><Upload className="h-4 w-4 mr-1" />New Import</TabsTrigger>
-          <TabsTrigger value="history"><Database className="h-4 w-4 mr-1" />Import History</TabsTrigger>
-        </TabsList>
+  const readFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const parsed = parseTrialBalance(await file.text());
+      const mappedRows = parsed.map((row) => ({ ...row, mapped_code: accounts.some((account) => account.code === row.source_code) ? row.source_code : null }));
+      setRows(mappedRows);
+      setFileName(file.name);
+      toast.success(`${mappedRows.length} trial-balance rows parsed`);
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Unable to parse CSV"); }
+  };
 
-        <TabsContent value="import" className="space-y-4">
-          {/* Step indicator */}
-          <div className="flex items-center gap-4">
-            {(["source", "mapping", "review"] as const).map((step, i) => (
-              <div key={step} className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                  importStep === step ? "bg-primary text-primary-foreground" :
-                  (["source","mapping","review"].indexOf(importStep) > i) ? "bg-primary/20 text-primary" :
-                  "bg-muted text-muted-foreground"
-                }`}>{i + 1}</div>
-                <span className="text-sm font-medium capitalize">{step === "source" ? "Select Source" : step === "mapping" ? "Map Accounts" : "Review & Post"}</span>
-                {i < 2 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
-              </div>
-            ))}
-          </div>
+  const saveImport = useMutation({
+    mutationFn: async () => {
+      if (!tenantId || !selectedClientId) throw new Error("Select a client in the workspace bar first");
+      if (!rows.length) throw new Error("Upload a CSV trial balance first");
+      if (Math.abs(debitTotal - creditTotal) > 0.005) throw new Error("The trial balance is not balanced");
+      const { error } = await supabase.from("tb_imports").insert({ tenant_id: tenantId, client_id: selectedClientId, source: "csv", file_name: fileName, status: mapped === rows.length ? "mapped" : "mapping_required", mapping_json: { rows }, rows_total: rows.length, rows_mapped: mapped, rows_posted: 0, imported_by: user?.id });
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["tb-import-history"] }); setRows([]); setFileName(""); toast.success("Trial balance saved for review"); },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
-          {importStep === "source" && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { id: "csv", label: "CSV / Excel", desc: "Upload a CSV or Excel trial balance file", icon: FileSpreadsheet },
-                { id: "xero", label: "Xero", desc: "Connect and import directly from Xero", icon: Database },
-                { id: "quickbooks", label: "QuickBooks", desc: "Import trial balance from QuickBooks Online", icon: Database },
-                { id: "sage", label: "Sage / IRIS", desc: "Migrate from Sage, IRIS, or Capium export", icon: Database },
-              ].map(source => (
-                <Card key={source.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${selectedSource === source.id ? "ring-2 ring-primary" : ""}`}
-                  onClick={() => setSelectedSource(source.id)}>
-                  <CardHeader className="pb-2">
-                    <source.icon className="h-8 w-8 text-primary mb-2" />
-                    <CardTitle className="text-base">{source.label}</CardTitle>
-                    <CardDescription className="text-xs">{source.desc}</CardDescription>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-          )}
+  const updateMapping = (index: number, mappedCode: string) => setRows((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, mapped_code: mappedCode } : row));
 
-          {importStep === "source" && selectedSource && (
-            <Card>
-              <CardContent className="pt-6 space-y-4">
-                {selectedSource === "csv" ? (
-                  <>
-                    <div><Label>Upload File</Label><Input type="file" accept=".csv,.xlsx,.xls" /></div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Date Format</Label>
-                        <Select defaultValue="dd/mm/yyyy">
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="dd/mm/yyyy">DD/MM/YYYY</SelectItem>
-                            <SelectItem value="mm/dd/yyyy">MM/DD/YYYY</SelectItem>
-                            <SelectItem value="yyyy-mm-dd">YYYY-MM-DD</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div><Label>Period End Date</Label><Input type="date" /></div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-6">
-                    <p className="text-muted-foreground mb-4">Connect your {selectedSource === "xero" ? "Xero" : selectedSource === "quickbooks" ? "QuickBooks" : "Sage/IRIS"} account to import</p>
-                    <Button>Connect & Authenticate</Button>
-                  </div>
-                )}
-                <Button className="w-full" onClick={() => { setImportStep("mapping"); toast.success("File parsed - " + importRows.length + " rows found"); }}>
-                  Parse & Continue
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {importStep === "mapping" && (
-            <>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Progress value={progress} className="h-2" />
-                </div>
-                <span className="text-sm font-medium">{mapped}/{importRows.length} mapped</span>
-                {unmapped > 0 && <Badge variant="destructive">{unmapped} unmapped</Badge>}
-              </div>
-              <Card>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Source Code</TableHead>
-                        <TableHead>Source Name</TableHead>
-                        <TableHead className="text-right">Debit</TableHead>
-                        <TableHead className="text-right">Credit</TableHead>
-                        <TableHead><ArrowRight className="h-4 w-4" /></TableHead>
-                        <TableHead>Mapped Account</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {importRows.map((row, i) => (
-                        <TableRow key={i}>
-                          <TableCell className="font-mono">{row.source_code}</TableCell>
-                          <TableCell>{row.source_name}</TableCell>
-                          <TableCell className="text-right font-mono">{row.debit ? `£${row.debit.toLocaleString("en-GB", { minimumFractionDigits: 2 })}` : "-"}</TableCell>
-                          <TableCell className="text-right font-mono">{row.credit ? `£${row.credit.toLocaleString("en-GB", { minimumFractionDigits: 2 })}` : "-"}</TableCell>
-                          <TableCell><ArrowRight className="h-4 w-4 text-muted-foreground" /></TableCell>
-                          <TableCell>
-                            {row.mapped_code ? (
-                              <span className="font-mono text-sm">{row.mapped_code} - {row.mapped_name}</span>
-                            ) : (
-                              <Select>
-                                <SelectTrigger className="w-full"><SelectValue placeholder="Map account..." /></SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="1000">1000 - Bank</SelectItem>
-                                  <SelectItem value="2400">2400 - Director Loan</SelectItem>
-                                  <SelectItem value="6900">6900 - Sundry Expenses</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {row.status === "mapped" ? <CheckCircle className="h-4 w-4 text-green-600" /> :
-                             row.status === "unmapped" ? <AlertTriangle className="h-4 w-4 text-amber-500" /> :
-                             <X className="h-4 w-4 text-muted-foreground" />}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setImportStep("source")}>Back</Button>
-                <Button onClick={() => { setImportStep("review"); toast.success("Mapping saved"); }}>Continue to Review</Button>
-              </div>
-            </>
-          )}
-
-          {importStep === "review" && (
-            <Card>
-              <CardHeader><CardTitle>Import Summary</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold">{importRows.length}</div>
-                    <div className="text-sm text-muted-foreground">Total Rows</div>
-                  </div>
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{mapped}</div>
-                    <div className="text-sm text-muted-foreground">Mapped</div>
-                  </div>
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-amber-600">{unmapped}</div>
-                    <div className="text-sm text-muted-foreground">Unmapped</div>
-                  </div>
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" onClick={() => setImportStep("mapping")}>Back to Mapping</Button>
-                  <Button onClick={() => { toast.success("Trial balance posted to ledger"); setImportStep("source"); }}>
-                    Post to Ledger
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="history">
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Rows</TableHead>
-                    <TableHead className="text-right">Mapped</TableHead>
-                    <TableHead className="text-right">Posted</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {PAST_IMPORTS.map(imp => (
-                    <TableRow key={imp.id}>
-                      <TableCell className="font-medium">{imp.client}</TableCell>
-                      <TableCell><Badge variant="outline">{imp.source}</Badge></TableCell>
-                      <TableCell>{imp.date}</TableCell>
-                      <TableCell className="text-right">{imp.rows}</TableCell>
-                      <TableCell className="text-right">{imp.mapped}</TableCell>
-                      <TableCell className="text-right">{imp.posted}</TableCell>
-                      <TableCell>
-                        <Badge variant={imp.status === "completed" ? "default" : "secondary"}>{imp.status}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+  return <div className="space-y-6"><WorkspacePageHeader eyebrow="Accounts migration" title="Trial Balance Import" icon={Upload} description="Parse a real CSV, map it to the practice chart of accounts and retain a reviewable import record." actions={<Select value={selectedClientId || ""} disabled><SelectTrigger className="w-full bg-card sm:w-72"><SelectValue placeholder="Select a client in the top bar" /></SelectTrigger><SelectContent>{clients.map((client) => <SelectItem key={client.id} value={client.id}>{client.legal_name}</SelectItem>)}</SelectContent></Select>} />
+    <Tabs defaultValue="import"><TabsList className="w-max min-w-full justify-start"><TabsTrigger value="import"><FileSpreadsheet className="mr-1 h-4 w-4" /> New import</TabsTrigger><TabsTrigger value="history"><Database className="mr-1 h-4 w-4" /> Import history</TabsTrigger></TabsList>
+      <TabsContent value="import" className="space-y-4"><Card className="workspace-panel"><CardContent className="space-y-4 p-5"><div><Label>Trial balance CSV</Label><Input type="file" accept=".csv,text/csv" onChange={readFile} /><p className="mt-2 text-xs text-muted-foreground">Required headings: account code, account name, debit and credit. Xero, QuickBooks and Sage direct connectors remain disabled until OAuth connections are configured.</p></div></CardContent></Card>
+        {!!rows.length && <><div className="flex flex-wrap items-center gap-3"><Progress value={progress} className="h-2 min-w-40 flex-1" /><span className="text-sm font-medium">{mapped}/{rows.length} mapped</span>{mapped < rows.length && <Badge variant="destructive">{rows.length - mapped} unmapped</Badge>}</div><Card className="workspace-panel overflow-hidden"><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>Source</TableHead><TableHead className="text-right">Debit</TableHead><TableHead className="text-right">Credit</TableHead><TableHead><ArrowRight className="h-4 w-4" /></TableHead><TableHead>Mapped account</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{rows.map((row, index) => <TableRow key={`${row.source_code}-${index}`}><TableCell><p className="font-mono text-xs">{row.source_code}</p><p className="text-sm">{row.source_name}</p></TableCell><TableCell className="text-right font-mono">{money(row.debit)}</TableCell><TableCell className="text-right font-mono">{money(row.credit)}</TableCell><TableCell><ArrowRight className="h-4 w-4 text-muted-foreground" /></TableCell><TableCell><Select value={row.mapped_code || ""} onValueChange={(value) => updateMapping(index, value)}><SelectTrigger className="min-w-56"><SelectValue placeholder="Map account" /></SelectTrigger><SelectContent>{accounts.map((account) => <SelectItem key={account.code} value={account.code}>{account.code} · {account.name}</SelectItem>)}</SelectContent></Select></TableCell><TableCell>{row.mapped_code ? <CheckCircle className="h-4 w-4 text-emerald-600" /> : <AlertTriangle className="h-4 w-4 text-amber-500" />}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card><div className="grid gap-3 sm:grid-cols-3"><Card className="workspace-panel"><CardContent className="p-4"><p className="workspace-eyebrow">Debit</p><p className="mt-2 font-mono text-xl font-semibold">{money(debitTotal)}</p></CardContent></Card><Card className="workspace-panel"><CardContent className="p-4"><p className="workspace-eyebrow">Credit</p><p className="mt-2 font-mono text-xl font-semibold">{money(creditTotal)}</p></CardContent></Card><Card className="workspace-panel"><CardContent className="p-4"><p className="workspace-eyebrow">Difference</p><p className="mt-2 font-mono text-xl font-semibold">{money(Math.abs(debitTotal - creditTotal))}</p></CardContent></Card></div><div className="flex justify-end"><Button onClick={() => saveImport.mutate()} disabled={saveImport.isPending || !selectedClientId}>{saveImport.isPending ? "Saving…" : "Save for review"}</Button></div></>}
+      </TabsContent>
+      <TabsContent value="history"><Card className="workspace-panel overflow-hidden"><CardContent className="p-0">{!history.length ? <p className="py-16 text-center text-sm text-muted-foreground">No trial-balance imports found.</p> : <Table><TableHeader><TableRow><TableHead>Client</TableHead><TableHead>File</TableHead><TableHead>Source</TableHead><TableHead className="text-right">Rows</TableHead><TableHead className="text-right">Mapped</TableHead><TableHead className="text-right">Posted</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{history.map((item) => <TableRow key={item.id}><TableCell className="font-medium">{item.clients?.legal_name}</TableCell><TableCell>{item.file_name || "—"}</TableCell><TableCell><Badge variant="outline">{item.source}</Badge></TableCell><TableCell className="text-right">{item.rows_total}</TableCell><TableCell className="text-right">{item.rows_mapped}</TableCell><TableCell className="text-right">{item.rows_posted}</TableCell><TableCell><Badge variant="secondary">{item.status}</Badge></TableCell></TableRow>)}</TableBody></Table>}</CardContent></Card></TabsContent>
+    </Tabs>
+  </div>;
 }

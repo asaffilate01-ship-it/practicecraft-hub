@@ -94,7 +94,7 @@ export function ChangeWizard({ open, onOpenChange, clientId, preselectedType }: 
   const { data: authCode } = useQuery({
     queryKey: ["auth-code", clientId],
     queryFn: async () => {
-      const { data } = await supabase.from("client_credentials").select("id").eq("client_id", clientId).eq("credential_type", "ch_auth_code").maybeSingle();
+      const { data } = await supabase.from("client_credentials").select("id").eq("client_id", clientId).eq("credential_type", "auth_code").maybeSingle();
       return data;
     },
     enabled: !!clientId,

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -291,10 +292,7 @@ export default function Bookkeeping() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Bookkeeping</h1>
-        <p className="text-sm text-muted-foreground">Double-entry ledger, chart of accounts & trial balance</p>
-      </div>
+      <WorkspacePageHeader eyebrow="Records and ledgers" title="Bookkeeping" description="Double-entry ledger, chart of accounts, journals, evidence capture and trial balance." />
 
       <Tabs defaultValue="accounts">
         <TabsList>

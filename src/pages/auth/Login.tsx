@@ -81,7 +81,7 @@ export default function Login() {
               <CloudCog className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-              IQ Practice Cloud
+              PracticeCraft
             </h1>
           </div>
           <p className="text-[hsl(210,20%,70%)] text-sm max-w-md mt-1">
@@ -92,7 +92,7 @@ export default function Login() {
         <div className="relative z-10 flex-1 flex items-center justify-center py-8">
           <img
             src={heroDashboard}
-            alt="IQ Practice Cloud Dashboard"
+            alt="PracticeCraft dashboard"
             className="w-full max-w-lg rounded-xl shadow-2xl border border-white/10"
           />
         </div>
@@ -124,7 +124,7 @@ export default function Login() {
               <CloudCog className="w-5 h-5 text-primary-foreground" />
             </div>
             <h1 className="text-xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>
-              IQ Practice Cloud
+              PracticeCraft
             </h1>
           </div>
 

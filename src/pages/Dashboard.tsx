@@ -6,8 +6,6 @@ import {
   Receipt, Sparkles, TrendingUp, Users, Wallet,
 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AIIntelligencePanel } from "@/components/intelligence/AIIntelligencePanel";
-import { TaskSuggestionsPanel } from "@/components/intelligence/TaskSuggestionsPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -137,7 +135,7 @@ export default function Dashboard() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between text-xs"><span className="font-medium">Accounts control readiness</span><span className="font-semibold">{control.checklistProgress}%</span></div>
             <Progress value={control.checklistProgress} className="mt-3 h-2" />
-            <div className="mt-3 flex items-center justify-between"><p className="text-[11px] text-muted-foreground">{control.decisions} evidence or accounting decisions remain.</p><Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => navigate("/accounts-intelligence")}>Review <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button></div>
+            <div className="mt-3 flex items-center justify-between"><p className="text-[11px] text-muted-foreground">{control.decisions} evidence or accounting decisions remain.</p><Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => navigate("/review-centre")}>Review <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button></div>
           </CardContent>
         </Card>
       </section>
@@ -148,7 +146,7 @@ export default function Dashboard() {
             <MetricCard label="Active clients" value={kpis?.active_clients ?? 0} helper={`${kpis?.open_tasks ?? 0} open tasks across the practice`} icon={Users} tone="lime" onClick={() => navigate("/clients")} />
             <MetricCard label="Overdue work" value={kpis?.overdue_tasks ?? 0} helper={kpis?.overdue_tasks ? "Requires attention today" : "All current deadlines are clear"} icon={Calendar} onClick={() => navigate("/tasks")} />
             <MetricCard label="VAT returns due" value={kpis?.vat_due_14d ?? 0} helper="Due within the next 14 days" icon={Receipt} tone="amber" onClick={() => navigate("/vat")} />
-            <MetricCard label="Accounts decisions" value={control.decisions} helper={`${control.openMatches} matches · ${control.openDuplicates} duplicates · ${control.openJudgements} judgements`} icon={FileSearch} onClick={() => navigate("/accounts-intelligence")} />
+            <MetricCard label="AI review queue" value={control.decisions} helper={`${control.openMatches} matches · ${control.openDuplicates} duplicates · ${control.openJudgements} judgements`} icon={FileSearch} onClick={() => navigate("/review-centre")} />
           </>
         )}
       </section>
@@ -179,7 +177,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <button type="button" onClick={() => navigate("/accounts-intelligence")} className="group workspace-panel flex min-h-72 flex-col bg-[#17221f] p-6 text-left text-white shadow-[0_16px_40px_rgba(23,34,31,0.18)] transition hover:-translate-y-0.5">
+        <button type="button" onClick={() => navigate("/review-centre")} className="group workspace-panel flex min-h-72 flex-col bg-[#17221f] p-6 text-left text-white shadow-[0_16px_40px_rgba(23,34,31,0.18)] transition hover:-translate-y-0.5">
           <div className="flex items-center justify-between"><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10"><Sparkles className="h-5 w-5 text-[#d7f560]" /></span><ArrowRight className="h-5 w-5 text-white/40 transition group-hover:translate-x-1" /></div>
           <div className="mt-auto"><p className="text-2xl font-semibold">{control.decisions} decisions need review</p><p className="mt-3 max-w-sm text-sm leading-6 text-white/55">Invoice matches, possible duplicates, capex and year-end judgements are separated into one controlled queue.</p><div className="mt-5 flex flex-wrap gap-2"><span className="rounded-full bg-white/10 px-3 py-1 text-[11px]">{control.openMatches} evidence matches</span><span className="rounded-full bg-white/10 px-3 py-1 text-[11px]">{control.openDuplicates} duplicates</span></div></div>
         </button>
@@ -195,8 +193,6 @@ export default function Dashboard() {
           <CardContent>{entityData.length ? <><ResponsiveContainer width="100%" height={190}><PieChart><Pie data={entityData} cx="50%" cy="50%" innerRadius={52} outerRadius={78} dataKey="value" stroke="none">{entityData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer><div className="flex flex-wrap justify-center gap-3">{entityData.map((entry) => <span key={entry.name} className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />{entry.name}</span>)}</div></> : <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">No clients yet.</div>}</CardContent>
         </Card>
       </section>
-
-      <section className="grid gap-5 lg:grid-cols-2"><TaskSuggestionsPanel /><AIIntelligencePanel /></section>
 
       <section className="grid gap-3 sm:grid-cols-3">
         <Button variant="outline" className="workspace-panel h-auto justify-start p-4" onClick={() => navigate("/accounts")}><BookOpenCheck className="mr-3 h-5 w-5 text-[#667914]" /><span className="text-left"><span className="block font-semibold">Accounts production</span><span className="text-xs font-normal text-muted-foreground">Prepare, review and finalise statements</span></span></Button>

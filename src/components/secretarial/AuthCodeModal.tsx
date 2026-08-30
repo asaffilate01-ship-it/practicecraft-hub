@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
@@ -10,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { callEdgePath } from "@/lib/edgeFunctions";
 
 interface AuthCodeModalProps {
   open: boolean;
@@ -22,40 +21,18 @@ const AUTH_CODE_PATTERN = /^[A-Za-z0-9]{6}$/;
 
 export function AuthCodeModal({ open, onOpenChange, clientId, existingCredentialId }: AuthCodeModalProps) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const [code, setCode] = useState("");
   const [confirmCode, setConfirmCode] = useState("");
   const [error, setError] = useState("");
-
-  const { data: profile } = {
-    data: null as { tenant_id: string } | null,
-  };
 
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!AUTH_CODE_PATTERN.test(code)) throw new Error("Auth code must be exactly 6 alphanumeric characters.");
       if (code.toUpperCase() !== confirmCode.toUpperCase()) throw new Error("Codes do not match.");
-
-      // Get tenant_id
-      const { data: p } = await supabase.from("profiles").select("tenant_id").eq("id", user!.id).single();
-      if (!p) throw new Error("Profile not found");
-
-      if (existingCredentialId) {
-        const { error } = await supabase.from("client_credentials")
-          .update({ ciphertext: code.toUpperCase(), updated_at: new Date().toISOString() })
-          .eq("id", existingCredentialId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("client_credentials").insert({
-          tenant_id: p.tenant_id,
-          client_id: clientId,
-          credential_type: "ch_auth_code",
-          provider: "companies_house",
-          ciphertext: code.toUpperCase(),
-          metadata_json: {},
-        });
-        if (error) throw error;
-      }
+      await callEdgePath("secretarial", "auth-code", {
+        method: "POST",
+        body: JSON.stringify({ clientId, authCode: code.toUpperCase(), existingCredentialId }),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth-code", clientId] });
@@ -63,7 +40,7 @@ export function AuthCodeModal({ open, onOpenChange, clientId, existingCredential
       setCode("");
       setConfirmCode("");
       setError("");
-      toast.success("Companies House auth code stored securely.");
+      toast.success("Companies House auth code encrypted and stored.");
     },
     onError: (e) => {
       setError(e.message);

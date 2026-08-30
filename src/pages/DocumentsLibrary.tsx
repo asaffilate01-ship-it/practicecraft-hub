@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const iconForMime = (mime: string) => {
   if (mime?.startsWith("image/")) return Image;
@@ -221,20 +222,7 @@ export default function DocumentsLibrary() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
-            Documents
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Secure document vault with tagging, versioning, and OCR.
-          </p>
-        </div>
-        <Button onClick={() => setUploadOpen(true)}>
-          <Upload className="w-4 h-4 mr-1.5" /> Upload
-        </Button>
-      </div>
+      <WorkspacePageHeader eyebrow="Evidence library" title="Documents" icon={FolderOpen} description="Secure client document vault with tagging, versioning and OCR status." actions={<Button onClick={() => setUploadOpen(true)}><Upload className="mr-1.5 h-4 w-4" /> Upload</Button>} />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">

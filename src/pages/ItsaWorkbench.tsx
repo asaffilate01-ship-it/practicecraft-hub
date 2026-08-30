@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, CalendarClock, FileCheck, FileText, Plus, TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const statusColors: Record<string, string> = {
   open: "bg-amber-500/10 text-amber-700 border-amber-200",
@@ -168,15 +169,8 @@ export default function ItsaWorkbench() {
   });
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <TrendingUp className="w-6 h-6 text-primary" /> MTD for Income Tax (ITSA)
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Quarterly updates, end-of-period statements and final declarations under Making Tax Digital
-        </p>
-      </div>
+    <div className="space-y-6">
+      <WorkspacePageHeader eyebrow="Digital tax workflow" title="MTD for Income Tax" icon={TrendingUp} description="Quarterly updates, end-of-period statements and final declarations under Making Tax Digital." />
 
       <Card className="border-warning/30 bg-warning/5"><CardContent className="flex items-start gap-2 pt-4 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /><p>This is a preparation workbench. It does not currently call HMRC or file MTD Income Tax updates or final declarations.</p></CardContent></Card>
 

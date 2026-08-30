@@ -1,245 +1,94 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle, Clock, FileText, Plus, Send, Trash2, XCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Send, FileText, CheckCircle, XCircle, Clock, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
+import { useAuth } from "@/contexts/AuthContext";
+import { useClientContext } from "@/contexts/ClientContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import { supabase } from "@/integrations/supabase/client";
 
+type ServiceLine = { name: string; fee_pence: number };
 type Proposal = {
   id: string;
   title: string;
-  prospect_name: string;
-  prospect_email: string;
-  status: "draft" | "sent" | "accepted" | "declined" | "expired";
-  services: { name: string; fee_pence: number }[];
+  prospect_name: string | null;
+  prospect_email: string | null;
+  status: string;
+  services_json: unknown;
   total_fee_pence: number;
   fee_frequency: string;
-  valid_until: string;
-  created_at: string;
+  valid_until: string | null;
 };
 
-const SAMPLE_PROPOSALS: Proposal[] = [
-  {
-    id: "1", title: "Annual Compliance Package", prospect_name: "Acme Ltd", prospect_email: "info@acme.co.uk",
-    status: "sent", services: [
-      { name: "Bookkeeping", fee_pence: 30000 }, { name: "VAT (MTD)", fee_pence: 15000 },
-      { name: "Accounts Production", fee_pence: 50000 }, { name: "Corporation Tax", fee_pence: 25000 },
-    ], total_fee_pence: 120000, fee_frequency: "monthly", valid_until: "2026-04-15", created_at: "2026-03-10",
-  },
-  {
-    id: "2", title: "Payroll Service", prospect_name: "Beta Services Ltd", prospect_email: "hr@beta.co.uk",
-    status: "accepted", services: [
-      { name: "Payroll (RTI)", fee_pence: 20000 }, { name: "Pensions Auto-Enrolment", fee_pence: 5000 },
-    ], total_fee_pence: 25000, fee_frequency: "monthly", valid_until: "2026-03-30", created_at: "2026-03-01",
-  },
-  {
-    id: "3", title: "Full Practice Package", prospect_name: "Gamma Holdings", prospect_email: "accounts@gamma.co.uk",
-    status: "draft", services: [
-      { name: "Bookkeeping", fee_pence: 40000 }, { name: "VAT (MTD)", fee_pence: 15000 },
-      { name: "Payroll (RTI)", fee_pence: 25000 }, { name: "Accounts Production", fee_pence: 60000 },
-      { name: "Corporation Tax", fee_pence: 30000 }, { name: "Company Secretarial", fee_pence: 10000 },
-    ], total_fee_pence: 180000, fee_frequency: "monthly", valid_until: "2026-04-30", created_at: "2026-03-14",
-  },
-];
-
-const AVAILABLE_SERVICES = [
-  "Bookkeeping", "VAT (MTD)", "Payroll (RTI)", "Accounts Production",
-  "Corporation Tax", "Self Assessment", "Company Secretarial", "AML/KYC",
-  "Pensions Auto-Enrolment", "CIS", "MTD Income Tax",
-];
-
+const AVAILABLE_SERVICES = ["Bookkeeping", "VAT (MTD)", "Payroll (RTI)", "Accounts Production", "Corporation Tax", "Self Assessment", "Company Secretarial", "AML/KYC", "Pensions Auto-Enrolment", "CIS", "MTD Income Tax"];
 const statusConfig: Record<string, { icon: typeof Clock; variant: "default" | "secondary" | "outline" | "destructive" }> = {
-  draft: { icon: FileText, variant: "outline" },
-  sent: { icon: Send, variant: "secondary" },
-  accepted: { icon: CheckCircle, variant: "default" },
-  declined: { icon: XCircle, variant: "destructive" },
-  expired: { icon: Clock, variant: "outline" },
+  draft: { icon: FileText, variant: "outline" }, sent: { icon: Send, variant: "secondary" }, accepted: { icon: CheckCircle, variant: "default" }, declined: { icon: XCircle, variant: "destructive" }, expired: { icon: Clock, variant: "outline" },
 };
+const emptyForm = () => ({ title: "", prospect_name: "", prospect_email: "", fee_frequency: "monthly", valid_until: "", terms: "", services: [] as ServiceLine[] });
+const serviceLines = (value: unknown): ServiceLine[] => Array.isArray(value) ? value.filter((item): item is ServiceLine => !!item && typeof item === "object" && "name" in item && "fee_pence" in item) : [];
 
 export default function Proposals() {
-  const [proposals] = useState(SAMPLE_PROPOSALS);
+  const queryClient = useQueryClient();
+  const { tenantId } = usePermissions();
+  const { user } = useAuth();
+  const { selectedClientId } = useClientContext();
   const [showCreate, setShowCreate] = useState(false);
-  const [newProposal, setNewProposal] = useState({
-    title: "", prospect_name: "", prospect_email: "", fee_frequency: "monthly", valid_until: "", terms: "",
-    services: [] as { name: string; fee_pence: number }[],
+  const [newProposal, setNewProposal] = useState(emptyForm);
+
+  const { data: proposals = [], isLoading } = useQuery({
+    queryKey: ["proposals", tenantId, selectedClientId],
+    queryFn: async () => {
+      let query = supabase.from("proposals").select("id,title,prospect_name,prospect_email,status,services_json,total_fee_pence,fee_frequency,valid_until").order("updated_at", { ascending: false });
+      if (selectedClientId) query = query.eq("client_id", selectedClientId);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as Proposal[];
+    },
+    enabled: !!tenantId,
   });
 
-  const addService = () => {
-    setNewProposal(p => ({ ...p, services: [...p.services, { name: "", fee_pence: 0 }] }));
-  };
+  const createProposal = useMutation({
+    mutationFn: async () => {
+      if (!tenantId || !newProposal.title.trim()) throw new Error("Add a proposal title");
+      const lines = newProposal.services.filter((service) => service.name && service.fee_pence >= 0);
+      if (!lines.length) throw new Error("Add at least one service");
+      const { error } = await supabase.from("proposals").insert({
+        tenant_id: tenantId, client_id: selectedClientId, title: newProposal.title.trim(), prospect_name: newProposal.prospect_name.trim() || null, prospect_email: newProposal.prospect_email.trim() || null,
+        services_json: lines, fee_breakdown_json: lines, total_fee_pence: lines.reduce((sum, service) => sum + service.fee_pence, 0), fee_frequency: newProposal.fee_frequency,
+        valid_until: newProposal.valid_until || null, terms_text: newProposal.terms.trim() || null, created_by: user?.id, status: "draft",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["proposals"] }); setNewProposal(emptyForm()); setShowCreate(false); toast.success("Proposal saved as draft"); },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
-  const updateService = (idx: number, field: string, value: string | number) => {
-    setNewProposal(p => ({
-      ...p,
-      services: p.services.map((s, i) => i === idx ? { ...s, [field]: value } : s),
-    }));
-  };
+  const addService = () => setNewProposal((proposal) => ({ ...proposal, services: [...proposal.services, { name: "", fee_pence: 0 }] }));
+  const updateService = (index: number, field: keyof ServiceLine, value: string | number) => setNewProposal((proposal) => ({ ...proposal, services: proposal.services.map((service, itemIndex) => itemIndex === index ? { ...service, [field]: value } : service) }));
+  const removeService = (index: number) => setNewProposal((proposal) => ({ ...proposal, services: proposal.services.filter((_, itemIndex) => itemIndex !== index) }));
+  const totalFee = newProposal.services.reduce((sum, service) => sum + service.fee_pence, 0);
 
-  const removeService = (idx: number) => {
-    setNewProposal(p => ({ ...p, services: p.services.filter((_, i) => i !== idx) }));
-  };
+  const createDialog = <Dialog open={showCreate} onOpenChange={setShowCreate}><DialogTrigger asChild><Button><Plus className="mr-1 h-4 w-4" /> New proposal</Button></DialogTrigger><DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>Create proposal</DialogTitle></DialogHeader><div className="space-y-4">
+    <div><Label>Title</Label><Input placeholder="Annual compliance package" value={newProposal.title} onChange={(event) => setNewProposal((proposal) => ({ ...proposal, title: event.target.value }))} /></div>
+    <div className="grid gap-3 sm:grid-cols-2"><div><Label>Prospect name</Label><Input value={newProposal.prospect_name} onChange={(event) => setNewProposal((proposal) => ({ ...proposal, prospect_name: event.target.value }))} /></div><div><Label>Prospect email</Label><Input type="email" value={newProposal.prospect_email} onChange={(event) => setNewProposal((proposal) => ({ ...proposal, prospect_email: event.target.value }))} /></div></div>
+    <div className="grid gap-3 sm:grid-cols-2"><div><Label>Fee frequency</Label><Select value={newProposal.fee_frequency} onValueChange={(value) => setNewProposal((proposal) => ({ ...proposal, fee_frequency: value }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="monthly">Monthly</SelectItem><SelectItem value="quarterly">Quarterly</SelectItem><SelectItem value="annually">Annually</SelectItem><SelectItem value="one_off">One-off</SelectItem></SelectContent></Select></div><div><Label>Valid until</Label><Input type="date" value={newProposal.valid_until} onChange={(event) => setNewProposal((proposal) => ({ ...proposal, valid_until: event.target.value }))} /></div></div>
+    <div className="space-y-2"><div className="flex items-center justify-between"><Label>Services and fees</Label><Button variant="outline" size="sm" onClick={addService}><Plus className="mr-1 h-3 w-3" /> Add service</Button></div>{newProposal.services.map((service, index) => <div key={index} className="grid grid-cols-[1fr_7rem_2.5rem] gap-2"><Select value={service.name} onValueChange={(value) => updateService(index, "name", value)}><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger><SelectContent>{AVAILABLE_SERVICES.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent></Select><Input type="number" min="0" placeholder="Fee (£)" value={service.fee_pence ? service.fee_pence / 100 : ""} onChange={(event) => updateService(index, "fee_pence", Math.round(Number(event.target.value || 0) * 100))} /><Button variant="ghost" size="icon" onClick={() => removeService(index)} aria-label="Remove service"><Trash2 className="h-4 w-4 text-destructive" /></Button></div>)}{newProposal.services.length > 0 && <p className="text-right text-sm font-semibold">£{(totalFee / 100).toFixed(2)} / {newProposal.fee_frequency.replace("one_off", "one-off")}</p>}</div>
+    <div><Label>Terms and scope</Label><Textarea value={newProposal.terms} onChange={(event) => setNewProposal((proposal) => ({ ...proposal, terms: event.target.value }))} /></div>
+    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><Button variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button><Button onClick={() => createProposal.mutate()} disabled={createProposal.isPending}>{createProposal.isPending ? "Saving…" : "Save draft"}</Button></div>
+  </div></DialogContent></Dialog>;
 
-  const totalFee = newProposal.services.reduce((sum, s) => sum + (s.fee_pence || 0), 0);
-
-  const handleCreate = () => {
-    toast.success("Proposal created as draft");
-    setShowCreate(false);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Proposals & Engagement Letters</h1>
-          <p className="text-muted-foreground">Create fee proposals, send to prospects, convert to engagements</p>
-        </div>
-        <Dialog open={showCreate} onOpenChange={setShowCreate}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-1" />New Proposal</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Create Proposal</DialogTitle></DialogHeader>
-            <div className="space-y-4">
-              <div><Label>Title</Label><Input placeholder="Annual Compliance Package" value={newProposal.title} onChange={e => setNewProposal(p => ({ ...p, title: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Prospect Name</Label><Input placeholder="Acme Ltd" value={newProposal.prospect_name} onChange={e => setNewProposal(p => ({ ...p, prospect_name: e.target.value }))} /></div>
-                <div><Label>Prospect Email</Label><Input placeholder="info@acme.co.uk" value={newProposal.prospect_email} onChange={e => setNewProposal(p => ({ ...p, prospect_email: e.target.value }))} /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Fee Frequency</Label>
-                  <Select value={newProposal.fee_frequency} onValueChange={v => setNewProposal(p => ({ ...p, fee_frequency: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="quarterly">Quarterly</SelectItem>
-                      <SelectItem value="annually">Annually</SelectItem>
-                      <SelectItem value="one_off">One-off</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div><Label>Valid Until</Label><Input type="date" value={newProposal.valid_until} onChange={e => setNewProposal(p => ({ ...p, valid_until: e.target.value }))} /></div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Services & Fees</Label>
-                  <Button variant="outline" size="sm" onClick={addService}><Plus className="h-3 w-3 mr-1" />Add Service</Button>
-                </div>
-                {newProposal.services.map((svc, idx) => (
-                  <div key={idx} className="flex gap-2 items-end">
-                    <div className="flex-1">
-                      <Select value={svc.name} onValueChange={v => updateService(idx, "name", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger>
-                        <SelectContent>
-                          {AVAILABLE_SERVICES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="w-32">
-                      <Input type="number" placeholder="Fee (£)" value={svc.fee_pence ? svc.fee_pence / 100 : ""} onChange={e => updateService(idx, "fee_pence", Math.round(parseFloat(e.target.value || "0") * 100))} />
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={() => removeService(idx)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                  </div>
-                ))}
-                {newProposal.services.length > 0 && (
-                  <div className="text-right font-semibold text-foreground">
-                    Total: £{(totalFee / 100).toFixed(2)} / {newProposal.fee_frequency}
-                  </div>
-                )}
-              </div>
-
-              <div><Label>Terms & Conditions</Label><Textarea placeholder="Payment terms, scope of work..." value={newProposal.terms} onChange={e => setNewProposal(p => ({ ...p, terms: e.target.value }))} /></div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowCreate(false)} className="flex-1">Cancel</Button>
-                <Button onClick={handleCreate} className="flex-1">Create Draft</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid grid-cols-4 gap-4">
-        {(["draft", "sent", "accepted", "declined"] as const).map(status => {
-          const count = proposals.filter(p => p.status === status).length;
-          const cfg = statusConfig[status];
-          const Icon = cfg.icon;
-          return (
-            <Card key={status}>
-              <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground capitalize">{status}</CardTitle></CardHeader>
-              <CardContent className="flex items-center gap-2">
-                <Icon className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">{count}</span>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Prospect</TableHead>
-                <TableHead>Services</TableHead>
-                <TableHead className="text-right">Fee</TableHead>
-                <TableHead>Frequency</TableHead>
-                <TableHead>Valid Until</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {proposals.map(p => {
-                const cfg = statusConfig[p.status];
-                return (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.title}</TableCell>
-                    <TableCell>
-                      <div>{p.prospect_name}</div>
-                      <div className="text-xs text-muted-foreground">{p.prospect_email}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {p.services.slice(0, 3).map((s, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">{s.name}</Badge>
-                        ))}
-                        {p.services.length > 3 && <Badge variant="outline" className="text-xs">+{p.services.length - 3}</Badge>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-mono">£{(p.total_fee_pence / 100).toFixed(2)}</TableCell>
-                    <TableCell className="capitalize">{p.fee_frequency}</TableCell>
-                    <TableCell>{p.valid_until}</TableCell>
-                    <TableCell><Badge variant={cfg.variant}>{p.status}</Badge></TableCell>
-                    <TableCell>
-                      {p.status === "draft" && (
-                        <Button variant="ghost" size="sm" onClick={() => toast.success("Proposal sent to " + p.prospect_email)}>
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {p.status === "accepted" && (
-                        <Button variant="ghost" size="sm" onClick={() => toast.success("Engagement letter generated")}>
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return <div className="space-y-6"><WorkspacePageHeader eyebrow="Onboarding and fees" title="Proposals & Engagements" icon={FileText} description="Create persistent fee proposals, scope services and prepare engagement acceptance." actions={createDialog} />
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{["draft", "sent", "accepted", "declined"].map((status) => { const config = statusConfig[status]; const Icon = config.icon; return <Card key={status} className="workspace-panel"><CardContent className="flex items-center justify-between p-4"><div><p className="workspace-eyebrow">{status}</p><p className="mt-2 text-2xl font-semibold">{proposals.filter((proposal) => proposal.status === status).length}</p></div><Icon className="h-5 w-5 text-muted-foreground" /></CardContent></Card>; })}</div>
+    {isLoading ? <Card className="workspace-panel"><CardContent className="py-16 text-center text-sm text-muted-foreground">Loading proposals…</CardContent></Card> : !proposals.length ? <Card className="workspace-panel"><CardContent className="flex min-h-56 flex-col items-center justify-center text-center"><FileText className="h-9 w-9 text-muted-foreground/35" /><p className="mt-3 font-semibold">No proposals found</p><p className="mt-1 text-sm text-muted-foreground">Create the first draft for {selectedClientId ? "the selected client" : "a prospect"}.</p></CardContent></Card> : <Card className="workspace-panel overflow-hidden"><CardContent className="p-0"><div className="divide-y md:hidden">{proposals.map((proposal) => <div key={proposal.id} className="p-4"><div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{proposal.title}</p><p className="mt-1 text-xs text-muted-foreground">{proposal.prospect_name || "Linked client"}</p></div><Badge variant={(statusConfig[proposal.status] ?? statusConfig.draft).variant}>{proposal.status}</Badge></div><div className="mt-3 flex justify-between text-sm"><span>{serviceLines(proposal.services_json).length} services</span><span className="font-mono font-semibold">£{(proposal.total_fee_pence / 100).toFixed(2)}</span></div></div>)}</div><div className="hidden md:block"><Table><TableHeader><TableRow><TableHead>Proposal</TableHead><TableHead>Prospect</TableHead><TableHead>Services</TableHead><TableHead className="text-right">Fee</TableHead><TableHead>Frequency</TableHead><TableHead>Valid until</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{proposals.map((proposal) => <TableRow key={proposal.id}><TableCell className="font-medium">{proposal.title}</TableCell><TableCell><p>{proposal.prospect_name || "Linked client"}</p><p className="text-xs text-muted-foreground">{proposal.prospect_email}</p></TableCell><TableCell>{serviceLines(proposal.services_json).length}</TableCell><TableCell className="text-right font-mono">£{(proposal.total_fee_pence / 100).toFixed(2)}</TableCell><TableCell className="capitalize">{proposal.fee_frequency.replace("_", " ")}</TableCell><TableCell>{proposal.valid_until || "—"}</TableCell><TableCell><Badge variant={(statusConfig[proposal.status] ?? statusConfig.draft).variant}>{proposal.status}</Badge></TableCell></TableRow>)}</TableBody></Table></div></CardContent></Card>}
+  </div>;
 }

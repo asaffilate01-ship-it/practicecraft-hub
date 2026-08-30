@@ -18,6 +18,7 @@ import { InvoicePaymentButton } from "@/components/billing/InvoicePaymentButton"
 import { SubscriptionPlans } from "@/components/billing/SubscriptionPlans";
 import { RecurringInvoiceBuilder } from "@/components/billing/RecurringInvoiceBuilder";
 import { DunningWorkflow } from "@/components/billing/DunningWorkflow";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -154,15 +155,7 @@ export default function Billing() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Billing</h1>
-          <p className="text-sm text-muted-foreground">Invoicing, recurring billing, payment tracking & collections</p>
-        </div>
-        <Button className="gap-2" onClick={() => { setForm({ ...form, invoice_number: nextInvoiceNumber() }); setShowCreate(true); }}>
-          <Plus className="w-4 h-4" /> New Invoice
-        </Button>
-      </div>
+      <WorkspacePageHeader eyebrow="Fees and collections" title="Billing" icon={CreditCard} description="Invoicing, recurring billing, payment tracking and collections." actions={<Button className="gap-2" onClick={() => { setForm({ ...form, invoice_number: nextInvoiceNumber() }); setShowCreate(true); }}><Plus className="h-4 w-4" /> New Invoice</Button>} />
 
       <Tabs defaultValue="invoices">
         <TabsList>
@@ -392,16 +385,15 @@ export default function Billing() {
                       try {
                         const { data, error } = await supabase.functions.invoke("stripe", {
                           body: {
-                            action: "create_checkout",
-                            invoice_id: viewInvoice.id,
-                            amount: parseFloat(viewInvoice.total),
-                            description: `Invoice ${viewInvoice.invoice_number}`,
+                            action: "create-invoice-payment",
+                            invoiceId: viewInvoice.id,
+                            successUrl: `${window.location.origin}/billing?payment=success`,
+                            cancelUrl: `${window.location.origin}/billing?payment=cancelled`,
                           },
                         });
                         if (error) throw error;
-                        if (data?.checkout_url) {
+                        if (data?.url) {
                           await supabase.from("invoices").update({
-                            stripe_checkout_url: data.checkout_url,
                             status: "sent",
                           }).eq("id", viewInvoice.id);
                           queryClient.invalidateQueries({ queryKey: ["invoices"] });
@@ -419,15 +411,8 @@ export default function Billing() {
                 {(viewInvoice.status === "sent" || viewInvoice.status === "overdue") && (
                   <>
                     <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "paid", amount_paid: parseFloat(viewInvoice.total) })}>Mark Paid</Button>
-                    <InvoicePaymentButton invoiceId={viewInvoice.id} />
+                    <InvoicePaymentButton invoiceId={viewInvoice.id} checkoutUrl={viewInvoice.stripe_checkout_url} />
                   </>
-                )}
-                {viewInvoice.stripe_checkout_url && viewInvoice.status !== "paid" && (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={viewInvoice.stripe_checkout_url} target="_blank" rel="noopener noreferrer">
-                      <CreditCard className="w-3.5 h-3.5 mr-1" /> View Payment Link
-                    </a>
-                  </Button>
                 )}
               </div>
             </div>

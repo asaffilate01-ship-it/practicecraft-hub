@@ -67,8 +67,8 @@ export function EvidenceControlStep({ clientId, periodId, periodStart, periodEnd
             </div>
             <CardDescription>Complete the bank-document review and year-end controls before relying on the trial balance and generated statements.</CardDescription>
           </div>
-          <Button onClick={() => navigate(`/accounts-intelligence?client=${clientId}&period=${periodId}`)}>
-            Open Accounts Intelligence <ArrowRight className="ml-2 h-4 w-4" />
+          <Button onClick={() => navigate(`/review-centre?client=${clientId}&period=${periodId}`)}>
+            Open AI Review Centre <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </CardHeader>
         <CardContent>

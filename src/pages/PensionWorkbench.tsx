@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, DollarSign, Plus, PiggyBank, UserCheck, Users } from "lucide-react";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const statusColors: Record<string, string> = {
   active: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
@@ -73,15 +74,8 @@ export default function PensionWorkbench() {
   const activeEnrolments = enrolments.filter((e: any) => e.status === "enrolled").length;
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <PiggyBank className="w-6 h-6 text-primary" /> Pension Auto-Enrolment
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage workplace pension schemes, employee enrolments, opt-outs and contribution submissions
-        </p>
-      </div>
+    <div className="space-y-6">
+      <WorkspacePageHeader eyebrow="Payroll compliance" title="Pension Auto-Enrolment" icon={PiggyBank} description="Manage workplace pension schemes, employee enrolments, opt-outs and contribution submissions." />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card><CardContent className="pt-4">

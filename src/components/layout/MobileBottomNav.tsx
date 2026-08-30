@@ -6,7 +6,7 @@ const items = [
   { label: "Home", to: "/", icon: LayoutDashboard },
   { label: "Clients", to: "/clients", icon: Users },
   { label: "Tasks", to: "/tasks", icon: ListTodo },
-  { label: "Review", to: "/accounts-intelligence", icon: FileSearch },
+  { label: "Review", to: "/review-centre", icon: FileSearch },
   { label: "Accounts", to: "/accounts", icon: BookOpenCheck },
 ];
 

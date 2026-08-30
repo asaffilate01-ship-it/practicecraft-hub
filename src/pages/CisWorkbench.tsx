@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { HardHat, Plus, Send, ShieldCheck, Users, FileText, CalendarDays } from "lucide-react";
 import { DueDatePill } from "@/components/ui/due-date-pill";
+import { WorkspacePageHeader } from "@/components/layout/WorkspacePageHeader";
 
 const statusColors: Record<string, string> = {
   active: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
@@ -108,17 +109,8 @@ export default function CisWorkbench() {
   const totalGross = deductions.reduce((s, d) => s + (d.gross_amount_pence || 0), 0);
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <HardHat className="w-6 h-6 text-primary" /> CIS — Construction Industry Scheme
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage contractors, subcontractors, deductions and monthly CIS returns
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <WorkspacePageHeader eyebrow="HMRC compliance" title="Construction Industry Scheme" icon={HardHat} description="Manage contractors, subcontractors, deductions and monthly CIS returns." />
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

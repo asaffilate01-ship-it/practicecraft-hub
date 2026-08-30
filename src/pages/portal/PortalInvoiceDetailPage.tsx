@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { InvoicePaymentButton } from "@/components/billing/InvoicePaymentButton";
+import type { Database } from "@/integrations/supabase/types";
+
+type InvoiceLine = Database["public"]["Tables"]["invoice_lines"]["Row"];
 
 export default function PortalInvoiceDetailPage() {
   const { invoiceId = "" } = useParams();
@@ -89,7 +93,7 @@ export default function PortalInvoiceDetailPage() {
                 <div className="col-span-2 text-right">Rate</div>
                 <div className="col-span-2 text-right">Amount</div>
               </div>
-              {lines.map((line: any) => (
+              {(lines as InvoiceLine[]).map((line) => (
                 <div key={line.id} className="grid grid-cols-12 px-4 py-2 border-t text-sm">
                   <div className="col-span-6">{line.description}</div>
                   <div className="col-span-2 text-right">{line.quantity}</div>
@@ -102,12 +106,8 @@ export default function PortalInvoiceDetailPage() {
 
           {inv.notes && <p className="text-sm text-muted-foreground">{inv.notes}</p>}
 
-          {inv.status !== "paid" && inv.stripe_checkout_url && (
-            <Button className="w-full" asChild>
-              <a href={inv.stripe_checkout_url} target="_blank" rel="noopener noreferrer">
-                Pay £{Number(inv.total).toFixed(2)}
-              </a>
-            </Button>
+          {inv.status !== "paid" && (
+            <InvoicePaymentButton invoiceId={inv.id} checkoutUrl={inv.stripe_checkout_url} />
           )}
         </CardContent>
       </Card>
