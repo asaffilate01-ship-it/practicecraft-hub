@@ -1,6 +1,8 @@
 # PracticeCraft UK regulatory readiness
 
-Last reviewed: 28 August 2026
+Last reviewed: 30 August 2026
+
+The live implementation/credential handover is maintained in [the regulatory API and approval matrix](./regulatory-api-and-approval-matrix.md). The in-product **Regulatory Control Centre** persists each firm's programme status and evidence while keeping every production switch server-controlled.
 
 PracticeCraft must not describe itself as “HMRC approved”. HMRC uses **recognised software** for products that complete the relevant journey and recognition process. A local status, generated XML, sandbox response or simulated receipt is not a production filing.
 
