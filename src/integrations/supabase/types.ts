@@ -4542,6 +4542,8 @@ export type Database = {
           issue_date: string
           last_dunning_at: string | null
           notes: string | null
+          paid_at: string | null
+          payment_method: string | null
           status: string
           stripe_checkout_url: string | null
           stripe_invoice_id: string | null
@@ -4564,6 +4566,8 @@ export type Database = {
           issue_date?: string
           last_dunning_at?: string | null
           notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
           status?: string
           stripe_checkout_url?: string | null
           stripe_invoice_id?: string | null
@@ -4586,6 +4590,8 @@ export type Database = {
           issue_date?: string
           last_dunning_at?: string | null
           notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
           status?: string
           stripe_checkout_url?: string | null
           stripe_invoice_id?: string | null

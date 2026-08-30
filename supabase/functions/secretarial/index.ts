@@ -27,6 +27,50 @@ const UK_POSTCODE_RE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[ABD-HJLNP-UW-Z]{2}$/i;
 const SIC_RE = /^\d{5}$/;
 const AUTH_CODE_RE = /^[A-Za-z0-9]{6}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const CREDENTIAL_TYPES = new Set(["auth_code", "director_verification_code", "psc_verification_code"]);
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let value = "";
+  for (const byte of bytes) value += String.fromCharCode(byte);
+  return btoa(value);
+}
+
+function base64ToBytes(value: string): Uint8Array {
+  return Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
+}
+
+async function credentialKey(): Promise<CryptoKey> {
+  const secret = Deno.env.get("INTEGRATION_ENCRYPTION_KEY");
+  if (!secret || secret.length < 32) {
+    throw new Error("INTEGRATION_ENCRYPTION_KEY must contain at least 32 characters");
+  }
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  return crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+
+async function encryptCredential(value: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    await credentialKey(),
+    new TextEncoder().encode(value),
+  );
+  return `v1:${bytesToBase64(iv)}:${bytesToBase64(new Uint8Array(encrypted))}`;
+}
+
+async function decryptCredential(value: string): Promise<string> {
+  // Legacy plaintext is accepted only inside this server function and is
+  // immediately re-encrypted by the credential routes before later use.
+  if (!value.startsWith("v1:")) return value;
+  const [, ivValue, encryptedValue] = value.split(":");
+  if (!ivValue || !encryptedValue) throw new Error("Stored credential is malformed");
+  const decrypted = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: base64ToBytes(ivValue) },
+    await credentialKey(),
+    base64ToBytes(encryptedValue),
+  );
+  return new TextDecoder().decode(decrypted);
+}
 
 // ── Address validator (shared definition) ──
 function validateAddress(addr: Record<string, unknown> | null | undefined, basePath: string): { errors: ValidationResult[]; warnings: ValidationResult[] } {
@@ -420,6 +464,16 @@ Deno.serve(async (req) => {
       return clientId;
     }
 
+    async function assertClient(clientId: string): Promise<void> {
+      const { data } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("id", clientId)
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      if (!data) throw new Error("Client access denied");
+    }
+
     // Helper to build validation context for a client
     async function buildValidationContext(clientId: string, excludeChangeId?: string): Promise<ValidationContext> {
       const [authRes, companyRes, directorsRes, pscRes, pendingRes] = await Promise.all([
@@ -460,6 +514,135 @@ Deno.serve(async (req) => {
     // ─── SCHEMA REGISTRY (GET) ───
     if (req.method === "GET" && segments[0] === "schema-registry") {
       return json(SCHEMA_REGISTRY);
+    }
+
+    // ─── SERVER-ONLY CREDENTIAL VAULT ───
+    // Responses expose status/metadata only. Credential values never return to
+    // the browser after they have been submitted.
+    if (req.method === "GET" && segments[0] === "credentials") {
+      const clientId = requireClientId();
+      await assertClient(clientId);
+      const { data, error } = await supabase
+        .from("client_credentials")
+        .select("id,provider,credential_type,ciphertext,metadata_json,expires_at,created_at,updated_at")
+        .eq("tenant_id", tenantId)
+        .eq("client_id", clientId)
+        .eq("provider", "companies_house")
+        .order("credential_type");
+      if (error) throw error;
+
+      const safeCredentials = [];
+      for (const credential of data || []) {
+        if (!credential.ciphertext.startsWith("v1:")) {
+          await supabase
+            .from("client_credentials")
+            .update({
+              ciphertext: await encryptCredential(credential.ciphertext),
+              metadata_json: { ...(credential.metadata_json || {}), encrypted_at: new Date().toISOString() },
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", credential.id)
+            .eq("tenant_id", tenantId);
+        }
+        safeCredentials.push({
+          id: credential.id,
+          provider: credential.provider,
+          credential_type: credential.credential_type,
+          metadata_json: credential.metadata_json || {},
+          expires_at: credential.expires_at,
+          created_at: credential.created_at,
+          updated_at: credential.updated_at,
+          is_stored: true,
+        });
+      }
+      return json(safeCredentials);
+    }
+
+    if (req.method === "POST" && segments[0] === "credentials") {
+      const body = await req.json();
+      const clientId = String(body.clientId || "");
+      const credentialType = String(body.credentialType || "");
+      const rawValue = String(body.value || "").trim();
+      if (!clientId || !CREDENTIAL_TYPES.has(credentialType) || !rawValue || rawValue.length > 256) {
+        return json({ error: "A supported credential type and value are required" }, 400);
+      }
+      await assertClient(clientId);
+      const value = credentialType === "auth_code" ? rawValue.toUpperCase() : rawValue;
+      if (credentialType === "auth_code" && !AUTH_CODE_RE.test(value)) {
+        return json({ error: "Auth code must be exactly 6 alphanumeric characters" }, 400);
+      }
+
+      const metadata = {
+        ...(body.metadata && typeof body.metadata === "object" ? body.metadata : {}),
+        encrypted_at: new Date().toISOString(),
+      };
+      const encrypted = await encryptCredential(value);
+      let query = supabase
+        .from("client_credentials")
+        .update({
+          ciphertext: encrypted,
+          metadata_json: metadata,
+          expires_at: body.expiresAt || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("tenant_id", tenantId)
+        .eq("client_id", clientId)
+        .eq("provider", "companies_house")
+        .eq("credential_type", credentialType);
+      if (body.id) query = query.eq("id", String(body.id));
+      const { data: updated, error: updateError } = await query.select("id").maybeSingle();
+      if (updateError) throw updateError;
+
+      let credentialId = updated?.id;
+      if (!credentialId) {
+        const { data: inserted, error: insertError } = await supabase
+          .from("client_credentials")
+          .insert({
+            tenant_id: tenantId,
+            client_id: clientId,
+            provider: "companies_house",
+            credential_type: credentialType,
+            ciphertext: encrypted,
+            metadata_json: metadata,
+            expires_at: body.expiresAt || null,
+          })
+          .select("id")
+          .single();
+        if (insertError) throw insertError;
+        credentialId = inserted.id;
+      }
+
+      await supabase.from("event_logs").insert({
+        tenant_id: tenantId,
+        event_type: "ch_credential_updated",
+        source: "user",
+        actor_user_id: user.id,
+        client_id: clientId,
+        payload_json: { credentialId, credentialType },
+      });
+      return json({ id: credentialId, credential_type: credentialType, is_stored: true });
+    }
+
+    if (req.method === "DELETE" && segments[0] === "credentials" && segments[1]) {
+      const { data: deleted, error } = await supabase
+        .from("client_credentials")
+        .delete()
+        .eq("id", segments[1])
+        .eq("tenant_id", tenantId)
+        .eq("provider", "companies_house")
+        .select("id,client_id,credential_type")
+        .maybeSingle();
+      if (error) throw error;
+      if (!deleted) return json({ error: "Credential not found" }, 404);
+      await supabase.from("event_logs").insert({
+        tenant_id: tenantId,
+        event_type: "ch_credential_deleted",
+        source: "user",
+        actor_user_id: user.id,
+        client_id: deleted.client_id,
+        payload_json: { credentialId: deleted.id, credentialType: deleted.credential_type },
+      });
+      return json({ success: true });
     }
 
     // ─── SUMMARY ───
@@ -615,6 +798,8 @@ Deno.serve(async (req) => {
       const { clientId, authCode } = body;
       if (!clientId || !authCode) throw new Error("clientId and authCode required");
 
+      await assertClient(clientId);
+
       if (!AUTH_CODE_RE.test(authCode)) {
         return json({ error: "Auth code must be exactly 6 alphanumeric characters" }, 400);
       }
@@ -625,15 +810,21 @@ Deno.serve(async (req) => {
         .eq("provider", "companies_house").eq("credential_type", "auth_code")
         .maybeSingle();
 
+      const encryptedAuthCode = await encryptCredential(authCode.toUpperCase());
       if (existing) {
         await supabase.from("client_credentials")
-          .update({ ciphertext: authCode, updated_at: new Date().toISOString() })
+          .update({
+            ciphertext: encryptedAuthCode,
+            metadata_json: { encrypted_at: new Date().toISOString() },
+            updated_at: new Date().toISOString(),
+          })
           .eq("id", existing.id);
       } else {
         await supabase.from("client_credentials").insert({
           tenant_id: tenantId, client_id: clientId,
           provider: "companies_house", credential_type: "auth_code",
-          ciphertext: authCode,
+          ciphertext: encryptedAuthCode,
+          metadata_json: { encrypted_at: new Date().toISOString() },
         });
       }
 
@@ -763,7 +954,10 @@ Deno.serve(async (req) => {
         throw new Error("Companies House auth code required but not stored for this client");
       }
 
-      if (authCred?.ciphertext && !AUTH_CODE_RE.test(authCred.ciphertext)) {
+      const decryptedAuthCode = authCred?.ciphertext
+        ? (await decryptCredential(authCred.ciphertext)).toUpperCase()
+        : null;
+      if (decryptedAuthCode && !AUTH_CODE_RE.test(decryptedAuthCode)) {
         await supabase.from("integration_health").upsert({
           tenant_id: tenantId,
           client_id: change.client_id,
@@ -868,14 +1062,14 @@ Deno.serve(async (req) => {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${supabaseKey}`,
-                apikey: supabaseKey,
+                Authorization: authHeader,
+                apikey: Deno.env.get("SUPABASE_ANON_KEY")!,
               },
               body: JSON.stringify({
                 filingType,
                 companyNumber: company?.company_number,
                 companyName: chPayload.companyName || company?.company_number,
-                companyAuthCode: authCred?.ciphertext,
+                companyAuthCode: decryptedAuthCode,
                 payload: chPayload,
                 clientId: change.client_id,
                 tenantId,

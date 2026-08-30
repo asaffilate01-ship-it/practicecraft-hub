@@ -139,7 +139,7 @@ export function SecretarialTab({ clientId, companyNumber }: SecretarialTabProps)
         .from("client_credentials")
         .select("id, credential_type, updated_at")
         .eq("client_id", clientId)
-        .eq("credential_type", "ch_auth_code")
+        .eq("credential_type", "auth_code")
         .maybeSingle();
       if (error) throw error;
       return data;

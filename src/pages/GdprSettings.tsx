@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +18,6 @@ import { toast } from "sonner";
 export default function GdprSettings() {
   const { user } = useAuth();
   const { tenantId } = usePermissions();
-  const queryClient = useQueryClient();
   const [exporting, setExporting] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -52,8 +50,8 @@ export default function GdprSettings() {
       a.click();
       URL.revokeObjectURL(url);
       toast.success("Data exported successfully");
-    } catch (err: any) {
-      toast.error(err.message || "Export failed");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Export failed");
     } finally {
       setExporting(false);
     }
@@ -66,10 +64,10 @@ export default function GdprSettings() {
         body: { action: "gdpr_delete_request", user_id: user?.id, tenant_id: tenantId },
       });
       if (error) throw error;
-      toast.success("Deletion request submitted. You will be contacted within 30 days.");
+      toast.success("Deletion request recorded. We will contact you after reviewing any legal retention requirements.");
       setDeleteOpen(false);
-    } catch (err: any) {
-      toast.error(err.message || "Request failed");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Request failed");
     }
   };
 

@@ -103,7 +103,7 @@ export default function Secretarial() {
       const { data, error } = await supabase
         .from("client_credentials")
         .select("client_id, credential_type, expires_at")
-        .eq("credential_type", "ch_auth_code");
+        .eq("credential_type", "auth_code");
       if (error) throw error;
       return data;
     },

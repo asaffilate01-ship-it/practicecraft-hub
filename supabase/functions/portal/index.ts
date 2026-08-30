@@ -106,6 +106,83 @@ Deno.serve(async (req) => {
   const clientId = portalUser?.client_id || url.searchParams.get("clientId");
 
   try {
+    if (body?.action === "gdpr_export") {
+      if (body.user_id && body.user_id !== userId) return json({ error: "Subject identity mismatch" }, 403);
+      if (body.tenant_id && body.tenant_id !== tenantId) return json({ error: "Tenant access denied" }, 403);
+
+      const [profileResult, portalResult, rolesResult, messagesResult, documentsResult, auditResult, requestsResult] =
+        await Promise.all([
+          serviceClient.from("profiles").select("id,tenant_id,full_name,email,avatar_url,created_at,updated_at")
+            .eq("id", userId).eq("tenant_id", tenantId).maybeSingle(),
+          serviceClient.from("portal_users").select("user_id,tenant_id,client_id,portal_role,display_name,status,created_at,updated_at")
+            .eq("user_id", userId).eq("tenant_id", tenantId),
+          serviceClient.from("user_roles").select("tenant_id,role,created_at")
+            .eq("user_id", userId).eq("tenant_id", tenantId),
+          serviceClient.from("messages").select("id,thread_id,sender_type,body,created_at")
+            .eq("tenant_id", tenantId).eq("sender_user_id", userId).order("created_at").limit(10000),
+          serviceClient.from("documents").select("id,client_id,filename,mime_type,size_bytes,document_type,status,created_at")
+            .eq("tenant_id", tenantId).eq("uploaded_by_user_id", userId).order("created_at").limit(10000),
+          serviceClient.from("audit_log").select("id,action,entity_name,entity_id,created_at")
+            .eq("tenant_id", tenantId).eq("user_id", userId).order("created_at").limit(10000),
+          serviceClient.from("data_subject_requests").select("id,request_type,status,requested_at,completed_at")
+            .eq("tenant_id", tenantId).eq("subject_user_id", userId).order("requested_at"),
+        ]);
+
+      await serviceClient.from("audit_log").insert({
+        tenant_id: tenantId,
+        user_id: userId,
+        action: "gdpr_export_generated",
+        entity_name: "data_subject",
+        after_json: { generated_at: new Date().toISOString() },
+      });
+
+      return json({
+        generated_at: new Date().toISOString(),
+        subject_user_id: userId,
+        tenant_id: tenantId,
+        profile: profileResult.data,
+        portal_identities: portalResult.data || [],
+        staff_roles: rolesResult.data || [],
+        messages_sent: messagesResult.data || [],
+        documents_uploaded: documentsResult.data || [],
+        audit_events: auditResult.data || [],
+        data_subject_requests: requestsResult.data || [],
+      });
+    }
+
+    if (body?.action === "gdpr_delete_request") {
+      if (body.user_id && body.user_id !== userId) return json({ error: "Subject identity mismatch" }, 403);
+      if (body.tenant_id && body.tenant_id !== tenantId) return json({ error: "Tenant access denied" }, 403);
+
+      const { data: request, error: requestError } = await serviceClient
+        .from("data_subject_requests")
+        .insert({ tenant_id: tenantId, subject_user_id: userId, request_type: "erasure", status: "received" })
+        .select("id,status,requested_at")
+        .single();
+      if (requestError?.code === "23505") {
+        const { data: existing } = await serviceClient
+          .from("data_subject_requests")
+          .select("id,status,requested_at")
+          .eq("tenant_id", tenantId)
+          .eq("subject_user_id", userId)
+          .eq("request_type", "erasure")
+          .in("status", ["received", "identity_check", "in_review"])
+          .single();
+        return json({ request: existing, duplicate: true });
+      }
+      if (requestError) throw requestError;
+
+      await serviceClient.from("audit_log").insert({
+        tenant_id: tenantId,
+        user_id: userId,
+        action: "gdpr_erasure_requested",
+        entity_name: "data_subject_request",
+        entity_id: request.id,
+        after_json: { status: request.status, requested_at: request.requested_at },
+      });
+      return json({ request }, 201);
+    }
+
     switch (endpoint) {
       case "summary": {
         // Portal summary with KPIs
@@ -328,7 +405,6 @@ Deno.serve(async (req) => {
         }
 
         if (req.method === "POST") {
-          const body = await req.json();
           if (!clientId) return json({ error: "clientId required" }, 400);
 
           const { data: thread, error: threadErr } = await supabase
@@ -378,8 +454,6 @@ Deno.serve(async (req) => {
 
         if (replyMatch && req.method === "POST") {
           const threadId = replyMatch[1];
-          const body = await req.json();
-
           const { data, error } = await supabase
             .from("messages")
             .insert({
@@ -405,10 +479,17 @@ Deno.serve(async (req) => {
 
         if (payLinkMatch && req.method === "POST") {
           const invoiceId = payLinkMatch[1];
-          // Placeholder: in production this would create a Stripe/GoCardless session
-          return json({
-            url: `https://pay.example.com/invoice/${invoiceId}`,
+          const stripeResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/stripe`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: authHeader,
+              apikey: Deno.env.get("SUPABASE_ANON_KEY")!,
+            },
+            body: JSON.stringify({ action: "create-invoice-payment", invoiceId }),
           });
+          const stripePayload = await stripeResponse.json();
+          return json(stripePayload, stripeResponse.status);
         }
 
         return json({ error: "Not found" }, 404);

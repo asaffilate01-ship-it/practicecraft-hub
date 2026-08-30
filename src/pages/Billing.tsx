@@ -392,16 +392,15 @@ export default function Billing() {
                       try {
                         const { data, error } = await supabase.functions.invoke("stripe", {
                           body: {
-                            action: "create_checkout",
-                            invoice_id: viewInvoice.id,
-                            amount: parseFloat(viewInvoice.total),
-                            description: `Invoice ${viewInvoice.invoice_number}`,
+                            action: "create-invoice-payment",
+                            invoiceId: viewInvoice.id,
+                            successUrl: `${window.location.origin}/billing?payment=success`,
+                            cancelUrl: `${window.location.origin}/billing?payment=cancelled`,
                           },
                         });
                         if (error) throw error;
-                        if (data?.checkout_url) {
+                        if (data?.url) {
                           await supabase.from("invoices").update({
-                            stripe_checkout_url: data.checkout_url,
                             status: "sent",
                           }).eq("id", viewInvoice.id);
                           queryClient.invalidateQueries({ queryKey: ["invoices"] });
@@ -419,15 +418,8 @@ export default function Billing() {
                 {(viewInvoice.status === "sent" || viewInvoice.status === "overdue") && (
                   <>
                     <Button variant="outline" size="sm" onClick={() => updateStatus.mutate({ id: viewInvoice.id, status: "paid", amount_paid: parseFloat(viewInvoice.total) })}>Mark Paid</Button>
-                    <InvoicePaymentButton invoiceId={viewInvoice.id} />
+                    <InvoicePaymentButton invoiceId={viewInvoice.id} checkoutUrl={viewInvoice.stripe_checkout_url} />
                   </>
-                )}
-                {viewInvoice.stripe_checkout_url && viewInvoice.status !== "paid" && (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={viewInvoice.stripe_checkout_url} target="_blank" rel="noopener noreferrer">
-                      <CreditCard className="w-3.5 h-3.5 mr-1" /> View Payment Link
-                    </a>
-                  </Button>
                 )}
               </div>
             </div>
