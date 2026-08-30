@@ -9,6 +9,7 @@ describe("go-live security contracts", () => {
   const secretarial = read("supabase/functions/secretarial/index.ts");
   const portal = read("supabase/functions/portal/index.ts");
   const migration = read("supabase/migrations/20260829233000_go_live_security_stage.sql");
+  const regulatoryMigration = read("supabase/migrations/20260830150000_regulatory_control_centre.sql");
 
   it("accepts payment state changes only through verified Stripe events", () => {
     expect(stripeWebhook).toContain("constructEventAsync");
@@ -43,5 +44,14 @@ describe("go-live security contracts", () => {
     expect(portal).toContain('body?.action === "gdpr_delete_request"');
     expect(migration).toContain("CREATE TABLE IF NOT EXISTS public.data_subject_requests");
     expect(portal).not.toContain("pay.example.com");
+  });
+
+  it("keeps regulatory production switches under server control", () => {
+    expect(regulatoryMigration).toContain("protect_regulatory_production_gate");
+    expect(regulatoryMigration).toContain("Production filing gates can only be changed by a server-side acceptance workflow");
+    expect(regulatoryMigration).toContain("production_enabled_at");
+    expect(regulatoryMigration).toContain("production_gate_reason");
+    expect(regulatoryMigration).toContain("Recognition status requires passed production recognition evidence");
+    expect(read("src/pages/RegulatoryReadiness.tsx")).not.toMatch(/production_enabled:\s*true/);
   });
 });
