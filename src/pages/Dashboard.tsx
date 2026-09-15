@@ -1,3 +1,5 @@
+import { PortfolioServices } from "@/components/PortfolioServices";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -66,6 +68,7 @@ function MetricCard({ label, value, helper, icon: Icon, tone = "plain", onClick 
 }
 
 export default function Dashboard() {
+  const { can, userKind } = usePermissions();
   const navigate = useNavigate();
   const { data: kpis, isLoading: kpisLoading } = useDashboardKPIs();
   const { data: overdueTasks } = useOverdueTasks();
@@ -199,6 +202,7 @@ export default function Dashboard() {
         <Button variant="outline" className="workspace-panel h-auto justify-start p-4" onClick={() => navigate("/billing")}><Wallet className="mr-3 h-5 w-5 text-[#667914]" /><span className="text-left"><span className="block font-semibold">Billing and payments</span><span className="text-xs font-normal text-muted-foreground">Overdue invoices: {kpis?.overdue_invoices ?? 0}</span></span></Button>
         <Button variant="outline" className="workspace-panel h-auto justify-start p-4" onClick={() => navigate("/reports")}><TrendingUp className="mr-3 h-5 w-5 text-[#667914]" /><span className="text-left"><span className="block font-semibold">Practice reports</span><span className="text-xs font-normal text-muted-foreground">Workload, billing and client insights</span></span></Button>
       </section>
+      {userKind === "staff" && can("settings", "view") && <PortfolioServices source="iq-practice-cloud" placement="documents" country="GB" owned={["taxnuvia"]} />}
     </div>
   );
 }
