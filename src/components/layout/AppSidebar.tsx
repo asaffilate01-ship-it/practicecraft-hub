@@ -8,7 +8,8 @@ import {
   ScanSearch,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,7 +38,8 @@ const navGroups: NavGroup[] = [
     label: "Core",
     defaultOpen: true,
     items: [
-      { title: "Dashboard", url: "/", icon: LayoutDashboard },
+      { title: "Overview", url: "/", icon: LayoutDashboard },
+      { title: "Practice analytics", url: "/analytics", icon: BarChart3, permission: ["reports", "view"] },
       { title: "Clients", url: "/clients", icon: Users, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
       { title: "Tasks", url: "/tasks", icon: CheckSquare, permission: ["tasks", "view"], featureKey: "tasks", moduleKey: "tasks" },
       { title: "Client Onboarding", url: "/client-onboarding", icon: UserPlus, permission: ["clients", "view"], featureKey: "clients", moduleKey: "clients" },
@@ -123,6 +125,8 @@ interface AppSidebarProps {
 
 export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [navSearch, setNavSearch] = useState("");
+  const { pathname } = useLocation();
   const { can, loading, role } = usePermissions();
   const { user } = useAuth();
   const branding = usePracticeBranding();
@@ -133,6 +137,11 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(navGroups.map((g) => [g.label, g.defaultOpen ?? false]))
   );
+
+  useEffect(() => {
+    const group = navGroups.find(group => group.items.some(item => item.url === pathname));
+    if (group) setOpenGroups(previous => ({ ...previous, [group.label]: true }));
+  }, [pathname]);
 
   const toggleGroup = (label: string) => {
     setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -177,6 +186,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
         )}
         {!onNavigate && (
           <button
+            aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
             onClick={() => setCollapsed(!collapsed)}
             className={cn(
               "ml-auto p-1 rounded-md hover:bg-sidebar-accent transition-colors shrink-0",
@@ -195,6 +205,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
         </div>
       )}
 
+      {!collapsed && <div className="px-3 py-3"><input aria-label="Find a workspace" placeholder="Find a workspace…" value={navSearch} onChange={event => setNavSearch(event.target.value)} className="w-full rounded-lg border border-sidebar-border bg-sidebar-accent px-3 py-2.5 text-sm text-sidebar-accent-foreground placeholder:text-sidebar-foreground/60 focus:outline-none focus:ring-2 focus:ring-sidebar-ring" /></div>}
       {/* Main nav */}
       <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
         {loading ? (
@@ -205,9 +216,9 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
           </div>
         ) : (
           navGroups.map((group) => {
-            const visibleItems = group.items.filter(isVisible);
+            const visibleItems = group.items.filter(isVisible).filter(item => !navSearch || `${group.label} ${item.title}`.toLowerCase().includes(navSearch.toLowerCase()));
             if (visibleItems.length === 0) return null;
-            const isOpen = openGroups[group.label] ?? false;
+            const isOpen = !!navSearch || (openGroups[group.label] ?? false);
 
             if (collapsed) {
               // In collapsed mode, just show icons without groups
@@ -229,6 +240,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             return (
               <div key={group.label}>
                 <button
+                  aria-expanded={isOpen}
                   onClick={() => toggleGroup(group.label)}
                   className="flex items-center justify-between w-full px-3 py-1.5 text-[11px] uppercase tracking-wider font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
                 >

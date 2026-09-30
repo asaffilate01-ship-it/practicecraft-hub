@@ -488,6 +488,7 @@ export default function PayrollWorkbench() {
 
   return (
     <div className="space-y-6">
+      <div role="note" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Calculation validation outstanding: the current calculator uses hard-coded historical rates. Independently validate payroll figures before use. Open a pay run to review employee totals and reconciliation checks.</div>
       <WorkspacePageHeader eyebrow="PAYE and Real Time Information" title="Payroll (RTI)" description={
           <>
             {selectedClientName
