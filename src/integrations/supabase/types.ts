@@ -11423,6 +11423,10 @@ export type Database = {
       }
     }
     Functions: {
+      get_payroll_preparation_reviews: { Args: { p_run_id: string }; Returns: Json }
+      request_payroll_preparation_review: { Args: { p_run_id: string; p_checks: Json; p_evidence_reference: string }; Returns: string }
+      decide_payroll_preparation_review: { Args: { p_review_id: string; p_decision: string; p_note: string }; Returns: undefined }
+
       accounts_preparation_checks: {
         Args: { p_period_id: string }
         Returns: Json

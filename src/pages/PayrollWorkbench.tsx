@@ -439,16 +439,7 @@ export default function PayrollWorkbench() {
     },
   });
 
-  const finaliseRun = useMutation({
-    mutationFn: async (runId: string) => {
-      const { error } = await supabase.from("pay_runs").update({ status: "finalised" }).eq("id", runId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pay-runs"] });
-      toast.success("Pay run finalised");
-    },
-  });
+
 
   // Preview pay calculation for employee
   const previewCalc = (emp: any) => {
@@ -603,8 +594,8 @@ export default function PayrollWorkbench() {
                         <TableCell>
                           <div className="flex gap-1">
                             <Button variant="ghost" size="sm" onClick={() => setSelectedRun(r)}><Eye className="w-3.5 h-3.5" /></Button>
-                            {r.status === "draft" && <Button variant="outline" size="sm" onClick={() => finaliseRun.mutate(r.id)}>Finalise</Button>}
-                            {r.status === "finalised" && <Button variant="outline" size="sm" className="gap-1"><Send className="w-3 h-3" /> Submit FPS</Button>}
+                            {r.status === "draft" && <Button variant="outline" size="sm" asChild><Link to={`/payroll/runs/${r.id}`}>Prepare & Review</Link></Button>}
+                            {r.status === "finalised" && <Button variant="outline" size="sm" asChild><Link to={`/payroll/rti/fps/${r.id}`}>Prepare FPS</Link></Button>}
                           </div>
                         </TableCell>
                       </TableRow>

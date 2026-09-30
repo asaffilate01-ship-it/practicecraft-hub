@@ -40,3 +40,5 @@ jobs:
           version: latest
       - name: Validate local migration chain
         run: supabase start && supabase db reset --local
+      - name: Payroll review database tests
+        run: supabase test db

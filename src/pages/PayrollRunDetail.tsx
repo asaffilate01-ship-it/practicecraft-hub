@@ -1,3 +1,4 @@
+import { PreparationReview } from "@/components/payroll/PreparationReview";
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,6 +46,7 @@ export default function PayrollRunDetail() {
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[['Gross pay', totals.gross_pence], ['Net pay', totals.net_pence], ['Employer NI', totals.ni_employer_pence], ['Total employer cost', totals.gross_pence + totals.ni_employer_pence + totals.pension_employer_pence]].map(([label, value]) => <Card key={label}><CardHeader><CardTitle className="text-sm">{label}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{money(Number(value))}</CardContent></Card>)}</div>
     <Card><CardHeader><CardTitle>Preparation checks</CardTitle></CardHeader><CardContent>{issues.length ? <ul className="list-disc pl-5 space-y-2">{issues.map(issue => <li key={issue}>{issue}</li>)}</ul> : <p>Stored payslips reconcile to the run totals and employer references are present.</p>}</CardContent></Card>
     <Card><CardHeader><CardTitle>Employee breakdown ({slips.length})</CardTitle></CardHeader><CardContent className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b text-left">{['Employee','Gross','PAYE','Employee NI','Pension','Student loan','Net'].map(h => <th className="p-3" key={h}>{h}</th>)}</tr></thead><tbody>{slips.map(s => <tr className="border-b" key={s.id}><td className="p-3">{s.employee_name}</td>{[s.gross_pence,s.tax_pence,s.ni_employee_pence,s.pension_employee_pence,s.student_loan_pence,s.net_pence].map((value,index) => <td className="p-3" key={index}>{money(value)}</td>)}</tr>)}</tbody></table></CardContent></Card>
+    <PreparationReview runId={run.id} />
     <div className="flex gap-3 flex-wrap">{can('payroll','submit_rti') && <Button asChild variant="outline"><Link to={`/payroll/rti/fps/${run.id}`}>Open FPS preparation</Link></Button>}{run.fps_submission_job_id && can('submissions','view') && <Button asChild variant="outline"><Link to={`/submissions/jobs/${run.fps_submission_job_id}`}>View FPS acknowledgement</Link></Button>}</div>
   </div>;
 }

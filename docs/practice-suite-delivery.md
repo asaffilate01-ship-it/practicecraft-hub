@@ -59,3 +59,23 @@ as superior from screenshots alone.
 TypeScript application check, production build, operation/date/reconciliation unit
 tests and component tests for filtering, review panels, client scope, permissions,
 board view and partial errors. No live backend writes or external filings performed.
+
+## Phase 2: payroll preparation review
+
+Added a persisted, permission-checked preparation review with four required
+attestations and an independent calculation evidence reference. A different user
+with payroll approval permission must approve or request changes. Reviews retain
+source snapshots and detect later changes. Direct browser writes to review records
+are revoked. Review RPCs scope both user permissions and tenant.
+
+The workbench now links to preparation instead of directly marking a run finalised.
+This is a preparation-evidence workflow, not a validated calculation engine, payment
+approval or RTI release gate. Existing backend payroll mutations are not certified
+or replaced. The new migration must be deployed before the review component works;
+it displays an unavailable state if the backend has not been upgraded.
+
+Release checks also exposed duplicate migration exports and vulnerable dependencies.
+Duplicate export versions remain as history markers; credential-policy recreation
+is idempotent. React Router and Vite are updated with their lockfile. CI now runs
+transactional pgTAP tests for preparation, tenant isolation, direct-write denial,
+self-approval prevention and stale-snapshot rejection after rebuilding the database.
