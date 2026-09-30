@@ -1,6 +1,6 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
-SELECT plan(10);
+SELECT plan(13);
 INSERT INTO public.tenants(id,firm_name) VALUES ('10000000-0000-0000-0000-000000000001','Review test'),('10000000-0000-0000-0000-000000000002','Other test');
 INSERT INTO auth.users(id,email,raw_user_meta_data) VALUES
  ('20000000-0000-0000-0000-000000000001','preparer@example.test','{"user_type":"portal"}'),
@@ -34,5 +34,13 @@ SET LOCAL ROLE authenticated;
 SELECT throws_ok($$SELECT public.decide_payroll_preparation_review((SELECT id FROM public.payroll_preparation_reviews LIMIT 1),'approved','Reviewed evidence')$$,'P0001','Payroll changed. Request changes and prepare a fresh review','Changed source blocks approval');
 SELECT lives_ok($$SELECT public.decide_payroll_preparation_review((SELECT id FROM public.payroll_preparation_reviews LIMIT 1),'changes_requested','Please recheck tax code')$$,'Reviewer can return changed payroll');
 SELECT throws_ok($$SELECT public.decide_payroll_preparation_review((SELECT id FROM public.payroll_preparation_reviews LIMIT 1),'approved','Reviewed evidence')$$,'P0001','Review already decided','Decision cannot be overwritten');
+SELECT set_config('request.jwt.claim.sub','20000000-0000-0000-0000-000000000001',true);
+SELECT lives_ok($$SELECT public.request_payroll_preparation_review('50000000-0000-0000-0000-000000000001','{"inputs_checked":true,"changes_checked":true,"independent_calculation_checked":true,"funding_checked":true}','evidence-02')$$,'Returned payroll can be prepared again');
+SELECT set_config('request.jwt.claim.sub','20000000-0000-0000-0000-000000000002',true);
+SELECT lives_ok($$SELECT public.decide_payroll_preparation_review((SELECT id FROM public.payroll_preparation_reviews WHERE status='requested'),'approved','Independent evidence verified')$$,'Independent reviewer approves current snapshot');
+RESET ROLE;
+UPDATE public.payslips SET tax_code='1257L' WHERE pay_run_id='50000000-0000-0000-0000-000000000001';
+SET LOCAL ROLE authenticated;
+SELECT is((SELECT (value->>'is_current')::boolean FROM jsonb_array_elements(public.get_payroll_preparation_reviews('50000000-0000-0000-0000-000000000001')) WHERE value->>'status'='approved'),false,'Later payroll change marks approval superseded');
 SELECT * FROM finish();
 ROLLBACK;
