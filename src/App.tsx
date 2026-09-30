@@ -15,6 +15,7 @@ import { lazy, Suspense } from "react";
 
 // Route-level splitting keeps the mobile shell small. A module is downloaded
 // only when the user opens it.
+const PracticeOperations = lazy(() => import("@/pages/PracticeOperations"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Clients = lazy(() => import("@/pages/Clients"));
 const ClientDetail = lazy(() => import("@/pages/ClientDetail"));
@@ -218,7 +219,9 @@ const AppRoutes = () => (
     <Route path="/terms" element={<TermsOfService />} />
 
     {/* ── Dashboard ────────────────────────────────────── */}
-    <Route path="/" element={<Protected><Dashboard /></Protected>} />
+    <Route path="/" element={<Protected><PracticeOperations /></Protected>} />
+    <Route path="/analytics" element={<Guarded module="reports" action="view"><Dashboard /></Guarded>} />
+    <Route path="/operations" element={<Protected><PracticeOperations /></Protected>} />
 
     {/* ── Clients ──────────────────────────────────────── */}
     <Route path="/clients" element={<Guarded module="clients" action="view"><Clients /></Guarded>} />

@@ -77,6 +77,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_open_data_subject_request
   WHERE status IN ('received', 'identity_check', 'in_review');
 
 ALTER TABLE public.data_subject_requests ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Subjects can view their own requests" ON public.data_subject_requests;
 CREATE POLICY "Subjects can view their own requests"
   ON public.data_subject_requests FOR SELECT
   TO authenticated
@@ -89,6 +90,7 @@ DROP POLICY IF EXISTS "Users can insert tenant credentials" ON public.client_cre
 DROP POLICY IF EXISTS "Users can update tenant credentials" ON public.client_credentials;
 DROP POLICY IF EXISTS "Users can delete tenant credentials" ON public.client_credentials;
 
+DROP POLICY IF EXISTS "Users can view tenant credential metadata" ON public.client_credentials;
 CREATE POLICY "Users can view tenant credential metadata"
   ON public.client_credentials FOR SELECT
   TO authenticated
