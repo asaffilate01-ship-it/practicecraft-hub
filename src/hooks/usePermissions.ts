@@ -51,7 +51,20 @@ export function usePermissions(): UsePermissionsResult {
 
   const isStaff = userType?.is_staff === true;
   const isPortal = userType?.is_portal === true;
-  const appRole = userType?.staff_role as string | null;
+  // Bind role to this practice: the legacy identity RPC returns the first
+  // membership and is not sufficient for users with more than one membership.
+  const { data: membership, isLoading: loadingMembership } = useQuery({
+    queryKey: ['practice-membership', user?.id, userType?.staff_tenant_id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('user_roles').select('role')
+        .eq('user_id', user!.id).eq('tenant_id', userType.staff_tenant_id).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: isStaff && !!user && !!userType?.staff_tenant_id,
+    staleTime: 5 * 60_000,
+  });
+  const appRole = membership?.role ?? null;
   const portalRole = userType?.portal_role as string | null;
   const tenantId = (isStaff ? userType?.staff_tenant_id : userType?.portal_tenant_id) as string | null;
 
@@ -112,7 +125,7 @@ export function usePermissions(): UsePermissionsResult {
     permissions: permissions ?? null,
     role: isStaff ? appRole : portalRole,
     tenantId,
-    loading: loadingType || (isStaff && loadingPermissions),
+    loading: loadingType || (isStaff && (loadingMembership || loadingPermissions)),
     userKind,
   };
 }

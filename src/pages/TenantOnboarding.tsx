@@ -79,8 +79,13 @@ export default function TenantOnboarding() {
         });
       }
 
-      await supabase.rpc("seed_tenant", { p_tenant_id: tenant.id });
-      await supabase.rpc("seed_templates_and_automations", { p_tenant_id: tenant.id });
+      const { error: seedError } = await supabase.rpc("seed_tenant", { p_tenant_id: tenant.id });
+      if (seedError) {
+        toast.error("Practice provisioning requires the server setup workflow. The practice is not ready; contact the platform administrator.");
+        return;
+      }
+      const { error: templatesError } = await supabase.rpc("seed_templates_and_automations", { p_tenant_id: tenant.id });
+      if (templatesError) { toast.error("Practice templates could not be provisioned. Setup is incomplete."); return; }
 
       setTenantId(tenant.id);
       setDraft({ basics: form, modules: Object.fromEntries(ALL_MODULES.map((m) => [m, true])), integrations: {}, users: [] });

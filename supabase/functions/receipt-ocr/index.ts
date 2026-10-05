@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { AccessError, requireStaff, requirePermissions, requireClient, validateReceipt } from "../_shared/access.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
@@ -6,23 +6,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-
+    if (req.method !== "POST") throw new AccessError("POST required", 405);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) throw new AccessError("Authentication required", 401);
+    const token = authHeader.slice(7);
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } }
     );
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !userData.user) throw new Error("Authentication failed");
+    const actor = await requireStaff(supabase, token);
+    const userData = { user: { id: actor.userId } };
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
@@ -30,12 +29,11 @@ serve(async (req) => {
 
     if (!file || !clientId) throw new Error("file and client_id required");
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("tenant_id")
-      .eq("id", userData.user.id)
-      .single();
-    if (!profile) throw new Error("Profile not found");
+    await requirePermissions(supabase, actor, ["documents.upload", "ledger.view", "ocr.view"]);
+    await requireClient(supabase, actor.tenantId, clientId);
+    if (!(file instanceof File) || !["image/jpeg", "image/png", "image/webp"].includes(file.type)
+      || file.size === 0 || file.size > 10 * 1024 * 1024) throw new AccessError("Use a JPEG, PNG or WebP receipt up to 10 MB", 400);
+    if (!LOVABLE_API_KEY) throw new AccessError("AI provider is not configured", 503);
 
     const arrayBuffer = await file.arrayBuffer();
     const digest = await crypto.subtle.digest("SHA-256", arrayBuffer);
@@ -43,7 +41,7 @@ serve(async (req) => {
     const { data: duplicate } = await supabase
       .from("document_fingerprints")
       .select("document_id")
-      .eq("tenant_id", profile.tenant_id)
+      .eq("tenant_id", actor.tenantId)
       .eq("client_id", clientId)
       .eq("sha256", sha256)
       .maybeSingle();
@@ -54,7 +52,7 @@ serve(async (req) => {
     }
 
     // Upload file to storage
-    const filePath = `${profile.tenant_id}/${clientId}/receipts/${Date.now()}_${file.name}`;
+    const filePath = `${actor.tenantId}/${clientId}/receipts/${crypto.randomUUID()}`;
     const { error: uploadErr } = await supabase.storage
       .from("client-documents")
       .upload(filePath, file, { contentType: file.type });
@@ -64,7 +62,7 @@ serve(async (req) => {
     const { data: doc, error: docErr } = await supabase
       .from("documents")
       .insert({
-        tenant_id: profile.tenant_id,
+        tenant_id: actor.tenantId,
         client_id: clientId,
         filename: file.name,
         mime_type: file.type,
@@ -76,10 +74,10 @@ serve(async (req) => {
       })
       .select()
       .single();
-    if (docErr) throw docErr;
+    if (docErr) { await supabase.storage.from("client-documents").remove([filePath]); throw docErr; }
 
     const { error: fingerprintErr } = await supabase.from("document_fingerprints").insert({
-      tenant_id: profile.tenant_id,
+      tenant_id: actor.tenantId,
       client_id: clientId,
       document_id: doc.id,
       sha256,
@@ -104,7 +102,7 @@ serve(async (req) => {
     const { data: accounts } = await supabase
       .from("chart_of_accounts")
       .select("id, code, name, account_type")
-      .eq("tenant_id", profile.tenant_id)
+      .eq("tenant_id", actor.tenantId)
       .eq("is_active", true)
       .order("code");
 
@@ -116,6 +114,7 @@ serve(async (req) => {
     // Call Lovable AI with vision to extract receipt data
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(45000),
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -202,7 +201,7 @@ serve(async (req) => {
     const toolCall = aiResult.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error("No AI extraction result");
 
-    const extraction = JSON.parse(toolCall.function.arguments);
+    const extraction = validateReceipt(JSON.parse(toolCall.function.arguments));
 
     // Find suggested account
     const suggestedAccount = (accounts || []).find(a => a.code === extraction.suggested_account_code);
@@ -210,11 +209,11 @@ serve(async (req) => {
     const confidence = extraction.confidence === "high" ? 95 : extraction.confidence === "medium" ? 75 : 45;
     const totalGrossPence = Math.round(Number(extraction.total_pence) || 0);
     const totalVatPence = Math.round(Number(extraction.vat_pence) || 0);
-    const totalNetPence = Math.round(Number(extraction.subtotal_pence) || (totalGrossPence - totalVatPence));
+    const totalNetPence = Math.round(extraction.subtotal_pence ?? (totalGrossPence - totalVatPence));
     const { data: savedExtraction, error: extractionErr } = await supabase
       .from("receipt_extractions")
       .upsert({
-        tenant_id: profile.tenant_id,
+        tenant_id: actor.tenantId,
         client_id: clientId,
         document_id: doc.id,
         supplier_name: extraction.supplier_name || null,
@@ -247,7 +246,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("receipt-ocr error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: e instanceof AccessError ? e.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

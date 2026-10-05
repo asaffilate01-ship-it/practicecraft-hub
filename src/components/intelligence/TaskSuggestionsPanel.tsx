@@ -1,3 +1,4 @@
+import { usePermissions } from "@/hooks/usePermissions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,9 +11,13 @@ import { toast } from "sonner";
 export function TaskSuggestionsPanel() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const { tenantId, can } = usePermissions();
+  const allowed = !!user && !!tenantId && can("tasks", "view") && can("clients", "view") && can("accounts", "view") && can("vat", "view");
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["ai-task-suggestions"],
+  const { data, isLoading, refetch, isError, isFetching } = useQuery({
+    queryKey: ["ai-task-suggestions", user?.id, tenantId],
+    enabled: allowed,
+    retry: false,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", {
         body: { action: "suggest_tasks" },
@@ -25,6 +30,7 @@ export function TaskSuggestionsPanel() {
 
   const createTask = useMutation({
     mutationFn: async (suggestion: any) => {
+      if (!can("tasks", "edit")) throw new Error("Task edit permission required");
       const { data: profile } = await supabase
         .from("profiles")
         .select("tenant_id")
@@ -35,10 +41,9 @@ export function TaskSuggestionsPanel() {
       const { error } = await supabase.from("tasks").insert({
         tenant_id: profile.tenant_id,
         title: suggestion.title,
-        description: suggestion.description || suggestion.reason,
+        description: [suggestion.description || suggestion.reason, suggestion.service ? `Suggested service: ${suggestion.service}` : null].filter(Boolean).join("\n"),
         priority: suggestion.priority || "medium",
         status: "todo",
-        service: suggestion.service || null,
         due_date: suggestion.suggested_due_date || null,
         assigned_to_user_id: user!.id,
       });
@@ -68,20 +73,20 @@ export function TaskSuggestionsPanel() {
             <Sparkles className="w-4 h-4 text-primary" />
             AI Task Suggestions
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isLoading} className="gap-1 text-xs">
+          <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching || !allowed} className="gap-1 text-xs">
             {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
             Refresh
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {isError ? <p role="alert" className="text-sm text-destructive">Suggestions unavailable. Check the AI connection and your permissions, then retry.</p> : !allowed ? <p>Additional module permissions are required.</p> : isLoading ? (
           <div className="flex flex-col items-center py-8 gap-2">
             <Loader2 className="w-5 h-5 animate-spin text-primary" />
             <p className="text-sm text-muted-foreground">Generating suggestions…</p>
           </div>
         ) : suggestions.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">No suggestions right now — you're on top of things!</p>
+          <p className="text-sm text-muted-foreground py-4 text-center">No suggestions returned. Review your deadlines independently.</p>
         ) : (
           <div className="space-y-2">
             {suggestions.map((s: any, i: number) => (
@@ -108,7 +113,7 @@ export function TaskSuggestionsPanel() {
                     variant="outline"
                     className="gap-1 ml-auto"
                     onClick={() => createTask.mutate(s)}
-                    disabled={createTask.isPending}
+                    disabled={createTask.isPending || !can("tasks", "edit")}
                   >
                     <Plus className="w-3 h-3" /> Create Task
                   </Button>

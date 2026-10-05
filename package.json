@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint:security": "eslint src/lib/edgeFunctions.ts src/components/billing/InvoicePaymentButton.tsx src/components/billing/StripeCheckoutButton.tsx src/components/client/CredentialsTab.tsx src/components/secretarial/AuthCodeModal.tsx src/pages/GdprSettings.tsx src/pages/PaymentHistory.tsx src/pages/portal/PortalInvoiceDetailPage.tsx src/pages/portal/PortalInvoicesPage.tsx src/test/goLiveSecurityContracts.test.ts",
     "security:contracts": "vitest run src/test/goLiveSecurityContracts.test.ts"
   },
@@ -64,7 +64,6 @@
     "recharts": "^2.15.4",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
     "vite-plugin-pwa": "^1.2.0",
     "zod": "^3.25.76"
@@ -87,6 +86,7 @@
     "lovable-tagger": "^1.1.13",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^6.4.3",

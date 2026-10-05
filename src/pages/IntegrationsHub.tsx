@@ -1,3 +1,4 @@
+import { FactoryConnectionPanel } from "@/components/intelligence/FactoryConnectionPanel";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -20,12 +21,12 @@ export default function IntegrationsHub() {
   const { tenantId } = usePermissions();
   const navigate = useNavigate();
 
-  const { data: health, isLoading } = useQuery({
+  const { data: health, isLoading, error } = useQuery({
     queryKey: ["integration-health", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("integration_health")
-        .select("*");
+        .select("*").eq("tenant_id", tenantId!).order("checked_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -44,6 +45,9 @@ export default function IntegrationsHub() {
         <p className="text-muted-foreground">Connect to HMRC, Companies House, payment providers, and banking APIs.</p>
       </div>
 
+      <FactoryConnectionPanel />
+      <p className="text-sm text-muted-foreground">Provider cards below show recorded health observations, not a live connection test or regulatory approval.</p>
+      {error && <p role="alert" className="text-destructive">Provider health could not be loaded. Connection status is unknown.</p>}
       <div className="grid gap-4 md:grid-cols-2">
         {integrations.map((int) => {
           const Icon = int.icon;
@@ -59,11 +63,11 @@ export default function IntegrationsHub() {
                   </div>
                   {st ? (
                     <Badge variant={st.status === "connected" ? "default" : st.status === "error" ? "destructive" : "secondary"}>
-                      {st.status === "connected" ? <><CheckCircle2 className="h-3 w-3 mr-1" /> Connected</> :
+                      {st.status === "connected" ? <><CheckCircle2 className="h-3 w-3 mr-1" /> Recorded connected</> :
                        st.status === "error" ? <><XCircle className="h-3 w-3 mr-1" /> Error</> : st.status}
                     </Badge>
                   ) : (
-                    <Badge variant="outline">Not configured</Badge>
+                    <Badge variant="outline">{isLoading ? "Loading…" : error ? "Unknown" : "No recorded check"}</Badge>
                   )}
                 </CardTitle>
               </CardHeader>

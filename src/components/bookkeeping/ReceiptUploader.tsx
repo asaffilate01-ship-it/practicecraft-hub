@@ -147,10 +147,10 @@ export function ReceiptUploader({ clientId, accounts, tenantId }: Props) {
           <CardTitle className="text-base flex items-center gap-2">
             <Camera className="w-4 h-4" /> Receipt Scanner
           </CardTitle>
-          <CardDescription>Upload a receipt image for AI-powered data extraction and ledger posting</CardDescription>
+          <CardDescription>Upload a JPEG, PNG or WebP receipt (up to 10 MB) for AI extraction and human review</CardDescription>
         </CardHeader>
         <CardContent>
-          <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFileChange} />
           <div className="flex gap-3">
             <Button
               variant="outline"

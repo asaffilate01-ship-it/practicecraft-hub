@@ -54,13 +54,8 @@ export function PracticeFeaturesProvider({ children }: { children: React.ReactNo
     staleTime: 5 * 60_000,
   });
 
-  // While loading, show all modules to avoid flash of missing nav
-  const resolvedFeatures = features ?? {
-    clients: true, tasks: true, bookkeeping: true, vat: true,
-    payroll: true, accounts: true, secretarial: true, incorporations: true,
-    submissions: true, documents: true, billing: true, kyc_aml: true,
-    reports: true, practice_mgmt: true,
-  };
+  // Subscription authority remains local; never enable paid modules while unresolved.
+  const resolvedFeatures = features ?? {};
 
   return <Ctx.Provider value={resolvedFeatures}>{children}</Ctx.Provider>;
 }
