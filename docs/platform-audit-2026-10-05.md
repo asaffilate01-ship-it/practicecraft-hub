@@ -100,3 +100,9 @@ This phase requires no new database migration. Earlier migrations, including `20
 | G — operational launch | Browser/mobile/accessibility QA, performance budgets, alerts, backup restore, incident/offboarding runbooks and pilot rollout | Hosted acceptance record tied to exact frontend/function/migration versions |
 
 Avoid a completion percentage: the remaining blockers include access boundaries and statutory correctness, so screen count is not a useful measure of launch readiness.
+
+## Validation record
+
+Local verification: 63 tests passed; actual application/Node TypeScript checks, scoped security lint and production build passed. Browser screenshot and hosted acceptance remain unverified. The build reports an existing large-chunk warning and unmatched PWA precache patterns.
+
+A fresh production dependency audit reports zero vulnerabilities after correctly classifying `tailwindcss-animate` as a build-only development dependency. A braces stack-exhaustion advisory remains in the Tailwind 3 development toolchain; moving its category is not a patch for that development dependency. Avoid processing untrusted build patterns and evaluate the Tailwind/toolchain upgrade separately. The deployed output is static compiled assets. Deno dependency downloads are blocked in this local runner; GitHub CI performs the Edge Function type checks before merge.

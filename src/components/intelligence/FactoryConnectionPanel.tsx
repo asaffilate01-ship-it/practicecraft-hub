@@ -45,6 +45,10 @@ function Connection({ userId, tenantId, canBrief }: { userId: string; tenantId: 
   const run = useQuery({ queryKey: ['factory-brief', userId, tenantId, runId],
     queryFn: async () => runSchema.parse(await invoke('run.get', runId!)), enabled: !!runId, retry: false });
   const error = status.error || snapshot.error || start.error || run.error;
+  const result = run.data?.run.result;
+  const resultObject = result && typeof result === 'object' ? result as Record<string, unknown> : null;
+  const summary = typeof result === 'string' ? result : [resultObject?.summary, resultObject?.answer, resultObject?.text].find(value => typeof value === 'string');
+  const recommendations = Array.isArray(resultObject?.recommendations) ? resultObject.recommendations.filter((value): value is string => typeof value === 'string').slice(0, 10) : [];
 
   return <Card>
     <CardHeader>
@@ -78,7 +82,9 @@ function Connection({ userId, tenantId, canBrief }: { userId: string; tenantId: 
           <p className="text-sm">Run: <span className="break-all font-mono text-xs">{runId}</span></p>
           <p className="text-sm">Status: {run.data?.run.status ?? 'Queued; result not yet verified'}</p>
           <Button variant="outline" size="sm" onClick={() => run.refetch()} disabled={run.isFetching}>Check result</Button>
-          {run.data?.run.result != null && <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words text-xs">{JSON.stringify(run.data.run.result, null, 2)}</pre>}
+          {typeof summary === 'string' && <p className="whitespace-pre-wrap text-sm">{summary}</p>}
+          {recommendations.length > 0 && <ul className="list-disc pl-5 space-y-1 text-sm">{recommendations.map((item, index) => <li key={index}>{item}</li>)}</ul>}
+          {result != null && !summary && recommendations.length === 0 && <p className="text-sm">A structured result is available. Review this run in the central Intelligence workspace for its full evidence.</p>}
           <p className="text-xs text-muted-foreground">A queued run is not a completed model response. Keep the run ID for the central audit trail.</p>
         </div>}
       </div>
