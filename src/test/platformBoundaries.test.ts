@@ -88,6 +88,14 @@ describe('AI access boundaries', () => {
     await expect(requirePermissions(db, { tenantId: local, role: 'staff' }, ['ledger.view', 'ledger.edit'])).rejects.toThrow('permission');
     expect(db.query.eq).toHaveBeenCalledWith('tenant_id', local);
   });
+  it('does not inherit an owner role from another tenant in the identity RPC', async () => {
+    const db = { ...queryDb({ role: 'staff' }),
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: central } }, error: null }) },
+      rpc: vi.fn().mockResolvedValue({ data: { is_staff: true, staff_tenant_id: local, staff_role: 'firm_owner' }, error: null }) };
+    expect(await requireStaff(db, 'valid')).toEqual({ userId: central, tenantId: local, role: 'staff' });
+    expect(db.query.eq).toHaveBeenCalledWith('tenant_id', local);
+    expect(db.query.eq).toHaveBeenCalledWith('user_id', central);
+  });
   it('fails closed on role lookup errors', async () => {
     await expect(requirePermissions(queryDb(null, 'offline'), { tenantId: local, role: 'staff' }, ['ledger.view'])).rejects.toThrow();
   });

@@ -12,9 +12,14 @@ export async function requireStaff(db: any, token: string) {
   if (error || !data?.user) throw new AccessError('Authentication required', 401);
   const type = await db.rpc('get_user_type', { _user_id: data.user.id });
   const identity = type.data;
-  if (type.error || !identity?.is_staff || !identity.staff_tenant_id || !roleNames[identity.staff_role])
+  if (type.error || !identity?.is_staff || !identity.staff_tenant_id)
     throw new AccessError('Staff access required');
-  return { userId: data.user.id as string, tenantId: identity.staff_tenant_id as string, role: identity.staff_role as string };
+  // The legacy identity RPC selects the first role across tenants. Never use
+  // that role to grant owner access in a different practice.
+  const membership = await db.from('user_roles').select('role')
+    .eq('user_id', data.user.id).eq('tenant_id', identity.staff_tenant_id).maybeSingle();
+  if (membership.error || !membership.data || !roleNames[membership.data.role]) throw new AccessError('Staff membership unavailable');
+  return { userId: data.user.id as string, tenantId: identity.staff_tenant_id as string, role: membership.data.role as string };
 }
 export async function requirePermissions(db: any, actor: { tenantId: string; role: string }, permissions: string[]) {
   if (['super_admin', 'firm_owner'].includes(actor.role)) return;
