@@ -17,3 +17,5 @@ verify_jwt = false
 
 [functions.open-banking]
 verify_jwt = false
+[functions.omniqora-bridge]
+verify_jwt = false

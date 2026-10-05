@@ -1,3 +1,5 @@
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,26 +10,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress";
 import { Brain, AlertTriangle, Users, TrendingUp, Loader2, RefreshCw } from "lucide-react";
 
-function useIntelligenceQuery(action: string) {
-  return useQuery({
-    queryKey: ["ai-intelligence", action],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("ai-intelligence", {
-        body: { action },
-      });
-      if (error) throw error;
-      return data;
-    },
-    staleTime: 5 * 60_000,
-    enabled: false, // manual trigger
-  });
-}
-
 export function AIIntelligencePanel() {
+  const { user } = useAuth();
+  const { tenantId, can } = usePermissions();
   const [activeTab, setActiveTab] = useState<"churn" | "staff" | "revenue">("churn");
 
   const churnQ = useQuery({
-    queryKey: ["ai-intelligence", "churn_risk"],
+    queryKey: ["ai-intelligence", user?.id, tenantId, "churn_risk"],
+    enabled: !!user && !!tenantId && can("reports", "view") && can("clients", "view") && can("tasks", "view") && can("billing", "view") && activeTab === "churn",
+    retry: false,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "churn_risk" } });
       if (error) throw error;
@@ -37,7 +28,9 @@ export function AIIntelligencePanel() {
   });
 
   const staffQ = useQuery({
-    queryKey: ["ai-intelligence", "staff_utilisation"],
+    queryKey: ["ai-intelligence", user?.id, tenantId, "staff_utilisation"],
+    enabled: !!user && !!tenantId && can("reports", "view") && activeTab === "staff",
+    retry: false,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "staff_utilisation" } });
       if (error) throw error;
@@ -47,7 +40,9 @@ export function AIIntelligencePanel() {
   });
 
   const revenueQ = useQuery({
-    queryKey: ["ai-intelligence", "revenue_insights"],
+    queryKey: ["ai-intelligence", user?.id, tenantId, "revenue_insights"],
+    enabled: !!user && !!tenantId && can("reports", "view") && can("billing", "view") && activeTab === "revenue",
+    retry: false,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", { body: { action: "revenue_insights" } });
       if (error) throw error;
@@ -59,7 +54,7 @@ export function AIIntelligencePanel() {
   const tabs = [
     { key: "churn" as const, label: "Churn Risk", icon: AlertTriangle, query: churnQ },
     { key: "staff" as const, label: "Staff Utilisation", icon: Users, query: staffQ },
-    { key: "revenue" as const, label: "Revenue Insights", icon: TrendingUp, query: revenueQ },
+    { key: "revenue" as const, label: "Invoice Insights", icon: TrendingUp, query: revenueQ },
   ];
 
   const activeQ = tabs.find(t => t.key === activeTab)?.query;
@@ -70,15 +65,16 @@ export function AIIntelligencePanel() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <Brain className="w-4 h-4 text-primary" />
-            AI Practice Intelligence
+            Practice Intelligence
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => activeQ?.refetch()} disabled={activeQ?.isLoading} className="gap-1 text-xs">
+          <Button variant="ghost" size="sm" onClick={() => activeQ?.refetch()} disabled={activeQ?.isFetching || !activeQ?.isEnabled} className="gap-1 text-xs">
             {activeQ?.isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
             Refresh
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <p className="text-xs text-muted-foreground">Churn uses Lovable AI suggestions. Invoice totals (including unpaid invoices) and utilisation are limited local summaries; utilisation covers this month, capped at 500 entries, with an assumed 160-hour capacity.</p>
         {/* Tab bar */}
         <div className="flex gap-1 border-b">
           {tabs.map(t => (
@@ -97,12 +93,13 @@ export function AIIntelligencePanel() {
           ))}
         </div>
 
+        {activeQ?.isError && <p role="alert" className="text-sm text-destructive">Analysis unavailable. No conclusion can be drawn; retry after checking the AI connection and permissions.</p>}
         {/* Churn Risk */}
-        {activeTab === "churn" && (
+        {activeTab === "churn" && !churnQ.isError && churnQ.isEnabled && (
           churnQ.isLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
           ) : (churnQ.data?.risks?.length || 0) === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No churn risks detected — great client health!</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">No risk suggestions returned. This is not assurance of client health.</p>
           ) : (
             <Table>
               <TableHeader>
@@ -115,7 +112,7 @@ export function AIIntelligencePanel() {
               </TableHeader>
               <TableBody>
                 {(churnQ.data?.risks || []).map((r: any) => (
-                  <TableRow key={r.clientId}>
+                  <TableRow key={r.clientName}>
                     <TableCell className="font-medium text-sm">{r.clientName}</TableCell>
                     <TableCell>
                       <Badge variant={r.riskLevel === "high" ? "destructive" : r.riskLevel === "medium" ? "secondary" : "outline"} className="text-xs capitalize">
@@ -137,7 +134,7 @@ export function AIIntelligencePanel() {
         )}
 
         {/* Staff Utilisation */}
-        {activeTab === "staff" && (
+        {activeTab === "staff" && !staffQ.isError && staffQ.isEnabled && (
           staffQ.isLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
           ) : (staffQ.data?.utilisation?.length || 0) === 0 ? (
@@ -177,15 +174,15 @@ export function AIIntelligencePanel() {
           )
         )}
 
-        {/* Revenue Insights */}
-        {activeTab === "revenue" && (
+        {/* Invoice Insights */}
+        {activeTab === "revenue" && !revenueQ.isError && revenueQ.isEnabled && (
           revenueQ.isLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
           ) : (
             <div className="space-y-4">
               {(revenueQ.data?.forecast?.length || 0) > 0 && (
                 <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">3-Month Forecast</h4>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Illustrative 3-Month Average Projection</h4>
                   <div className="grid grid-cols-3 gap-3">
                     {(revenueQ.data?.forecast || []).map((f: any) => (
                       <Card key={f.month} className="p-3">
@@ -198,12 +195,12 @@ export function AIIntelligencePanel() {
               )}
               {(revenueQ.data?.topClients?.length || 0) > 0 && (
                 <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Clients by Revenue</h4>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top Clients by Invoiced Total</h4>
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Client</TableHead>
-                        <TableHead className="text-right">Revenue</TableHead>
+                        <TableHead className="text-right">Invoiced total</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

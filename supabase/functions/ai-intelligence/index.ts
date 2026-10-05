@@ -1,70 +1,69 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { AccessError, requireStaff, requirePermissions, requireClient, intelligencePermissions, validateIntelligence } from "../_shared/access.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-
+    if (req.method !== "POST") throw new AccessError("POST required", 405);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) throw new AccessError("Authentication required", 401);
+    const token = authHeader.slice(7);
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } }
     );
+    const actor = await requireStaff(supabase, token);
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !userData.user) throw new Error("Authentication failed");
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("tenant_id")
-      .eq("id", userData.user.id)
-      .single();
-    if (!profile) throw new Error("No profile found");
-
-    const tenantId = profile.tenant_id;
+    const tenantId = actor.tenantId;
     const { action, context } = await req.json();
+    if (!Object.hasOwn(intelligencePermissions, action)) throw new AccessError("Unknown action", 400);
+    await requirePermissions(supabase, actor, intelligencePermissions[action]);
+    if (!["revenue_insights", "staff_utilisation"].includes(action) && !LOVABLE_API_KEY)
+      throw new AccessError("AI provider is not configured", 503);
 
     const jsonHeaders = { ...corsHeaders, "Content-Type": "application/json" };
 
     // ─── SMART TASK SUGGESTIONS ───
     if (action === "suggest_tasks") {
-      const { data: clients } = await supabase
+      const { data: clients, error: clientsError } = await supabase
         .from("clients")
         .select("id, legal_name, entity_type, status")
         .eq("tenant_id", tenantId)
         .eq("status", "active")
         .limit(20);
+      if (clientsError) throw new AccessError("Source data unavailable", 503);
 
-      const { data: recentTasks } = await supabase
+      const { data: recentTasks, error: recentTasksError } = await supabase
         .from("tasks")
         .select("title, status, due_date, service, client_id")
         .eq("tenant_id", tenantId)
         .order("created_at", { ascending: false })
         .limit(30);
+      if (recentTasksError) throw new AccessError("Source data unavailable", 503);
 
-      const { data: periods } = await supabase
+      const { data: periods, error: periodsError } = await supabase
         .from("accounts_periods")
         .select("client_id, period_end, status, filing_deadline")
         .eq("tenant_id", tenantId)
         .in("status", ["draft", "in_progress"])
         .limit(20);
+      if (periodsError) throw new AccessError("Source data unavailable", 503);
 
-      const { data: vatReturns } = await supabase
+      const { data: vatReturns, error: vatReturnsError } = await supabase
         .from("vat_returns")
         .select("client_id, period_end, status, due_date")
         .eq("tenant_id", tenantId)
         .in("status", ["draft", "in_progress"])
         .limit(20);
+      if (vatReturnsError) throw new AccessError("Source data unavailable", 503);
 
       const today = new Date().toISOString().slice(0, 10);
       const prompt = `You are a UK accounting practice management AI. Today is ${today}.
@@ -78,6 +77,7 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
 
       const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
+        signal: AbortSignal.timeout(45000),
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
@@ -128,22 +128,24 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
 
       const result = await aiResp.json();
       const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
-      const parsed = toolCall ? JSON.parse(toolCall.function.arguments) : { suggestions: [] };
+      if (!toolCall) throw new AccessError("AI returned no analysis", 502);
+      const parsed = validateIntelligence(JSON.parse(toolCall.function.arguments), action);
 
       return new Response(JSON.stringify(parsed), { headers: jsonHeaders });
     }
 
     // ─── ANOMALY DETECTION ───
     if (action === "detect_anomalies") {
-      const clientId = context?.client_id;
-      if (!clientId) throw new Error("client_id required");
+      const clientId = await requireClient(supabase, tenantId, context?.client_id);
 
-      const { data: txns } = await supabase
+      const { data: txns, error: txnsError } = await supabase
         .from("bank_transactions")
         .select("id, description, amount_pence, transaction_date, transaction_type, categorisation_status")
+        .eq("tenant_id", tenantId)
         .eq("client_id", clientId)
         .order("transaction_date", { ascending: false })
         .limit(100);
+      if (txnsError) throw new AccessError("Source data unavailable", 503);
 
       if (!txns?.length) {
         return new Response(JSON.stringify({ anomalies: [], message: "No transactions to analyse" }), { headers: jsonHeaders });
@@ -155,6 +157,7 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
 
       const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
+        signal: AbortSignal.timeout(45000),
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
@@ -205,33 +208,37 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
 
       const result = await aiResp.json();
       const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
-      const parsed = toolCall ? JSON.parse(toolCall.function.arguments) : { anomalies: [], summary: "No anomalies detected" };
+      if (!toolCall) throw new AccessError("AI returned no analysis", 502);
+      const parsed = validateIntelligence(JSON.parse(toolCall.function.arguments), action);
 
       return new Response(JSON.stringify(parsed), { headers: jsonHeaders });
     }
 
     // ─── CHURN RISK ───
     if (action === "churn_risk") {
-      const { data: clients } = await supabase
+      const { data: clients, error: clientsError } = await supabase
         .from("clients")
         .select("id, legal_name, email, status, created_at")
         .eq("tenant_id", tenantId)
         .eq("status", "active")
         .limit(50);
+      if (clientsError) throw new AccessError("Source data unavailable", 503);
 
-      const { data: recentTasks } = await supabase
+      const { data: recentTasks, error: recentTasksError } = await supabase
         .from("tasks")
         .select("client_id, status, due_date, updated_at")
         .eq("tenant_id", tenantId)
         .order("updated_at", { ascending: false })
         .limit(200);
+      if (recentTasksError) throw new AccessError("Source data unavailable", 503);
 
-      const { data: invoices } = await supabase
+      const { data: invoices, error: invoicesError } = await supabase
         .from("invoices")
-        .select("client_id, status, due_date, total_pence")
+        .select("client_id, status, due_date, total")
         .eq("tenant_id", tenantId)
         .order("due_date", { ascending: false })
         .limit(200);
+      if (invoicesError) throw new AccessError("Source data unavailable", 503);
 
       const clientSummary = (clients || []).map(c => {
         const clientTasks = (recentTasks || []).filter(t => t.client_id === c.id);
@@ -243,6 +250,7 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
 
       const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
+        signal: AbortSignal.timeout(45000),
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
@@ -290,18 +298,20 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
 
       const result = await aiResp.json();
       const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
-      const parsed = toolCall ? JSON.parse(toolCall.function.arguments) : { risks: [] };
+      if (!toolCall) throw new AccessError("AI returned no analysis", 502);
+      const parsed = validateIntelligence(JSON.parse(toolCall.function.arguments), action);
       return new Response(JSON.stringify(parsed), { headers: jsonHeaders });
     }
 
     // ─── REVENUE INSIGHTS ───
     if (action === "revenue_insights") {
-      const { data: invoices } = await supabase
+      const { data: invoices, error: invoicesError } = await supabase
         .from("invoices")
-        .select("client_id, total_pence, status, issued_at, clients(legal_name)")
+        .select("client_id, total, status, issue_date, clients(legal_name)")
         .eq("tenant_id", tenantId)
-        .order("issued_at", { ascending: false })
+        .order("issue_date", { ascending: false })
         .limit(200);
+      if (invoicesError) throw new AccessError("Source data unavailable", 503);
 
       // Group by client
       const clientRevenue: Record<string, { name: string; total: number }> = {};
@@ -310,11 +320,11 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
       (invoices || []).forEach((inv: any) => {
         const cName = inv.clients?.legal_name || "Unknown";
         if (!clientRevenue[inv.client_id]) clientRevenue[inv.client_id] = { name: cName, total: 0 };
-        clientRevenue[inv.client_id].total += (inv.total_pence || 0) / 100;
+        clientRevenue[inv.client_id].total += Number(inv.total || 0);
 
-        if (inv.issued_at) {
-          const month = inv.issued_at.slice(0, 7);
-          monthlyRevenue[month] = (monthlyRevenue[month] || 0) + (inv.total_pence || 0) / 100;
+        if (inv.issue_date) {
+          const month = inv.issue_date.slice(0, 7);
+          monthlyRevenue[month] = (monthlyRevenue[month] || 0) + Number(inv.total || 0);
         }
       });
 
@@ -338,17 +348,22 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
 
     // ─── STAFF UTILISATION ───
     if (action === "staff_utilisation") {
-      const { data: timeEntries } = await supabase
+      const { data: timeEntries, error: timeEntriesError } = await supabase
         .from("time_entries")
-        .select("user_id, minutes, is_billable, profiles(full_name)")
+        .select("user_id, duration_minutes, is_billable")
         .eq("tenant_id", tenantId)
+        .gte("date", new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" }).slice(0, 7) + "-01")
+        .lte("date", new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" }))
         .limit(500);
+      if (timeEntriesError) throw new AccessError("Source data unavailable", 503);
 
+      const { data: staffProfiles, error: staffError } = await supabase.from("profiles").select("id, full_name").eq("tenant_id", tenantId);
+      if (staffError) throw new AccessError("Staff data unavailable", 503);
       const staffMap: Record<string, { name: string; total: number; billable: number }> = {};
       (timeEntries || []).forEach((t: any) => {
-        if (!staffMap[t.user_id]) staffMap[t.user_id] = { name: t.profiles?.full_name || "Unknown", total: 0, billable: 0 };
-        staffMap[t.user_id].total += (t.minutes || 0);
-        if (t.is_billable) staffMap[t.user_id].billable += (t.minutes || 0);
+        if (!staffMap[t.user_id]) staffMap[t.user_id] = { name: staffProfiles?.find(p => p.id === t.user_id)?.full_name || "Unknown", total: 0, billable: 0 };
+        staffMap[t.user_id].total += (t.duration_minutes || 0);
+        if (t.is_billable) staffMap[t.user_id].billable += (t.duration_minutes || 0);
       });
 
       const utilisation = Object.entries(staffMap).map(([userId, v]) => ({
@@ -366,7 +381,7 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
     return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), { status: 400, headers: jsonHeaders });
   } catch (e) {
     console.error("ai-intelligence error:", e);
-    const status = (e as any).message?.includes("Rate limit") ? 429 : 500;
+    const status = e instanceof AccessError ? e.status : 500;
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
       status, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

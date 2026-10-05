@@ -149,7 +149,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
   const isVisible = (item: NavItem) => {
     if (item.permission && !can(item.permission[0], item.permission[1])) return false;
-    if (item.featureKey && features[item.featureKey] === false) return false;
+    if (item.featureKey && features[item.featureKey] !== true) return false;
     if (item.moduleKey && !canUseModule(session.role, item.moduleKey)) return false;
     return true;
   };

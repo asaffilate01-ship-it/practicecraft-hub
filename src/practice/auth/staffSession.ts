@@ -37,7 +37,7 @@ export function buildStaffSession(
   email: string | null
 ): StaffSession {
   return {
-    role: ROLE_MAP[appRole ?? ""] ?? "owner",
+    role: ROLE_MAP[appRole ?? ""] ?? "viewer",
     name: fullName || "Staff User",
     email: email || "",
   };
@@ -49,7 +49,7 @@ export function buildStaffSession(
  */
 export function getStaffSession(): StaffSession {
   return {
-    role: "owner",
+    role: "viewer",
     name: "Staff User",
     email: "",
   };

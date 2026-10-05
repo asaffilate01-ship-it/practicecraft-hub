@@ -23,6 +23,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check AI and Factory Edge Functions
+        run: deno check --no-lock --node-modules-dir=auto supabase/functions/ai-intelligence/index.ts supabase/functions/ai-categorise/index.ts supabase/functions/receipt-ocr/index.ts supabase/functions/omniqora-bridge/index.ts
       - run: npm run typecheck
       - run: npm run lint:security
       - run: npm test

@@ -1,3 +1,5 @@
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,11 +12,14 @@ import { AlertTriangle, Search, Loader2, RefreshCw, ShieldCheck } from "lucide-r
 import { toast } from "sonner";
 
 export function AnomalyDetectionPanel() {
+  const { user } = useAuth();
+  const { tenantId, can } = usePermissions();
+  const allowed = !!user && !!tenantId && can("ledger", "view") && can("clients", "view");
   const { selectedClientId } = useClientContext();
   const [scanning, setScanning] = useState(false);
 
-  const { data, refetch, isLoading } = useQuery({
-    queryKey: ["anomaly-detection", selectedClientId],
+  const { data, refetch, isLoading, isError } = useQuery({
+    queryKey: ["anomaly-detection", user?.id, tenantId, selectedClientId],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("ai-intelligence", {
         body: { action: "detect_anomalies", context: { client_id: selectedClientId } },
@@ -32,7 +37,8 @@ export function AnomalyDetectionPanel() {
     }
     setScanning(true);
     try {
-      await refetch();
+      if (!allowed) throw new Error("Ledger and client view permissions required");
+      await refetch({ throwOnError: true });
     } catch (e: any) {
       toast.error(e.message || "Scan failed");
     } finally {
@@ -61,7 +67,7 @@ export function AnomalyDetectionPanel() {
             variant="outline"
             size="sm"
             onClick={runScan}
-            disabled={scanning || isLoading || !selectedClientId}
+            disabled={scanning || isLoading || !selectedClientId || !allowed}
             className="gap-1"
           >
             {scanning || isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
@@ -70,6 +76,7 @@ export function AnomalyDetectionPanel() {
         </div>
       </CardHeader>
       <CardContent>
+        {isError && <p role="alert" className="text-sm text-destructive">Scan failed. No conclusion can be drawn about these transactions.</p>}
         {!data && !scanning && (
           <div className="text-center py-8 space-y-2">
             <ShieldCheck className="w-8 h-8 mx-auto text-muted-foreground opacity-40" />
@@ -88,7 +95,7 @@ export function AnomalyDetectionPanel() {
           </div>
         )}
 
-        {data && !scanning && (
+        {data && !scanning && !isError && (
           <div className="space-y-4">
             {summary && (
               <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">{summary}</p>
@@ -97,7 +104,7 @@ export function AnomalyDetectionPanel() {
             {anomalies.length === 0 ? (
               <div className="text-center py-4">
                 <ShieldCheck className="w-6 h-6 mx-auto mb-2 text-[hsl(var(--success))]" />
-                <p className="text-sm text-muted-foreground">No anomalies detected — transactions look clean.</p>
+                <p className="text-sm text-muted-foreground">No anomalies flagged in this limited scan. Human review is still required.</p>
               </div>
             ) : (
               <Table>

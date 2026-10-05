@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { AccessError, requireStaff, requirePermissions, validateSuggestions, uuid } from "../_shared/access.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
@@ -6,47 +6,44 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-
+    if (req.method !== "POST") throw new AccessError("POST required", 405);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) throw new AccessError("Authentication required", 401);
+    const token = authHeader.slice(7);
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } }
     );
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !userData.user) throw new Error("Authentication failed");
+    const actor = await requireStaff(supabase, token);
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     const { transaction_ids } = await req.json();
-    if (!transaction_ids?.length) throw new Error("No transaction_ids provided");
+    if (!Array.isArray(transaction_ids) || transaction_ids.length < 1 || transaction_ids.length > 50
+      || transaction_ids.some(id => typeof id !== "string" || !uuid.test(id))
+      || new Set(transaction_ids).size !== transaction_ids.length) throw new AccessError("Provide 1–50 unique transaction IDs", 400);
+    await requirePermissions(supabase, actor, ["ledger.view", "ledger.edit"]);
+    if (!LOVABLE_API_KEY) throw new AccessError("AI provider is not configured", 503);
 
     // Fetch transactions
     const { data: txns, error: txnErr } = await supabase
       .from("bank_transactions")
       .select("id, description, amount_pence, transaction_type, reference")
-      .in("id", transaction_ids.slice(0, 50));
+      .eq("tenant_id", actor.tenantId)
+      .in("categorisation_status", ["uncategorised", "suggested"])
+      .in("id", transaction_ids);
     if (txnErr) throw txnErr;
-    if (!txns?.length) throw new Error("No transactions found");
+    if (txns?.length !== transaction_ids.length) throw new AccessError("Transactions unavailable or already confirmed", 409);
 
     // Get tenant's chart of accounts
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("tenant_id")
-      .eq("id", userData.user.id)
-      .single();
-    if (!profile) throw new Error("No profile found");
-
     const { data: accounts } = await supabase
       .from("chart_of_accounts")
       .select("id, code, name, account_type")
-      .eq("tenant_id", profile.tenant_id)
+      .eq("tenant_id", actor.tenantId)
       .eq("is_active", true)
       .order("code");
 
@@ -59,6 +56,7 @@ serve(async (req) => {
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(45000),
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -126,7 +124,7 @@ serve(async (req) => {
     if (!toolCall) throw new Error("No AI response");
 
     const parsed = JSON.parse(toolCall.function.arguments);
-    const suggestions = parsed.suggestions || [];
+    const suggestions = validateSuggestions(parsed.suggestions, txns, accounts);
 
     // Update transactions with suggestions
     const updates = [];
@@ -137,11 +135,13 @@ serve(async (req) => {
           supabase.from("bank_transactions").update({
             suggested_account_id: account.id,
             categorisation_status: "suggested",
-          }).eq("id", s.transaction_id)
+          }).eq("id", s.transaction_id).eq("tenant_id", actor.tenantId)
+            .in("categorisation_status", ["uncategorised", "suggested"]).select("id")
         );
       }
     }
-    await Promise.all(updates);
+    const results = await Promise.all(updates);
+    if (results.some(r => r.error || r.data?.length !== 1)) throw new AccessError("Some suggestions could not be saved; refresh before retrying", 409);
 
     return new Response(JSON.stringify({ suggestions, updated: updates.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -149,7 +149,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("ai-categorise error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: e instanceof AccessError ? e.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
