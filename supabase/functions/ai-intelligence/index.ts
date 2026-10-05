@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
 
       const { data: recentTasks, error: recentTasksError } = await supabase
         .from("tasks")
-        .select("title, status, due_date, service, client_id")
+        .select("title, status, due_date, client_id")
         .eq("tenant_id", tenantId)
         .order("created_at", { ascending: false })
         .limit(30);
@@ -73,7 +73,7 @@ Recent tasks: ${JSON.stringify(recentTasks?.slice(0, 15) || [])}
 Open accounts periods: ${JSON.stringify(periods || [])}
 Open VAT returns: ${JSON.stringify(vatReturns || [])}
 
-Suggest 3-5 actionable tasks the practice should create right now based on upcoming deadlines, missing work, or best practices. Consider UK filing deadlines (CT600 = 12 months after period end, SA = 31 Jan, VAT = 1 month 7 days after period end).`;
+Suggest 3-5 actionable tasks the practice should create right now based on upcoming deadlines, missing work, or best practices. Use only the supplied recorded deadlines. Do not calculate or invent statutory deadlines; flag missing dates for human review.`;
 
       const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -242,7 +242,7 @@ Suggest 3-5 actionable tasks the practice should create right now based on upcom
 
       const clientSummary = (clients || []).map(c => {
         const clientTasks = (recentTasks || []).filter(t => t.client_id === c.id);
-        const overdueTasks = clientTasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done");
+        const overdueTasks = clientTasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && !["done", "cancelled"].includes(t.status));
         const clientInvoices = (invoices || []).filter(i => i.client_id === c.id);
         const overdueInvoices = clientInvoices.filter(i => i.status === "overdue");
         return `${c.legal_name}: ${overdueTasks.length} overdue tasks, ${overdueInvoices.length} overdue invoices, joined ${c.created_at?.slice(0, 10)}`;

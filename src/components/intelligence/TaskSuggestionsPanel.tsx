@@ -41,10 +41,9 @@ export function TaskSuggestionsPanel() {
       const { error } = await supabase.from("tasks").insert({
         tenant_id: profile.tenant_id,
         title: suggestion.title,
-        description: suggestion.description || suggestion.reason,
+        description: [suggestion.description || suggestion.reason, suggestion.service ? `Suggested service: ${suggestion.service}` : null].filter(Boolean).join("\n"),
         priority: suggestion.priority || "medium",
         status: "todo",
-        service: suggestion.service || null,
         due_date: suggestion.suggested_due_date || null,
         assigned_to_user_id: user!.id,
       });

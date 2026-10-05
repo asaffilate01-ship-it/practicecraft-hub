@@ -46,7 +46,7 @@ Deno.serve(async req => {
     const [clients, tasks] = await Promise.all([
       db.from('clients').select('id', { count: 'exact', head: true }).eq('tenant_id', actor.tenantId).eq('status', 'active'),
       db.from('tasks').select('id', { count: 'exact', head: true }).eq('tenant_id', actor.tenantId)
-        .lt('due_date', today).not('status', 'in', '(done,completed,complete,cancelled)'),
+        .lt('due_date', today).not('status', 'in', '(done,cancelled)'),
     ]);
     if (clients.error || tasks.error) throw new AccessError('Practice summary unavailable', 503);
     const result = await callFactory(binding, '/api/platform/intelligence', {
