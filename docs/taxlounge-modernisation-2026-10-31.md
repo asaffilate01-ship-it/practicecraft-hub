@@ -10,10 +10,18 @@ Reviewed current main/source, open design PR #5, October platform audit, feature
 - Restored browser zoom, added password toggle labels, removed unbacked notification and Profile actions, and stopped claiming an unverified trial or domain.
 - Product/Design/Agent guidance now states TaxLounge boundaries and release standards.
 
+## Verified code delivery and unresolved assurance
+
+- The active PR contains the TaxLounge product identity, safer PWA caching, authorised mobile navigation, personal per-practice/per-staff work queue preferences, conservative error states and entitlement-aware workspace cards.
+- A dependency-remediation GitHub Action rebuilt the npm lockfile, upgraded the Zod runtime dependency to a patched major release and moved build-only PWA tooling into dev dependencies. **The production dependency audit reported zero vulnerabilities in the gated build.**
+- A second test-toolchain remediation upgraded Vitest and verified that the full dependency graph had **no outstanding critical-severity findings** (moderate/low dev-tool findings remain and require continued review).
+- Updated the standard CI to fail on production high-severity advisories and full-tree critical advisories. Staging browser/device and regulated provider acceptance are still outstanding.
+- This is a **code verification milestone only**, not evidence of production migrations, live HMRC/Companies House filing, user invitation flows, live bank feeds or a connected central worker.
+
 ## Open blockers ranked by severity
 | Priority | Workstream | Required acceptance evidence |
 |---|---|---|
-| P0 | Dependency vulnerabilities | `npm audit --omit=dev` clean or each advisory remediated with supported versions, documented impact and CI; no `--force` version jumps without regression testing |
+| Ongoing | Dependency advisories | Production audit currently clear; critical dev findings remediated. Review remaining moderate/low development-tool findings and preserve the audit gates after every lockfile change |
 | P0 | Bank feeds | Persisted one-use OAuth state, tenant/client/connection binding, provider callback replay tests and disconnection/recovery |
 | P0 | Ledger, permissions, billing | Row-level negative tests, atomic posting/lock/approval, authorised invitations/removals, webhook idempotency, entitlement checks |
 | P0 | Privacy and legal | Confirm actual legal operator, DPA, support/privacy/legal email addresses, contact details, notice dates, third parties and cookie policy; existing legal pages contain legacy naming/addresses |
