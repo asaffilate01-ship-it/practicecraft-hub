@@ -44,12 +44,12 @@ describe("legacy authenticated response cache", () => {
 
 describe("release safety source contracts", () => {
   it("does not cache Supabase API responses in the PWA", () => {
-    const config = readFileSync(new URL("../../vite.config.ts", import.meta.url), "utf8");
+    const config = readFileSync("vite.config.ts", "utf8");
     expect(config).not.toContain('cacheName: "supabase-api"');
     expect(config).toContain('cacheName: "taxlounge-route-modules"');
   });
   it("allows pinch-zoom and does not claim an unverified canonical domain", () => {
-    const html = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
+    const html = readFileSync("index.html", "utf8");
     expect(html).not.toContain("user-scalable=no");
     expect(html).not.toContain("iqpracticecloud.com");
     expect(html).toContain("TaxLounge");
