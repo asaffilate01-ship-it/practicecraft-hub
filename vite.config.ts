@@ -34,26 +34,19 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /\/assets\/.*\.js$/i,
             handler: "CacheFirst",
             options: {
-              cacheName: "practicecraft-route-modules",
+              cacheName: "taxlounge-route-modules",
               expiration: { maxEntries: 120, maxAgeSeconds: 30 * 24 * 60 * 60 },
             },
           },
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "supabase-api",
-              expiration: { maxEntries: 100, maxAgeSeconds: 300 },
-            },
-          },
+          // Authenticated Supabase API responses must never enter the offline cache.
         ],
       },
       manifest: {
-        name: "IQ Practice Cloud",
-        short_name: "IQ Cloud",
-        description: "UK Accountancy Practice Management — VAT, Payroll, Accounts, AML",
-        theme_color: "#0F172A",
-        background_color: "#0F172A",
+        name: "TaxLounge",
+        short_name: "TaxLounge",
+        description: "A UK accountancy practice workspace for clients, deadlines and review",
+        theme_color: "#18352D",
+        background_color: "#18352D",
         display: "standalone",
         orientation: "portrait-primary",
         scope: "/",

@@ -1,4 +1,5 @@
-import "@testing-library/jest-dom";
+// Vitest-specific extension makes DOM matchers available at runtime and in TypeScript.
+import "@testing-library/jest-dom/vitest";
 
 if (typeof window !== "undefined") Object.defineProperty(window, "matchMedia", {
   writable: true,

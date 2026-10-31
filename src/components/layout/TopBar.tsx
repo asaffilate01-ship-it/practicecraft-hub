@@ -1,4 +1,5 @@
-import { Bell, ChevronDown, User, LogOut, Menu } from "lucide-react";
+import { ChevronDown, LogOut, Menu } from "lucide-react";
+import { TAXLOUNGE } from "@/lib/productIdentity";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,13 +40,13 @@ export function TopBar({ onMenuClick }: TopBarProps) {
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border/80 bg-background/95 px-3 backdrop-blur-xl sm:px-4 md:px-7">
       <div className="flex items-center gap-3">
         {onMenuClick && (
-          <Button variant="ghost" size="icon" onClick={onMenuClick} className="md:hidden">
+          <Button variant="ghost" size="icon" onClick={onMenuClick} className="md:hidden" aria-label="Open navigation">
             <Menu className="w-5 h-5" />
           </Button>
         )}
         <div className="flex items-center gap-2 sm:hidden">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary font-serif text-base font-bold text-primary-foreground">P</span>
-          <div><div className="text-xs font-semibold leading-none">PracticeCraft</div><div className="mt-1 text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Practice & accounts</div></div>
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary font-serif text-base font-bold text-primary-foreground">{branding?.practiceName?.slice(0, 1).toUpperCase() || "T"}</span>
+          <div><div className="text-xs font-semibold leading-none">{branding?.practiceName || TAXLOUNGE.name}</div><div className="mt-1 text-[8px] uppercase tracking-[0.16em] text-muted-foreground">Practice & accounts</div></div>
         </div>
         <div className="hidden sm:block"><GlobalPracticeSearch /></div>
       </div>
@@ -53,10 +54,6 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       <div className="flex items-center gap-2 md:gap-3">
         <div className="sm:hidden"><GlobalPracticeSearch /></div>
         <div className="hidden sm:block"><ClientSelector /></div>
-        <Button variant="ghost" size="icon" className="relative rounded-xl">
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-        </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -72,7 +69,6 @@ export function TopBar({ onMenuClick }: TopBarProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem><User className="w-4 h-4 mr-2" />Profile</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/settings")}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="text-destructive">

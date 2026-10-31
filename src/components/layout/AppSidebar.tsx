@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/hooks/usePermissions";
+import { TAXLOUNGE } from "@/lib/productIdentity";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePracticeBranding } from "@/practice/branding/PracticeBrandingProvider";
 import { usePracticeFeatures } from "@/practice/features/PracticeFeaturesProvider";
@@ -173,13 +174,13 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
           <img src={branding.logoUrl} alt={branding.practiceName} className="h-8 object-contain shrink-0" />
         ) : (
           <div className="w-9 h-9 rounded-xl bg-sidebar-primary flex items-center justify-center shrink-0 font-bold text-lg text-sidebar-primary-foreground" style={{ fontFamily: "Georgia, serif" }}>
-            P
+            {branding?.practiceName?.slice(0, 1).toUpperCase() || "T"}
           </div>
         )}
         {!collapsed && !branding?.logoUrl && (
           <div className="overflow-hidden">
             <h1 className="text-sm font-bold text-sidebar-accent-foreground tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-              {branding?.practiceName ?? "PracticeCraft"}
+              {branding?.practiceName ?? TAXLOUNGE.name}
             </h1>
             <p className="mt-0.5 text-[9px] uppercase tracking-[0.18em] text-sidebar-foreground/45">Practice & accounts</p>
           </div>

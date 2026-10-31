@@ -112,14 +112,23 @@ const PortalSettingsPage = lazy(() => import("@/pages/portal/PortalSettingsPage"
 
 const queryClient = new QueryClient();
 
+function RouteLoadingState({ message = "Checking workspace access…" }: { message?: string }) {
+  return (
+    <div
+      className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center"
+      role="status"
+      aria-live="polite"
+    >
+      <div aria-hidden="true" className="h-9 w-9 animate-spin rounded-full border-4 border-primary border-t-transparent motion-reduce:animate-none" />
+      <p className="max-w-sm text-sm font-medium text-muted-foreground">{message}</p>
+    </div>
+  );
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
+    return <RouteLoadingState />;
   }
   if (!session) return <Navigate to="/login" replace />;
   return <>{children}</>;
@@ -127,7 +136,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <RouteLoadingState message="Checking your session…" />;
   if (session) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
@@ -144,11 +153,7 @@ function PortalRoute({ children }: { children: React.ReactNode }) {
 function PortalRouteGuard({ children }: { children: React.ReactNode }) {
   const { userKind, role, loading } = usePermissions();
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
+    return <RouteLoadingState />;
   }
   // Staff users should not access portal routes
   if (userKind === "staff") return <Navigate to="/" replace />;
@@ -160,11 +165,7 @@ function PortalRouteGuard({ children }: { children: React.ReactNode }) {
 function StaffRoute({ children }: { children: React.ReactNode }) {
   const { userKind, role, loading } = usePermissions();
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
+    return <RouteLoadingState />;
   }
   if (userKind === "portal") {
     return <Navigate to={role === "employee" ? "/employee" : "/portal"} replace />;
