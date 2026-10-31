@@ -62,7 +62,7 @@ export default function BankFeeds() {
     setConnForm({ client_id: selectedClientId ?? "", account_name: "", account_number_masked: "", sort_code: "", provider: "manual", ledger_account_id: "" });
   }, [tenantId, selectedClientId]);
 
-  const { data: clients = [] } = useQuery({
+  const { data: clients = [], isError: clientsError } = useQuery({
     queryKey: ["clients-list", tenantId, user?.id, selectedClientId],
     queryFn: async () => {
       let request = supabase.from("clients").select("id, legal_name").eq("tenant_id", tenantId!).order("legal_name");
@@ -111,7 +111,7 @@ export default function BankFeeds() {
     enabled: !!profile?.tenant_id,
   });
 
-  const { data: accounts = [] } = useQuery({
+  const { data: accounts = [], isError: accountsError } = useQuery({
     queryKey: ["chart_of_accounts", tenantId, user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from("chart_of_accounts").select("id, code, name").eq("tenant_id", tenantId!).order("code");
@@ -349,7 +349,7 @@ export default function BankFeeds() {
       <div role="status" className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
         Live Open Banking is not connected. Use a manual bank account and statement CSV import while secure provider consent is being developed.
       </div>
-      {(connectionsError || transactionsError) && (
+      {(clientsError || connectionsError || transactionsError || accountsError) && (
         <div role="alert" className="rounded-xl border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
           Some bank records could not be loaded. Counts and available actions may be incomplete. Refresh before making changes.
         </div>
@@ -531,7 +531,7 @@ export default function BankFeeds() {
           <DialogHeader><DialogTitle>Import bank statement CSV</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="rounded-xl border border-border bg-muted/50 p-3 text-xs leading-5 text-muted-foreground">
-              Supports common UK bank headings including Date, Description, Amount, Debit, Credit, Balance and Reference. Re-importing the same statement will not create duplicate bank lines.
+              Supports common UK bank headings including Date, Description, Amount, Debit, Credit, Balance and Reference. Max 5 MB. Review imported lines before categorising or posting; provider connections are not active.
             </div>
             <div className="space-y-2">
               <Label>Bank account</Label>
@@ -547,7 +547,7 @@ export default function BankFeeds() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCsvImport(false)}>Cancel</Button>
-            <Button onClick={() => importCsv.mutate()} disabled={!csvFile || !csvConnectionId || importCsv.isPending}>{importCsv.isPending ? "Importing…" : "Import transactions"}</Button>
+            <Button onClick={() => importCsv.mutate()} disabled={!csvFile || !csvConnectionId || importCsv.isPending || !canEditLedger}>{importCsv.isPending ? "Importing…" : "Import transactions"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -596,7 +596,7 @@ export default function BankFeeds() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddConnection(false)}>Cancel</Button>
-            <Button onClick={() => addConnection.mutate()} disabled={!connForm.client_id || !connForm.account_name.trim() || !connForm.ledger_account_id || addConnection.isPending}>
+            <Button onClick={() => addConnection.mutate()} disabled={!connForm.client_id || !connForm.account_name.trim() || !connForm.ledger_account_id || addConnection.isPending || !canEditLedger}>
               {addConnection.isPending ? "Adding…" : "Add Account"}
             </Button>
           </DialogFooter>
@@ -629,7 +629,7 @@ export default function BankFeeds() {
                   <SelectContent>
                     <SelectItem value="debit">Debit (out)</SelectItem>
                     <SelectItem value="credit">Credit (in)</SelectItem>
-                    <SelectItem value="transfer">Transfer</SelectItem>
+                    
                   </SelectContent>
                 </Select>
               </div>
@@ -651,9 +651,27 @@ export default function BankFeeds() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddTxn(false)}>Cancel</Button>
-            <Button onClick={() => addTransaction.mutate()} disabled={!txnForm.bank_connection_id || !txnForm.description.trim() || !txnForm.amount || addTransaction.isPending}>
+            <Button onClick={() => addTransaction.mutate()} disabled={!txnForm.bank_connection_id || !txnForm.description.trim() || !txnForm.amount || addTransaction.isPending || !canEditLedger}>
               {addTransaction.isPending ? "Adding…" : "Add Transaction"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showPostConfirmation} onOpenChange={setShowPostConfirmation}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm ledger posting</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm leading-6 text-muted-foreground">
+            <p>Post {confirmedCount} confirmed transaction{confirmedCount === 1 ? "" : "s"} from this authorised workspace to the ledger?</p>
+            <p>This may create financial journal entries and is not an AI suggestion. Check each category and bank/cash ledger mapping before proceeding. Posting may be irreversible; a failed batch can leave some entries posted.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPostConfirmation(false)}>Cancel</Button>
+            <Button disabled={!canEditLedger || postToLedger.isPending || confirmedCount === 0} onClick={() => {
+              setShowPostConfirmation(false);
+              postToLedger.mutate();
+            }}>Confirm posting</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

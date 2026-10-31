@@ -25,6 +25,9 @@ describe("TaxLounge manual bank import boundaries", () => {
     expect(source).toContain(".eq(\"tenant_id\", tenantId!)");
     expect(source).toContain('if (selectedClientId) query = query.eq("client_id", selectedClientId);');
     expect(source).not.toContain("syncOpenBanking.mutate()");
+    expect(source).toContain("Confirm ledger posting");
+    expect(source).toContain("postToLedger.mutate()");
+    expect(source).toContain("transactionsError");
     expect(source).not.toContain('value="truelayer"');
   });
 });
