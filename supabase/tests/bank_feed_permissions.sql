@@ -1,6 +1,6 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
-SELECT plan(24);
+SELECT plan(25);
 
 INSERT INTO public.tenants(id,firm_name) VALUES
 ('71000000-0000-0000-0000-000000000001','TaxLounge bank test'),
