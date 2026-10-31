@@ -2,14 +2,16 @@ import { fireEvent, render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import PracticeOperations from '@/pages/PracticeOperations';
-const state = vi.hoisted(() => ({ client: null as string | null, allowed: ['payroll'], errors: [] as string[] }));
-vi.mock('@/hooks/usePermissions', () => ({ usePermissions: () => ({ can: (module: string) => state.allowed.includes(module) }) }));
+const state = vi.hoisted(() => ({ client: null as string | null, allowed: ['payroll'], errors: [] as string[], features: { payroll: true, accounts: true, bookkeeping: true, practice_mgmt: true, billing: true, secretarial: true } }));
+vi.mock('@/hooks/usePermissions', () => ({ usePermissions: () => ({ can: (module: string) => state.allowed.includes(module), tenantId: 'practice-a', role: 'firm_owner' }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'alice' } }) }));
+vi.mock('@/practice/features/PracticeFeaturesProvider', () => ({ usePracticeFeatures: () => state.features }));
 vi.mock('@/contexts/ClientContext', () => ({ useClientContext: () => ({ selectedClientId: state.client, selectedClientName: null }) }));
 vi.mock('@/hooks/usePracticeOperations', () => ({ usePracticeOperations: () => ({ isLoading: false, isFetching: false, refetch: vi.fn(), data: { errors: state.errors, rows: [
   {id:'a',source:'Payroll',title:'Acme payroll',clientId:'a',status:'rejected',dueDate:null,href:'/payroll/runs/a'},
   {id:'b',source:'Documents',title:'Bank statements',clientId:'b',status:'open',dueDate:null,href:'/documents/requests'},
 ] } }) }));
-afterEach(() => { cleanup(); state.client = null; state.errors = []; });
+afterEach(() => { cleanup(); state.client = null; state.errors = []; state.allowed = ['payroll']; state.features = { payroll: true, accounts: true, bookkeeping: true, practice_mgmt: true, billing: true, secretarial: true }; window.localStorage.clear(); });
 describe('practice operations journeys', () => {
   it('filters and explains an exception with its source action', () => {
     render(<MemoryRouter><PracticeOperations /></MemoryRouter>);
@@ -26,6 +28,13 @@ describe('practice operations journeys', () => {
     fireEvent.click(screen.getByLabelText('Board view'));
     expect(screen.getByText('Acme payroll')).toBeInTheDocument();
     expect(screen.queryByText('Bank statements')).not.toBeInTheDocument();
+  });
+  it('hides workspaces outside tenant feature entitlements even for permitted staff', () => {
+    state.allowed = ['payroll', 'accounts'];
+    state.features = { ...state.features, payroll: false };
+    render(<MemoryRouter><PracticeOperations /></MemoryRouter>);
+    expect(screen.queryByRole('link', { name: /Payroll & people/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Accounts & review/ })).toBeInTheDocument();
   });
   it('shows incomplete-data failures instead of a success message', () => {
     state.errors = ['payroll'];
