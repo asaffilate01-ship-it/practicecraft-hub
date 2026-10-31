@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CloudCog, Eye, EyeOff, Building2, Users, ShieldCheck, Receipt, Wallet, FileText, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, Building2, Users, ShieldCheck, Receipt, Wallet, FileText, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import heroDashboard from "@/assets/hero-dashboard.png";
 import { resolveLoginDestination } from "@/lib/authRouting";
 
 const features = [
-  { icon: Receipt, label: "MTD VAT & RTI Payroll" },
+  { icon: Receipt, label: "VAT & payroll workspaces" },
   { icon: FileText, label: "Accounts Production" },
   { icon: ShieldCheck, label: "AML / KYC Compliance" },
   { icon: Wallet, label: "Billing & Payments" },
@@ -78,10 +78,10 @@ export default function Login() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-[hsl(199,89%,48%)] flex items-center justify-center">
-              <CloudCog className="w-5 h-5 text-white" />
+              <span aria-hidden="true" className="font-serif text-sm font-bold text-white">TL</span>
             </div>
             <h1 className="text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-              PracticeCraft
+              TaxLounge
             </h1>
           </div>
           <p className="text-[hsl(210,20%,70%)] text-sm max-w-md mt-1">
@@ -92,7 +92,7 @@ export default function Login() {
         <div className="relative z-10 flex-1 flex items-center justify-center py-8">
           <img
             src={heroDashboard}
-            alt="PracticeCraft dashboard"
+            alt="TaxLounge dashboard"
             className="w-full max-w-lg rounded-xl shadow-2xl border border-white/10"
           />
         </div>
@@ -110,7 +110,7 @@ export default function Login() {
           </div>
           <div className="flex items-center gap-2 text-xs text-[hsl(210,20%,55%)] pt-2 border-t border-white/10">
             <CheckCircle2 className="w-3.5 h-3.5 text-[hsl(142,71%,45%)]" />
-            <span>HMRC sandbox integration · controlled filing audit trail</span>
+            <span>Controlled preparation · evidence-based filing audit trail</span>
           </div>
         </div>
       </div>
@@ -121,10 +121,10 @@ export default function Login() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 justify-center mb-6">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <CloudCog className="w-5 h-5 text-primary-foreground" />
+              <span aria-hidden="true" className="font-serif text-sm font-bold text-primary-foreground">TL</span>
             </div>
             <h1 className="text-xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>
-              PracticeCraft
+              TaxLounge
             </h1>
           </div>
 
@@ -179,6 +179,8 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showPassword}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

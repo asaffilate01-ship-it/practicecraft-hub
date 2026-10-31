@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CloudCog, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Signup() {
@@ -50,12 +50,13 @@ export default function Signup() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-2">
-            <CloudCog className="w-6 h-6 text-primary-foreground" />
+            <span aria-hidden="true" className="font-serif text-lg font-bold text-primary-foreground">TL</span>
           </div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">TaxLounge</p>
           <CardTitle className="text-2xl" style={{ fontFamily: 'var(--font-heading)' }}>
             Create your account
           </CardTitle>
-          <CardDescription>Start your 14-day free trial</CardDescription>
+          <CardDescription>Set up your accounting practice workspace</CardDescription>
         </CardHeader>
         <form onSubmit={handleSignup}>
           <CardContent className="space-y-4">
@@ -84,6 +85,8 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
