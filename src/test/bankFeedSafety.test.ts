@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { requireManualBankConnection, validateBankCsvFile } from "@/lib/bankFeedSafety";
+import { requireConsistentBankTransaction, requireManualBankConnection, validateBankCsvFile } from "@/lib/bankFeedSafety";
 
 const manual = { id: "bank-a", tenant_id: "practice-a", client_id: "client-a", provider: "manual" };
 describe("TaxLounge manual bank import boundaries", () => {
@@ -12,6 +12,15 @@ describe("TaxLounge manual bank import boundaries", () => {
     expect(() => requireManualBankConnection(manual, "practice-a", "client-b")).toThrow("outside");
     expect(() => requireManualBankConnection({ ...manual, provider: "truelayer" }, "practice-a", "client-a")).toThrow("unavailable");
     expect(() => requireManualBankConnection(undefined, "practice-a", "client-a")).toThrow("outside");
+  });
+  it("blocks mismatched bank/client bindings before any posting RPC", () => {
+    const bank = { ...manual, id: "conn-a" };
+    const t = { tenant_id: "practice-a", client_id: "client-a", bank_connection_id: "conn-a" };
+    expect(() => requireConsistentBankTransaction(t, [bank], "practice-a", "client-a")).not.toThrow();
+    expect(() => requireConsistentBankTransaction({ ...t, client_id: "client-b" }, [bank], "practice-a", "client-b")).toThrow("does not match");
+    expect(() => requireConsistentBankTransaction({ ...t, tenant_id: "practice-b" }, [bank], "practice-b")).toThrow("does not match");
+    expect(() => requireConsistentBankTransaction(t, [], "practice-a", "client-a")).toThrow("does not match");
+    expect(() => requireConsistentBankTransaction(t, [bank], "practice-a", "client-b")).toThrow("outside");
   });
   it("bounds CSV size and file extension before parsing", () => {
     expect(() => validateBankCsvFile({ name: "statement.CSV", size: 240 })).not.toThrow();

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientContext } from "@/contexts/ClientContext";
 import { usePermissions } from "@/hooks/usePermissions";
-import { requireManualBankConnection, validateBankCsvFile } from "@/lib/bankFeedSafety";
+import { requireConsistentBankTransaction, requireManualBankConnection, validateBankCsvFile } from "@/lib/bankFeedSafety";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -291,8 +291,17 @@ export default function BankFeeds() {
       if (!profile?.tenant_id || !canEditLedger) throw new Error("Ledger posting is not authorised");
       const confirmed = transactions.filter((t: any) => t.tenant_id === profile.tenant_id && (!selectedClientId || t.client_id === selectedClientId) && t.categorisation_status === "confirmed" && t.confirmed_account_id);
       if (!confirmed.length) throw new Error("No confirmed transactions to post");
-      const missingMapping = confirmed.find((t: any) => !t.bank_connection?.ledger_account_id);
-      if (missingMapping) throw new Error(`${missingMapping.bank_connection?.account_name || "A bank account"} is not mapped to a ledger bank/cash account`);
+      // Validate every row and bank/client binding before performing any irreversible RPC.
+      for (const transaction of confirmed) {
+        requireConsistentBankTransaction(transaction, connections, profile.tenant_id, selectedClientId);
+        if (!transaction.bank_connection?.ledger_account_id ||
+            !accounts.some((account: any) => account.id === transaction.bank_connection.ledger_account_id)) {
+          throw new Error("A confirmed transaction has no valid bank/cash ledger mapping in this practice");
+        }
+        if (!accounts.some((account: any) => account.id === transaction.confirmed_account_id)) {
+          throw new Error("A confirmed transaction has an unavailable ledger category");
+        }
+      }
       let posted = 0;
       for (const t of confirmed as any[]) {
         const { error } = await supabase.rpc("post_bank_transaction", { p_transaction_id: t.id });
