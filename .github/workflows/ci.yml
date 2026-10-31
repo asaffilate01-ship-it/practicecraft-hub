@@ -50,7 +50,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pin a verified stable CLI to avoid rate-limited 'latest' release lookups.
+          version: 2.122.0
       - name: Validate local migration chain
         run: supabase start && supabase db reset --local
       - name: Payroll review database tests
