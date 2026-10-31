@@ -1,73 +1,27 @@
-# Welcome to your Lovable project
+# TaxLounge
 
-## Project info
+**UK accountancy practice management and controlled tax-preparation workflows**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+TaxLounge is the product name for the code in `practicecraft-hub`. It is not TaxNuvia or Finvessa. The repository is a React/TypeScript/Vite, shadcn-ui/Tailwind and Supabase application with practice and client/employee workspaces.
 
-## How can I edit this code?
+## What is already in the code
+Practice operations, clients, tasks, bookkeeping, accounts preparation, VAT/MTD workspaces, payroll and preparation reviews, AML, document requests, billing and selected submission/secretarial workflows. **A screen, API handler or queued job is not evidence of live filing acceptance.**
 
-There are several ways of editing your application.
+## Local development
+1. Install Node.js and run `npm ci`.
+2. Copy `.env.example` to your local environment if needed and configure **only** the permitted `VITE_SUPABASE_URL` and publishable/anon key for the intended environment. Never commit secret/service-role keys or provider tokens.
+3. Run `npm run dev` for the local workspace.
+4. Before proposing changes: `npm run typecheck`, `npm test`, `npm run lint:security`, `npm run build` and `npm audit --omit=dev`.
+5. Apply database migrations and deploy Edge Functions only through reviewed, environment-specific staging/release procedures.
 
-**Use Lovable**
+## Product and design
+- [Product identity and boundaries](PRODUCT.md)
+- [TaxLounge design system](DESIGN.md)
+- [Modernisation and AI/MCP blueprint](docs/taxlounge-modernisation-2026-10-31.md)
+- [SaaS/AI and integration audit](docs/platform-audit-2026-10-05.md)
+- [Readiness and release prerequisites](docs/go-live-readiness.md)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Deployment caution
+This repository is **not yet verified production-ready**. Tax logic, sandbox recognition, payment/bank state, tenant tests, migrations, AI scope and hosting must be verified separately. The PWA deliberately does not cache authenticated Supabase API data. The app currently has no verified public marketing domain; do not add a guessed canonical URL.
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Lovable may be used to publish after staging and CI review. Do not infer production status from GitHub commits, UI screens or an earlier Lovable project placeholder.

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { TAXLOUNGE } from "@/lib/productIdentity";
 import { visibleMobileNavigation } from "@/lib/mobileNavigation";
 import { clearLegacySupabaseResponseCache } from "@/lib/legacyApiCache";
@@ -38,5 +39,19 @@ describe("legacy authenticated response cache", () => {
   });
   it("does not block startup if Cache Storage cannot be used", async () => {
     expect(await clearLegacySupabaseResponseCache({ delete: async () => { throw Error("disabled"); } })).toBe(false);
+  });
+});
+
+describe("release safety source contracts", () => {
+  it("does not cache Supabase API responses in the PWA", () => {
+    const config = readFileSync(new URL("../../vite.config.ts", import.meta.url), "utf8");
+    expect(config).not.toContain('cacheName: "supabase-api"');
+    expect(config).toContain('cacheName: "taxlounge-route-modules"');
+  });
+  it("allows pinch-zoom and does not claim an unverified canonical domain", () => {
+    const html = readFileSync(new URL("../../index.html", import.meta.url), "utf8");
+    expect(html).not.toContain("user-scalable=no");
+    expect(html).not.toContain("iqpracticecloud.com");
+    expect(html).toContain("TaxLounge");
   });
 });
