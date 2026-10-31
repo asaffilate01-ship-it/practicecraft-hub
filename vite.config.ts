@@ -39,7 +39,6 @@ export default defineConfig(({ mode }) => ({
             },
           },
           // Authenticated Supabase API responses must never enter the offline cache.
-          },
         ],
       },
       manifest: {
