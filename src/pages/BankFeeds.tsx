@@ -123,14 +123,17 @@ export default function BankFeeds() {
 
   const addConnection = useMutation({
     mutationFn: async () => {
-      if (!profile?.tenant_id) throw new Error("No tenant");
+      if (!profile?.tenant_id || !canEditLedger) throw new Error("Bank account editing is not authorised");
+      if (!clients.some((c: any) => c.id === connForm.client_id) || (selectedClientId && connForm.client_id !== selectedClientId)) throw new Error("Select a client in this practice");
+      if (!accounts.some((a: any) => a.id === connForm.ledger_account_id && a.code.startsWith("10"))) throw new Error("Select a valid bank/cash ledger account");
+      if (!connForm.account_name.trim()) throw new Error("Bank account name is required");
       const { error } = await supabase.from("bank_connections").insert({
         tenant_id: profile.tenant_id,
         client_id: connForm.client_id,
         account_name: connForm.account_name.trim(),
         account_number_masked: connForm.account_number_masked.trim() || null,
         sort_code: connForm.sort_code.trim() || null,
-        provider: connForm.provider,
+        provider: "manual",
         ledger_account_id: connForm.ledger_account_id,
       });
       if (error) throw error;
@@ -146,11 +149,11 @@ export default function BankFeeds() {
 
   const addTransaction = useMutation({
     mutationFn: async () => {
-      if (!profile?.tenant_id) throw new Error("No tenant");
-      const conn = connections.find((c: any) => c.id === txnForm.bank_connection_id);
-      if (!conn) throw new Error("Select a bank account");
+      if (!profile?.tenant_id || !canEditLedger) throw new Error("Adding bank transactions is not authorised");
+      const conn = requireManualBankConnection(connections.find((c: any) => c.id === txnForm.bank_connection_id), profile.tenant_id, selectedClientId);
       const amountPence = Math.round(parseFloat(txnForm.amount) * 100);
-      if (isNaN(amountPence) || amountPence === 0) throw new Error("Enter a valid amount");
+      if (!Number.isSafeInteger(amountPence) || amountPence === 0) throw new Error("Enter a valid amount");
+      if (!txnForm.description.trim()) throw new Error("Enter a description");
 
       const { error } = await supabase.from("bank_transactions").insert({
         tenant_id: profile.tenant_id,
@@ -175,11 +178,12 @@ export default function BankFeeds() {
 
   const importCsv = useMutation({
     mutationFn: async () => {
-      if (!profile?.tenant_id) throw new Error("No tenant");
+      if (!profile?.tenant_id || !canEditLedger) throw new Error("CSV import is not authorised");
       if (!csvFile || !csvConnectionId) throw new Error("Choose a CSV file and bank account");
-      const connection = connections.find((item: any) => item.id === csvConnectionId);
-      if (!connection) throw new Error("Bank account not found");
+      validateBankCsvFile(csvFile);
+      const connection = requireManualBankConnection(connections.find((item: any) => item.id === csvConnectionId), profile.tenant_id, selectedClientId);
       const parsed = parseBankCsv(await csvFile.text());
+      if (parsed.transactions.length > 10000) throw new Error("CSV has too many transactions; split it into smaller statements");
       if (!parsed.transactions.length) throw new Error(parsed.errors[0] || "No valid transactions found");
 
       let imported = 0;
@@ -212,11 +216,16 @@ export default function BankFeeds() {
 
   const categoriseTxn = useMutation({
     mutationFn: async ({ txnId, accountId }: { txnId: string; accountId: string }) => {
-      const { error } = await supabase.from("bank_transactions").update({
+      if (!canEditLedger || !tenantId) throw new Error("Categorisation is not authorised");
+      const txn = transactions.find((t: any) => t.id === txnId && t.tenant_id === tenantId && (!selectedClientId || t.client_id === selectedClientId));
+      if (!txn || txn.categorisation_status !== "uncategorised") throw new Error("Transaction is unavailable; refresh to review");
+      if (!accounts.some((a: any) => a.id === accountId)) throw new Error("Choose a ledger account in this practice");
+      const { data, error } = await supabase.from("bank_transactions").update({
         confirmed_account_id: accountId,
         categorisation_status: "confirmed",
-      }).eq("id", txnId);
+      }).eq("id", txnId).eq("tenant_id", tenantId).eq("client_id", txn.client_id).eq("categorisation_status", "uncategorised").select("id");
       if (error) throw error;
+      if (data?.length !== 1) throw new Error("Transaction changed; refresh and review before retrying");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
@@ -236,6 +245,7 @@ export default function BankFeeds() {
 
   const aiCategorise = useMutation({
     mutationFn: async () => {
+      if (!canEditLedger) throw new Error("AI categorisation is not authorised");
       if (!uncategorisedIds.length) throw new Error("No uncategorised transactions");
       const { data, error } = await supabase.functions.invoke("ai-categorise", {
         body: { transaction_ids: uncategorisedIds.slice(0, 50) },
@@ -253,15 +263,20 @@ export default function BankFeeds() {
   // Bulk confirm all suggested → confirmed
   const bulkConfirm = useMutation({
     mutationFn: async () => {
-      const suggested = transactions.filter((t: any) => t.categorisation_status === "suggested" && t.suggested_account_id);
+      if (!canEditLedger || !tenantId) throw new Error("Bulk categorisation is not authorised");
+      const suggested = transactions.filter((t: any) => t.tenant_id === tenantId && (!selectedClientId || t.client_id === selectedClientId) && t.categorisation_status === "suggested" && t.suggested_account_id);
       if (!suggested.length) throw new Error("No suggested transactions to confirm");
+      let confirmed = 0;
       for (const t of suggested) {
-        await supabase.from("bank_transactions").update({
-          confirmed_account_id: (t as any).suggested_account_id,
+        const { data, error } = await supabase.from("bank_transactions").update({
+          confirmed_account_id: t.suggested_account_id,
           categorisation_status: "confirmed",
-        }).eq("id", (t as any).id);
+        }).eq("id", t.id).eq("tenant_id", tenantId).eq("client_id", t.client_id).eq("categorisation_status", "suggested").select("id");
+        if (error) throw new Error(`Stopped after ${confirmed} confirmed transactions. Refresh before retrying.`);
+        confirmed += data?.length ?? 0;
       }
-      return suggested.length;
+      if (confirmed !== suggested.length) throw new Error(`${confirmed} of ${suggested.length} transactions confirmed; refresh to reconcile.`);
+      return confirmed;
     },
     onSuccess: (count) => {
       queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
@@ -273,8 +288,8 @@ export default function BankFeeds() {
   // Post confirmed transactions to ledger
   const postToLedger = useMutation({
     mutationFn: async () => {
-      if (!profile?.tenant_id) throw new Error("No tenant");
-      const confirmed = transactions.filter((t: any) => t.categorisation_status === "confirmed" && t.confirmed_account_id);
+      if (!profile?.tenant_id || !canEditLedger) throw new Error("Ledger posting is not authorised");
+      const confirmed = transactions.filter((t: any) => t.tenant_id === profile.tenant_id && (!selectedClientId || t.client_id === selectedClientId) && t.categorisation_status === "confirmed" && t.confirmed_account_id);
       if (!confirmed.length) throw new Error("No confirmed transactions to post");
       const missingMapping = confirmed.find((t: any) => !t.bank_connection?.ledger_account_id);
       if (missingMapping) throw new Error(`${missingMapping.bank_connection?.account_name || "A bank account"} is not mapped to a ledger bank/cash account`);
@@ -288,7 +303,7 @@ export default function BankFeeds() {
     },
     onSuccess: (count) => {
       queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
-      toast.success(`${count} transactions posted to ledger`);
+      toast.success(`${count} posting requests completed. Check refreshed transaction statuses and the ledger.`);
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -305,27 +320,27 @@ export default function BankFeeds() {
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end [&>button]:min-h-11 sm:[&>button]:min-h-9">
 
           {uncategorisedCount > 0 && (
-            <Button variant="outline" className="gap-2" onClick={() => aiCategorise.mutate()} disabled={aiCategorise.isPending}>
+            <Button variant="outline" className="gap-2" onClick={() => aiCategorise.mutate()} disabled={aiCategorise.isPending || !canEditLedger}>
               <Sparkles className="w-4 h-4" /> {aiCategorise.isPending ? "Categorising…" : `AI Categorise (${uncategorisedCount})`}
             </Button>
           )}
           {suggestedCount > 0 && (
-            <Button variant="outline" className="gap-2" onClick={() => bulkConfirm.mutate()} disabled={bulkConfirm.isPending}>
+            <Button variant="outline" className="gap-2" onClick={() => bulkConfirm.mutate()} disabled={bulkConfirm.isPending || !canEditLedger}>
               <CheckCircle2 className="w-4 h-4" /> Confirm All ({suggestedCount})
             </Button>
           )}
           {confirmedCount > 0 && (
-            <Button variant="default" className="gap-2" onClick={() => postToLedger.mutate()} disabled={postToLedger.isPending}>
+            <Button variant="default" className="gap-2" onClick={() => setShowPostConfirmation(true)} disabled={postToLedger.isPending || !canEditLedger}>
               <ArrowUpRight className="w-4 h-4" /> {postToLedger.isPending ? "Posting…" : `Post to Ledger (${confirmedCount})`}
             </Button>
           )}
-          <Button variant="outline" className="gap-2" onClick={() => setShowAddTxn(true)}>
+          <Button variant="outline" className="gap-2" onClick={() => setShowAddTxn(true)} disabled={!canEditLedger}>
             <Plus className="w-4 h-4" /> Add Transaction
           </Button>
-          <Button variant="outline" className="gap-2" onClick={() => setShowCsvImport(true)}>
+          <Button variant="outline" className="gap-2" onClick={() => setShowCsvImport(true)} disabled={!canEditLedger}>
             <Upload className="w-4 h-4" /> Import CSV
           </Button>
-          <Button className="gap-2" onClick={() => setShowAddConnection(true)}>
+          <Button className="gap-2" onClick={() => setShowAddConnection(true)} disabled={!canEditLedger}>
             <Landmark className="w-4 h-4" /> Add Bank Account
           </Button>
         </div>
@@ -522,7 +537,7 @@ export default function BankFeeds() {
               <Label>Bank account</Label>
               <Select value={csvConnectionId} onValueChange={setCsvConnectionId}>
                 <SelectTrigger><SelectValue placeholder="Choose account" /></SelectTrigger>
-                <SelectContent>{connections.map((connection: any) => <SelectItem key={connection.id} value={connection.id}>{connection.account_name} ({connection.client?.legal_name})</SelectItem>)}</SelectContent>
+                <SelectContent>{connections.filter((connection: any) => connection.provider === "manual").map((connection: any) => <SelectItem key={connection.id} value={connection.id}>{connection.account_name} ({connection.client?.legal_name})</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
@@ -598,7 +613,7 @@ export default function BankFeeds() {
               <Select value={txnForm.bank_connection_id} onValueChange={(v) => setTxnForm({ ...txnForm, bank_connection_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
                 <SelectContent>
-                  {connections.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.account_name} ({c.client?.legal_name})</SelectItem>)}
+                  {connections.filter((c: any) => c.provider === "manual").map((c: any) => <SelectItem key={c.id} value={c.id}>{c.account_name} ({c.client?.legal_name})</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
