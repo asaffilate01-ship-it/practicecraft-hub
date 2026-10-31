@@ -19,3 +19,7 @@ The initial Bank Feeds database policies were tenant-only FOR ALL permissions. T
 
 ## Risk and rollback
 A column-scoped composite foreign key can reject malformed existing data when validated; this is intentional. Review conflicting records rather than altering IDs. For a rollback of RLS, preserve the restrictive policies until replacement access controls are ready. Do not deploy an old posting function/legacy FOR ALL policy to roll back security.
+
+## Read-only pre-deployment checks
+
+Use [`docs/taxlounge-bank-preflight.sql`](taxlounge-bank-preflight.sql) against a **privileged, restored staging copy of TaxLounge**, recording the counts and constraint-validation results. No cross-client records should be silently repaired or migrated. The audit also lists legacy third-party bank provider records that remain disabled. This report is an evidence prerequisite, not an automated cleanup.
