@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientContext } from "@/contexts/ClientContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import { requireManualBankConnection, validateBankCsvFile } from "@/lib/bankFeedSafety";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Landmark, Plus, RefreshCw, ArrowUpRight, ArrowDownLeft, CheckCircle2, Tag, Sparkles, Upload } from "lucide-react";
+import { Landmark, Plus, ArrowUpRight, ArrowDownLeft, CheckCircle2, Tag, Sparkles, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { parseBankCsv } from "@/lib/bankCsv";
 
@@ -34,9 +36,12 @@ export default function BankFeeds() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { selectedClientId, selectedClientName } = useClientContext();
+  const { tenantId, can } = usePermissions();
+  const canEditLedger = can("ledger", "edit");
   const [showAddConnection, setShowAddConnection] = useState(false);
   const [showAddTxn, setShowAddTxn] = useState(false);
   const [showCsvImport, setShowCsvImport] = useState(false);
+  const [showPostConfirmation, setShowPostConfirmation] = useState(false);
   const [csvConnectionId, setCsvConnectionId] = useState("");
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [selectedConnection, setSelectedConnection] = useState<string>("all");
@@ -44,32 +49,38 @@ export default function BankFeeds() {
   const [connForm, setConnForm] = useState({ client_id: "", account_name: "", account_number_masked: "", sort_code: "", provider: "manual", ledger_account_id: "" });
   const [txnForm, setTxnForm] = useState({ bank_connection_id: "", transaction_date: new Date().toISOString().split("T")[0], description: "", amount: "", reference: "", transaction_type: "debit" });
 
-  const { data: profile } = useQuery({
-    queryKey: ["profile", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("tenant_id").eq("id", user!.id).single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
+  // Use the authenticated staff membership's tenant, not user-editable profile metadata.
+  const profile = tenantId ? { tenant_id: tenantId } : null;
+  useEffect(() => {
+    setSelectedConnection("all");
+    setCsvConnectionId("");
+    setCsvFile(null);
+    setShowAddConnection(false);
+    setShowAddTxn(false);
+    setShowCsvImport(false);
+    setShowPostConfirmation(false);
+    setConnForm({ client_id: selectedClientId ?? "", account_name: "", account_number_masked: "", sort_code: "", provider: "manual", ledger_account_id: "" });
+  }, [tenantId, selectedClientId]);
 
   const { data: clients = [] } = useQuery({
-    queryKey: ["clients-list", profile?.tenant_id],
+    queryKey: ["clients-list", tenantId, user?.id, selectedClientId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("clients").select("id, legal_name").order("legal_name");
+      let request = supabase.from("clients").select("id, legal_name").eq("tenant_id", tenantId!).order("legal_name");
+      if (selectedClientId) request = request.eq("id", selectedClientId);
+      const { data, error } = await request;
       if (error) throw error;
       return data;
     },
     enabled: !!profile?.tenant_id,
   });
 
-  const { data: connections = [], isLoading: loadingConns } = useQuery({
-    queryKey: ["bank_connections", profile?.tenant_id, selectedClientId],
+  const { data: connections = [], isLoading: loadingConns, isError: connectionsError } = useQuery({
+    queryKey: ["bank_connections", tenantId, user?.id, selectedClientId],
     queryFn: async () => {
       let q = supabase
         .from("bank_connections")
         .select("*, client:clients(legal_name)")
+        .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false });
       if (selectedClientId) q = q.eq("client_id", selectedClientId);
       const { data, error } = await q;
@@ -79,15 +90,17 @@ export default function BankFeeds() {
     enabled: !!profile?.tenant_id,
   });
 
-  const { data: transactions = [], isLoading: loadingTxns } = useQuery({
-    queryKey: ["bank_transactions", profile?.tenant_id, selectedConnection, catFilter],
+  const { data: transactions = [], isLoading: loadingTxns, isError: transactionsError } = useQuery({
+    queryKey: ["bank_transactions", tenantId, user?.id, selectedClientId, selectedConnection, catFilter],
     queryFn: async () => {
       let query = supabase
         .from("bank_transactions")
         .select("*, bank_connection:bank_connections(account_name, ledger_account_id), suggested_account:chart_of_accounts!bank_transactions_suggested_account_id_fkey(code, name), confirmed_account:chart_of_accounts!bank_transactions_confirmed_account_id_fkey(code, name)")
+        .eq("tenant_id", tenantId!)
         .order("transaction_date", { ascending: false })
         .limit(200);
 
+      if (selectedClientId) query = query.eq("client_id", selectedClientId);
       if (selectedConnection !== "all") query = query.eq("bank_connection_id", selectedConnection);
       if (catFilter !== "all") query = query.eq("categorisation_status", catFilter);
 
@@ -99,9 +112,9 @@ export default function BankFeeds() {
   });
 
   const { data: accounts = [] } = useQuery({
-    queryKey: ["chart_of_accounts", profile?.tenant_id],
+    queryKey: ["chart_of_accounts", tenantId, user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("chart_of_accounts").select("id, code, name").order("code");
+      const { data, error } = await supabase.from("chart_of_accounts").select("id, code, name").eq("tenant_id", tenantId!).order("code");
       if (error) throw error;
       return data;
     },
@@ -257,28 +270,6 @@ export default function BankFeeds() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  // Sync via Open Banking
-  const syncOpenBanking = useMutation({
-    mutationFn: async () => {
-      const obConnections = connections.filter((c: any) => c.provider === "truelayer" && c.status === "active");
-      if (!obConnections.length) throw new Error("No active Open Banking connections. Add one first.");
-      const { data, error } = await supabase.functions.invoke("open-banking", {
-        body: {
-          action: "sync_transactions",
-          connection_ids: obConnections.map((c: any) => c.id),
-        },
-      });
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["bank_transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["bank_connections"] });
-      toast.success(`Synced ${data?.imported || 0} new transactions from Open Banking`);
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
-
   // Post confirmed transactions to ledger
   const postToLedger = useMutation({
     mutationFn: async () => {
@@ -308,14 +299,11 @@ export default function BankFeeds() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">Bank Feeds</h1>
-          <p className="text-sm text-muted-foreground">Manage bank connections, sync transactions, and auto-categorise</p>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">Bank feeds & imports</h1>
+          <p className="text-sm text-muted-foreground">Manage manual bank accounts, statement imports and reviewed categorisation</p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end [&>button]:min-h-11 sm:[&>button]:min-h-9">
-          <Button variant="outline" className="gap-2" onClick={() => syncOpenBanking.mutate()} disabled={syncOpenBanking.isPending}>
-            <RefreshCw className={`w-4 h-4 ${syncOpenBanking.isPending ? "animate-spin" : ""}`} />
-            {syncOpenBanking.isPending ? "Syncing…" : "Sync Open Banking"}
-          </Button>
+
           {uncategorisedCount > 0 && (
             <Button variant="outline" className="gap-2" onClick={() => aiCategorise.mutate()} disabled={aiCategorise.isPending}>
               <Sparkles className="w-4 h-4" /> {aiCategorise.isPending ? "Categorising…" : `AI Categorise (${uncategorisedCount})`}
@@ -343,6 +331,14 @@ export default function BankFeeds() {
         </div>
       </div>
 
+      <div role="status" className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        Live Open Banking is not connected. Use a manual bank account and statement CSV import while secure provider consent is being developed.
+      </div>
+      {(connectionsError || transactionsError) && (
+        <div role="alert" className="rounded-xl border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
+          Some bank records could not be loaded. Counts and available actions may be incomplete. Refresh before making changes.
+        </div>
+      )}
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className="workspace-panel">
@@ -354,7 +350,7 @@ export default function BankFeeds() {
         <Card className="workspace-panel">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{transactions.length}</div>
-            <p className="text-sm text-muted-foreground">Transactions</p>
+            <p className="text-sm text-muted-foreground">Transactions shown (up to 200)</p>
           </CardContent>
         </Card>
         <Card className="workspace-panel">
@@ -491,8 +487,8 @@ export default function BankFeeds() {
                             <h3 className="font-medium">{c.account_name}</h3>
                             <p className="text-xs text-muted-foreground">{c.client?.legal_name}</p>
                           </div>
-                          <Badge className={statusColors[c.status] || "bg-muted text-muted-foreground"}>
-                            {c.status}
+                          <Badge className={c.provider === "manual" ? (statusColors[c.status] || "bg-muted text-muted-foreground") : "bg-warning/15 text-warning-foreground"}>
+                            {c.provider === "manual" ? `Manual · ${c.status}` : "Provider unavailable"}
                           </Badge>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -569,17 +565,7 @@ export default function BankFeeds() {
                 <Input value={connForm.account_number_masked} onChange={(e) => setConnForm({ ...connForm, account_number_masked: e.target.value })} placeholder="1234" maxLength={4} />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Provider</Label>
-              <Select value={connForm.provider} onValueChange={(v) => setConnForm({ ...connForm, provider: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="manual">Manual Import</SelectItem>
-                  <SelectItem value="truelayer">TrueLayer (Open Banking)</SelectItem>
-                  <SelectItem value="plaid">Plaid</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <p className="text-xs text-muted-foreground">Manual CSV import only. This record does not connect to your bank automatically.</p>
             <div className="space-y-2">
               <Label>Ledger bank/cash account *</Label>
               <Select value={connForm.ledger_account_id} onValueChange={(v) => setConnForm({ ...connForm, ledger_account_id: v })}>
