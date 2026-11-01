@@ -81,7 +81,7 @@ export function validateReceipt(value: any) {
   const nonEmpty = (v: unknown, max: number) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
   const dateOk = (v: unknown) => {
     if (v == null || v === '') return true; // Missing date stays a draft; journal RPC rejects posting.
-    if (typeof v !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(v)) return false;
+    if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
     const [y, m, d] = v.split('-').map(Number);
     const day = new Date(Date.UTC(y, m - 1, d));
     return day.getUTCFullYear() === y && day.getUTCMonth() + 1 === m && day.getUTCDate() === d;
