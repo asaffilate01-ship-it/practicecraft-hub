@@ -36,6 +36,8 @@ jobs:
       - run: npm run lint:security
       - name: Lint TaxLounge workspace and role-aware shortcuts
         run: npx eslint src/pages/PracticeOperations.tsx src/lib/workQueuePreferences.ts src/components/layout/MobileBottomNav.tsx src/test/workQueuePreferences.test.ts src/test/practiceOperationsUi.test.tsx
+      - name: Lint supervised receipt and OCR review workspaces
+        run: npx eslint src/pages/ReceiptReviewQueue.tsx src/components/bookkeeping/ReceiptUploader.tsx src/lib/receiptReview.ts src/test/receiptReviewPreview.test.ts src/test/receiptReviewContracts.test.ts
       - run: npm test
       - run: npm run build
       - name: Production dependency audit

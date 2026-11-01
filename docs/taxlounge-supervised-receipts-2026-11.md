@@ -25,3 +25,10 @@ Receipts previously passed through a browser-side workflow that directly created
 - Open Banking is still disabled. A server-owned one-time OAuth state/PKCE flow, consent records, encrypted token vault and provider-verified account/client linkage are prerequisites. No automatic import is enabled by this build.
 - The existing Lovable AI OCR provider remains the current backend integration; this phase does **not** create a new Omniqora MCP agent, replace provider credentials or automatically incur recurring AI jobs.
 - Backfill/audit of historic receipts is a reviewed manual workflow. No silent migration of client data from TaxNuvia or Finvessa.
+
+## Verified isolated build evidence (1 November 2026)
+- Supabase CLI-generated migration: `supabase/migrations/20261101102456_taxlounge_receipt_review_posting.sql`
+- Complete local database reset and **76 successful pgTAP assertions across four suites**, including the new receipt posting and bank/role/payroll contract checks.
+- **98 application tests across 18 files**, successful TypeScript typecheck, production build and dependency audits. Production audit returned zero reported vulnerabilities.
+- One-time migration generator retired itself after success: [verified action](https://github.com/asaffilate01-ship-it/practicecraft-hub/actions/runs/41297347866).
+- The final GitHub PR CI remains an independent merge gate. No TaxLounge production environment has been accessed or modified.
