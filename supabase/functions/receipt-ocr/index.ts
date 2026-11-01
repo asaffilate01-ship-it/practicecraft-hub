@@ -22,6 +22,15 @@ Deno.serve(async (req) => {
     const actor = await requireStaff(supabase, token);
     const userData = { user: { id: actor.userId } };
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!serviceRoleKey) throw new AccessError("Receipt extraction writer is unavailable", 503);
+    // The user-scoped client above remains authoritative for permissions, source
+    // upload and client ownership. Service role is used ONLY for the validated
+    // extraction row after those checks, never with the caller's JWT.
+    const extractionWriter = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "", serviceRoleKey,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    );
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
@@ -49,44 +58,6 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "This receipt is an exact duplicate of a document already uploaded for this client." }), {
         status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    // Upload file to storage
-    const filePath = `${actor.tenantId}/${clientId}/receipts/${crypto.randomUUID()}`;
-    const { error: uploadErr } = await supabase.storage
-      .from("client-documents")
-      .upload(filePath, file, { contentType: file.type });
-    if (uploadErr) throw uploadErr;
-
-    // Create document record
-    const { data: doc, error: docErr } = await supabase
-      .from("documents")
-      .insert({
-        tenant_id: actor.tenantId,
-        client_id: clientId,
-        filename: file.name,
-        mime_type: file.type,
-        size_bytes: file.size,
-        storage_path: filePath,
-        document_type: "receipt",
-        folder_path: "/receipts",
-        uploaded_by_user_id: userData.user.id,
-      })
-      .select()
-      .single();
-    if (docErr) { await supabase.storage.from("client-documents").remove([filePath]); throw docErr; }
-
-    const { error: fingerprintErr } = await supabase.from("document_fingerprints").insert({
-      tenant_id: actor.tenantId,
-      client_id: clientId,
-      document_id: doc.id,
-      sha256,
-      size_bytes: file.size,
-    });
-    if (fingerprintErr) {
-      await supabase.from("documents").delete().eq("id", doc.id);
-      await supabase.storage.from("client-documents").remove([filePath]);
-      throw fingerprintErr;
     }
 
     // Convert file to base64 for AI vision
@@ -174,7 +145,7 @@ Deno.serve(async (req) => {
                 },
                 confidence: { type: "string", enum: ["high", "medium", "low"] }
               },
-              required: ["supplier_name", "total_pence", "confidence"],
+              required: ["supplier_name", "currency", "total_pence", "confidence"],
               additionalProperties: false
             }
           }
@@ -203,6 +174,46 @@ Deno.serve(async (req) => {
 
     const extraction = validateReceipt(JSON.parse(toolCall.function.arguments));
 
+    // Do not persist a document before AI extraction succeeds and passes
+    // financial validation: retries after provider errors remain possible.
+    // Upload file to storage
+    const filePath = `${actor.tenantId}/${clientId}/receipts/${crypto.randomUUID()}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("client-documents")
+      .upload(filePath, file, { contentType: file.type });
+    if (uploadErr) throw uploadErr;
+
+    // Create document record
+    const { data: doc, error: docErr } = await supabase
+      .from("documents")
+      .insert({
+        tenant_id: actor.tenantId,
+        client_id: clientId,
+        filename: file.name,
+        mime_type: file.type,
+        size_bytes: file.size,
+        storage_path: filePath,
+        document_type: "receipt",
+        folder_path: "/receipts",
+        uploaded_by_user_id: userData.user.id,
+      })
+      .select()
+      .single();
+    if (docErr) { await supabase.storage.from("client-documents").remove([filePath]); throw docErr; }
+
+    const { error: fingerprintErr } = await supabase.from("document_fingerprints").insert({
+      tenant_id: actor.tenantId,
+      client_id: clientId,
+      document_id: doc.id,
+      sha256,
+      size_bytes: file.size,
+    });
+    if (fingerprintErr) {
+      await supabase.from("documents").delete().eq("id", doc.id);
+      await supabase.storage.from("client-documents").remove([filePath]);
+      throw fingerprintErr;
+    }
+
     // Find suggested account
     const suggestedAccount = (accounts || []).find(a => a.code === extraction.suggested_account_code);
 
@@ -210,9 +221,9 @@ Deno.serve(async (req) => {
     const totalGrossPence = Math.round(Number(extraction.total_pence) || 0);
     const totalVatPence = Math.round(Number(extraction.vat_pence) || 0);
     const totalNetPence = Math.round(extraction.subtotal_pence ?? (totalGrossPence - totalVatPence));
-    const { data: savedExtraction, error: extractionErr } = await supabase
+    const { data: savedExtraction, error: extractionErr } = await extractionWriter
       .from("receipt_extractions")
-      .upsert({
+      .insert({
         tenant_id: actor.tenantId,
         client_id: clientId,
         document_id: doc.id,
@@ -225,10 +236,19 @@ Deno.serve(async (req) => {
         total_net_pence: totalNetPence,
         confidence,
         raw_json: extraction,
-      }, { onConflict: "tenant_id,document_id" })
+      })
       .select("id")
       .single();
-    if (extractionErr) throw extractionErr;
+    if (extractionErr) {
+      // Best-effort rollback of the just-created draft. Never leave a
+      // duplicate fingerprint that prevents a corrected retry.
+      await supabase.from("document_fingerprints").delete()
+        .eq("tenant_id", actor.tenantId).eq("document_id", doc.id);
+      await supabase.from("documents").delete()
+        .eq("tenant_id", actor.tenantId).eq("id", doc.id);
+      await supabase.storage.from("client-documents").remove([filePath]);
+      throw new AccessError("Receipt extraction could not be saved; retry after review", 503);
+    }
 
     await supabase.from("documents").update({
       status: "processed",

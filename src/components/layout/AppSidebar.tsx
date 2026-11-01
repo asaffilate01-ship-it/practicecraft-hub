@@ -51,6 +51,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
       { title: "Bank Feeds", url: "/bank-feeds", icon: Landmark, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
+      { title: "Receipt Reviews", url: "/receipt-reviews", icon: ScanSearch, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
       { title: "Auto-Categorise", url: "/categorisation-rules", icon: Zap, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
       { title: "Quick Entry", url: "/invoice-entry", icon: BookOpen, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },
       { title: "Multi-Currency", url: "/multi-currency", icon: Globe, permission: ["ledger", "view"], featureKey: "bookkeeping", moduleKey: "bookkeeping" },

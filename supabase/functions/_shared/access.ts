@@ -77,13 +77,30 @@ export function validateIntelligence(value: any, action: string) {
 }
 
 export function validateReceipt(value: any) {
-  if (!value || typeof value.supplier_name !== 'string' || !value.supplier_name.trim()
-    || !['high', 'medium', 'low'].includes(value.confidence)
-    || !Number.isSafeInteger(value.total_pence) || value.total_pence < 0
-    || (value.vat_pence != null && (!Number.isSafeInteger(value.vat_pence) || value.vat_pence < 0 || value.vat_pence > value.total_pence))
-    || (value.subtotal_pence != null && (!Number.isSafeInteger(value.subtotal_pence) || value.subtotal_pence < 0
-      || value.subtotal_pence + (value.vat_pence ?? 0) !== value.total_pence))
-    || (value.currency != null && value.currency !== 'GBP'))
-    throw new AccessError('Receipt amounts require manual review; automatic extraction was not saved', 502);
+  const safePence = (v: unknown) => Number.isSafeInteger(v) && (v as number) >= 0 && (v as number) <= 100000000000;
+  const nonEmpty = (v: unknown, max: number) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
+  const dateOk = (v: unknown) => {
+    if (v == null || v === '') return true; // Missing date stays a draft; journal RPC rejects posting.
+    if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+    const [y, m, d] = v.split('-').map(Number);
+    const day = new Date(Date.UTC(y, m - 1, d));
+    return day.getUTCFullYear() === y && day.getUTCMonth() + 1 === m && day.getUTCDate() === d;
+  };
+  if (!value || !nonEmpty(value.supplier_name, 180)
+    || !['high','medium','low'].includes(value.confidence)
+    || value.currency !== 'GBP'
+    || !dateOk(value.receipt_date)
+    || !safePence(value.total_pence) || value.total_pence === 0
+    || (value.vat_pence != null && (!safePence(value.vat_pence) || value.vat_pence > value.total_pence))
+    || (value.subtotal_pence != null && (!safePence(value.subtotal_pence) ||
+       value.subtotal_pence + (value.vat_pence ?? 0) !== value.total_pence))
+    || (value.suggested_account_code != null &&
+       (typeof value.suggested_account_code !== 'string' || !/^[a-zA-Z0-9_-]{2,20}$/.test(value.suggested_account_code)))
+    || (value.invoice_number != null && typeof value.invoice_number !== 'string')
+    || (value.payment_method != null && typeof value.payment_method !== 'string')
+    || (value.line_items != null && (!Array.isArray(value.line_items) ||
+       value.line_items.length > 60 || value.line_items.some((line: any) =>
+         !nonEmpty(line?.description, 300) || !safePence(line.total_pence))))
+    ) throw new AccessError('Receipt extraction requires manual review; no validated extraction was saved', 502);
   return value;
 }

@@ -1,15 +1,13 @@
-import { useState, useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { usePermissions } from "@/hooks/usePermissions";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Upload, Camera, FileText, Check, X, Sparkles, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Camera, FileCheck2, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 type ExtractionResult = {
@@ -18,235 +16,128 @@ type ExtractionResult = {
     supplier_name: string;
     receipt_date?: string;
     currency?: string;
+    total_pence: number;
     subtotal_pence?: number;
     vat_pence?: number;
-    total_pence: number;
-    vat_rate?: number;
-    payment_method?: string;
-    suggested_account_code?: string;
-    line_items?: Array<{ description: string; total_pence: number }>;
-    confidence: string;
+    confidence: "high" | "medium" | "low";
   };
-  suggested_account: { id: string; code: string; name: string } | null;
 };
-
 type Props = {
   clientId: string;
-  accounts: Array<{ id: string; code: string; name: string; account_type: string }>;
   tenantId: string;
+  accounts: Array<{ id: string; code: string; name: string; account_type: string }>;
 };
+const money = (v: number | undefined) =>
+  v == null ? "Requires review" : new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(v / 100);
 
-export function ReceiptUploader({ clientId, accounts, tenantId }: Props) {
-  const queryClient = useQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
+export function ReceiptUploader({ clientId, tenantId }: Props) {
+  const { tenantId: activeTenantId, can, loading } = usePermissions();
+  const allowed = !loading && !!clientId && !!activeTenantId && activeTenantId === tenantId &&
+    can("documents", "upload") && can("ledger", "view") && can("ocr", "view");
+  const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [result, setResult] = useState<ExtractionResult | null>(null);
-  const [showApproval, setShowApproval] = useState(false);
-  const [selectedAccountId, setSelectedAccountId] = useState("");
-  const [bankAccountId, setBankAccountId] = useState("");
 
-  const pence = (v: number) => `£${(v / 100).toFixed(2)}`;
-
-  const uploadMutation = useMutation({
+  const scan = useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("client_id", clientId);
-
+      if (!allowed) throw new Error("Receipt extraction is not authorised in this practice");
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+          file.size <= 0 || file.size > 10 * 1024 * 1024)
+        throw new Error("Choose a JPEG, PNG or WebP receipt up to 10 MB");
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/receipt-ocr`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: formData,
-        }
-      );
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Upload failed");
-      }
-      return res.json() as Promise<ExtractionResult>;
+      if (!session?.access_token) throw new Error("Please sign in again before uploading a receipt");
+      const body = new FormData();
+      body.append("file", file);
+      body.append("client_id", clientId);
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/receipt-ocr`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Receipt extraction unavailable");
+      if (!data.document_id || !data.extraction) throw new Error("Receipt extraction returned no reviewable draft");
+      return data as ExtractionResult;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       setResult(data);
-      if (data.suggested_account) {
-        setSelectedAccountId(data.suggested_account.id);
-      }
-      setShowApproval(true);
-      toast.success("Receipt scanned successfully");
+      toast.success("Receipt extracted and saved for human review. Nothing was posted.");
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (error: Error) => toast.error(error.message),
   });
-
-  const approveMutation = useMutation({
-    mutationFn: async () => {
-      if (!result || !selectedAccountId) throw new Error("Select an expense account");
-      if (!bankAccountId) throw new Error("Select the bank or cash account used for payment");
-      const ext = result.extraction;
-
-      // Create journal entry directly
-      const { data: journal, error: jErr } = await supabase
-        .from("journal_entries")
-        .insert({
-          tenant_id: tenantId,
-          client_id: clientId,
-          narration: `Receipt: ${ext.supplier_name} ${ext.receipt_date || ""}`,
-          reference: `RCT-${result.document_id.slice(0, 8)}`,
-          is_posted: false,
-        })
-        .select()
-        .single();
-      if (jErr) throw jErr;
-
-      const vatPence = ext.vat_pence || 0;
-      const vatAccount = vatPence > 0 ? accounts.find(a => a.code === "1300") : undefined;
-      const netPence = vatAccount ? (ext.subtotal_pence || ext.total_pence - vatPence) : ext.total_pence;
-      const lines: any[] = [
-        { journal_entry_id: journal.id, account_id: selectedAccountId, debit: netPence / 100, credit: 0, description: `${ext.supplier_name} expense` },
-      ];
-      if (vatPence > 0) {
-        // Find VAT control account
-        if (vatAccount) {
-          lines.push({ journal_entry_id: journal.id, account_id: vatAccount.id, debit: vatPence / 100, credit: 0, description: "Input VAT" });
-        }
-      }
-      lines.push({ journal_entry_id: journal.id, account_id: bankAccountId, debit: 0, credit: ext.total_pence / 100, description: "Payment" });
-
-      const { error: lErr } = await supabase.from("journal_lines").insert(lines);
-      if (lErr) {
-        await supabase.from("journal_entries").delete().eq("id", journal.id);
-        throw lErr;
-      }
-      const { error: postErr } = await supabase.from("journal_entries").update({ is_posted: true }).eq("id", journal.id);
-      if (postErr) throw postErr;
-      await supabase.from("documents").update({ status: "processed" }).eq("id", result.document_id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["journal_entries"] });
-      setShowApproval(false);
-      setResult(null);
-      toast.success("Receipt posted to ledger");
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) uploadMutation.mutate(file);
-  };
-
-  const expenseAccounts = accounts.filter(a => a.account_type === "expense");
-  const bankAccounts = accounts.filter(a => a.code.startsWith("10"));
 
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Camera className="w-4 h-4" /> Receipt Scanner
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Camera className="h-4 w-4" /> Receipt extraction
           </CardTitle>
-          <CardDescription>Upload a JPEG, PNG or WebP receipt (up to 10 MB) for AI extraction and human review</CardDescription>
+          <CardDescription>
+            Scan a JPEG, PNG or WebP receipt (up to 10 MB). AI output is a draft:
+            review the source document, amounts and VAT eligibility before posting.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFileChange} />
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="gap-2 flex-1"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploadMutation.isPending}
-            >
-              {uploadMutation.isPending ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Scanning…</>
-              ) : (
-                <><Upload className="w-4 h-4" /> Upload Receipt</>
-              )}
-            </Button>
-          </div>
+        <CardContent className="space-y-3">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            aria-label="Choose receipt image"
+            className="sr-only"
+            onChange={event => {
+              const file = event.target.files?.[0];
+              if (file) scan.mutate(file);
+              event.currentTarget.value = "";
+            }}
+          />
+          <Button variant="outline" className="w-full gap-2" disabled={!allowed || scan.isPending}
+            onClick={() => inputRef.current?.click()}>
+            {scan.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {scan.isPending ? "Extracting…" : "Scan receipt for review"}
+          </Button>
+          {!allowed && <p role="status" className="text-xs text-muted-foreground">
+            Receipt scanning requires documents.upload, ledger.view and ocr.view for this practice.
+          </p>}
+          <Button variant="ghost" className="w-full" onClick={() => navigate("/receipt-reviews")}>
+            Open saved receipt review queue
+          </Button>
         </CardContent>
       </Card>
 
-      <Dialog open={showApproval} onOpenChange={setShowApproval}>
-        <DialogContent className="max-w-lg">
+      <Dialog open={!!result} onOpenChange={open => { if (!open) setResult(null); }}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4" /> Receipt Extraction
+              <FileCheck2 className="h-5 w-5" /> Extraction saved for review
             </DialogTitle>
           </DialogHeader>
           {result && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{result.extraction.supplier_name}</span>
-                <Badge variant={result.extraction.confidence === "high" ? "default" : "secondary"}>
-                  {result.extraction.confidence} confidence
-                </Badge>
+            <div className="space-y-4 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-semibold">{result.extraction.supplier_name}</span>
+                <Badge variant="secondary">{result.extraction.confidence} AI confidence</Badge>
               </div>
-
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-muted-foreground">Date:</span> {result.extraction.receipt_date || "—"}</div>
-                <div><span className="text-muted-foreground">Payment:</span> {result.extraction.payment_method || "—"}</div>
-                <div><span className="text-muted-foreground">Subtotal:</span> {result.extraction.subtotal_pence ? pence(result.extraction.subtotal_pence) : "—"}</div>
-                <div><span className="text-muted-foreground">VAT ({result.extraction.vat_rate || 0}%):</span> {result.extraction.vat_pence ? pence(result.extraction.vat_pence) : "—"}</div>
-              </div>
-
-              <div className="text-lg font-bold text-right">
-                Total: {pence(result.extraction.total_pence)}
-              </div>
-
-              {result.extraction.line_items && result.extraction.line_items.length > 0 && (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Item</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {result.extraction.line_items.map((item, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="text-sm">{item.description}</TableCell>
-                        <TableCell className="text-right text-sm font-mono">{pence(item.total_pence)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-
-              <div className="space-y-3 border-t pt-3">
-                <div className="space-y-2">
-                  <Label>Expense Account *</Label>
-                  <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-                    <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
-                    <SelectContent>
-                      {expenseAccounts.map(a => (
-                        <SelectItem key={a.id} value={a.id}>{a.code} - {a.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Paid From (Bank/Cash Account) *</Label>
-                  <Select value={bankAccountId} onValueChange={setBankAccountId}>
-                    <SelectTrigger><SelectValue placeholder="Select bank" /></SelectTrigger>
-                    <SelectContent>
-                      {bankAccounts.map(a => (
-                        <SelectItem key={a.id} value={a.id}>{a.code} - {a.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <dl className="grid grid-cols-2 gap-3 rounded-xl bg-muted/40 p-4">
+                <div><dt className="text-muted-foreground">Receipt date</dt><dd>{result.extraction.receipt_date || "Missing"}</dd></div>
+                <div><dt className="text-muted-foreground">Currency</dt><dd>{result.extraction.currency || "Missing"}</dd></div>
+                <div><dt className="text-muted-foreground">Net</dt><dd>{money(result.extraction.subtotal_pence)}</dd></div>
+                <div><dt className="text-muted-foreground">VAT</dt><dd>{money(result.extraction.vat_pence)}</dd></div>
+                <div className="col-span-2"><dt className="text-muted-foreground">Gross</dt><dd className="font-semibold">{money(result.extraction.total_pence)}</dd></div>
+              </dl>
+              <p className="text-xs leading-5 text-muted-foreground">
+                No journal entry has been created. AI confidence is not assurance that the receipt, business purpose or VAT treatment is correct.
+              </p>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowApproval(false)} className="gap-1">
-              <X className="w-3.5 h-3.5" /> Reject
-            </Button>
-            <Button onClick={() => approveMutation.mutate()} disabled={!selectedAccountId || !bankAccountId || approveMutation.isPending} className="gap-1">
-              <Check className="w-3.5 h-3.5" /> {approveMutation.isPending ? "Posting…" : "Approve & Post"}
-            </Button>
+            <Button variant="outline" onClick={() => setResult(null)}>Review later</Button>
+            <Button onClick={() => {
+              if (!result) return;
+              const params = new URLSearchParams({ client: clientId, document: result.document_id });
+              setResult(null);
+              navigate(`/receipt-reviews?${params.toString()}`);
+            }}>Open review</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

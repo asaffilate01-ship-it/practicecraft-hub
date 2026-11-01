@@ -20,6 +20,7 @@ Practice operations, clients, tasks, bookkeeping, accounts preparation, VAT/MTD 
 - [Modernisation and AI/MCP blueprint](docs/taxlounge-modernisation-2026-10-31.md)
 - [SaaS/AI and integration audit](docs/platform-audit-2026-10-05.md)
 - [Readiness and release prerequisites](docs/go-live-readiness.md)
+- [Supervised receipt and OCR review release](docs/taxlounge-supervised-receipts-2026-11.md)
 
 ## Deployment caution
 This repository is **not yet verified production-ready**. Tax logic, sandbox recognition, payment/bank state, tenant tests, migrations, AI scope and hosting must be verified separately. The PWA deliberately does not cache authenticated Supabase API data. The app currently has no verified public marketing domain; do not add a guessed canonical URL.
