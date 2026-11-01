@@ -1,6 +1,6 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
-SELECT plan(21);
+SELECT plan(23);
 INSERT INTO public.tenants(id,firm_name) VALUES
  ('81000000-0000-0000-0000-000000000001','Receipt test practice'),
  ('81000000-0000-0000-0000-000000000002','Other receipt practice');
@@ -71,5 +71,7 @@ SELECT throws_ok($$SELECT public.post_receipt_review('85000000-0000-0000-0000-00
 SELECT set_config('request.jwt.claim.sub','82000000-0000-0000-0000-000000000004',true);
 SELECT throws_ok($$SELECT public.post_receipt_review('85000000-0000-0000-0000-000000000001','84000000-0000-0000-0000-000000000002','84000000-0000-0000-0000-000000000001','Reviewer checked evidence')$$,'42501','Receipt extraction unavailable','Other tenant cannot repost receipt');
 SELECT is((SELECT count(*)::integer FROM public.receipt_posting_reviews),0,'Other tenant cannot view review records');
+SELECT is(has_table_privilege('authenticated','public.receipt_extractions','INSERT'),false,'Browser staff cannot forge AI extraction amounts');
+SELECT is(has_table_privilege('authenticated','public.receipt_extractions','UPDATE'),false,'Browser staff cannot overwrite extraction evidence');
 SELECT * FROM finish();
 ROLLBACK;

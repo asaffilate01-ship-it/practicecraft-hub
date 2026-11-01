@@ -115,6 +115,19 @@ describe('AI access boundaries', () => {
     for (const action of ['suggest_tasks', 'detect_anomalies', 'churn_risk']) expect(() => validateIntelligence({}, action)).toThrow();
     expect(validateIntelligence({ anomalies: [], summary: 'No flags in the sample' }, 'detect_anomalies').anomalies).toEqual([]);
   });
+  it('rejects receipt hallucinations, malformed dates and oversized line arrays', () => {
+    const valid = { supplier_name: 'Shop', total_pence: 1200, vat_pence: 200, subtotal_pence: 1000, currency: 'GBP', receipt_date: '2026-10-30', confidence: 'medium' };
+    expect(validateReceipt(valid)).toEqual(valid);
+    for (const value of [
+      { ...valid, receipt_date: '2026-02-30' },
+      { ...valid, total_pence: 0 },
+      { ...valid, total_pence: 1000000000001 },
+      { ...valid, supplier_name: 'x'.repeat(181) },
+      { ...valid, line_items: Array.from({ length: 61 }, () => ({ description: 'item', total_pence: 10 })) },
+      { ...valid, line_items: [{ description: 'forged', total_pence: -1 }] },
+      { ...valid, currency: undefined },
+    ]) expect(() => validateReceipt(value)).toThrow('manual review');
+  });
   it('rejects unbalanced or fractional receipt amounts and unsupported currencies', () => {
     const receipt = { supplier_name: 'Test', total_pence: 1200, vat_pence: 200, subtotal_pence: 1000, confidence: 'high', currency: 'GBP' };
     expect(validateReceipt(receipt)).toEqual(receipt);

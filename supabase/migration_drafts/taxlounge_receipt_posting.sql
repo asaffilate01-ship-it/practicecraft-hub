@@ -211,3 +211,16 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.post_receipt_review(uuid,uuid,uuid,text) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.post_receipt_review(uuid,uuid,uuid,text) TO authenticated;
+
+
+-- The OCR Edge Function alone creates validated extraction drafts. Browser
+-- callers may read authorised drafts but cannot forge raw totals or rewrite
+-- posted source values using a direct REST update.
+DROP POLICY IF EXISTS "Users can view tenant receipt extractions" ON public.receipt_extractions;
+DROP POLICY IF EXISTS "Users can insert tenant receipt extractions" ON public.receipt_extractions;
+DROP POLICY IF EXISTS "Users can update tenant receipt extractions" ON public.receipt_extractions;
+REVOKE INSERT,UPDATE,DELETE ON public.receipt_extractions FROM PUBLIC,anon,authenticated;
+GRANT SELECT ON public.receipt_extractions TO authenticated;
+CREATE POLICY "TaxLounge authorised receipt evidence readers"
+ ON public.receipt_extractions FOR SELECT TO authenticated
+ USING (public.taxlounge_receipt_permission(tenant_id,'view'));

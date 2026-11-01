@@ -62,12 +62,13 @@ export default function ReceiptReviewQueue() {
     },
   });
   const reviewsQ = useQuery({
-    queryKey: ["receipt-review-posted", tenantId, user?.id, clientFilter],
-    enabled: canView,
+    queryKey: ["receipt-review-posted", tenantId, user?.id, clientFilter, ids.join(",")],
+    enabled: canView && ids.length > 0,
     queryFn: async () => {
       let query = supabase.from("receipt_posting_reviews")
         .select("id,tenant_id,client_id,document_id,expense_account_id,payment_account_id,journal_entry_id,reviewed_at,review_note")
-        .eq("tenant_id", tenantId!).order("reviewed_at", { ascending: false }).limit(200);
+        .eq("tenant_id", tenantId!).in("document_id", ids)
+        .order("reviewed_at", { ascending: false });
       if (clientFilter) query = query.eq("client_id", clientFilter);
       const { data, error } = await query;
       if (error) throw error;
