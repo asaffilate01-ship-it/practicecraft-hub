@@ -60,44 +60,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Upload file to storage
-    const filePath = `${actor.tenantId}/${clientId}/receipts/${crypto.randomUUID()}`;
-    const { error: uploadErr } = await supabase.storage
-      .from("client-documents")
-      .upload(filePath, file, { contentType: file.type });
-    if (uploadErr) throw uploadErr;
-
-    // Create document record
-    const { data: doc, error: docErr } = await supabase
-      .from("documents")
-      .insert({
-        tenant_id: actor.tenantId,
-        client_id: clientId,
-        filename: file.name,
-        mime_type: file.type,
-        size_bytes: file.size,
-        storage_path: filePath,
-        document_type: "receipt",
-        folder_path: "/receipts",
-        uploaded_by_user_id: userData.user.id,
-      })
-      .select()
-      .single();
-    if (docErr) { await supabase.storage.from("client-documents").remove([filePath]); throw docErr; }
-
-    const { error: fingerprintErr } = await supabase.from("document_fingerprints").insert({
-      tenant_id: actor.tenantId,
-      client_id: clientId,
-      document_id: doc.id,
-      sha256,
-      size_bytes: file.size,
-    });
-    if (fingerprintErr) {
-      await supabase.from("documents").delete().eq("id", doc.id);
-      await supabase.storage.from("client-documents").remove([filePath]);
-      throw fingerprintErr;
-    }
-
     // Convert file to base64 for AI vision
     const bytes = new Uint8Array(arrayBuffer);
     let binary = "";
@@ -212,6 +174,46 @@ Deno.serve(async (req) => {
 
     const extraction = validateReceipt(JSON.parse(toolCall.function.arguments));
 
+    // Do not persist a document before AI extraction succeeds and passes
+    // financial validation: retries after provider errors remain possible.
+    // Upload file to storage
+    const filePath = `${actor.tenantId}/${clientId}/receipts/${crypto.randomUUID()}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("client-documents")
+      .upload(filePath, file, { contentType: file.type });
+    if (uploadErr) throw uploadErr;
+
+    // Create document record
+    const { data: doc, error: docErr } = await supabase
+      .from("documents")
+      .insert({
+        tenant_id: actor.tenantId,
+        client_id: clientId,
+        filename: file.name,
+        mime_type: file.type,
+        size_bytes: file.size,
+        storage_path: filePath,
+        document_type: "receipt",
+        folder_path: "/receipts",
+        uploaded_by_user_id: userData.user.id,
+      })
+      .select()
+      .single();
+    if (docErr) { await supabase.storage.from("client-documents").remove([filePath]); throw docErr; }
+
+    const { error: fingerprintErr } = await supabase.from("document_fingerprints").insert({
+      tenant_id: actor.tenantId,
+      client_id: clientId,
+      document_id: doc.id,
+      sha256,
+      size_bytes: file.size,
+    });
+    if (fingerprintErr) {
+      await supabase.from("documents").delete().eq("id", doc.id);
+      await supabase.storage.from("client-documents").remove([filePath]);
+      throw fingerprintErr;
+    }
+
     // Find suggested account
     const suggestedAccount = (accounts || []).find(a => a.code === extraction.suggested_account_code);
 
@@ -237,7 +239,16 @@ Deno.serve(async (req) => {
       })
       .select("id")
       .single();
-    if (extractionErr) throw extractionErr;
+    if (extractionErr) {
+      // Best-effort rollback of the just-created draft. Never leave a
+      // duplicate fingerprint that prevents a corrected retry.
+      await supabase.from("document_fingerprints").delete()
+        .eq("tenant_id", actor.tenantId).eq("document_id", doc.id);
+      await supabase.from("documents").delete()
+        .eq("tenant_id", actor.tenantId).eq("id", doc.id);
+      await supabase.storage.from("client-documents").remove([filePath]);
+      throw new AccessError("Receipt extraction could not be saved; retry after review", 503);
+    }
 
     await supabase.from("documents").update({
       status: "processed",
