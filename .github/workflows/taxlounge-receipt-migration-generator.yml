@@ -1,0 +1,65 @@
+name: TaxLounge supervised receipt migration generator
+
+on:
+  push:
+    branches: [codex/taxlounge-supervised-receipts-20261101]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: taxlounge-receipt-migration
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+      - name: Generate named migration from reviewed SQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase migration new taxlounge_receipt_review_posting
+          file="$(find supabase/migrations -maxdepth 1 -type f -name '*_taxlounge_receipt_review_posting.sql' | sort | tail -1)"
+          test -n "$file"
+          cp supabase/migration_drafts/taxlounge_receipt_posting.sql "$file"
+          echo "MIGRATION_PATH=$file" >> "$GITHUB_ENV"
+      - name: Rebuild isolated database and prove supervised posting contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase start
+          supabase db reset --local
+          supabase test db
+      - name: Verify client and Edge code
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
+          npm audit --omit=dev --audit-level=high
+          npm audit --audit-level=critical
+      - name: Commit validated migration and self-retire
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "$MIGRATION_PATH"
+          git rm -- .github/workflows/taxlounge-receipt-migration-generator.yml supabase/migration_drafts/taxlounge_receipt_posting.sql
+          git diff --cached --check
+          git commit -m 'Add verified supervised receipt posting migration'
+          git push origin HEAD:refs/heads/codex/taxlounge-supervised-receipts-20261101
