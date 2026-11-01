@@ -8660,6 +8660,60 @@ export type Database = {
           },
         ]
       }
+      receipt_posting_reviews: {
+        Row: {
+          id: string
+          tenant_id: string
+          client_id: string
+          document_id: string
+          extraction_id: string
+          expense_account_id: string
+          payment_account_id: string
+          gross_pence: number
+          net_pence: number
+          vat_pence: number
+          journal_entry_id: string
+          reviewer_user_id: string
+          review_note: string
+          source_snapshot: Json
+          reviewed_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          client_id: string
+          document_id: string
+          extraction_id: string
+          expense_account_id: string
+          payment_account_id: string
+          gross_pence: number
+          net_pence: number
+          vat_pence: number
+          journal_entry_id: string
+          reviewer_user_id: string
+          review_note: string
+          source_snapshot: Json
+          reviewed_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          client_id?: string
+          document_id?: string
+          extraction_id?: string
+          expense_account_id?: string
+          payment_account_id?: string
+          gross_pence?: number
+          net_pence?: number
+          vat_pence?: number
+          journal_entry_id?: string
+          reviewer_user_id?: string
+          review_note?: string
+          source_snapshot?: Json
+          reviewed_at?: string
+        }
+        Relationships: []
+      }
       receipt_extractions: {
         Row: {
           client_id: string | null
@@ -11484,6 +11538,15 @@ export type Database = {
         Returns: boolean
       }
       mark_accounts_prepared: { Args: { p_period_id: string }; Returns: Json }
+      post_receipt_review: {
+        Args: {
+          p_document_id: string
+          p_expense_account_id: string
+          p_payment_account_id: string
+          p_review_note: string
+        }
+        Returns: string
+      }
       post_bank_transaction: {
         Args: { p_transaction_id: string }
         Returns: string

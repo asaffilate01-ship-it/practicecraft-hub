@@ -22,6 +22,7 @@ const ClientDetail = lazy(() => import("@/pages/ClientDetail"));
 const Tasks = lazy(() => import("@/pages/Tasks"));
 const Bookkeeping = lazy(() => import("@/pages/Bookkeeping"));
 const BankFeeds = lazy(() => import("@/pages/BankFeeds"));
+const ReceiptReviewQueue = lazy(() => import("@/pages/ReceiptReviewQueue"));
 const CategorisationRules = lazy(() => import("@/pages/CategorisationRules"));
 const ClientOnboarding = lazy(() => import("@/pages/ClientOnboarding"));
 const VatReturns = lazy(() => import("@/pages/VatReturns"));
@@ -235,6 +236,7 @@ const AppRoutes = () => (
     {/* ── Bookkeeping / Ledger ─────────────────────────── */}
     <Route path="/bookkeeping" element={<Guarded module="ledger" action="view"><Bookkeeping /></Guarded>} />
     <Route path="/bank-feeds" element={<Guarded module="ledger" action="view"><BankFeeds /></Guarded>} />
+    <Route path="/receipt-reviews" element={<Guarded module="ledger" action="view"><ReceiptReviewQueue /></Guarded>} />
     <Route path="/categorisation-rules" element={<Guarded module="ledger" action="view"><CategorisationRules /></Guarded>} />
     <Route path="/invoice-entry" element={<Guarded module="ledger" action="view"><InvoiceEntry /></Guarded>} />
     <Route path="/client-onboarding" element={<Guarded module="clients" action="view"><ClientOnboarding /></Guarded>} />
