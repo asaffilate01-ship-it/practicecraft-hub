@@ -37,3 +37,11 @@ The encryption key requires a deliberate rotation/re-encryption plan. Do not exp
 This phase uses `info accounts` scope only, without `offline_access`, so no refresh token or ongoing banking sync is requested. The TrueLayer Data API **v1** consent concept is distinct from a Data API v3 `connection_id`. All production account linking remains blocked.
 
 References: https://docs.truelayer.com/docs/generate-an-auth-link ; https://docs.truelayer.com/reference/generateaccesstoken ; https://supabase.com/docs/guides/database/postgres/row-level-security
+
+## Verified local build — 2 November 2026
+
+- Generated migration: `supabase/migrations/20261102175136_taxlounge_sandbox_oauth_consents.sql`.
+- **93 pgTAP assertions across five database suites** passed on a fresh Supabase local database.
+- **108 application tests across 21 files** passed; TypeScript, production build, Deno Edge Function check and security dependency audits passed. Production audit reported zero vulnerabilities.
+- One-off migration runner completed successfully and removed its draft/workflow: https://github.com/asaffilate01-ship-it/practicecraft-hub/actions/runs/41495058143.
+- Final-head standard GitHub CI remains an independent merge gate. No live TaxLounge Supabase database or third-party TrueLayer account has been accessed, and no production Edge secrets were configured.

@@ -136,7 +136,11 @@ export function BankOAuthPilot({ selectedClientId }: { selectedClientId: string 
               {(history.data ?? []).map(consent => (
                 <div key={consent.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">{consent.status === "disconnected" ? "Credential deleted" : "Sandbox consent saved — account unlinked"}</p>
+                    <p className="text-sm font-medium">{consent.status === "disconnected"
+                      ? "Stored sandbox credential deleted"
+                      : new Date(consent.token_expires_at).getTime() <= Date.now()
+                        ? "Sandbox access token expired — no connection"
+                        : "Sandbox consent saved — account unlinked"}</p>
                     <p className="text-xs text-muted-foreground">{consent.account_count} mock account(s) · {new Date(consent.created_at).toLocaleDateString("en-GB")}</p>
                   </div>
                   {canStart && consent.initiated_by === user?.id && consent.status !== "disconnected" &&
