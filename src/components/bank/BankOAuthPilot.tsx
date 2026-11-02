@@ -125,7 +125,10 @@ export function BankOAuthPilot({ selectedClientId }: { selectedClientId: string 
             </Button>
             {!selectedClientId && <p className="text-xs text-muted-foreground">Select a client workspace first; consent is always client-bound.</p>}
             {!canStart && <p className="text-xs text-muted-foreground">ledger.edit and integrations.edit permissions are required to initiate consent.</p>}
-            <div className="space-y-2">
+          </>
+        )}
+        {status.data?.consents_supported && (
+          <div className="space-y-2">
               <p className="text-sm font-medium">Recent sandbox consents</p>
               {history.isError && <p role="alert" className="text-sm text-destructive">Sandbox consent history is unavailable.</p>}
               {(history.data ?? []).length === 0 && !history.isLoading &&
@@ -143,8 +146,7 @@ export function BankOAuthPilot({ selectedClientId }: { selectedClientId: string 
                     </Button>}
                 </div>
               ))}
-            </div>
-          </>
+          </div>
         )}
         <div className="flex items-start gap-2 text-xs text-muted-foreground">
           <ShieldCheck className="h-4 w-4 shrink-0"/>
