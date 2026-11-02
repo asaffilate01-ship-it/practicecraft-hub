@@ -21,8 +21,9 @@ Practice operations, clients, tasks, bookkeeping, accounts preparation, VAT/MTD 
 - [SaaS/AI and integration audit](docs/platform-audit-2026-10-05.md)
 - [Readiness and release prerequisites](docs/go-live-readiness.md)
 - [Supervised receipt and OCR review release](docs/taxlounge-supervised-receipts-2026-11.md)
+- [Sandbox-only Open Banking consent foundation](docs/taxlounge-sandbox-bank-consent-2026-11.md)
 
 ## Deployment caution
 This repository is **not yet verified production-ready**. Tax logic, sandbox recognition, payment/bank state, tenant tests, migrations, AI scope and hosting must be verified separately. The PWA deliberately does not cache authenticated Supabase API data. The app currently has no verified public marketing domain; do not add a guessed canonical URL.
 
-Lovable may be used to publish after staging and CI review. Do not infer production status from GitHub commits, UI screens or an earlier Lovable project placeholder.
+Deployment must be reviewed through the selected GitHub/staging release workflow, not inferred from the presence of a Lovable project placeholder or a GitHub merge.

@@ -1,5 +1,8 @@
 # TaxLounge bank feeds — security boundary (31 October 2026)
 
+> **2 November 2026 update:** This document describes the October fail-closed remediation. A new **sandbox-only** OAuth pilot (separate from live bank feeds) now supports permission-bound, one-use PKCE consent testing without returning tokens to browsers or creating linked bank accounts. See [the updated consent security guide](taxlounge-sandbox-bank-consent-2026-11.md). Legacy token-return and transaction-import endpoints remain unavailable. Live banking is not enabled.
+
+
 ## Implemented safe interim state
 The previous `open-banking` Edge Function accepted user-provided connection/client IDs, performed privileged service-role writes, exchanged TrueLayer authorization codes without one-use server state and returned provider access tokens to the browser. The client also called `sync_transactions`, which had no corresponding server action.
 
