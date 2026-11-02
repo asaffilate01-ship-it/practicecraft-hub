@@ -60,6 +60,7 @@ serve(async (req) => {
     if (action === "connection_status") {
       return json({
         enabled: !!config,
+        consents_supported: true,
         mode: config ? "sandbox_mock_consent" : "manual_csv_only",
         live_provider_enabled: false,
         transaction_import_enabled: false,
@@ -84,7 +85,8 @@ serve(async (req) => {
 
     // Everything below requires additional integration control permissions.
     await requirePermissions(caller, actor, ["ledger.edit", "integrations.edit"]);
-    if (!config) throw new AccessError("The mock-bank sandbox has not been enabled by an administrator", 503);
+    // Credential deletion remains possible even when new sandbox sessions are disabled.
+    if (!config && action !== "disconnect_consent") throw new AccessError("The mock-bank sandbox has not been enabled by an administrator", 503);
     const serviceKey = env("SUPABASE_SERVICE_ROLE_KEY");
     if (!serviceKey) throw new AccessError("Bank service is not configured", 503);
     const server = createClient(url, serviceKey, {
@@ -92,6 +94,7 @@ serve(async (req) => {
     });
 
     if (action === "start_consent") {
+      if (!config) throw new AccessError("Mock bank is disabled", 503);
       const clientId = await requireClient(caller, actor.tenantId, body.client_id);
       const { count, error: limitError } = await server.from("bank_oauth_intents")
         .select("id", { count: "exact", head: true })
@@ -126,6 +129,7 @@ serve(async (req) => {
     }
 
     if (action === "complete_consent") {
+      if (!config) throw new AccessError("Mock bank is disabled", 503);
       const state = validateOAuthState(body.state);
       const code = validateProviderCode(body.code);
       const stateDigest = await digestSha256(state);

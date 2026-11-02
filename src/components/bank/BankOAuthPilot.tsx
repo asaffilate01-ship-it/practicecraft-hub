@@ -20,6 +20,7 @@ type Consent = {
 };
 type Status = {
   enabled: boolean;
+  consents_supported: boolean;
   mode: "sandbox_mock_consent" | "manual_csv_only";
   live_provider_enabled: false;
   transaction_import_enabled: false;
@@ -47,7 +48,7 @@ export function BankOAuthPilot({ selectedClientId }: { selectedClientId: string 
   });
   const history = useQuery({
     queryKey: ["taxlounge-bank-oauth-consents", tenantId, user?.id, selectedClientId],
-    enabled: canRead && status.data?.enabled === true,
+    enabled: canRead && status.data?.consents_supported === true,
     retry: false,
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("open-banking", {
@@ -78,7 +79,7 @@ export function BankOAuthPilot({ selectedClientId }: { selectedClientId: string 
   });
   const disconnect = useMutation({
     mutationFn: async (consentId: string) => {
-      if (!canStart || !status.data?.enabled) throw new Error("Consent changes are not authorised");
+      if (!canStart || !status.data?.consents_supported) throw new Error("Consent changes are not authorised");
       const { data, error } = await supabase.functions.invoke("open-banking", {
         body: { action: "disconnect_consent", consent_id: consentId },
       });
