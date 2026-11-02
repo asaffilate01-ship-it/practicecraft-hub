@@ -124,7 +124,7 @@ export async function encryptBankSecret(secret: string, key: Uint8Array, subject
   if (!secret || secret.length > 16384) throw new AccessError("Invalid provider secret", 502);
   const iv = randomBytes(12);
   const ciphertext = new Uint8Array(await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv, additionalData: new TextEncoder().encode(subject) },
+    { name: "AES-GCM", iv: iv as BufferSource, additionalData: new TextEncoder().encode(subject) },
     await encryptionKey(key),
     new TextEncoder().encode(secret),
   ));
@@ -137,9 +137,9 @@ export async function decryptBankSecret(encoded: string, key: Uint8Array, subjec
     const combined = b64ToBytes(encoded);
     if (combined.length < 29 || combined.length > 17000) throw new Error("Invalid ciphertext");
     const plain = await crypto.subtle.decrypt({
-      name: "AES-GCM", iv: combined.slice(0, 12),
+      name: "AES-GCM", iv: combined.slice(0, 12) as BufferSource,
       additionalData: new TextEncoder().encode(subject),
-    }, await encryptionKey(key), combined.slice(12));
+    }, await encryptionKey(key), combined.slice(12) as BufferSource);
     return new TextDecoder().decode(plain);
   } catch {
     throw new AccessError("Banking credential is invalid or cannot be decrypted", 503);
