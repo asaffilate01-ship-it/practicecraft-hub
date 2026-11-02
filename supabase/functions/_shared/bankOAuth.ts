@@ -8,7 +8,7 @@ export const INTENT_TTL_MS = 5 * 60 * 1000;
 
 export type BankingAction = "connection_status" | "start_consent" | "complete_consent" | "list_consents" | "disconnect_consent";
 const actions: readonly BankingAction[] = ["connection_status", "start_consent", "complete_consent", "list_consents", "disconnect_consent"];
-export const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[0-9a-f]{12}$/i;
+export const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function parseBankingAction(body: unknown): BankingAction {
   if (!body || typeof body !== "object" || Array.isArray(body)) throw new AccessError("Invalid bank request", 400);
