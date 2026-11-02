@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientContext } from "@/contexts/ClientContext";
+import { BankOAuthPilot } from "@/components/bank/BankOAuthPilot";
 import { usePermissions } from "@/hooks/usePermissions";
 import { requireConsistentBankTransaction, requireManualBankConnection, validateBankCsvFile } from "@/lib/bankFeedSafety";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -358,6 +359,7 @@ export default function BankFeeds() {
       <div role="status" className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
         Live Open Banking is not connected. Use a manual bank account and statement CSV import while secure provider consent is being developed.
       </div>
+      <BankOAuthPilot selectedClientId={selectedClientId} />
       {(clientsError || connectionsError || transactionsError || accountsError) && (
         <div role="alert" className="rounded-xl border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
           Some bank records could not be loaded. Counts and available actions may be incomplete. Refresh before making changes.
