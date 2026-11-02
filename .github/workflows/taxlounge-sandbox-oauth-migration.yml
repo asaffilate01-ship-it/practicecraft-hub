@@ -1,0 +1,75 @@
+name: TaxLounge sandbox OAuth migration and verification
+
+on:
+  push:
+    branches: [codex/taxlounge-openbanking-consent-20261102]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: taxlounge-sandbox-oauth-generator
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Generate named consent migration through Supabase CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase migration new taxlounge_sandbox_oauth_consents
+          file="$(find supabase/migrations -maxdepth 1 -type f -name '*_taxlounge_sandbox_oauth_consents.sql' | sort | tail -1)"
+          test -n "$file"
+          cp supabase/migration_drafts/taxlounge_bank_sandbox_consent.sql "$file"
+          echo "MIGRATION_PATH=$file" >> "$GITHUB_ENV"
+      - name: Rebuild local DB and validate RLS, replay and consent deletion
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase start
+          supabase db reset --local
+          supabase test db
+      - name: Typecheck, unit tests, production build and security audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run lint:security
+          npx eslint src/components/bank/BankOAuthPilot.tsx src/pages/BankOAuthCallback.tsx src/test/bankOAuthFoundation.test.ts src/test/bankOAuthUi.test.ts src/test/openBankingConsentSource.test.ts
+          npm test
+          npm run build
+          npm audit --omit=dev --audit-level=high
+          npm audit --audit-level=critical
+      - name: Typecheck actual Deno banking function
+        shell: bash
+        run: |
+          set -euo pipefail
+          deno check --no-config --no-lock --node-modules-dir=none supabase/functions/open-banking/index.ts
+      - name: Commit verified migration and retire one-off workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "$MIGRATION_PATH"
+          git rm -- .github/workflows/taxlounge-sandbox-oauth-migration.yml supabase/migration_drafts/taxlounge_bank_sandbox_consent.sql
+          git diff --cached --check
+          git commit -m 'Add validated TaxLounge private mock-bank OAuth consent migration'
+          git push origin HEAD:refs/heads/codex/taxlounge-openbanking-consent-20261102
